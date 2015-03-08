@@ -1,3 +1,10 @@
+#include "hw_cm_per.h"
+#include "hw_cm_wkup.h"
+#include "hw_uart_irda_cir.h"
+#include "uart_irda_cir.h"
+#include "interrupt.h"
+#include "soc_AM335x.h"
+
 #define SOC_PRCM_REGS          					 (0x44E00000)
 #define SOC_CM_PER_REGS 	   					 (SOC_PRCM_REGS + 0)
 #define CM_PER_GPIO1_CLKCTRL   					 (0xac)
@@ -26,19 +33,122 @@
 #define CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_GPIO_1_GDBCLK (0x00080000u)
 #define CM_PER_GPIO1_CLKCTRL_IDLEST  					(0x00030000u)
 
+// uart
+#define CM_PER_OCPWP_L3_CLKSTCTRL   			(0x12c)
+#define CM_PER_OCPWP_CLKCTRL   					(0x130)
+#define SOC_CM_WKUP_REGS                     	(SOC_PRCM_REGS + 0x400)
+
+/* CONF_UART0_RXD */
+#define CONTROL_CONF_UART0_RXD_CONF_UART0_RXD_MMODE   (0x00000007u)
+#define CONTROL_CONF_UART0_RXD_CONF_UART0_RXD_MMODE_SHIFT   (0x00000000u)
+
+#define CONTROL_CONF_UART0_RXD_CONF_UART0_RXD_PUDEN   (0x00000008u)
+#define CONTROL_CONF_UART0_RXD_CONF_UART0_RXD_PUDEN_SHIFT   (0x00000003u)
+
+#define CONTROL_CONF_UART0_RXD_CONF_UART0_RXD_PUTYPESEL   (0x00000010u)
+#define CONTROL_CONF_UART0_RXD_CONF_UART0_RXD_PUTYPESEL_SHIFT   (0x00000004u)
+
+#define CONTROL_CONF_UART0_RXD_CONF_UART0_RXD_RSVD   (0x000FFF80u)
+#define CONTROL_CONF_UART0_RXD_CONF_UART0_RXD_RSVD_SHIFT   (0x00000007u)
+
+#define CONTROL_CONF_UART0_RXD_CONF_UART0_RXD_RXACTIVE   (0x00000020u)
+#define CONTROL_CONF_UART0_RXD_CONF_UART0_RXD_RXACTIVE_SHIFT   (0x00000005u)
+
+#define CONTROL_CONF_UART0_RXD_CONF_UART0_RXD_SLEWCTRL   (0x00000040u)
+#define CONTROL_CONF_UART0_RXD_CONF_UART0_RXD_SLEWCTRL_SHIFT   (0x00000006u)
+
+/* CONF_UART0_TXD */
+#define CONTROL_CONF_UART0_TXD_CONF_UART0_TXD_MMODE   (0x00000007u)
+#define CONTROL_CONF_UART0_TXD_CONF_UART0_TXD_MMODE_SHIFT   (0x00000000u)
+
+#define CONTROL_CONF_UART0_TXD_CONF_UART0_TXD_PUDEN   (0x00000008u)
+#define CONTROL_CONF_UART0_TXD_CONF_UART0_TXD_PUDEN_SHIFT   (0x00000003u)
+
+#define CONTROL_CONF_UART0_TXD_CONF_UART0_TXD_PUTYPESEL   (0x00000010u)
+#define CONTROL_CONF_UART0_TXD_CONF_UART0_TXD_PUTYPESEL_SHIFT   (0x00000004u)
+
+#define CONTROL_CONF_UART0_TXD_CONF_UART0_TXD_RSVD   (0x000FFF80u)
+#define CONTROL_CONF_UART0_TXD_CONF_UART0_TXD_RSVD_SHIFT   (0x00000007u)
+
+#define CONTROL_CONF_UART0_TXD_CONF_UART0_TXD_RXACTIVE   (0x00000020u)
+#define CONTROL_CONF_UART0_TXD_CONF_UART0_TXD_RXACTIVE_SHIFT   (0x00000005u)
+
+#define CONTROL_CONF_UART0_TXD_CONF_UART0_TXD_SLEWCTRL   (0x00000040u)
+#define CONTROL_CONF_UART0_TXD_CONF_UART0_TXD_SLEWCTRL_SHIFT   (0x00000006u)
+
+#define SOC_UART_0_REGS                      (0x44E09000)
+
 // PRCM: Power Reset Control Management
 // OPTFCLKEN: Optional Function CLK (used to configure the clk frequenz via software)
 // GDBCLK: Global debounce clock (this clock is between the PRCM and the GPIO)
 // GPMC: General Purpose Memory Controller
 
+#define BAUD_RATE_115200          (115200)
+#define UART_MODULE_INPUT_CLK     (48000000)
+
+/*
+** The number of data bytes to be transmitted to Transmit FIFO of UART
+** per generation of the Transmit Empty interrupt. This can take a maximum
+** value of TX Trigger Space which is 'TX FIFO size - TX Threshold Level'.
+*/
+#define NUM_TX_BYTES_PER_TRANS    (56)
+
 #define HWREG(x) (*((volatile unsigned int *)(x)))
 #define CONTROL_CONF_GPMC_A(n)   (0x840 + (n * 4))
 
+//Uart defines
+#define CONTROL_CONF_UART_RXD(n)   (0x970 + ((n) * 0x10))
+#define CONTROL_CONF_UART_TXD(n)   (0x974 + ((n) * 0x10))
+
 void GPIO1ModuleClkConfig(void);
 void resetGPIOModule(void);
+void UartFIFOConfigure(void);
+void UartBaudRateSet(void);
+void UartInterruptEnable(void);
 
 int main(void) {
 
+	UART0ModuleClkConfig();
+
+	//pin mux
+	/* RXD */
+	HWREG(SOC_CONTROL_REGS + CONTROL_CONF_UART_RXD(0)) =
+			(CONTROL_CONF_UART0_RXD_CONF_UART0_RXD_PUTYPESEL
+					| CONTROL_CONF_UART0_RXD_CONF_UART0_RXD_RXACTIVE);
+	/* TXD */
+	HWREG(SOC_CONTROL_REGS + CONTROL_CONF_UART_TXD(0)) =
+			CONTROL_CONF_UART0_TXD_CONF_UART0_TXD_PUTYPESEL;
+
+    //module reset
+	/* Performing Software Reset of the module. */
+    HWREG(SOC_UART_0_REGS + UART_SYSC) |= (UART_SYSC_SOFTRESET);
+    /* Wait until the process of Module Reset is complete. */
+	while(!(HWREG(SOC_UART_0_REGS + UART_SYSS) & UART_SYSS_RESETDONE));
+
+	UartFIFOConfigure();
+
+	UARTRegConfigModeEnable(SOC_UART_0_REGS, UART_REG_CONFIG_MODE_B);
+
+    /* Programming the Line Characteristics. */
+    UARTLineCharacConfig(SOC_UART_0_REGS,
+                         (UART_FRAME_WORD_LENGTH_8 | UART_FRAME_NUM_STB_1),
+                         UART_PARITY_NONE);
+
+    /* Disabling write access to Divisor Latches. */
+    UARTDivisorLatchDisable(SOC_UART_0_REGS);
+
+    /* Disabling Break Control. */
+    UARTBreakCtl(SOC_UART_0_REGS, UART_BREAK_COND_DISABLE);
+
+    /* Switching to UART16x operating mode. */
+    UARTOperatingModeSelect(SOC_UART_0_REGS, UART16x_OPER_MODE);
+
+
+    /* Performing Interrupt configurations. */
+    UartInterruptEnable();
+
+
+	//-----------------------------------------------------//
 	/* Enabling functional clocks for GPIO1 instance. */
 	GPIO1ModuleClkConfig();
 
@@ -113,4 +223,250 @@ void GPIO1ModuleClkConfig(void) {
 			!= (HWREG(SOC_CM_PER_REGS + CM_PER_L4LS_CLKSTCTRL)
 					& CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_GPIO_1_GDBCLK))
 		;
+}
+
+void UART0ModuleClkConfig(void)
+{
+    /* Configuring L3 Interface Clocks. */
+
+    /* Writing to MODULEMODE field of CM_PER_L3_CLKCTRL register. */
+    HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKCTRL) |=
+          CM_PER_L3_CLKCTRL_MODULEMODE_ENABLE;
+
+    /* Waiting for MODULEMODE field to reflect the written value. */
+    while(CM_PER_L3_CLKCTRL_MODULEMODE_ENABLE !=
+          (HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKCTRL) &
+           CM_PER_L3_CLKCTRL_MODULEMODE));
+
+    /* Writing to MODULEMODE field of CM_PER_L3_INSTR_CLKCTRL register. */
+    HWREG(SOC_CM_PER_REGS + CM_PER_L3_INSTR_CLKCTRL) |=
+          CM_PER_L3_INSTR_CLKCTRL_MODULEMODE_ENABLE;
+
+    /* Waiting for MODULEMODE field to reflect the written value. */
+    while(CM_PER_L3_INSTR_CLKCTRL_MODULEMODE_ENABLE !=
+          (HWREG(SOC_CM_PER_REGS + CM_PER_L3_INSTR_CLKCTRL) &
+           CM_PER_L3_INSTR_CLKCTRL_MODULEMODE));
+
+    /* Writing to CLKTRCTRL field of CM_PER_L3_CLKSTCTRL register. */
+    HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKSTCTRL) |=
+          CM_PER_L3_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
+
+    /* Waiting for CLKTRCTRL field to reflect the written value. */
+    while(CM_PER_L3_CLKSTCTRL_CLKTRCTRL_SW_WKUP !=
+          (HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKSTCTRL) &
+           CM_PER_L3_CLKSTCTRL_CLKTRCTRL));
+
+    /* Writing to CLKTRCTRL field of CM_PER_OCPWP_L3_CLKSTCTRL register. */
+    HWREG(SOC_CM_PER_REGS + CM_PER_OCPWP_L3_CLKSTCTRL) |=
+          CM_PER_OCPWP_L3_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
+
+    /*Waiting for CLKTRCTRL field to reflect the written value. */
+    while(CM_PER_OCPWP_L3_CLKSTCTRL_CLKTRCTRL_SW_WKUP !=
+          (HWREG(SOC_CM_PER_REGS + CM_PER_OCPWP_L3_CLKSTCTRL) &
+           CM_PER_OCPWP_L3_CLKSTCTRL_CLKTRCTRL));
+
+    /* Writing to CLKTRCTRL field of CM_PER_L3S_CLKSTCTRL register. */
+    HWREG(SOC_CM_PER_REGS + CM_PER_L3S_CLKSTCTRL) |=
+          CM_PER_L3S_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
+
+    /*Waiting for CLKTRCTRL field to reflect the written value. */
+    while(CM_PER_L3S_CLKSTCTRL_CLKTRCTRL_SW_WKUP !=
+          (HWREG(SOC_CM_PER_REGS + CM_PER_L3S_CLKSTCTRL) &
+           CM_PER_L3S_CLKSTCTRL_CLKTRCTRL));
+
+    /* Checking fields for necessary values.  */
+
+    /* Waiting for IDLEST field in CM_PER_L3_CLKCTRL register to be set to 0x0. */
+    while((CM_PER_L3_CLKCTRL_IDLEST_FUNC << CM_PER_L3_CLKCTRL_IDLEST_SHIFT)!=
+          (HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKCTRL) &
+           CM_PER_L3_CLKCTRL_IDLEST));
+
+    /*
+    ** Waiting for IDLEST field in CM_PER_L3_INSTR_CLKCTRL register to attain the
+    ** desired value.
+    */
+    while((CM_PER_L3_INSTR_CLKCTRL_IDLEST_FUNC <<
+           CM_PER_L3_INSTR_CLKCTRL_IDLEST_SHIFT)!=
+          (HWREG(SOC_CM_PER_REGS + CM_PER_L3_INSTR_CLKCTRL) &
+           CM_PER_L3_INSTR_CLKCTRL_IDLEST));
+
+    /*
+    ** Waiting for CLKACTIVITY_L3_GCLK field in CM_PER_L3_CLKSTCTRL register to
+    ** attain the desired value.
+    */
+    while(CM_PER_L3_CLKSTCTRL_CLKACTIVITY_L3_GCLK !=
+          (HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKSTCTRL) &
+           CM_PER_L3_CLKSTCTRL_CLKACTIVITY_L3_GCLK));
+
+    /*
+    ** Waiting for CLKACTIVITY_OCPWP_L3_GCLK field in CM_PER_OCPWP_L3_CLKSTCTRL
+    ** register to attain the desired value.
+    */
+    while(CM_PER_OCPWP_L3_CLKSTCTRL_CLKACTIVITY_OCPWP_L3_GCLK !=
+          (HWREG(SOC_CM_PER_REGS + CM_PER_OCPWP_L3_CLKSTCTRL) &
+           CM_PER_OCPWP_L3_CLKSTCTRL_CLKACTIVITY_OCPWP_L3_GCLK));
+
+    /*
+    ** Waiting for CLKACTIVITY_L3S_GCLK field in CM_PER_L3S_CLKSTCTRL register
+    ** to attain the desired value.
+    */
+    while(CM_PER_L3S_CLKSTCTRL_CLKACTIVITY_L3S_GCLK !=
+          (HWREG(SOC_CM_PER_REGS + CM_PER_L3S_CLKSTCTRL) &
+          CM_PER_L3S_CLKSTCTRL_CLKACTIVITY_L3S_GCLK));
+
+
+    /* Configuring registers related to Wake-Up region. */
+
+    /* Writing to MODULEMODE field of CM_WKUP_CONTROL_CLKCTRL register. */
+    HWREG(SOC_CM_WKUP_REGS + CM_WKUP_CONTROL_CLKCTRL) |=
+          CM_WKUP_CONTROL_CLKCTRL_MODULEMODE_ENABLE;
+
+    /* Waiting for MODULEMODE field to reflect the written value. */
+    while(CM_WKUP_CONTROL_CLKCTRL_MODULEMODE_ENABLE !=
+          (HWREG(SOC_CM_WKUP_REGS + CM_WKUP_CONTROL_CLKCTRL) &
+           CM_WKUP_CONTROL_CLKCTRL_MODULEMODE));
+
+    /* Writing to CLKTRCTRL field of CM_PER_L3S_CLKSTCTRL register. */
+    HWREG(SOC_CM_WKUP_REGS + CM_WKUP_CLKSTCTRL) |=
+          CM_WKUP_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
+
+    /*Waiting for CLKTRCTRL field to reflect the written value. */
+    while(CM_WKUP_CLKSTCTRL_CLKTRCTRL_SW_WKUP !=
+          (HWREG(SOC_CM_WKUP_REGS + CM_WKUP_CLKSTCTRL) &
+           CM_WKUP_CLKSTCTRL_CLKTRCTRL));
+
+    /* Writing to CLKTRCTRL field of CM_L3_AON_CLKSTCTRL register. */
+    HWREG(SOC_CM_WKUP_REGS + CM_WKUP_CM_L3_AON_CLKSTCTRL) |=
+          CM_WKUP_CM_L3_AON_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
+
+    /*Waiting for CLKTRCTRL field to reflect the written value. */
+    while(CM_WKUP_CM_L3_AON_CLKSTCTRL_CLKTRCTRL_SW_WKUP !=
+          (HWREG(SOC_CM_WKUP_REGS + CM_WKUP_CM_L3_AON_CLKSTCTRL) &
+           CM_WKUP_CM_L3_AON_CLKSTCTRL_CLKTRCTRL));
+
+    /* Writing to MODULEMODE field of CM_WKUP_UART0_CLKCTRL register. */
+    HWREG(SOC_CM_WKUP_REGS + CM_WKUP_UART0_CLKCTRL) |=
+          CM_WKUP_UART0_CLKCTRL_MODULEMODE_ENABLE;
+
+    /* Waiting for MODULEMODE field to reflect the written value. */
+    while(CM_WKUP_UART0_CLKCTRL_MODULEMODE_ENABLE !=
+          (HWREG(SOC_CM_WKUP_REGS + CM_WKUP_UART0_CLKCTRL) &
+           CM_WKUP_UART0_CLKCTRL_MODULEMODE));
+
+    /* Verifying if the other bits are set to required settings. */
+
+    /*
+    ** Waiting for IDLEST field in CM_WKUP_CONTROL_CLKCTRL register to attain
+    ** desired value.
+    */
+    while((CM_WKUP_CONTROL_CLKCTRL_IDLEST_FUNC <<
+           CM_WKUP_CONTROL_CLKCTRL_IDLEST_SHIFT) !=
+          (HWREG(SOC_CM_WKUP_REGS + CM_WKUP_CONTROL_CLKCTRL) &
+           CM_WKUP_CONTROL_CLKCTRL_IDLEST));
+
+    /*
+    ** Waiting for CLKACTIVITY_L3_AON_GCLK field in CM_L3_AON_CLKSTCTRL
+    ** register to attain desired value.
+    */
+    while(CM_WKUP_CM_L3_AON_CLKSTCTRL_CLKACTIVITY_L3_AON_GCLK !=
+          (HWREG(SOC_CM_WKUP_REGS + CM_WKUP_CM_L3_AON_CLKSTCTRL) &
+           CM_WKUP_CM_L3_AON_CLKSTCTRL_CLKACTIVITY_L3_AON_GCLK));
+
+    /*
+    ** Waiting for IDLEST field in CM_WKUP_L4WKUP_CLKCTRL register to attain
+    ** desired value.
+    */
+    while((CM_WKUP_L4WKUP_CLKCTRL_IDLEST_FUNC <<
+           CM_WKUP_L4WKUP_CLKCTRL_IDLEST_SHIFT) !=
+          (HWREG(SOC_CM_WKUP_REGS + CM_WKUP_L4WKUP_CLKCTRL) &
+           CM_WKUP_L4WKUP_CLKCTRL_IDLEST));
+
+    /*
+    ** Waiting for CLKACTIVITY_L4_WKUP_GCLK field in CM_WKUP_CLKSTCTRL register
+    ** to attain desired value.
+    */
+    while(CM_WKUP_CLKSTCTRL_CLKACTIVITY_L4_WKUP_GCLK !=
+          (HWREG(SOC_CM_WKUP_REGS + CM_WKUP_CLKSTCTRL) &
+           CM_WKUP_CLKSTCTRL_CLKACTIVITY_L4_WKUP_GCLK));
+
+    /*
+    ** Waiting for CLKACTIVITY_L4_WKUP_AON_GCLK field in CM_L4_WKUP_AON_CLKSTCTRL
+    ** register to attain desired value.
+    */
+    while(CM_WKUP_CM_L4_WKUP_AON_CLKSTCTRL_CLKACTIVITY_L4_WKUP_AON_GCLK !=
+          (HWREG(SOC_CM_WKUP_REGS + CM_WKUP_CM_L4_WKUP_AON_CLKSTCTRL) &
+           CM_WKUP_CM_L4_WKUP_AON_CLKSTCTRL_CLKACTIVITY_L4_WKUP_AON_GCLK));
+
+    /*
+    ** Waiting for CLKACTIVITY_UART0_GFCLK field in CM_WKUP_CLKSTCTRL
+    ** register to attain desired value.
+    */
+    while(CM_WKUP_CLKSTCTRL_CLKACTIVITY_UART0_GFCLK !=
+          (HWREG(SOC_CM_WKUP_REGS + CM_WKUP_CLKSTCTRL) &
+           CM_WKUP_CLKSTCTRL_CLKACTIVITY_UART0_GFCLK));
+
+    /*
+    ** Waiting for IDLEST field in CM_WKUP_UART0_CLKCTRL register to attain
+    ** desired value.
+    */
+    while((CM_WKUP_UART0_CLKCTRL_IDLEST_FUNC <<
+           CM_WKUP_UART0_CLKCTRL_IDLEST_SHIFT) !=
+          (HWREG(SOC_CM_WKUP_REGS + CM_WKUP_UART0_CLKCTRL) &
+           CM_WKUP_UART0_CLKCTRL_IDLEST));
+}
+
+void UartFIFOConfigure(void)
+{
+    unsigned int fifoConfig = 0;
+
+    /*
+    ** - Transmit Trigger Level Granularity is 4
+    ** - Receiver Trigger Level Granularity is 1
+    ** - Transmit FIFO Space Setting is 56. Hence TX Trigger level
+    **   is 8 (64 - 56). The TX FIFO size is 64 bytes.
+    ** - The Receiver Trigger Level is 1.
+    ** - Clear the Transmit FIFO.
+    ** - Clear the Receiver FIFO.
+    ** - DMA Mode enabling shall happen through SCR register.
+    ** - DMA Mode 0 is enabled. DMA Mode 0 corresponds to No
+    **   DMA Mode. Effectively DMA Mode is disabled.
+    */
+    fifoConfig = UART_FIFO_CONFIG(UART_TRIG_LVL_GRANULARITY_4,
+                                  UART_TRIG_LVL_GRANULARITY_1,
+                                  UART_FCR_TX_TRIG_LVL_56,
+                                  1,
+                                  1,
+                                  1,
+                                  UART_DMA_EN_PATH_SCR,
+                                  UART_DMA_MODE_0_ENABLE);
+
+    /* Configuring the FIFO settings. */
+    UARTFIFOConfig(SOC_UART_0_REGS, fifoConfig);
+}
+
+void UartBaudRateSet(void)
+{
+    unsigned int divisorValue = 0;
+
+    /* Computing the Divisor Value. */
+    divisorValue = UARTDivisorValCompute(UART_MODULE_INPUT_CLK,
+                                         BAUD_RATE_115200,
+                                         UART16x_OPER_MODE,
+                                         UART_MIR_OVERSAMPLING_RATE_42);
+
+    /* Programming the Divisor Latches. */
+    UARTDivisorLatchWrite(SOC_UART_0_REGS, divisorValue);
+}
+
+void UartInterruptEnable(void)
+{
+    /* Enabling IRQ in CPSR of ARM processor. */
+    IntMasterIRQEnable();
+
+    /* Configuring AINTC to receive UART0 interrupts. */
+    UART0AINTCConfigure();
+
+    /* Enabling the specified UART interrupts. */
+    UARTIntEnable(SOC_UART_0_REGS, (UART_INT_LINE_STAT | UART_INT_THR |
+                                    UART_INT_RHR_CTI));
 }
