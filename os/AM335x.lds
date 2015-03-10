@@ -62,80 +62,19 @@ SECTIONS
         KEEP(*(.isr_vector))
         *startup_ARMCA8.o (.text)
     } > DDR0
-    
-    . = ALIGN(4);
+
     .text :
     {
+        . = ALIGN(4);
         *(.text*)
-
-        KEEP(*(.init))
-        KEEP(*(.fini))
-
-        /* .ctors */
-        *crtbegin.o(.ctors)
-        *crtbegin?.o(.ctors)
-        *(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
-        *(SORT(.ctors.*))
-        *(.ctors)
-
-        /* .dtors */
-         *crtbegin.o(.dtors)
-         *crtbegin?.o(.dtors)
-         *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
-         *(SORT(.dtors.*))
-         *(.dtors)
-
         *(.rodata*)
+    } >DDR0
 
-        KEEP(*(.eh_frame*))
-    } > DDR0
-
-    .ARM.extab : 
-    {
-        *(.ARM.extab* .gnu.linkonce.armextab.*)
-    } > DDR0
-
-    __exidx_start = .;
-    .ARM.exidx :
-    {
-        *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-    } > DDR0
-    __exidx_end = .;
-
-        
     .data :
     {
         . = ALIGN(4);
-        __data_start__ = .;
-        *(vtable)
         *(.data*)
-
-        . = ALIGN(4);
-        /* preinit data */
-        PROVIDE_HIDDEN (__preinit_array_start = .);
-        KEEP(*(.preinit_array))
-        PROVIDE_HIDDEN (__preinit_array_end = .);
-
-        . = ALIGN(4);
-        /* init data */
-        PROVIDE_HIDDEN (__init_array_start = .);
-        KEEP(*(SORT(.init_array.*)))
-        KEEP(*(.init_array))
-        PROVIDE_HIDDEN (__init_array_end = .);
-
-
-        . = ALIGN(4);
-        /* finit data */
-        PROVIDE_HIDDEN (__fini_array_start = .);
-        KEEP(*(SORT(.fini_array.*)))
-        KEEP(*(.fini_array))
-        PROVIDE_HIDDEN (__fini_array_end = .);
-
-        . = ALIGN(4);
-        /* All data end */
-        __data_end__ = .;
-
-    } > DDR0
+    } >DDR0
 
     .bss :
     {
@@ -144,42 +83,28 @@ SECTIONS
         *(.bss*)
         *(COMMON)
         __bss_end__ = .;
-    } > DDR0
-    
-    .heap (NOLOAD):
+    } >DDR0
+
+    .heap :
     {
-        /* The line below can be used to FILL the memory with a known value and
-         * debug any stack overruns. For this to work, the specifier (NOLOAD) above 
-         * must be removed at the expense of an increase in the output binary size */
-        FILL(0xDEADBEEF)
         . = ALIGN(4);
         __end__ = .;
         end = __end__;
-        /* The line below created to be compatible with Linaro's semihosting support */
-        __HeapBase = __end__; 
+        __HeapBase = __end__;
         *(.heap*)
-        . = . + HEAPSIZE;
-        __HeapLimit = .; 
-    } > DDR0
+        . = . + 0x800;
+        __HeapLimit = .;
+    } >DDR0
 
-    /* .stack section doesn't contain any symbols. It is only
-     * used for linker to calculate size of stack sections, and assign
-     * values to stack symbols later */
-    .stack (NOLOAD):
+    .stack :
     {
-        /* The line below can be used to FILL the memory with a known value and
-         * debug any stack overruns. For this to work, the specifier (NOLOAD) above 
-         * must be removed at the expense of an increase in the output binary size */
-        FILL(0xBAD0BAD0)
         . = ALIGN(4);
         __StackLimit = . ;
         *(.stack*)
-        . = . + STACKSIZE;
-        __StackTop = . ;
-        /* The line below created to be compatible with Linaro's semihosting support */
-        __StackBase = . ;
-    } > DDR0
-    PROVIDE(__stack = __StackTop);
+        . = . + 0x7FFFFF8;
+        __StackTop = .;
+    } >DDR0
+    __stack = __StackTop;
 
 }
 /**************************************************************************/

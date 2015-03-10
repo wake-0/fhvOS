@@ -40,10 +40,12 @@
 *
 */
 
+
 #include "hw_intc.h"
 #include "interrupt.h"
 #include "hw_types.h"
 #include "soc_AM335x.h"
+#include "cpu.h"
 
 /******************************************************************************
 **                INTERNAL MACRO DEFINITIONS
@@ -472,7 +474,6 @@ void IntMasterIRQEnable(void)
 {
     /* Enable IRQ in CPSR.*/
     CPUirqe();
-
 }
 
 /**
@@ -582,5 +583,3 @@ void IntEnable(unsigned char  status)
 }
 
 /********************************** End Of File ******************************/
-
-
