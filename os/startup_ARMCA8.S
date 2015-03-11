@@ -156,6 +156,7 @@ Loop:
          BLE   Loop                            @ Clear till BSS end
 
 @
+
 @ Enter the main function. The execution still happens in system mode.
 @
 @Enter_main:
