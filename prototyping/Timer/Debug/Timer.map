@@ -1,0 +1,566 @@
+******************************************************************************
+                  TI ARM Linker PC v5.2.2                      
+******************************************************************************
+>> Linked Wed Mar 11 20:14:47 2015
+
+OUTPUT FILE NAME:   <Timer.out>
+ENTRY POINT SYMBOL: "_c_int00"  address: 4030571c
+
+
+MEMORY CONFIGURATION
+
+         name            origin    length      used     unused   attr    fill
+----------------------  --------  ---------  --------  --------  ----  --------
+  SRAM                  402f0400   0000fc00  00000000  0000fc00  RWIX
+  L3OCMC0               40300000   00010000  00006269  00009d97  RWIX
+  M3SHUMEM              44d00000   00004000  00000000  00004000  RWIX
+  M3SHDMEM              44d80000   00002000  00000000  00002000  RWIX
+  DDR0                  80000000   40000000  00000000  40000000  RWIX
+
+
+SEGMENT ALLOCATION MAP
+
+run origin  load origin   length   init length attrs members
+----------  ----------- ---------- ----------- ----- -------
+40300000    40300000    000057f4   000057f4    r-x
+  40300000    40300000    000057f4   000057f4    r-x .text
+403057f4    403057f4    00000a20   00000000    rw-
+  403057f4    403057f4    00000800   00000000    rw- .stack
+  40305ff4    40305ff4    00000201   00000000    rw- .bss
+  403061f8    403061f8    0000001c   00000000    rw- .data
+40306214    40306214    00000018   00000018    r--
+  40306214    40306214    00000018   00000018    r-- .const
+40306230    40306230    00000040   00000040    r--
+  40306230    40306230    00000040   00000040    r-- .cinit
+
+
+SECTION ALLOCATION MAP
+
+ output                                  attributes/
+section   page    origin      length       input sections
+--------  ----  ----------  ----------   ----------------
+.text      0    40300000    000057f4     
+                  40300000    00001d10     uart_irda_cir.obj (.text)
+                  40301d10    000019f8     uartStdio.obj (.text)
+                  40303708    0000069c     dmtimer.obj (.text)
+                  40303da4    00000638     ascii.obj (.text)
+                  403043dc    000003e4     interrupt.obj (.text)
+                  403047c0    0000035c     main.obj (.text)
+                  40304b1c    00000280     consoleUtils.obj (.text)
+                  40304d9c    00000270     uart.obj (.text)
+                  4030500c    00000180     rtsv7A8_A_le_eabi.lib : memcpy32.obj (.text)
+                  4030518c    0000014c     uartConsole.obj (.text)
+                  403052d8    000000f4     rtsv7A8_A_le_eabi.lib : u_div32.obj (.text)
+                  403053cc    000000b0                           : memset32.obj (.text)
+                  4030547c    000000a4                           : autoinit.obj (.text)
+                  40305520    000000a0                           : copy_decompress_rle.obj (.text)
+                  403055c0    00000084                           : cpy_tbl.obj (.text)
+                  40305644    00000078                           : exit.obj (.text)
+                  403056bc    00000060     cpu.obj (.text)
+                  4030571c    00000054     rtsv7A8_A_le_eabi.lib : boot.obj (.text)
+                  40305770    00000024                           : _lock.obj (.text)
+                  40305794    00000020                           : args_main.obj (.text)
+                  403057b4    00000014                           : copy_decompress_none.obj (.text:decompress:none)
+                  403057c8    00000010                           : copy_zero_init.obj (.text:decompress:ZI)
+                  403057d8    0000000c     cpu.obj (.text:CPUIntStatus)
+                  403057e4    00000008     rtsv7A8_A_le_eabi.lib : copy_decompress_rle.obj (.text:decompress:rle24)
+                  403057ec    00000008                           : pre_init.obj (.text)
+
+.stack     0    403057f4    00000800     UNINITIALIZED
+                  403057f4    00000800     --HOLE--
+
+.bss       0    40305ff4    00000201     UNINITIALIZED
+                  40305ff4    00000200     interrupt.obj (.bss:fnRAMVectors)
+                  403061f4    00000001     (.common:ConsoleType)
+
+.data      0    403061f8    0000001c     UNINITIALIZED
+                  403061f8    00000008     main.obj (.data)
+                  40306200    00000008     rtsv7A8_A_le_eabi.lib : _lock.obj (.data)
+                  40306208    00000008                           : exit.obj (.data)
+                  40306210    00000004                           : stkdepth_vars.obj (.data)
+
+.const     0    40306214    00000018     
+                  40306214    00000014     uartStdio.obj (.const:.string)
+                  40306228    00000004     uartStdio.obj (.const)
+
+.TI.noinit 
+*          0    40305ff4    00000000     UNINITIALIZED
+
+.TI.persistent 
+*          0    403061f8    00000000     UNINITIALIZED
+
+.cinit     0    40306230    00000040     
+                  40306230    00000015     (.cinit..data.load) [load image, compression = rle]
+                  40306245    00000003     --HOLE-- [fill = 0]
+                  40306248    0000000c     (__TI_handler_table)
+                  40306254    00000004     --HOLE-- [fill = 0]
+                  40306258    00000008     (.cinit..bss.load) [load image, compression = zero_init]
+                  40306260    00000010     (__TI_cinit_table)
+
+.init_array 
+*          0    40300000    00000000     UNINITIALIZED
+
+
+LINKER GENERATED COPY TABLES
+
+__TI_cinit_table @ 40306260 records: 2, size/record: 8, table size: 16
+	.data: load addr=40306230, load size=00000015 bytes, run addr=403061f8, run size=0000001c bytes, compression=rle
+	.bss: load addr=40306258, load size=00000008 bytes, run addr=40305ff4, run size=00000201 bytes, compression=zero_init
+
+
+LINKER GENERATED HANDLER TABLE
+
+__TI_handler_table @ 40306248 records: 3, size/record: 4, table size: 12
+	index: 0, handler: __TI_zero_init
+	index: 1, handler: __TI_decompress_rle24
+	index: 2, handler: __TI_decompress_none
+
+
+GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name 
+
+address   name                           
+-------   ----                           
+40303da4  ASCIIToDigit                   
+40305644  C$$EXIT                        
+403056d8  CPUAbortHandler                
+403057d8  CPUIntStatus                   
+403056bc  CPUSwitchToPrivilegedMode      
+403056c4  CPUSwitchToUserMode            
+403056fc  CPUfiqd                        
+4030570c  CPUfiqe                        
+403056dc  CPUirqd                        
+403056ec  CPUirqe                        
+40304ca4  ConsoleUtilsGetChar            
+40304c1c  ConsoleUtilsGets               
+40304b1c  ConsoleUtilsInit               
+40304b5c  ConsoleUtilsPrintf             
+40304d14  ConsoleUtilsPutChar            
+40304c68  ConsoleUtilsPuts               
+40304bb4  ConsoleUtilsScanf              
+40304b28  ConsoleUtilsSetType            
+40304910  DMTimer2ModuleClkConfig        
+40303a48  DMTimerCompareGet              
+40303a0c  DMTimerCompareSet              
+40303c68  DMTimerContextRestore          
+40303be8  DMTimerContextSave             
+40303904  DMTimerCounterGet              
+403038c8  DMTimerCounterSet              
+40303748  DMTimerDisable                 
+40303708  DMTimerEnable                  
+4030398c  DMTimerGPOConfigure            
+40303afc  DMTimerIntDisable              
+40303ad8  DMTimerIntEnable               
+40303b58  DMTimerIntEnableGet            
+40303a84  DMTimerIntRawStatusGet         
+40303a60  DMTimerIntRawStatusSet         
+40303ab4  DMTimerIntStatusClear          
+40303a9c  DMTimerIntStatusGet            
+40303788  DMTimerModeConfigure           
+40303d48  DMTimerPostedModeConfig        
+40303888  DMTimerPreScalerClkDisable     
+40303808  DMTimerPreScalerClkEnable      
+40303974  DMTimerReloadGet               
+40303938  DMTimerReloadSet               
+40303bb4  DMTimerReset                   
+40303b70  DMTimerResetConfigure          
+40303b20  DMTimerTriggerSet              
+40303d8c  DMTimerWritePostedStatusGet    
+40304294  DateToStr                      
+40303e78  DigitToASCII                   
+40304028  EthrAddrToStr                  
+40304424  IntAINTCInit                   
+4030455c  IntActiveIrqNumGet             
+403045f4  IntCurrIrqPriorityGet          
+4030474c  IntDisable                     
+40304764  IntEnable                      
+403045e0  IntFuncClkAutoGateSet          
+403045cc  IntFuncClkFreeRunSet           
+40304548  IntIfClkAutoGateSet            
+40304534  IntIfClkFreeRunSet             
+40304734  IntMasterFIQDisable            
+40304728  IntMasterFIQEnable             
+4030471c  IntMasterIRQDisable            
+40304710  IntMasterIRQEnable             
+40304740  IntMasterStatusGet             
+403046d4  IntPendingIrqMaskedStatusGet   
+40304494  IntPrioritySet                 
+40304604  IntPriorityThresholdGet        
+40304614  IntPriorityThresholdSet        
+40304590  IntProtectionDisable           
+40304580  IntProtectionEnable            
+40304634  IntRawStatusGet                
+403043e0  IntRegister                    
+403046a4  IntSoftwareIntClear            
+40304674  IntSoftwareIntSet              
+4030456c  IntSpurIrqFlagGet              
+403045b8  IntSyncClkAutoGateSet          
+403045a4  IntSyncClkFreeRunSet           
+40304500  IntSystemDisable               
+403044cc  IntSystemEnable                
+40304404  IntUnRegister                  
+UNDEFED   SHT$$INIT_ARRAY$$Base          
+UNDEFED   SHT$$INIT_ARRAY$$Limit         
+40303f14  StrToEthrAddr                  
+4030414c  TimeToStr                      
+40304dd0  UART0ModuleClkConfig           
+40301640  UARTAutoIdleModeControl        
+403013ec  UARTAutoRTSAutoCTSControl      
+40301b28  UARTAutobaudParityGet          
+40301bc0  UARTAutobaudSpeedGet           
+40301b74  UARTAutobaudWordLenGet         
+40300388  UARTBreakCtl                   
+403010c8  UARTCharGet                    
+40301070  UARTCharGetNonBlocking         
+40301120  UARTCharGetTimeout             
+403011b0  UARTCharPut                    
+40301004  UARTCharPutNonBlocking         
+40300fb0  UARTCharsAvail                 
+403052b4  UARTConsoleGetc                
+40305278  UARTConsoleInit                
+4030529c  UARTConsolePutc                
+40301a98  UARTDMACounterResetControl     
+403008c4  UARTDMADisable                 
+40300868  UARTDMAEnable                  
+403019b0  UARTDSRInterruptControl        
+403002cc  UARTDivisorLatchDisable        
+403002a8  UARTDivisorLatchEnable         
+40300124  UARTDivisorLatchWrite          
+40300060  UARTDivisorValCompute          
+403009e8  UARTEnhanFuncBitValRestore     
+40300988  UARTEnhanFuncEnable            
+40301224  UARTFIFOCharGet                
+40301204  UARTFIFOCharPut                
+403004a4  UARTFIFOConfig                 
+40301398  UARTFIFOEnableStatusGet        
+403008fc  UARTFIFORegisterWrite          
+4030194c  UARTFIFOTrigLvlGranControl     
+40301240  UARTFIFOWrite                  
+40301684  UARTFlowCtrlTrigLvlConfig      
+40302200  UARTGetHexNum                  
+4030214c  UARTGetNum                     
+4030246c  UARTGetc                       
+40301e78  UARTGets                       
+403015b8  UARTIdleModeConfigure          
+40300e94  UARTIntDisable                 
+40300db0  UARTIntEnable                  
+403012f8  UARTIntIdentityGet             
+40301344  UARTIntPendingStatusGet        
+403003cc  UARTLineCharacConfig           
+403017f8  UARTLoopbackModeControl        
+4030186c  UARTModemControlClear          
+4030183c  UARTModemControlSet            
+403018b8  UARTModemStatusChangeCheck     
+4030189c  UARTModemStatusGet             
+40301584  UARTModuleReset                
+40301c6c  UARTModuleVersionNumberGet     
+40300000  UARTOperatingModeSelect        
+40300488  UARTParityModeGet              
+40300444  UARTParityModeSet              
+40304d9c  UARTPinMuxSetup                
+403031f8  UARTPrintf                     
+40301540  UARTPulseShapingControl        
+40302020  UARTPutHexNum                  
+40301f24  UARTPutNum                     
+40302458  UARTPutc                       
+40301dc0  UARTPuts                       
+40301a7c  UARTRXCTSDSRTransitionStatusGet
+40301a38  UARTRXCTSDSRWakeUpConfigure    
+40300368  UARTRegConfModeRestore         
+403002f0  UARTRegConfigModeEnable        
+403018d4  UARTResumeOperation            
+403012ac  UARTRxErrorGet                 
+40301b10  UARTRxFIFOLevelGet             
+40302a10  UARTScanf                      
+40301c50  UARTScratchPadRegRead          
+40301c0c  UARTScratchPadRegWrite         
+403014dc  UARTSoftwareFlowCtrlOptSet     
+40300f5c  UARTSpaceAvail                 
+40301478  UARTSpecialCharDetectControl   
+40301db4  UARTStdioInit                  
+40300a4c  UARTSubConfigMSRSPRModeEn      
+40300b24  UARTSubConfigTCRTLRModeEn      
+40300bfc  UARTSubConfigXOFFModeEn        
+40300cd4  UARTTCRTLRBitValRestore        
+40301c88  UARTTxDMAThresholdControl      
+40301ccc  UARTTxDMAThresholdValConfig    
+403019f4  UARTTxEmptyIntControl          
+40301adc  UARTTxFIFOFullStatusGet        
+40301af8  UARTTxFIFOLevelGet             
+403015fc  UARTWakeUpControl              
+4030191c  UARTWakeUpEventsDisable        
+403018ec  UARTWakeUpEventsEnable         
+403016d4  UARTXON1XOFF1ValProgram        
+40301704  UARTXON2XOFF2ValProgram        
+40301734  UARTXONAnyFeatureControl       
+403024ec  UARTprintf                     
+40302478  UARTwrite                      
+40305ff4  __STACK_END                    
+00000800  __STACK_SIZE                   
+40306260  __TI_CINIT_Base                
+40306270  __TI_CINIT_Limit               
+40306248  __TI_Handler_Table_Base        
+40306254  __TI_Handler_Table_Limit       
+4030547c  __TI_auto_init                 
+40306208  __TI_cleanup_ptr               
+403057b4  __TI_decompress_none           
+403057e4  __TI_decompress_rle24          
+4030620c  __TI_dtors_ptr                 
+40306230  __TI_static_base__             
+403057c8  __TI_zero_init                 
+403053cc  __aeabi_memclr                 
+403053cc  __aeabi_memclr4                
+403053cc  __aeabi_memclr8                
+4030500c  __aeabi_memcpy                 
+4030500c  __aeabi_memcpy4                
+4030500c  __aeabi_memcpy8                
+403053d0  __aeabi_memset                 
+403053d0  __aeabi_memset4                
+403053d0  __aeabi_memset8                
+403052d8  __aeabi_uidiv                  
+403052d8  __aeabi_uidivmod               
+ffffffff  __binit__                      
+ffffffff  __c_args__                     
+403057f4  __stack                        
+40305794  _args_main                     
+4030571c  _c_int00                       
+40306200  _lock                          
+40305788  _nop                           
+4030577c  _register_lock                 
+40305770  _register_unlock               
+403057ec  _system_pre_init               
+40306204  _unlock                        
+4030564c  abort                          
+ffffffff  binit                          
+403055c0  copy_in                        
+40305658  exit                           
+40305ff4  fnRAMVectors                   
+403047c0  main                           
+40306210  main_func_sp                   
+4030500c  memcpy                         
+403053dc  memset                         
+
+
+GLOBAL SYMBOLS: SORTED BY Symbol Address 
+
+address   name                           
+-------   ----                           
+00000800  __STACK_SIZE                   
+40300000  UARTOperatingModeSelect        
+40300060  UARTDivisorValCompute          
+40300124  UARTDivisorLatchWrite          
+403002a8  UARTDivisorLatchEnable         
+403002cc  UARTDivisorLatchDisable        
+403002f0  UARTRegConfigModeEnable        
+40300368  UARTRegConfModeRestore         
+40300388  UARTBreakCtl                   
+403003cc  UARTLineCharacConfig           
+40300444  UARTParityModeSet              
+40300488  UARTParityModeGet              
+403004a4  UARTFIFOConfig                 
+40300868  UARTDMAEnable                  
+403008c4  UARTDMADisable                 
+403008fc  UARTFIFORegisterWrite          
+40300988  UARTEnhanFuncEnable            
+403009e8  UARTEnhanFuncBitValRestore     
+40300a4c  UARTSubConfigMSRSPRModeEn      
+40300b24  UARTSubConfigTCRTLRModeEn      
+40300bfc  UARTSubConfigXOFFModeEn        
+40300cd4  UARTTCRTLRBitValRestore        
+40300db0  UARTIntEnable                  
+40300e94  UARTIntDisable                 
+40300f5c  UARTSpaceAvail                 
+40300fb0  UARTCharsAvail                 
+40301004  UARTCharPutNonBlocking         
+40301070  UARTCharGetNonBlocking         
+403010c8  UARTCharGet                    
+40301120  UARTCharGetTimeout             
+403011b0  UARTCharPut                    
+40301204  UARTFIFOCharPut                
+40301224  UARTFIFOCharGet                
+40301240  UARTFIFOWrite                  
+403012ac  UARTRxErrorGet                 
+403012f8  UARTIntIdentityGet             
+40301344  UARTIntPendingStatusGet        
+40301398  UARTFIFOEnableStatusGet        
+403013ec  UARTAutoRTSAutoCTSControl      
+40301478  UARTSpecialCharDetectControl   
+403014dc  UARTSoftwareFlowCtrlOptSet     
+40301540  UARTPulseShapingControl        
+40301584  UARTModuleReset                
+403015b8  UARTIdleModeConfigure          
+403015fc  UARTWakeUpControl              
+40301640  UARTAutoIdleModeControl        
+40301684  UARTFlowCtrlTrigLvlConfig      
+403016d4  UARTXON1XOFF1ValProgram        
+40301704  UARTXON2XOFF2ValProgram        
+40301734  UARTXONAnyFeatureControl       
+403017f8  UARTLoopbackModeControl        
+4030183c  UARTModemControlSet            
+4030186c  UARTModemControlClear          
+4030189c  UARTModemStatusGet             
+403018b8  UARTModemStatusChangeCheck     
+403018d4  UARTResumeOperation            
+403018ec  UARTWakeUpEventsEnable         
+4030191c  UARTWakeUpEventsDisable        
+4030194c  UARTFIFOTrigLvlGranControl     
+403019b0  UARTDSRInterruptControl        
+403019f4  UARTTxEmptyIntControl          
+40301a38  UARTRXCTSDSRWakeUpConfigure    
+40301a7c  UARTRXCTSDSRTransitionStatusGet
+40301a98  UARTDMACounterResetControl     
+40301adc  UARTTxFIFOFullStatusGet        
+40301af8  UARTTxFIFOLevelGet             
+40301b10  UARTRxFIFOLevelGet             
+40301b28  UARTAutobaudParityGet          
+40301b74  UARTAutobaudWordLenGet         
+40301bc0  UARTAutobaudSpeedGet           
+40301c0c  UARTScratchPadRegWrite         
+40301c50  UARTScratchPadRegRead          
+40301c6c  UARTModuleVersionNumberGet     
+40301c88  UARTTxDMAThresholdControl      
+40301ccc  UARTTxDMAThresholdValConfig    
+40301db4  UARTStdioInit                  
+40301dc0  UARTPuts                       
+40301e78  UARTGets                       
+40301f24  UARTPutNum                     
+40302020  UARTPutHexNum                  
+4030214c  UARTGetNum                     
+40302200  UARTGetHexNum                  
+40302458  UARTPutc                       
+4030246c  UARTGetc                       
+40302478  UARTwrite                      
+403024ec  UARTprintf                     
+40302a10  UARTScanf                      
+403031f8  UARTPrintf                     
+40303708  DMTimerEnable                  
+40303748  DMTimerDisable                 
+40303788  DMTimerModeConfigure           
+40303808  DMTimerPreScalerClkEnable      
+40303888  DMTimerPreScalerClkDisable     
+403038c8  DMTimerCounterSet              
+40303904  DMTimerCounterGet              
+40303938  DMTimerReloadSet               
+40303974  DMTimerReloadGet               
+4030398c  DMTimerGPOConfigure            
+40303a0c  DMTimerCompareSet              
+40303a48  DMTimerCompareGet              
+40303a60  DMTimerIntRawStatusSet         
+40303a84  DMTimerIntRawStatusGet         
+40303a9c  DMTimerIntStatusGet            
+40303ab4  DMTimerIntStatusClear          
+40303ad8  DMTimerIntEnable               
+40303afc  DMTimerIntDisable              
+40303b20  DMTimerTriggerSet              
+40303b58  DMTimerIntEnableGet            
+40303b70  DMTimerResetConfigure          
+40303bb4  DMTimerReset                   
+40303be8  DMTimerContextSave             
+40303c68  DMTimerContextRestore          
+40303d48  DMTimerPostedModeConfig        
+40303d8c  DMTimerWritePostedStatusGet    
+40303da4  ASCIIToDigit                   
+40303e78  DigitToASCII                   
+40303f14  StrToEthrAddr                  
+40304028  EthrAddrToStr                  
+4030414c  TimeToStr                      
+40304294  DateToStr                      
+403043e0  IntRegister                    
+40304404  IntUnRegister                  
+40304424  IntAINTCInit                   
+40304494  IntPrioritySet                 
+403044cc  IntSystemEnable                
+40304500  IntSystemDisable               
+40304534  IntIfClkFreeRunSet             
+40304548  IntIfClkAutoGateSet            
+4030455c  IntActiveIrqNumGet             
+4030456c  IntSpurIrqFlagGet              
+40304580  IntProtectionEnable            
+40304590  IntProtectionDisable           
+403045a4  IntSyncClkFreeRunSet           
+403045b8  IntSyncClkAutoGateSet          
+403045cc  IntFuncClkFreeRunSet           
+403045e0  IntFuncClkAutoGateSet          
+403045f4  IntCurrIrqPriorityGet          
+40304604  IntPriorityThresholdGet        
+40304614  IntPriorityThresholdSet        
+40304634  IntRawStatusGet                
+40304674  IntSoftwareIntSet              
+403046a4  IntSoftwareIntClear            
+403046d4  IntPendingIrqMaskedStatusGet   
+40304710  IntMasterIRQEnable             
+4030471c  IntMasterIRQDisable            
+40304728  IntMasterFIQEnable             
+40304734  IntMasterFIQDisable            
+40304740  IntMasterStatusGet             
+4030474c  IntDisable                     
+40304764  IntEnable                      
+403047c0  main                           
+40304910  DMTimer2ModuleClkConfig        
+40304b1c  ConsoleUtilsInit               
+40304b28  ConsoleUtilsSetType            
+40304b5c  ConsoleUtilsPrintf             
+40304bb4  ConsoleUtilsScanf              
+40304c1c  ConsoleUtilsGets               
+40304c68  ConsoleUtilsPuts               
+40304ca4  ConsoleUtilsGetChar            
+40304d14  ConsoleUtilsPutChar            
+40304d9c  UARTPinMuxSetup                
+40304dd0  UART0ModuleClkConfig           
+4030500c  __aeabi_memcpy                 
+4030500c  __aeabi_memcpy4                
+4030500c  __aeabi_memcpy8                
+4030500c  memcpy                         
+40305278  UARTConsoleInit                
+4030529c  UARTConsolePutc                
+403052b4  UARTConsoleGetc                
+403052d8  __aeabi_uidiv                  
+403052d8  __aeabi_uidivmod               
+403053cc  __aeabi_memclr                 
+403053cc  __aeabi_memclr4                
+403053cc  __aeabi_memclr8                
+403053d0  __aeabi_memset                 
+403053d0  __aeabi_memset4                
+403053d0  __aeabi_memset8                
+403053dc  memset                         
+4030547c  __TI_auto_init                 
+403055c0  copy_in                        
+40305644  C$$EXIT                        
+4030564c  abort                          
+40305658  exit                           
+403056bc  CPUSwitchToPrivilegedMode      
+403056c4  CPUSwitchToUserMode            
+403056d8  CPUAbortHandler                
+403056dc  CPUirqd                        
+403056ec  CPUirqe                        
+403056fc  CPUfiqd                        
+4030570c  CPUfiqe                        
+4030571c  _c_int00                       
+40305770  _register_unlock               
+4030577c  _register_lock                 
+40305788  _nop                           
+40305794  _args_main                     
+403057b4  __TI_decompress_none           
+403057c8  __TI_zero_init                 
+403057d8  CPUIntStatus                   
+403057e4  __TI_decompress_rle24          
+403057ec  _system_pre_init               
+403057f4  __stack                        
+40305ff4  __STACK_END                    
+40305ff4  fnRAMVectors                   
+40306200  _lock                          
+40306204  _unlock                        
+40306208  __TI_cleanup_ptr               
+4030620c  __TI_dtors_ptr                 
+40306210  main_func_sp                   
+40306230  __TI_static_base__             
+40306248  __TI_Handler_Table_Base        
+40306254  __TI_Handler_Table_Limit       
+40306260  __TI_CINIT_Base                
+40306270  __TI_CINIT_Limit               
+ffffffff  __binit__                      
+ffffffff  __c_args__                     
+ffffffff  binit                          
+UNDEFED   SHT$$INIT_ARRAY$$Base          
+UNDEFED   SHT$$INIT_ARRAY$$Limit         
+
+[218 symbols]

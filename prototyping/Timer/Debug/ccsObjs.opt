@@ -1,0 +1,1 @@
+"./ascii.obj" "./consoleUtils.obj" "./cpu.obj" "./dmtimer.obj" "./interrupt.obj" "./main.obj" "./uart.obj" "./uartConsole.obj" "./uartStdio.obj" "./uart_irda_cir.obj" "../AM335x.cmd" -l"libc.a" 
