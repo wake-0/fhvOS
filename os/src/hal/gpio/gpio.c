@@ -6,7 +6,6 @@
  */
 
 #include "gpio.h"
-#include "../platform/platform.h"
 
 // Platform dependant includes
 #include "../am335x/soc_AM335x.h"
@@ -26,7 +25,7 @@ extern void GPIODisable(bus_number_t busNo)
 
 extern void GPIOReset(bus_number_t busNo)
 {
-	memory_addr_t baseAddr = 0;
+	//memory_addr_t baseAddr = 0;
 	/*if 		(busNo == 0) baseAddr = SOC_GPIO_0_REGS;
 	else if (busNo == 1) baseAddr = SOC_GPIO_1_REGS;
 	else if (busNo == 2) baseAddr = SOC_GPIO_2_REGS;
@@ -37,7 +36,8 @@ extern void GPIOReset(bus_number_t busNo)
 
 extern bus_number_t GPIOGetPinBus(int pin)
 {
-
+	// TODO
+	return 0;
 }
 
 extern void GPIOSetMux(int pin, int mux)

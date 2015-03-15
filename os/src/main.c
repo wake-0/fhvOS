@@ -1,6 +1,6 @@
 #include "hal/am335x/hw_cm_per.h"
 #include "hal/am335x/hw_cm_wkup.h"
-#include "interrupt.h"
+#include "hal/interrupt/interrupt.h"
 #include "hal/am335x/soc_AM335x.h"
 #include "hal/uart/hw_uart.h"
 #include "hal/uart/uart.h"
