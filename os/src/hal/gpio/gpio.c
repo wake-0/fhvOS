@@ -27,17 +27,12 @@ extern void GPIODisable(bus_number_t busNo)
 extern void GPIOReset(bus_number_t busNo)
 {
 	memory_addr_t baseAddr = 0;
-	if 		(busNo == 0) baseAddr = SOC_GPIO_0_REGS;
+	/*if 		(busNo == 0) baseAddr = SOC_GPIO_0_REGS;
 	else if (busNo == 1) baseAddr = SOC_GPIO_1_REGS;
 	else if (busNo == 2) baseAddr = SOC_GPIO_2_REGS;
 	else if (busNo == 3) baseAddr = SOC_GPIO_3_REGS;
-	else return;
+	else return;*/
 
-	// XXX Prototype how platform/memory is accessed
-	// PlatformWriteBitMask(baseAddr + GPIO_SYSCONFIG, GPIO_SYSCONFIG_SOFTRESET, BIT_MASK_ACTION_SET_ON);
-
-	/* Waiting until the GPIO Module is reset.*/
-	// while (!PlatformReadBitMask(baseAddr + GPIO_SYSSTATUS, GPIO_SYSSTATUS_RESETDONE, BIT_MASK_ACTION_AND));
 }
 
 extern bus_number_t GPIOGetPinBus(int pin)
