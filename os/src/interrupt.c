@@ -43,8 +43,8 @@
 
 #include "hw_intc.h"
 #include "interrupt.h"
-#include "hw_types.h"
-#include "soc_AM335x.h"
+#include "hal/am335x/hw_types.h"
+#include "hal/am335x/soc_AM335x.h"
 #include "cpu.h"
 
 /******************************************************************************

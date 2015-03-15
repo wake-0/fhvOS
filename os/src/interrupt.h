@@ -45,7 +45,7 @@
 #ifndef INTERRUPT_H
 #define INTERRUPT_H
 
-#include "hw_types.h"
+#include "hal/am335x/hw_types.h"
 
 #ifdef __cplusplus
 extern "C" {
