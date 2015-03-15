@@ -49,6 +49,8 @@
 #include "../am335x/hw_control_AM335x.h"
 #include "../interrupt/interrupt.h"
 
+#include "../platform/platform.h"
+
 #define BAUD_RATE_115200          (115200)
 #define UART_MODULE_INPUT_CLK     (48000000)
 
