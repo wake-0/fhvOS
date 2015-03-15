@@ -78,7 +78,7 @@ void UARTSoftwareReset(uart_t uart)
 	while(HWREG_CHECK(baseAddress + UART_SYSS_OFF, UART_SYSS_SOFT_RESET));
 }
 
-//TODO: add some logic to decide write/read, ...
+// TODO: add some logic to decide write/read, ...
 void UARTFIFOSettings(uart_t uart)
 {
 	unsigned int baseAddress = getBaseAddressOfUART(uart);
@@ -159,9 +159,10 @@ void UARTFIFOSettings(uart_t uart)
 
 
 	// 12. Restore the UARTi.UART_LCR value saved
-	HWREG_WRITE(baseAddress + UART_LCR_OFF, UART_MCR_TCR_TLR);
+	HWREG_WRITE(baseAddress + UART_LCR_OFF, lcrValue);
 }
 
+// TODO: implement this function
 void UARTSettings(uart_t uart) {
 
 }

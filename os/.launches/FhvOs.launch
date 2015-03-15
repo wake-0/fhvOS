@@ -16,7 +16,7 @@
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_TARGET_CONFIG" value="${target_config_active_default:FhvOs}"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.Texas Instruments XDS100v2 USB Debug Probe/CortxA8" value="C:/Users\Vaio\Dropbox\_private_8_Semester\S1\OS-Projekt\fhvOS\os\Debug\FhvOs.out"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.Texas Instruments XDS100v2 USB Debug Probe_0/CortxA8" value="C:/Fachhochschule Vorarlberg\Mechatronik Master\Semester 2\S1\S1\os\Debug\FhvOs.out"/>
-<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.Texas Instruments XDS100v2 USB Emulator/CortxA8" value="C:/Users\Vaio\Dropbox\_private_8_Semester\S1\OS-Projekt\fhvOS\os\Debug__TI\FhvOs.out"/>
+<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.Texas Instruments XDS100v2 USB Emulator/CortxA8" value="W:/Fachhochschule\Master\2-term\S1-RessourcenbeschraenkteSysteme\project\fhvOS\os\Debug__TI\FhvOs.out"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/FhvOs"/>
 </listAttribute>
