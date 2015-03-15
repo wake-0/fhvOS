@@ -36,16 +36,15 @@
 ;  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ;
 ;******************************************************************************
-;
 ;****************************** Global Symbols*******************************
         .global Entry
         .global start_boot
         .global __TI_auto_init
 
         .ref __stack
+        .ref __STACK_END
         .ref bss_start
         .ref bss_end
-        .ref start_boot
         .ref main
 
 ;************************ Internal Definitions ******************************
@@ -57,7 +56,7 @@
 UND_STACK_SIZE .set 0x8
 ABT_STACK_SIZE .set 0x8
 FIQ_STACK_SIZE .set 0x8
-IRQ_STACK_SIZE .set 0x100
+IRQ_STACK_SIZE .set 0x1000
 SVC_STACK_SIZE .set 0x8
 
 ;
@@ -75,7 +74,7 @@ MODE_SYS .set 0x1F
 I_F_BIT .set 0xC0
 
 ;**************************** Code Seection ***********************************
-        .text
+        .sect ".text:Entry"
 
 ;
 ; This code is assembled for ARM instructions
@@ -86,15 +85,18 @@ I_F_BIT .set 0xC0
 ;
 ;******************************************************************************
 ;
+; The reset handler in StarterWare is named as 'Entry'.
 ; The reset handler sets up the stack pointers for all the modes. The FIQ and
-; IRQ shall be disabled during this. Then, clearthe BSS sections, switch to the
-;  main() function.
+; IRQ shall be disabled during this. Then clear the BSS sections and finally
+; switch to the function calling the main() function.
 ;
 Entry:
 ;
 ; Set up the Stack for Undefined mode
 ;
-         LDR   r0, _stackptr                     ; Read the stack address
+         LDR   r0, _stackptr                   ; Read and align the stack pointer
+         SUB   r0, r0, #8
+         BIC   r0, r0, #7
          MSR   cpsr_c, #MODE_UND|I_F_BIT       ; switch to undef  mode
          MOV   sp,r0                           ; write the stack pointer
          SUB   r0, r0, #UND_STACK_SIZE         ; give stack space
@@ -123,10 +125,19 @@ Entry:
          MOV   sp,r0                           ; write the stack pointer
          SUB   r0,r0, #SVC_STACK_SIZE          ; give stack space
 ;
-; Set up the Stack for System mode
+; Set up the Stack for USer/System mode
 ;
          MSR   cpsr_c, #MODE_SYS|I_F_BIT       ; change to system mode
          MOV   sp,r0                           ; write the stack pointer
+
+; Invalidate and Enable Branch Prediction
+         MOV     r0, #0         
+         MCR     p15, #0, r0, c7, c5, #6
+         ISB
+         MRC     p15, #0, r0, c1, c0, #0
+         ORR     r0, r0, #0x00000800
+         MCR     p15, #0, r0, c1, c0, #0
+
 ;
 ; Clear the BSS section here
 ;
@@ -140,31 +151,33 @@ Loop:
          STR   r2, [r0], #4                    ; Clear one word in BSS
          CMP   r0, r1
          BLE   Loop                            ; Clear till BSS end
+         
+         BL    __TI_auto_init                  ; Call TI auto init
 
 ;
-; Enter the start_boot function. The execution still happens in system mode
+; Enter the start_boot function. The execution still happens in system mode.
 ;
-         LDR   r10, _main                 ; Get the address of main
-         MOV   lr,pc                           ; Dummy return to main
-         BX    r10                             ; Branch to main
+Enter_main:
+         LDR   r10, _start_boot
+         MOV   lr,pc                           ; Dummy return from start_boot
+         BX    r10                             ; Branch to start_boot
          SUB   pc, pc, #0x08                   ; looping
 
-;         MSR   cpsr_c, #MODE_SVC|I_F_BIT       ; change to SVC mode
-;         BX   lr
-;
 ; End of the file
 ;
 
 _stackptr:
-    .word __stack
+    .word __STACK_END
 _bss_start:
     .word bss_start
 _bss_end:
     .word bss_end
-_main:
+_start_boot:
     .word main
 _data_auto_init:
     .word __TI_auto_init
          .end
+    
+
 
 
