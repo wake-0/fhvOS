@@ -1,0 +1,642 @@
+Archive member included because of file (symbol)
+
+c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-exit.o)
+                              c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib/crt0.o (exit)
+c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-impure.o)
+                              c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-exit.o) (_global_impure_ptr)
+c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-init.o)
+                              c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib/crt0.o (__libc_init_array)
+c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-memset.o)
+                              c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib/crt0.o (memset)
+c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-__call_atexit.o)
+                              c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-exit.o) (__call_exitprocs)
+c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-atexit.o)
+                              c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-__call_atexit.o) (atexit)
+c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-fini.o)
+                              c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-__call_atexit.o) (__libc_fini_array)
+c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-__atexit.o)
+                              c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-atexit.o) (__register_exitproc)
+c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4\libgcc.a(_udivsi3.o)
+                              ./uartStdio.o (__aeabi_uidiv)
+c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4\libgcc.a(_dvmd_tls.o)
+                              c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4\libgcc.a(_udivsi3.o) (__aeabi_idiv0)
+c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libnosys.a(_exit.o)
+                              c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-exit.o) (_exit)
+
+Allocating common symbols
+Common symbol       size              file
+
+fnRAMVectors        0x200             ./interrupt.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+SRAM             0x402f0400         0x0000fc00
+L3OCMC0          0x40300000         0x00010000
+M3SHUMEM         0x44d00000         0x00004000
+M3SHDMEM         0x44d80000         0x00002000
+DDR0             0x80000000         0x40000000
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crti.o
+LOAD c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtbegin.o
+LOAD c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib/crt0.o
+                0x0001c000                STACKSIZE = 0x1c000
+                0x00000400                HEAPSIZE = 0x400
+LOAD ./ascii.o
+LOAD ./consoleUtils.o
+LOAD ./cpu.o
+LOAD ./dmtimer.o
+LOAD ./interrupt.o
+LOAD ./main.o
+LOAD ./startup_ARMCA8.o
+LOAD ./uart.o
+LOAD ./uartConsole.o
+LOAD ./uartStdio.o
+LOAD ./uart_irda_cir.o
+
+.rsthand        0x80000000       0xb0
+                0x80000000                . = ALIGN (0x10000)
+ *(.isr_vector)
+ *startup_ARMCA8.o(.text)
+ .text          0x80000000       0xb0 ./startup_ARMCA8.o
+                0x80000000                Entry
+
+.text           0x800000b0     0x7200
+                0x800000b0                . = ALIGN (0x4)
+ *(.text*)
+ .text          0x800000b0        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crti.o
+ .text          0x800000b0       0x94 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtbegin.o
+ .text          0x80000144      0x114 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib/crt0.o
+                0x80000144                _start
+                0x80000144                _mainCRTStartup
+ .text          0x80000258      0x784 ./ascii.o
+                0x80000258                ASCIIToDigit
+                0x80000344                DigitToASCII
+                0x80000400                StrToEthrAddr
+                0x80000574                EthrAddrToStr
+                0x800006e4                TimeToStr
+                0x80000860                DateToStr
+ .text          0x800009dc      0x2bc ./consoleUtils.o
+                0x800009dc                ConsoleUtilsInit
+                0x800009ec                ConsoleUtilsSetType
+                0x80000a38                ConsoleUtilsPrintf
+                0x80000a94                ConsoleUtilsScanf
+                0x80000b04                ConsoleUtilsGets
+                0x80000b68                ConsoleUtilsPuts
+                0x80000bb8                ConsoleUtilsGetChar
+                0x80000c48                ConsoleUtilsPutChar
+ .text          0x80000c98       0xd0 ./cpu.o
+                0x80000c98                CPUSwitchToPrivilegedMode
+                0x80000cb0                CPUSwitchToUserMode
+                0x80000cd4                CPUAbortHandler
+                0x80000ce8                CPUirqd
+                0x80000d08                CPUirqe
+                0x80000d28                CPUfiqd
+                0x80000d48                CPUfiqe
+ .text          0x80000d68      0xa4c ./dmtimer.o
+                0x80000d68                DMTimerEnable
+                0x80000dd0                DMTimerDisable
+                0x80000e38                DMTimerModeConfigure
+                0x80000efc                DMTimerPreScalerClkEnable
+                0x80000fc0                DMTimerPreScalerClkDisable
+                0x80001028                DMTimerCounterSet
+                0x80001088                DMTimerCounterGet
+                0x800010e4                DMTimerReloadSet
+                0x80001144                DMTimerReloadGet
+                0x80001170                DMTimerGPOConfigure
+                0x80001234                DMTimerCompareSet
+                0x80001294                DMTimerCompareGet
+                0x800012c0                DMTimerIntRawStatusSet
+                0x800012f4                DMTimerIntRawStatusGet
+                0x80001320                DMTimerIntStatusGet
+                0x8000134c                DMTimerIntStatusClear
+                0x80001380                DMTimerIntEnable
+                0x800013b4                DMTimerIntDisable
+                0x800013e8                DMTimerTriggerSet
+                0x80001444                DMTimerIntEnableGet
+                0x80001470                DMTimerResetConfigure
+                0x800014d0                DMTimerReset
+                0x80001524                DMTimerContextSave
+                0x800015d8                DMTimerContextRestore
+                0x80001728                DMTimerPostedModeConfig
+                0x80001788                DMTimerWritePostedStatusGet
+ .text          0x800017b4      0x634 ./interrupt.o
+                0x800017c8                IntRegister
+                0x800017fc                IntUnRegister
+                0x80001830                IntAINTCInit
+                0x800018c0                IntPrioritySet
+                0x80001910                IntSystemEnable
+                0x8000195c                IntSystemDisable
+                0x800019a8                IntIfClkFreeRunSet
+                0x800019d8                IntIfClkAutoGateSet
+                0x80001a08                IntActiveIrqNumGet
+                0x80001a30                IntSpurIrqFlagGet
+                0x80001a58                IntProtectionEnable
+                0x80001a7c                IntProtectionDisable
+                0x80001aac                IntSyncClkFreeRunSet
+                0x80001adc                IntSyncClkAutoGateSet
+                0x80001b0c                IntFuncClkFreeRunSet
+                0x80001b3c                IntFuncClkAutoGateSet
+                0x80001b6c                IntCurrIrqPriorityGet
+                0x80001b94                IntPriorityThresholdGet
+                0x80001bbc                IntPriorityThresholdSet
+                0x80001bec                IntRawStatusGet
+                0x80001c48                IntSoftwareIntSet
+                0x80001c90                IntSoftwareIntClear
+                0x80001cd8                IntPendingIrqMaskedStatusGet
+                0x80001d30                IntMasterIRQEnable
+                0x80001d40                IntMasterIRQDisable
+                0x80001d50                IntMasterFIQEnable
+                0x80001d60                IntMasterFIQDisable
+                0x80001d70                IntMasterStatusGet
+                0x80001d8c                IntDisable
+                0x80001db8                IntEnable
+ .text          0x80001de8      0x404 ./main.o
+                0x80001de8                main
+                0x80001f8c                DMTimer2ModuleClkConfig
+ .text          0x800021ec      0x3a4 ./uart.o
+                0x800021ec                UARTPinMuxSetup
+                0x80002234                UART0ModuleClkConfig
+ .text          0x80002590      0x1b8 ./uartConsole.o
+                0x800026c8                UARTConsoleInit
+                0x800026f4                UARTConsolePutc
+                0x80002724                UARTConsoleGetc
+ .text          0x80002748     0x1ebc ./uartStdio.o
+                0x80002748                UARTStdioInit
+                0x80002814                UARTPuts
+                0x800028e0                UARTGets
+                0x800029a0                UARTPutNum
+                0x80002b00                UARTPutHexNum
+                0x80002c6c                UARTGetNum
+                0x80002d5c                UARTGetHexNum
+                0x80002ff8                UARTPutc
+                0x80003020                UARTGetc
+                0x80003038                UARTwrite
+                0x800030bc                UARTprintf
+                0x800036e8                UARTScanf
+                0x80003fe4                UARTPrintf
+ .text          0x80004604     0x25ec ./uart_irda_cir.o
+                0x80004604                UARTOperatingModeSelect
+                0x80004688                UARTDivisorValCompute
+                0x80004774                UARTDivisorLatchWrite
+                0x8000494c                UARTDivisorLatchEnable
+                0x80004984                UARTDivisorLatchDisable
+                0x800049bc                UARTRegConfigModeEnable
+                0x80004a54                UARTRegConfModeRestore
+                0x80004a84                UARTBreakCtl
+                0x80004ae4                UARTLineCharacConfig
+                0x80004b88                UARTParityModeSet
+                0x80004be8                UARTParityModeGet
+                0x80004c18                UARTFIFOConfig
+                0x80005070                UARTDMAEnable
+                0x800050f0                UARTDMADisable
+                0x80005144                UARTFIFORegisterWrite
+                0x800051dc                UARTEnhanFuncEnable
+                0x8000525c                UARTEnhanFuncBitValRestore
+                0x800052e0                UARTSubConfigMSRSPRModeEn
+                0x800053ec                UARTSubConfigTCRTLRModeEn
+                0x800054f8                UARTSubConfigXOFFModeEn
+                0x80005604                UARTTCRTLRBitValRestore
+                0x80005714                UARTIntEnable
+                0x8000582c                UARTIntDisable
+                0x80005924                UARTSpaceAvail
+                0x80005994                UARTCharsAvail
+                0x80005a04                UARTCharPutNonBlocking
+                0x80005a88                UARTCharGetNonBlocking
+                0x80005b00                UARTCharGet
+                0x80005b7c                UARTCharGetTimeout
+                0x80005c20                UARTCharPut
+                0x80005c90                UARTFIFOCharPut
+                0x80005cc0                UARTFIFOCharGet
+                0x80005cf0                UARTFIFOWrite
+                0x80005d64                UARTRxErrorGet
+                0x80005dc8                UARTIntIdentityGet
+                0x80005e2c                UARTIntPendingStatusGet
+                0x80005e9c                UARTFIFOEnableStatusGet
+                0x80005f0c                UARTAutoRTSAutoCTSControl
+                0x80005fb8                UARTSpecialCharDetectControl
+                0x8000603c                UARTSoftwareFlowCtrlOptSet
+                0x800060c0                UARTPulseShapingControl
+                0x80006120                UARTModuleReset
+                0x80006174                UARTIdleModeConfigure
+                0x800061d4                UARTWakeUpControl
+                0x80006234                UARTAutoIdleModeControl
+                0x80006294                UARTFlowCtrlTrigLvlConfig
+                0x800062f4                UARTXON1XOFF1ValProgram
+                0x80006340                UARTXON2XOFF2ValProgram
+                0x8000638c                UARTXONAnyFeatureControl
+                0x80006484                UARTLoopbackModeControl
+                0x800064e4                UARTModemControlSet
+                0x80006528                UARTModemControlClear
+                0x80006570                UARTModemStatusGet
+                0x800065a0                UARTModemStatusChangeCheck
+                0x800065d0                UARTResumeOperation
+                0x800065f8                UARTWakeUpEventsEnable
+                0x8000663c                UARTWakeUpEventsDisable
+                0x80006684                UARTFIFOTrigLvlGranControl
+                0x8000670c                UARTDSRInterruptControl
+                0x8000676c                UARTTxEmptyIntControl
+                0x800067cc                UARTRXCTSDSRWakeUpConfigure
+                0x8000682c                UARTRXCTSDSRTransitionStatusGet
+                0x8000685c                UARTDMACounterResetControl
+                0x800068bc                UARTTxFIFOFullStatusGet
+                0x800068ec                UARTTxFIFOLevelGet
+                0x80006918                UARTRxFIFOLevelGet
+                0x80006944                UARTAutobaudParityGet
+                0x800069a8                UARTAutobaudWordLenGet
+                0x80006a0c                UARTAutobaudSpeedGet
+                0x80006a70                UARTScratchPadRegWrite
+                0x80006ad0                UARTScratchPadRegRead
+                0x80006b00                UARTModuleVersionNumberGet
+                0x80006b30                UARTTxDMAThresholdControl
+                0x80006b90                UARTTxDMAThresholdValConfig
+ .text          0x80006bf0        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-exit.o)
+ .text.exit     0x80006bf0       0x34 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-exit.o)
+                0x80006bf0                exit
+ .text          0x80006c24        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-impure.o)
+ .text          0x80006c24        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-init.o)
+ .text.__libc_init_array
+                0x80006c24       0x88 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-init.o)
+                0x80006c24                __libc_init_array
+ .text          0x80006cac        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-memset.o)
+ .text.memset   0x80006cac       0xf4 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-memset.o)
+                0x80006cac                memset
+ .text          0x80006da0        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-__call_atexit.o)
+ .text.startup.register_fini
+                0x80006da0       0x24 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-__call_atexit.o)
+ .text.__call_exitprocs
+                0x80006dc4      0x170 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-__call_atexit.o)
+                0x80006dc4                __call_exitprocs
+ .text          0x80006f34        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-atexit.o)
+ .text.atexit   0x80006f34       0x20 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-atexit.o)
+                0x80006f34                atexit
+ .text          0x80006f54        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-fini.o)
+ .text.__libc_fini_array
+                0x80006f54       0x48 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-fini.o)
+                0x80006f54                __libc_fini_array
+ .text          0x80006f9c        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-__atexit.o)
+ .text.__register_exitproc
+                0x80006f9c       0xf0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-__atexit.o)
+                0x80006f9c                __register_exitproc
+ .text          0x8000708c      0x114 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4\libgcc.a(_udivsi3.o)
+                0x8000708c                __aeabi_uidiv
+                0x8000708c                __udivsi3
+                0x80007180                __aeabi_uidivmod
+ .text          0x800071a0        0x4 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4\libgcc.a(_dvmd_tls.o)
+                0x800071a0                __aeabi_idiv0
+                0x800071a0                __aeabi_ldiv0
+ .text          0x800071a4        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libnosys.a(_exit.o)
+ .text._exit    0x800071a4        0x4 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libnosys.a(_exit.o)
+                0x800071a4                _exit
+ .text          0x800071a8        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtend.o
+ .text          0x800071a8        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtn.o
+ *(.rodata*)
+ .rodata        0x800071a8       0x50 ./consoleUtils.o
+ .rodata        0x800071f8       0x4c ./main.o
+ .rodata        0x80007244       0x64 ./uartStdio.o
+ .rodata.str1.4
+                0x800072a8        0x4 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-impure.o)
+ .rodata._global_impure_ptr
+                0x800072ac        0x4 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-impure.o)
+                0x800072ac                _global_impure_ptr
+
+.glue_7         0x800072b0        0x0
+ .glue_7        0x00000000        0x0 linker stubs
+
+.glue_7t        0x800072b0        0x0
+ .glue_7t       0x00000000        0x0 linker stubs
+
+.vfp11_veneer   0x800072b0        0x0
+ .vfp11_veneer  0x00000000        0x0 linker stubs
+
+.v4_bx          0x800072b0        0x0
+ .v4_bx         0x00000000        0x0 linker stubs
+
+.init           0x800072b0       0x18
+ .init          0x800072b0        0xc c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crti.o
+                0x800072b0                _init
+ .init          0x800072bc        0xc c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtn.o
+
+.fini           0x800072c8       0x18
+ .fini          0x800072c8        0xc c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crti.o
+                0x800072c8                _fini
+ .fini          0x800072d4        0xc c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtn.o
+
+.iplt           0x800072e0        0x0
+ .iplt          0x00000000        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtbegin.o
+
+.eh_frame       0x800072e0        0x4
+ .eh_frame      0x800072e0        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtbegin.o
+ .eh_frame      0x800072e0        0x4 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtend.o
+
+.ARM.extab      0x800072e4        0x0
+ .ARM.extab     0x800072e4        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib/crt0.o
+
+.ARM.exidx      0x800072e4        0x8
+ .ARM.exidx     0x800072e4        0x8 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib/crt0.o
+
+.rel.dyn        0x800072ec        0x0
+ .rel.iplt      0x00000000        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtbegin.o
+
+.data           0x800072f0      0x434
+                0x800072f0                . = ALIGN (0x4)
+ *(.data*)
+ .data          0x800072f0        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crti.o
+ .data          0x800072f0        0x4 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtbegin.o
+                0x800072f0                __dso_handle
+ .data          0x800072f4        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib/crt0.o
+ .data          0x800072f4        0x0 ./ascii.o
+ .data          0x800072f4        0x0 ./consoleUtils.o
+ .data          0x800072f4        0x0 ./cpu.o
+ .data          0x800072f4        0x0 ./dmtimer.o
+ .data          0x800072f4        0x0 ./interrupt.o
+ .data          0x800072f4        0x4 ./main.o
+ .data          0x800072f8        0x0 ./startup_ARMCA8.o
+ .data          0x800072f8        0x0 ./uart.o
+ .data          0x800072f8        0x0 ./uartConsole.o
+ .data          0x800072f8        0x0 ./uartStdio.o
+ .data          0x800072f8        0x0 ./uart_irda_cir.o
+ .data          0x800072f8        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-exit.o)
+ .data          0x800072f8        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-impure.o)
+ .data.impure_data
+                0x800072f8      0x428 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-impure.o)
+ .data._impure_ptr
+                0x80007720        0x4 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-impure.o)
+                0x80007720                _impure_ptr
+ .data          0x80007724        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-init.o)
+ .data          0x80007724        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-memset.o)
+ .data          0x80007724        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-__call_atexit.o)
+ .data          0x80007724        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-atexit.o)
+ .data          0x80007724        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-fini.o)
+ .data          0x80007724        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-__atexit.o)
+ .data          0x80007724        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4\libgcc.a(_udivsi3.o)
+ .data          0x80007724        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4\libgcc.a(_dvmd_tls.o)
+ .data          0x80007724        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libnosys.a(_exit.o)
+ .data          0x80007724        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtend.o
+ .data          0x80007724        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtn.o
+
+.init_array     0x80007724        0x4
+ .init_array    0x80007724        0x4 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtbegin.o
+
+.fini_array     0x80007728        0x4
+ .fini_array    0x80007728        0x4 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtbegin.o
+
+.jcr            0x8000772c        0x4
+ .jcr           0x8000772c        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtbegin.o
+ .jcr           0x8000772c        0x4 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtend.o
+
+.igot.plt       0x80007730        0x0
+ .igot.plt      0x00000000        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtbegin.o
+
+.init_array.00000
+                0x80007730        0x4
+ .init_array.00000
+                0x80007730        0x4 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-__call_atexit.o)
+
+.bss            0x80007734      0x224
+                0x80007734                . = ALIGN (0x4)
+                0x80007734                __bss_start__ = .
+ *(.bss*)
+ .bss           0x80007734        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crti.o
+ .bss           0x80007734       0x1c c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtbegin.o
+ .bss           0x80007750        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib/crt0.o
+ .bss           0x80007750        0x0 ./ascii.o
+ .bss           0x80007750        0x1 ./consoleUtils.o
+ .bss           0x80007751        0x0 ./cpu.o
+ .bss           0x80007751        0x0 ./dmtimer.o
+ .bss           0x80007751        0x0 ./interrupt.o
+ *fill*         0x80007751        0x3 
+ .bss           0x80007754        0x4 ./main.o
+ .bss           0x80007758        0x0 ./startup_ARMCA8.o
+ .bss           0x80007758        0x0 ./uart.o
+ .bss           0x80007758        0x0 ./uartConsole.o
+ .bss           0x80007758        0x0 ./uartStdio.o
+ .bss           0x80007758        0x0 ./uart_irda_cir.o
+ .bss           0x80007758        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-exit.o)
+ .bss           0x80007758        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-impure.o)
+ .bss           0x80007758        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-init.o)
+ .bss           0x80007758        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-memset.o)
+ .bss           0x80007758        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-__call_atexit.o)
+ .bss           0x80007758        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-atexit.o)
+ .bss           0x80007758        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-fini.o)
+ .bss           0x80007758        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-__atexit.o)
+ .bss           0x80007758        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4\libgcc.a(_udivsi3.o)
+ .bss           0x80007758        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4\libgcc.a(_dvmd_tls.o)
+ .bss           0x80007758        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libnosys.a(_exit.o)
+ .bss           0x80007758        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtend.o
+ .bss           0x80007758        0x0 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtn.o
+ *(COMMON)
+ COMMON         0x80007758      0x200 ./interrupt.o
+                0x80007758                fnRAMVectors
+                0x80007958                __bss_end__ = .
+
+.heap           0x80007958      0x800
+                0x80007958                . = ALIGN (0x4)
+                0x80007958                __end__ = .
+                0x80007958                end = __end__
+                0x80007958                __HeapBase = __end__
+ *(.heap*)
+                0x80008158                . = (. + 0x800)
+ *fill*         0x80007958      0x800 
+                0x80008158                __HeapLimit = .
+
+.stack          0x80008158  0x7fffff8
+                0x80008158                . = ALIGN (0x4)
+                0x80008158                __StackLimit = .
+ *(.stack*)
+                0x88008150                . = (. + 0x7fffff8)
+ *fill*         0x80008158  0x7fffff8 
+                0x88008150                __StackTop = .
+                0x88008150                __stack = __StackTop
+START GROUP
+LOAD c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a
+LOAD c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4\libgcc.a
+LOAD c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libnosys.a
+END GROUP
+START GROUP
+LOAD c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4\libgcc.a
+LOAD c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libg.a
+LOAD c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a
+END GROUP
+LOAD c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtend.o
+LOAD c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtn.o
+OUTPUT(TimerTest.out elf32-littlearm)
+
+.ARM.attributes
+                0x00000000       0x33
+ .ARM.attributes
+                0x00000000       0x16 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crti.o
+ .ARM.attributes
+                0x00000016       0x30 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtbegin.o
+ .ARM.attributes
+                0x00000046       0x14 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib/crt0.o
+ .ARM.attributes
+                0x0000005a       0x37 ./ascii.o
+ .ARM.attributes
+                0x00000091       0x37 ./consoleUtils.o
+ .ARM.attributes
+                0x000000c8       0x37 ./cpu.o
+ .ARM.attributes
+                0x000000ff       0x37 ./dmtimer.o
+ .ARM.attributes
+                0x00000136       0x37 ./interrupt.o
+ .ARM.attributes
+                0x0000016d       0x37 ./main.o
+ .ARM.attributes
+                0x000001a4       0x1f ./startup_ARMCA8.o
+ .ARM.attributes
+                0x000001c3       0x37 ./uart.o
+ .ARM.attributes
+                0x000001fa       0x37 ./uartConsole.o
+ .ARM.attributes
+                0x00000231       0x37 ./uartStdio.o
+ .ARM.attributes
+                0x00000268       0x37 ./uart_irda_cir.o
+ .ARM.attributes
+                0x0000029f       0x30 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-exit.o)
+ .ARM.attributes
+                0x000002cf       0x30 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-impure.o)
+ .ARM.attributes
+                0x000002ff       0x30 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-init.o)
+ .ARM.attributes
+                0x0000032f       0x30 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-memset.o)
+ .ARM.attributes
+                0x0000035f       0x30 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-__call_atexit.o)
+ .ARM.attributes
+                0x0000038f       0x30 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-atexit.o)
+ .ARM.attributes
+                0x000003bf       0x30 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-fini.o)
+ .ARM.attributes
+                0x000003ef       0x30 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-__atexit.o)
+ .ARM.attributes
+                0x0000041f       0x18 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4\libgcc.a(_udivsi3.o)
+ .ARM.attributes
+                0x00000437       0x18 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4\libgcc.a(_dvmd_tls.o)
+ .ARM.attributes
+                0x0000044f       0x30 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libnosys.a(_exit.o)
+ .ARM.attributes
+                0x0000047f       0x30 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtend.o
+ .ARM.attributes
+                0x000004af       0x18 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/crtn.o
+
+.comment        0x00000000       0x70
+ .comment       0x00000000       0x70 ./ascii.o
+                                 0x71 (size before relaxing)
+ .comment       0x00000000       0x71 ./consoleUtils.o
+ .comment       0x00000000       0x71 ./cpu.o
+ .comment       0x00000000       0x71 ./dmtimer.o
+ .comment       0x00000000       0x71 ./interrupt.o
+ .comment       0x00000000       0x71 ./main.o
+ .comment       0x00000000       0x71 ./uart.o
+ .comment       0x00000000       0x71 ./uartConsole.o
+ .comment       0x00000000       0x71 ./uartStdio.o
+ .comment       0x00000000       0x71 ./uart_irda_cir.o
+
+.debug_info     0x00000000     0x2c36
+ .debug_info    0x00000000      0x273 ./ascii.o
+ .debug_info    0x00000273      0x27c ./consoleUtils.o
+ .debug_info    0x000004ef       0xab ./cpu.o
+ .debug_info    0x0000059a      0x574 ./dmtimer.o
+ .debug_info    0x00000b0e      0x40e ./interrupt.o
+ .debug_info    0x00000f1c       0xc9 ./main.o
+ .debug_info    0x00000fe5       0x6a ./startup_ARMCA8.o
+ .debug_info    0x0000104f       0x74 ./uart.o
+ .debug_info    0x000010c3      0x140 ./uartConsole.o
+ .debug_info    0x00001203      0x66a ./uartStdio.o
+ .debug_info    0x0000186d     0x13c9 ./uart_irda_cir.o
+
+.debug_abbrev   0x00000000      0x82e
+ .debug_abbrev  0x00000000       0xaa ./ascii.o
+ .debug_abbrev  0x000000aa      0x145 ./consoleUtils.o
+ .debug_abbrev  0x000001ef       0x29 ./cpu.o
+ .debug_abbrev  0x00000218       0xf7 ./dmtimer.o
+ .debug_abbrev  0x0000030f      0x140 ./interrupt.o
+ .debug_abbrev  0x0000044f       0x7f ./main.o
+ .debug_abbrev  0x000004ce       0x14 ./startup_ARMCA8.o
+ .debug_abbrev  0x000004e2       0x5a ./uart.o
+ .debug_abbrev  0x0000053c       0x95 ./uartConsole.o
+ .debug_abbrev  0x000005d1      0x172 ./uartStdio.o
+ .debug_abbrev  0x00000743       0xeb ./uart_irda_cir.o
+
+.debug_aranges  0x00000000      0x160
+ .debug_aranges
+                0x00000000       0x20 ./ascii.o
+ .debug_aranges
+                0x00000020       0x20 ./consoleUtils.o
+ .debug_aranges
+                0x00000040       0x20 ./cpu.o
+ .debug_aranges
+                0x00000060       0x20 ./dmtimer.o
+ .debug_aranges
+                0x00000080       0x20 ./interrupt.o
+ .debug_aranges
+                0x000000a0       0x20 ./main.o
+ .debug_aranges
+                0x000000c0       0x20 ./startup_ARMCA8.o
+ .debug_aranges
+                0x000000e0       0x20 ./uart.o
+ .debug_aranges
+                0x00000100       0x20 ./uartConsole.o
+ .debug_aranges
+                0x00000120       0x20 ./uartStdio.o
+ .debug_aranges
+                0x00000140       0x20 ./uart_irda_cir.o
+
+.debug_line     0x00000000      0xd7b
+ .debug_line    0x00000000      0x107 ./ascii.o
+ .debug_line    0x00000107      0x11b ./consoleUtils.o
+ .debug_line    0x00000222       0x51 ./cpu.o
+ .debug_line    0x00000273      0x130 ./dmtimer.o
+ .debug_line    0x000003a3       0xf4 ./interrupt.o
+ .debug_line    0x00000497       0xa6 ./main.o
+ .debug_line    0x0000053d       0x76 ./startup_ARMCA8.o
+ .debug_line    0x000005b3       0x8f ./uart.o
+ .debug_line    0x00000642       0x68 ./uartConsole.o
+ .debug_line    0x000006aa      0x383 ./uartStdio.o
+ .debug_line    0x00000a2d      0x34e ./uart_irda_cir.o
+
+.debug_str      0x00000000     0x1422
+ .debug_str     0x00000000      0x1b1 ./ascii.o
+                                0x1be (size before relaxing)
+ .debug_str     0x000001b1      0x19a ./consoleUtils.o
+                                0x2b7 (size before relaxing)
+ .debug_str     0x0000034b       0x67 ./cpu.o
+                                0x130 (size before relaxing)
+ .debug_str     0x000003b2      0x2ac ./dmtimer.o
+                                0x390 (size before relaxing)
+ .debug_str     0x0000065e      0x273 ./interrupt.o
+                                0x385 (size before relaxing)
+ .debug_str     0x000008d1       0x66 ./main.o
+                                0x153 (size before relaxing)
+ .debug_str     0x00000937       0x3b ./uart.o
+                                0x128 (size before relaxing)
+ .debug_str     0x00000972       0xb5 ./uartConsole.o
+                                0x1a2 (size before relaxing)
+ .debug_str     0x00000a27      0x199 ./uartStdio.o
+                                0x2d4 (size before relaxing)
+ .debug_str     0x00000bc0      0x862 ./uart_irda_cir.o
+                                0x989 (size before relaxing)
+
+.debug_frame    0x00000000     0x147c
+ .debug_frame   0x00000000       0xb0 ./ascii.o
+ .debug_frame   0x000000b0      0x108 ./consoleUtils.o
+ .debug_frame   0x000001b8       0xb8 ./cpu.o
+ .debug_frame   0x00000270      0x2b4 ./dmtimer.o
+ .debug_frame   0x00000524      0x310 ./interrupt.o
+ .debug_frame   0x00000834       0x98 ./main.o
+ .debug_frame   0x000008cc       0x40 ./uart.o
+ .debug_frame   0x0000090c       0xb8 ./uartConsole.o
+ .debug_frame   0x000009c4      0x1ac ./uartStdio.o
+ .debug_frame   0x00000b70      0x778 ./uart_irda_cir.o
+ .debug_frame   0x000012e8       0x28 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-exit.o)
+ .debug_frame   0x00001310       0x2c c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-init.o)
+ .debug_frame   0x0000133c       0x2c c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-memset.o)
+ .debug_frame   0x00001368       0x50 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-__call_atexit.o)
+ .debug_frame   0x000013b8       0x28 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-atexit.o)
+ .debug_frame   0x000013e0       0x2c c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-fini.o)
+ .debug_frame   0x0000140c       0x30 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libc.a(lib_a-__atexit.o)
+ .debug_frame   0x0000143c       0x20 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4\libgcc.a(_udivsi3.o)
+ .debug_frame   0x0000145c       0x20 c:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8.4/../../../../arm-none-eabi/lib\libnosys.a(_exit.o)

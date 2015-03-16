@@ -1,0 +1,1 @@
+"./ascii.o" "./consoleUtils.o" "./cpu.o" "./dmtimer.o" "./interrupt.o" "./main.o" "./startup_ARMCA8.o" "./uart.o" "./uartConsole.o" "./uartStdio.o" "./uart_irda_cir.o" -Wl,-T"../AM335x.lds" -Wl,--start-group -l"c" -l"gcc" -l"nosys" -Wl,--end-group 
