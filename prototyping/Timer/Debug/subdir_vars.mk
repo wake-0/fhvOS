@@ -6,6 +6,9 @@
 CMD_SRCS += \
 ../AM335x.cmd 
 
+ASM_SRCS += \
+../supervisor.asm 
+
 C_SRCS += \
 ../ascii.c \
 ../consoleUtils.c \
@@ -25,10 +28,14 @@ OBJS += \
 ./dmtimer.obj \
 ./interrupt.obj \
 ./main.obj \
+./supervisor.obj \
 ./uart.obj \
 ./uartConsole.obj \
 ./uartStdio.obj \
 ./uart_irda_cir.obj 
+
+ASM_DEPS += \
+./supervisor.pp 
 
 C_DEPS += \
 ./ascii.pp \
@@ -61,10 +68,14 @@ OBJS__QUOTED += \
 "dmtimer.obj" \
 "interrupt.obj" \
 "main.obj" \
+"supervisor.obj" \
 "uart.obj" \
 "uartConsole.obj" \
 "uartStdio.obj" \
 "uart_irda_cir.obj" 
+
+ASM_DEPS__QUOTED += \
+"supervisor.pp" 
 
 C_SRCS__QUOTED += \
 "../ascii.c" \
@@ -77,5 +88,8 @@ C_SRCS__QUOTED += \
 "../uartConsole.c" \
 "../uartStdio.c" \
 "../uart_irda_cir.c" 
+
+ASM_SRCS__QUOTED += \
+"../supervisor.asm" 
 
 

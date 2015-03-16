@@ -77,6 +77,38 @@
 #define INTC_PENDING_FIQ(n) (0x9c + ((n) * 0x20))
 #define INTC_ILR(n)  (0x100 + ((n) * 0x04))
 
+#define INTC_MIR0						(0x84)
+#define INTC_MIR_CLEAR0					(0x88)
+#define INTC_MIR_SET0					(0x8C)
+#define INTC_ISR_SET0					(0x90)
+#define INTC_ISR_CLEAR0 				(0x94)
+#define INTC_PENDING_IRQ0				(0x98)
+#define INTC_PENDING_FIQ0				(0x9C)
+#define INTC_ITR1						(0xA0)
+#define INTC_MIR1						(0xA4)
+#define INTC_MIR_CLEAR1					(0xA8)
+#define INTC_MIR_SET1					(0xAC)
+#define INTC_ISR_SET1					(0xB0)
+#define INTC_ISR_CLEAR1 				(0xB4)
+#define INTC_PENDING_IRQ1				(0xB8)
+#define INTC_PENDING_FIQ1				(0xBC)
+#define INT_ITR2						(0xC0)
+#define INTC_MIR2						(0xC4)
+#define INTC_MIR_CLEAR2					(0xC8)
+#define INTC_MIR_SET2					(0xCC)
+#define INTC_ISR_SET2					(0xD0)
+#define INTC_ISR_CLEAR2 				(0xD4)
+#define INTC_PENDING_IRQ2				(0xD8)
+#define INTC_PENDING_FIQ2				(0xDC)
+#define INTC_ITR3						(0xE0)
+#define INTC_MIR3						(0xE4)
+#define INTC_MIR_CLEAR3					(0xE8)
+#define INTC_MIR_SET3					(0xEC)
+#define INTC_ISR_SET3					(0xF0)
+#define INTC_ISR_CLEAR3 				(0xF4)
+#define INTC_PENDING_IRQ3				(0xF8)
+#define INTC_PENDING_FIQ3				(0xFC)
+
 /**************************************************************************\
 * Field Definition Macros
 \**************************************************************************/
@@ -89,7 +121,7 @@
 #define INTC_SYSCONFIG_SOFTRESET    (0x00000002u)
 #define INTC_SYSCONFIG_SOFTRESET_SHIFT  (0x00000001u)
 
-#define INTC_SYSCONFIG_AUTOIDLE    (0x00000001u)
+
 #define INTC_SYSCONFIG_AUTOIDLE_SHIFT  (0x00000000u)
 
 /* SYSSTATUS */
@@ -283,5 +315,16 @@
 #define INTC_ILR_FIQNIRQ    (0x00000001u)
 #define INTC_ILR_FIQNIRQ_SHIFT  (0x00000000u)
 
-
+#define INTC_MIR_CLEAR_BITMASK			(0x0)
+#define INTC_MIR_SET_BITMASK			(0x1)
+#define INT_MODE_IRQ					(0x0)
+#define INT_MODE_FIQ					(0x1)
+#define INTC_HIGHEST_PRIORITY			(0x0)
+#define INTC_LOWEST_PRIORITY			(0x7F)
+#define INTC_PRIORITY_DISABLED			(0xFF)
+#define INTC_IDLE_SYNCFREE				(0x0)
+#define INTC_IDLE_SYNCAUTO				(0x1)
+#define INTC_IDLE_FUNCAUTO				(0x0)
+#define INTC_IDLE_FUNCFREE				(0x1)
+#define INTC_IDLE_SUNCAUTO_FUNCFREE		(0x3)
 #endif

@@ -46,9 +46,6 @@
 #include "../am335x/hw_types.h"
 #include "../am335x/soc_AM335x.h"
 #include "../cpu/cpu.h"
-#include "../platform/platform.h"
-
-#include "../platform/platform.h"
 
 /******************************************************************************
 **                INTERNAL MACRO DEFINITIONS
@@ -56,6 +53,8 @@
 #define REG_IDX_SHIFT                  (0x05)
 #define REG_BIT_MASK                   (0x1F)
 #define NUM_INTERRUPTS                 (128u)
+#define TRUE    1
+#define FALSE   0
 
 /**************** *************************************************************
 **                 STATIC VARIABLE DEFINITIONS
@@ -70,6 +69,49 @@ static void IntDefaultHandler(void);
 /******************************************************************************
 **                     API FUNCTION DEFINITIONS
 ******************************************************************************/
+
+
+void setIntControllerAutoIdle()
+{
+	HWREG(SOC_AINTC_REGS + INTC_SYSCONFIG) = INTC_SYSCONFIG_AUTOIDLE;
+
+	while (!(HWREG(SOC_AINTC_REGS + INTC_SYSCONFIG) & INTC_SYSCONFIG_AUTOIDLE))
+			;
+}
+
+void setIntPriorityAndMode(int intControllerILR, unsigned int intPriority, unsigned int intMode)
+{
+
+	HWREG(SOC_AINTC_REGS + intControllerILR) = (intPriority << 2) + intMode;
+
+	while(!(HWREG(SOC_AINTC_REGS + intControllerILR) & ((intPriority << 2) + intMode)))
+		;
+}
+
+void clearInterruptMask(unsigned int intcMirClearRegister)
+{
+	HWREG(SOC_AINTC_REGS + intcMirClearRegister) = INTC_MIR_CLEAR_BITMASK;
+
+	while(!(HWREG(SOC_AINTC_REGS + intcMirClearRegister) & INTC_MIR_CLEAR_BITMASK))
+		;
+}
+
+void setInterruptMask(unsigned int intcMirSetRegister)
+{
+	HWREG(SOC_AINTC_REGS + intcMirSetRegister) = INTC_MIR_SET_BITMASK;
+
+	while(!(HWREG(SOC_AINTC_REGS + intcMirSetRegister) & INTC_MIR_SET_BITMASK))
+		;
+}
+
+void intcIdleSettings(unsigned int idleMode)
+{
+	HWREG(SOC_AINTC_REGS + INTC_IDLE) = idleMode;
+
+	while(!(HWREG(SOC_AINTC_REGS + INTC_IDLE) & idleMode))
+			;
+}
+
 
 /**
  * The Default Interrupt Handler.

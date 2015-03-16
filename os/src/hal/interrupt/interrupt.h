@@ -215,6 +215,16 @@ extern unsigned int IntRawStatusGet(unsigned int intrNum);
 extern unsigned int IntPendingIrqMaskedStatusGet(unsigned int intrNum);
 extern unsigned int IntPendingFiqMaskedStatusGet(unsigned int intrNum);
 
+
+extern void clearInterruptMask(unsigned int intcMirClearRegister);
+extern void setInterruptMask(unsigned int intcMirSetRegister);
+extern void setIntPriorityAndMode(int intcILR, unsigned int intPriority, unsigned int intMode);
+extern void intcIdleSettings(unsigned int idleMode);
+extern void setIntControllerAutoIdle();
+
+
+
+
 #ifdef __cplusplus
 }
 #endif

@@ -13,6 +13,7 @@ ORDERED_OBJS += \
 "./dmtimer.obj" \
 "./interrupt.obj" \
 "./main.obj" \
+"./supervisor.obj" \
 "./uart.obj" \
 "./uartConsole.obj" \
 "./uartStdio.obj" \
@@ -156,7 +157,8 @@ Timer.hex: $(EXE_OUTPUTS)
 clean:
 	-$(RM) $(EXE_OUTPUTS__QUOTED)$(BIN_OUTPUTS__QUOTED)
 	-$(RM) "ascii.pp" "consoleUtils.pp" "cpu.pp" "dmtimer.pp" "interrupt.pp" "main.pp" "uart.pp" "uartConsole.pp" "uartStdio.pp" "uart_irda_cir.pp" 
-	-$(RM) "ascii.obj" "consoleUtils.obj" "cpu.obj" "dmtimer.obj" "interrupt.obj" "main.obj" "uart.obj" "uartConsole.obj" "uartStdio.obj" "uart_irda_cir.obj" 
+	-$(RM) "ascii.obj" "consoleUtils.obj" "cpu.obj" "dmtimer.obj" "interrupt.obj" "main.obj" "supervisor.obj" "uart.obj" "uartConsole.obj" "uartStdio.obj" "uart_irda_cir.obj" 
+	-$(RM) "supervisor.pp" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

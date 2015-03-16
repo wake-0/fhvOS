@@ -1,0 +1,192 @@
+******************************************************************************
+                  TI ARM Linker PC v5.2.2                      
+******************************************************************************
+>> Linked Mon Mar 16 18:30:37 2015
+
+OUTPUT FILE NAME:   <Timer.out>
+ENTRY POINT SYMBOL: "_c_int00"  address: 40300e44
+
+
+MEMORY CONFIGURATION
+
+         name            origin    length      used     unused   attr    fill
+----------------------  --------  ---------  --------  --------  ----  --------
+  SRAM                  402f0400   0000fc00  00000000  0000fc00  RWIX
+  L3OCMC0               40300000   00010000  00000f38  0000f0c8  RWIX
+  M3SHUMEM              44d00000   00004000  00000000  00004000  RWIX
+  M3SHDMEM              44d80000   00002000  00000000  00002000  RWIX
+  DDR0                  80000000   40000000  00000000  40000000  RWIX
+
+
+SEGMENT ALLOCATION MAP
+
+run origin  load origin   length   init length attrs members
+----------  ----------- ---------- ----------- ----- -------
+40300000    40300000    00000800   00000000    rw-
+  40300000    40300000    00000800   00000000    rw- .stack
+40300800    40300800    00000700   00000700    r-x
+  40300800    40300800    00000700   00000700    r-x .text
+40300f00    40300f00    00000014   00000000    rw-
+  40300f00    40300f00    00000014   00000000    rw- .data
+40300f18    40300f18    00000024   00000024    r--
+  40300f18    40300f18    00000024   00000024    r-- .cinit
+
+
+SECTION ALLOCATION MAP
+
+ output                                  attributes/
+section   page    origin      length       input sections
+--------  ----  ----------  ----------   ----------------
+.stack     0    40300000    00000800     UNINITIALIZED
+                  40300000    00000800     --HOLE--
+
+.text      0    40300800    00000700     
+                  40300800    000001d4     main.obj (.text)
+                  403009d4    00000180     rtsv7A8_A_le_eabi.lib : memcpy32.obj (.text)
+                  40300b54    000000b0                           : memset32.obj (.text)
+                  40300c04    000000a4                           : autoinit.obj (.text)
+                  40300ca8    000000a0                           : copy_decompress_rle.obj (.text)
+                  40300d48    00000084                           : cpy_tbl.obj (.text)
+                  40300dcc    00000078                           : exit.obj (.text)
+                  40300e44    00000054                           : boot.obj (.text)
+                  40300e98    00000024                           : _lock.obj (.text)
+                  40300ebc    00000020                           : args_main.obj (.text)
+                  40300edc    00000014                           : copy_decompress_none.obj (.text:decompress:none)
+                  40300ef0    00000008                           : copy_decompress_rle.obj (.text:decompress:rle24)
+                  40300ef8    00000008                           : pre_init.obj (.text)
+
+.data      0    40300f00    00000014     UNINITIALIZED
+                  40300f00    00000008     rtsv7A8_A_le_eabi.lib : _lock.obj (.data)
+                  40300f08    00000008                           : exit.obj (.data)
+                  40300f10    00000004                           : stkdepth_vars.obj (.data)
+
+.cinit     0    40300f18    00000024     
+                  40300f18    00000011     (.cinit..data.load) [load image, compression = rle]
+                  40300f29    00000003     --HOLE-- [fill = 0]
+                  40300f2c    00000008     (__TI_handler_table)
+                  40300f34    00000008     (__TI_cinit_table)
+
+.init_array 
+*          0    40300000    00000000     UNINITIALIZED
+
+.TI.persistent 
+*          0    40300f00    00000000     UNINITIALIZED
+
+
+LINKER GENERATED COPY TABLES
+
+__TI_cinit_table @ 40300f34 records: 1, size/record: 8, table size: 8
+	.data: load addr=40300f18, load size=00000011 bytes, run addr=40300f00, run size=00000014 bytes, compression=rle
+
+
+LINKER GENERATED HANDLER TABLE
+
+__TI_handler_table @ 40300f2c records: 2, size/record: 4, table size: 8
+	index: 0, handler: __TI_decompress_rle24
+	index: 1, handler: __TI_decompress_none
+
+
+GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name 
+
+address   name                    
+-------   ----                    
+40300dcc  C$$EXIT                 
+40300824  DMTimer2ModuleClkConfig 
+UNDEFED   SHT$$INIT_ARRAY$$Base   
+UNDEFED   SHT$$INIT_ARRAY$$Limit  
+40300800  __STACK_END             
+00000800  __STACK_SIZE            
+40300f34  __TI_CINIT_Base         
+40300f3c  __TI_CINIT_Limit        
+40300f2c  __TI_Handler_Table_Base 
+40300f34  __TI_Handler_Table_Limit
+40300c04  __TI_auto_init          
+40300f08  __TI_cleanup_ptr        
+40300edc  __TI_decompress_none    
+40300ef0  __TI_decompress_rle24   
+40300f0c  __TI_dtors_ptr          
+40300f18  __TI_static_base__      
+40300b54  __aeabi_memclr          
+40300b54  __aeabi_memclr4         
+40300b54  __aeabi_memclr8         
+403009d4  __aeabi_memcpy          
+403009d4  __aeabi_memcpy4         
+403009d4  __aeabi_memcpy8         
+40300b58  __aeabi_memset          
+40300b58  __aeabi_memset4         
+40300b58  __aeabi_memset8         
+ffffffff  __binit__               
+ffffffff  __c_args__              
+40300000  __stack                 
+40300ebc  _args_main              
+40300e44  _c_int00                
+40300f00  _lock                   
+40300eb0  _nop                    
+40300ea4  _register_lock          
+40300e98  _register_unlock        
+40300ef8  _system_pre_init        
+40300f04  _unlock                 
+40300dd4  abort                   
+ffffffff  binit                   
+40300d48  copy_in                 
+40300814  cpuIrqDisable           
+40300804  cpuIrqEnable            
+40300de0  exit                    
+40300800  main                    
+40300f10  main_func_sp            
+403009d4  memcpy                  
+40300b64  memset                  
+
+
+GLOBAL SYMBOLS: SORTED BY Symbol Address 
+
+address   name                    
+-------   ----                    
+00000800  __STACK_SIZE            
+40300000  __stack                 
+40300800  __STACK_END             
+40300800  main                    
+40300804  cpuIrqEnable            
+40300814  cpuIrqDisable           
+40300824  DMTimer2ModuleClkConfig 
+403009d4  __aeabi_memcpy          
+403009d4  __aeabi_memcpy4         
+403009d4  __aeabi_memcpy8         
+403009d4  memcpy                  
+40300b54  __aeabi_memclr          
+40300b54  __aeabi_memclr4         
+40300b54  __aeabi_memclr8         
+40300b58  __aeabi_memset          
+40300b58  __aeabi_memset4         
+40300b58  __aeabi_memset8         
+40300b64  memset                  
+40300c04  __TI_auto_init          
+40300d48  copy_in                 
+40300dcc  C$$EXIT                 
+40300dd4  abort                   
+40300de0  exit                    
+40300e44  _c_int00                
+40300e98  _register_unlock        
+40300ea4  _register_lock          
+40300eb0  _nop                    
+40300ebc  _args_main              
+40300edc  __TI_decompress_none    
+40300ef0  __TI_decompress_rle24   
+40300ef8  _system_pre_init        
+40300f00  _lock                   
+40300f04  _unlock                 
+40300f08  __TI_cleanup_ptr        
+40300f0c  __TI_dtors_ptr          
+40300f10  main_func_sp            
+40300f18  __TI_static_base__      
+40300f2c  __TI_Handler_Table_Base 
+40300f34  __TI_CINIT_Base         
+40300f34  __TI_Handler_Table_Limit
+40300f3c  __TI_CINIT_Limit        
+ffffffff  __binit__               
+ffffffff  __c_args__              
+ffffffff  binit                   
+UNDEFED   SHT$$INIT_ARRAY$$Base   
+UNDEFED   SHT$$INIT_ARRAY$$Limit  
+
+[46 symbols]
