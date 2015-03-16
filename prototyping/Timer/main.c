@@ -72,58 +72,40 @@ static void DMTimerSetUp(void);
 static void DMTimerIsr(void);
 static volatile unsigned int cntValue = 10;
 static volatile unsigned int flagIsr = 0;
+void cpuIrqEnable(void);
+void cpuIrqDisable(void);
 
-
+// MPU_INTC_FCLK			Interrupt Controller Functional Clock
 
 int main(void) {
 
-	/* This function will enable clocks for the DMTimer2 instance */
-	DMTimer2ModuleClkConfig();
-
-	/* Initialize the UART console */
-	ConsoleUtilsInit();
-
-	/* Select the console type based on compile time check */
-	ConsoleUtilsSetType(CONSOLE_UART);
-
-	/* Enable IRQ in CPSR */
-	IntMasterIRQEnable();
-
-	/* Register DMTimer2 interrupts on to AINTC */
-	DMTimerAintcConfigure();
-
-	/* Perform the necessary configurations for DMTimer */
-	DMTimerSetUp();
-
-	/* Enable the DMTimer interrupts */
-	DMTimerIntEnable(SOC_DMTIMER_2_REGS, DMTIMER_INT_OVF_EN_FLAG);
-
-	ConsoleUtilsPrintf("Tencounter: ");
-
-	/* Start the DMTimer */
-	DMTimerEnable(SOC_DMTIMER_2_REGS);
-
-	while(cntValue)
+	while(1)
 	{
-		if(flagIsr == 1)
-		{
-			ConsoleUtilsPrintf("\b%d",(cntValue - 1));
-			cntValue--;
-			flagIsr = 0;
-		}
-		else
-			ConsoleUtilsPrintf("waiting\n");
+
 	}
-
-	// Stop the DMTimer
-	DMTimerDisable(SOC_DMTIMER_2_REGS);
-
-	PRINT_STATUS(S_PASS);
-
-	// Halt the program
-	while(1);
 }
 
+
+void cpuIrqEnable(void)
+{
+    /* Enable IRQ in CPSR */
+    asm("    mrs     r0, CPSR\n\t"
+        "    bic     r0, r0, #0x80\n\t"
+        "    msr     CPSR_c, r0");
+}
+
+/*
+**
+** Wrapper function for the FIQ disable function
+**
+*/
+void cpuIrqDisable(void)
+{
+    /* Disable FIQ in CPSR */
+    asm("    mrs     r0, CPSR\n\t"
+        "    orr     r0, r0, #0x40\n\t"
+        "    msr     CPSR_c, r0");
+}
 
 /*
 ** Do the necessary DMTimer configurations on to AINTC.
@@ -162,7 +144,8 @@ static void DMTimerSetUp(void)
 ** DMTimer interrupt service routine. This will send a character to serial
 ** console.
 */
-static void DMTimerIsr(void)
+#pragma INTERRUPT(DMTimerIsr, UDEF)
+interrupt void DMTimerIsr(void)
 {
     /* Disable the DMTimer interrupts */
     DMTimerIntDisable(SOC_DMTIMER_2_REGS, DMTIMER_INT_OVF_EN_FLAG);

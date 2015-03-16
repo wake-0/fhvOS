@@ -159,6 +159,9 @@ Loop:
 
 @ Enter the main function. The execution still happens in system mode.
 @
+
+		CPS		0x13						@ change to supervisor mode
+
 @Enter_main:
          LDR   r10,=main
          MOV   lr,pc                           @ Dummy return from main

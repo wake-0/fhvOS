@@ -67,63 +67,178 @@
             if(HWREG(baseAdd + DMTIMER_TSICR) & DMTIMER_TSICR_POSTED)\
             while((reg & DMTimerWritePostedStatusGet(baseAdd)));
 
+
+
+// registers
+#define INTC_MIR0						(0x84)
+#define INTC_MIR_CLEAR0					(0x88)
+#define INTC_MIR_SET0					(0x8C)
+#define INTC_ISR_SET0					(0x90)
+#define INTC_ISR_CLEAR0 				(0x94)
+#define INTC_PENDING_IRQ0				(0x98)
+#define INTC_PENDING_FIQ0				(0x9C)
+#define INTC_ITR1						(0xA0)
+#define INTC_MIR1						(0xA4)
+#define INTC_MIR_CLEAR1					(0xA8)
+#define INTC_MIR_SET1					(0xAC)
+#define INTC_ISR_SET1					(0xB0)
+#define INTC_ISR_CLEAR1 				(0xB4)
+#define INTC_PENDING_IRQ1				(0xB8)
+#define INTC_PENDING_FIQ1				(0xBC)
+#define INT_ITR2						(0xC0)
+#define INTC_MIR2						(0xC4)
+#define INTC_MIR_CLEAR2					(0xC8)
+#define INTC_MIR_SET2					(0xCC)
+#define INTC_ISR_SET2					(0xD0)
+#define INTC_ISR_CLEAR2 				(0xD4)
+#define INTC_PENDING_IRQ2				(0xD8)
+#define INTC_PENDING_FIQ2				(0xDC)
+#define INTC_ITR3						(0xE0)
+#define INTC_MIR3						(0xE4)
+#define INTC_MIR_CLEAR3					(0xE8)
+#define INTC_MIR_SET3					(0xEC)
+#define INTC_ISR_SET3					(0xF0)
+#define INTC_ISR_CLEAR3 				(0xF4)
+#define INTC_PENDING_IRQ3				(0xF8)
+#define INTC_PENDING_FIQ3				(0xFC)
+#define INTC_PROTECTION					(0x4C)
+
+// commands
+#define INTC_MIR_CLEAR_BITMASK			(0x0)
+#define INTC_MIR_SET_BITMASK			(0x1)
+#define INT_MODE_IRQ					(0x0)
+#define INT_MODE_FIQ					(0x1)
+#define INTC_HIGHEST_PRIORITY			(0x0)
+#define INTC_LOWEST_PRIORITY			(0x7F)
+#define INTC_PRIORITY_DISABLED			(0xFF)
+#define INTC_IDLE_SYNCFREE				(0x0)
+#define INTC_IDLE_SYNCAUTO				(0x1)
+#define INTC_IDLE_FUNCAUTO				(0x0)
+#define INTC_IDLE_FUNCFREE				(0x1)
+#define INTC_IDLE_SUNCAUTO_FUNCFREE		(0x3)
+
+void clearInterruptMask(unsigned int intcMirClearRegister);
+void setInterruptMask(unsigned int intcMirSetRegister);
+void setIntPriorityAndMode(int intcILR, unsigned int intPriority, unsigned int intMode);
+void intcIdleSettings(unsigned int idleMode);
+void setIntControllerAutoIdle();
+void setIdleSyncMode(unsigned int syncMode);
+void setIdleFuncMode(unsigned int funcMode);
+
 static void DMTimerAintcConfigure(void);
 static void DMTimerSetUp(void);
 static void DMTimerIsr(void);
 static volatile unsigned int cntValue = 10;
 static volatile unsigned int flagIsr = 0;
 
+void globalInterruptEnable(void);
 
 
 int main(void) {
 
 	/* This function will enable clocks for the DMTimer2 instance */
-	DMTimer2ModuleClkConfig();
+	    DMTimer2ModuleClkConfig();
 
-	/* Initialize the UART console */
-	//ConsoleUtilsInit();
+	    /* Initialize the UART console */
+	    ConsoleUtilsInit();
 
-	/* Select the console type based on compile time check */
-	//ConsoleUtilsSetType(CONSOLE_UART);
+	    /* Select the console type based on compile time check */
+	    ConsoleUtilsSetType(CONSOLE_UART);
 
-	/* Enable IRQ in CPSR */
-	IntMasterIRQEnable();
+	    /* Enable IRQ in CPSR */
+	    IntMasterIRQEnable();
 
-	/* Register DMTimer2 interrupts on to AINTC */
-	DMTimerAintcConfigure();
+	    /* Register DMTimer2 interrupts on to AINTC */
+	    DMTimerAintcConfigure();
 
-	/* Perform the necessary configurations for DMTimer */
-	DMTimerSetUp();
+	    /* Perform the necessary configurations for DMTimer */
+	    DMTimerSetUp();
 
-	/* Enable the DMTimer interrupts */
-	DMTimerIntEnable(SOC_DMTIMER_2_REGS, DMTIMER_INT_OVF_EN_FLAG);
+	    /* Enable the DMTimer interrupts */
+	    DMTimerIntEnable(SOC_DMTIMER_2_REGS, DMTIMER_INT_OVF_EN_FLAG);
 
-	ConsoleUtilsPrintf("Tencounter: ");
+	    ConsoleUtilsPrintf("Tencounter: ");
 
-	/* Start the DMTimer */
-	DMTimerEnable(SOC_DMTIMER_2_REGS);
+	    /* Start the DMTimer */
+	    DMTimerEnable(SOC_DMTIMER_2_REGS);
 
-	while(cntValue)
-	{
-		if(flagIsr == 1)
-		{
-			ConsoleUtilsPrintf("\b%d",(cntValue - 1));
-			cntValue--;
-			flagIsr = 0;
-		}
-		else
-			ConsoleUtilsPrintf("waiting\n");
-	}
+	    while(cntValue)
+	    {
+	        if(flagIsr == 1)
+	        {
+	            ConsoleUtilsPrintf("\b%d",(cntValue - 1));
+	            cntValue--;
+	            flagIsr = 0;
+	        }
+	    }
 
-	// Stop the DMTimer
-	DMTimerDisable(SOC_DMTIMER_2_REGS);
+	    /* Stop the DMTimer */
+	    DMTimerDisable(SOC_DMTIMER_2_REGS);
 
-	PRINT_STATUS(S_PASS);
+	    PRINT_STATUS(S_PASS);
 
-	// Halt the program
-	while(1);
+	    /* Halt the program */
+	    while(1);
 }
 
+
+
+
+
+void setIntControllerAutoIdle()
+{
+	HWREG(SOC_AINTC_REGS + INTC_SYSCONFIG) = INTC_SYSCONFIG_AUTOIDLE;
+
+	while (!(HWREG(SOC_AINTC_REGS + INTC_SYSCONFIG) & INTC_SYSCONFIG_AUTOIDLE))
+			;
+}
+
+void setIntPriorityAndMode(int intControllerILR, unsigned int intPriority, unsigned int intMode)
+{
+
+	HWREG(SOC_AINTC_REGS + intControllerILR) = (intPriority << 2) + intMode;
+
+	while(!(HWREG(SOC_AINTC_REGS + intControllerILR) & ((intPriority << 2) + intMode)))
+		;
+}
+
+void clearInterruptMask(unsigned int intcMirClearRegister)
+{
+	HWREG(SOC_AINTC_REGS + intcMirClearRegister) = INTC_MIR_CLEAR_BITMASK;
+
+	while(!(HWREG(SOC_AINTC_REGS + intcMirClearRegister) & INTC_MIR_CLEAR_BITMASK))
+		;
+}
+
+void setInterruptMask(unsigned int intcMirSetRegister)
+{
+	HWREG(SOC_AINTC_REGS + intcMirSetRegister) = INTC_MIR_SET_BITMASK;
+
+	while(!(HWREG(SOC_AINTC_REGS + intcMirSetRegister) & INTC_MIR_SET_BITMASK))
+		;
+}
+
+void intcIdleSettings(unsigned int idleMode)
+{
+	HWREG(SOC_AINTC_REGS + INTC_IDLE) = idleMode;
+
+	while(!(HWREG(SOC_AINTC_REGS + INTC_IDLE) & idleMode))
+			;
+}
+
+
+
+
+
+
+
+
+void globalInterruptEnable(void)
+{
+	__asm("    mrs     r0, CPSR\n\t"
+			"    bic     r0, r0, #0x80\n\t"
+			"    msr     CPSR_c, r0");
+}
 
 /*
 ** Do the necessary DMTimer configurations on to AINTC.
@@ -162,6 +277,7 @@ static void DMTimerSetUp(void)
 ** DMTimer interrupt service routine. This will send a character to serial
 ** console.
 */
+#pragma INTERRUPT(DMTimerIsr, UDEF)
 static void DMTimerIsr(void)
 {
     /* Disable the DMTimer interrupts */
@@ -175,6 +291,26 @@ static void DMTimerIsr(void)
     /* Enable the DMTimer interrupts */
     DMTimerIntEnable(SOC_DMTIMER_2_REGS, DMTIMER_INT_OVF_EN_FLAG);
 }
+
+/*
+#pragma INTERRUPT(udef_handler, UDEF)
+interrupt void udef_handler() {
+	printf("udef interrupt\n");
+}
+
+#pragma INTERRUPT(fiq_handler, FIQ)
+interrupt void fiq_handler() {
+	printf("fiq interrupt\n");
+}
+
+
+// Is called on any prefetch abort.
+
+#pragma INTERRUPT(pabt_handler, PABT)
+interrupt void pabt_handler() {
+	printf("pabt interrupt\n");
+}
+*/
 
 void DMTimer2ModuleClkConfig(void)
 {

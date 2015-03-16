@@ -23,6 +23,7 @@ MEMORY
     DDR0:     o = 0x80000000  l = 0x40000000  /* 1GB external DDR Bank 0 */
 }
 
+
 SECTIONS
 {
     .text          >  L3OCMC0
@@ -88,6 +89,8 @@ SECTIONS
 }
 #endif             /* M3 memory map */
 
+
+
 #ifdef PRU_CORE    /* PRU memory map */
 MEMORY
 {
@@ -98,6 +101,8 @@ MEMORY
 	PAGE 2:
       SHAREDMEM: o = 0x00010000  l = 0x00003000  /* 12kB Shared RAM */
 }
+
+
 
 SECTIONS
 {
@@ -116,4 +121,5 @@ SECTIONS
 	.args          >  PRUDMEM, PAGE 1
 }
 #endif             /* PRU memory map */
+
 

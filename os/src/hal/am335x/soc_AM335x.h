@@ -54,6 +54,18 @@ extern "C" {
 /** @brief Base address of AINTC memory mapped registers                      */
 #define SOC_AINTC_REGS                       (0x48200000)
 
+/* Registers of AINTC */
+#define INTC_SYSCONFIG						(0x10)
+#define INTC_SYSSTATUS						(0x14)
+#define INTC_IDLE 							(0x50)
+#define INTC_ILR_TINT2						(0x210)
+
+
+/* Commands for AINTC */
+#define INTC_SYSCONFIG_AUTOIDLE				(0x1)
+#define INTC_IDLE_FUNCFREE_SYNCAUTO			(0x3)
+#define INTC_IRQ_HIGHEST_PRIORITY			(0x0)
+
 /** @brief Base addresses of UART memory mapped registers                     */
 #define SOC_UART_0_REGS                      (0x44E09000)
 #define SOC_UART_1_REGS                      (0x48022000)
