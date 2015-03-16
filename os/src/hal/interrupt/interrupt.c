@@ -46,6 +46,7 @@
 #include "../am335x/hw_types.h"
 #include "../am335x/soc_AM335x.h"
 #include "../cpu/cpu.h"
+#include "../platform/platform.h"
 
 #include "../platform/platform.h"
 
