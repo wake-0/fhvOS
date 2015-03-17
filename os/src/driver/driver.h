@@ -16,9 +16,9 @@ typedef struct driver_t {
 	int (*init)(short);
 	int (*open)(short);
 	int (*close)(short);
-	int (*read)(short, char*, int);
-	int (*write)(short, char*, int*);
+	int (*read)(short, char*, int*);
+	int (*write)(short, char*, int);
 	int (*ioctl)(short, int, int, char*, int);
-} Driver;
+} driver_t;
 
 #endif /* DRIVER_DRIVER_H_ */
