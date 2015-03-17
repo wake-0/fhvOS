@@ -111,8 +111,18 @@ extern void GPIOReset(int pinNo)
 		;
 }
 
-extern void GPIOSetMux(int pin, int muxMode)
+extern void GPIOSetMux(int pin, mux_mode_t mux)
 {
+	int muxMode = -1;
+	switch (mux) {
+		case MUX_MODE_LED:
+			muxMode = 7;
+			break;
+		default:
+			break;
+	}
+	if (muxMode == -1) return; // Invalid mux mode for beaglebone
+
 	int gpio = pinMapping[pin][BEAGLE_BONE_GPIO_NO];
 	switch (gpio) {
 		case 1:
