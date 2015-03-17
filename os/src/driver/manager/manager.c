@@ -14,7 +14,7 @@
 
 static driver_t* drivers[MAX_DRIVER];
 
-extern void init()
+extern void DriverManagerInit()
 {
 	// Create all drivers
 

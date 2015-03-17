@@ -46,7 +46,7 @@ int LEDWrite (short id, char* buf, int len)
 	return DRIVER_OK;
 }
 
-int LEDRead	(short id, char* buf, int* len)
+int LEDRead	(short id, char* buf, int len)
 {
 	// TODO Implement this
 	return DRIVER_FUNCTION_NOT_SUPPORTED;
