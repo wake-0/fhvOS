@@ -8,14 +8,17 @@
 #ifndef DRIVER_DRIVER_H_
 #define DRIVER_DRIVER_H_
 
-typedef struct driver_t {
-	// TODO Add return values and parameters
-	void (*open)(void);
-	void (*close)(void);
-	void (*read)(void);
-	void (*write)(void);
+#define DRIVER_FUNCTION_NOT_SUPPORTED 	-2
+#define DRIVER_ERROR					-1
+#define DRIVER_OK						0
 
-	// TODO Add ioctl
+typedef struct driver_t {
+	int (*init)(short);
+	int (*open)(short);
+	int (*close)(short);
+	int (*read)(short, char*, int);
+	int (*write)(short, char*, int*);
+	int (*ioctl)(short, int, int, char*, int);
 } Driver;
 
 #endif /* DRIVER_DRIVER_H_ */
