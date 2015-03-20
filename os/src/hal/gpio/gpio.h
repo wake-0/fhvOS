@@ -37,7 +37,4 @@ extern void 		GPIOSetPinDirection(int pin, pin_direction_t dir);
 extern void 		GPIOSetPinValue(int pin, pin_value_t value);
 extern pin_value_t 	GPIOGetPinValue(int pin);
 
-extern int			GPIOGetLedPin(unsigned int ledNo);
-extern int			GPIOGetLedCount();
-
 #endif /* HAL_GPIO_GPIO_H_ */

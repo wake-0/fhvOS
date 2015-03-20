@@ -5,24 +5,25 @@
  *      Author: Nicolaj Hoess
  */
 
+#include <hw_led.h>
 #include "led.h"
 #include "../../hal/gpio/gpio.h"
 
 int LEDInit	(short id)
 {
-	int ledCount = GPIOGetLedCount();
+	int ledCount = BOARD_LED_COUNT;
 	if (id > ledCount - 1) return DRIVER_ERROR;
 	// Set up the GPIO pin
-	GPIOEnable(GPIOGetLedPin(id));
-	GPIOReset(GPIOGetLedPin(id));
-	GPIOSetMux(GPIOGetLedPin(id), MUX_MODE_LED);
-	GPIOSetPinDirection(GPIOGetLedPin(id), PIN_DIRECTION_OUT);
+	GPIOEnable(BOARD_LED(id));
+	GPIOReset(BOARD_LED(id));
+	GPIOSetMux(BOARD_LED(id), MUX_MODE_LED);
+	GPIOSetPinDirection(BOARD_LED(id), PIN_DIRECTION_OUT);
 	return DRIVER_OK;
 }
 
 int LEDOpen	(short id)
 {
-	int ledCount = GPIOGetLedCount();
+	int ledCount = BOARD_LED_COUNT;
 	if (id > ledCount - 1) return DRIVER_ERROR;
 	return DRIVER_OK;
 }
@@ -36,12 +37,12 @@ int LEDClose (short id)
 
 int LEDWrite (short id, char* buf, int len)
 {
-	int ledCount = GPIOGetLedCount();
+	int ledCount = BOARD_LED_COUNT;
 	if (id > ledCount - 1) return DRIVER_ERROR;
 
 	if (len != 1) return DRIVER_ERROR;
-	if (buf[0] == 1) GPIOSetPinValue(GPIOGetLedPin(id), PIN_VALUE_HIGH);
-	else if (buf[0] == 0) GPIOSetPinValue(GPIOGetLedPin(id), PIN_VALUE_LOW);
+	if (buf[0] == 1) GPIOSetPinValue(BOARD_LED(id), PIN_VALUE_HIGH);
+	else if (buf[0] == 0) GPIOSetPinValue(BOARD_LED(id), PIN_VALUE_LOW);
 	else return DRIVER_ERROR;
 	return DRIVER_OK;
 }
