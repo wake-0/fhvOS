@@ -49,6 +49,10 @@
 // TWPS
 #define DMTIMER_TWPS_W_PEND_TCLR   	(0x00000001u)
 
+// TIOCP_CFG
+#define TIOCP_CFG_SOFTRESET_DONE   (0x0u)
+#define TIOCP_CFG_SOFTRESET   (0x00000001u)
+
 // register offsets for DMTIMER1 (1MS)
 
 #define TIDR_1MS 				(0x00)						// Identification Register
