@@ -8,6 +8,8 @@
 #ifndef HAL_PLATFORM_PLATFORM_H_
 #define HAL_PLATFORM_PLATFORM_H_
 
+#include <inttypes.h>
+
 //*****************************************************************************
 //
 // Define a boolean type, and values for true and false.

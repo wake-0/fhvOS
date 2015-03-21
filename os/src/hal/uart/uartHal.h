@@ -1,12 +1,12 @@
 /*
- * uart.h
+ * uartHal.h
  *
  *  Created on: 15.03.2015
  *      Author: Kevin
  */
 
-#ifndef UART_H_
-#define UART_H_
+#ifndef UART_HAL_H_
+#define UART_HAL_H_
 
 /*
  * UART abstraction
@@ -79,8 +79,9 @@ typedef struct {
 /*
  * functions
  */
-void UARTSoftwareReset(uart_t uart);
-void UARTFIFOSettings(uart_t uart);
-void UARTSettings(uart_t uart, configuration_t config);
+void UARTHALSoftwareReset(uart_t uart);
+void UARTHALFIFOSettings(uart_t uart);
+void UARTHALSettings(uart_t uart, configuration_t config);
+void UARTHALFIFOWrite(uart_t uart, char* msg);
 
-#endif /* UART_H_ */
+#endif /* UART_HAL_H_ */

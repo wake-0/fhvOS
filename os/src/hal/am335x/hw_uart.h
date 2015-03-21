@@ -37,27 +37,33 @@
 /*
  * Bits for the UART FIFO settings
  */
+#define UART_LCR_MODE_A 		(0x80)
 #define UART_LCR_MODE_B			(0xBF)
 #define UART_LCR_ENHANCED_EN	(1 << 4)
-#define UART_LCR_MODE_A 		(0x80)
+
 #define UART_MCR_TCR_TLR		(1 << 6)
-#define UART_SCR_RX_TRIG_GRANU  (1 << 7)
+
 #define UART_SCR_TX_TRIG_GRANU  (1 << 6)
+#define UART_SCR_RX_TRIG_GRANU  (1 << 7)
+#define UART_SCR_DMA_MODE_CTL	(1 << 0)
 #define UART_SCR_DMA_MODE_0		(1 << 1)
 #define UART_SCR_DMA_MODE_1		(1 << 2)
-#define UART_SCR_DMA_MODE_CTL	(0x01)
+
 
 /*
  * Bits for the UART settings
  */
-#define UART_MODE_UART					(0x07)
+#define UART_MODE_DISABLE_UART			(0x07)
 #define UART_LCR_MODE_OPERATIONAL		(0x00)
 #define UART_IER_RHR_IT					(0x01)
-#define UART_CONFIG						(0xFF)
 #define UART_PARITY_EN					(1 << 3)
 #define UART_PARITY_TYPE_2				(1 << 5)
 #define UART_PARITY_TYPE_1				(1 << 4)
-#define UART_16X_MODE					0x00
+#define UART_16X_MODE					(0x07)
 
+/*
+ * Bits for the UART transmit
+ */
+#define UART_THR						(0x00)
 
 #endif /* HAL_AM335X_HW_UART_H_ */

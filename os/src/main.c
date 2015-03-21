@@ -1,5 +1,7 @@
 
-#include <stdio.h>
+//#include <stdio.h>
+
+#include "driver/uart/uartDriver.h"
 
 void CPUirqd1(void);
 void CPUirqe1(void);
@@ -11,7 +13,8 @@ interrupt void irq_handler(void);
 
 int main(void) {
 
-	printf("blabla\n");
+	//printf("blabla\n");
+
 	CPUirqe1();
 
 	CPUSwitchToUserMode1();
@@ -19,7 +22,8 @@ int main(void) {
 	CPUSwitchToPrivilegedMode1();
 
 	while(1)
-	{}
+	{
+	}
 }
 
 #pragma INTERRUPT(udef_handler, UDEF)
