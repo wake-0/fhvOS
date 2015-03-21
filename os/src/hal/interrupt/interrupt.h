@@ -136,6 +136,7 @@ extern "C" {
 
 
 typedef void (*intHandler_t)(void);
+typedef void (*intResetHandler_t)(void);
 
 /*****************************************************************************
 **                     API FUNCTION PROTOTYPES

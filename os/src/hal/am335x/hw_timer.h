@@ -13,7 +13,7 @@
 // base addresses
 
 #define DMTIMER0 				(0x44E05000)
-#define DMTIMER1MS				(0x44E31000)
+#define DMTIMER1_MS				(0x44E31000)
 #define DMTIMER2				(0x48040000)
 #define DMTIMER3				(0x48042000)
 #define DMTIMER4				(0x48044000)
@@ -42,6 +42,12 @@
 #define TSICR					(0x54)						// Timer Synchronous Interface Control Register
 #define TCAR2					(0x58)						// Timer Capture Register
 
+
+// TSICR
+#define DMTIMER_TSICR_POSTED   		(0x00000004u)
+
+// TWPS
+#define DMTIMER_TWPS_W_PEND_TCLR   	(0x00000001u)
 
 // register offsets for DMTIMER1 (1MS)
 
