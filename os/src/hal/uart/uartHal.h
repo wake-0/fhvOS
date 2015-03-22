@@ -62,8 +62,8 @@ typedef enum {
  * UART stopbit
  */
 typedef enum {
-	UART_STOPBIT_NONE,
-	UART_STOPBIT_ENABLED
+	UART_STOPBIT_1,
+	UART_STOPBIT_2
 } stopbit_t;
 
 /*

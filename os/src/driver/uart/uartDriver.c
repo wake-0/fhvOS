@@ -7,21 +7,19 @@
 #include "uartDriver.h"
 #include "../../hal/uart/uartHal.h"
 
-void UARTDriverInit(void)
+void UARTDriverInit(uart_t uart)
 {
-	uart_t uart = UART0;
 	UARTHALSoftwareReset(uart);
 	UARTHALFIFOSettings(uart);
 
 	configuration_t config = { UART_BAUDRATE_9600,
 							   UART_PARITY_NONE,
 							   UART_CHARLENGTH_8,
-							   UART_STOPBIT_ENABLED };
+							   UART_STOPBIT_1 };
 	UARTHALSettings(uart, config);
 }
 
-void UARTDriverWrite(char* msg)
+void UARTDriverWrite(uart_t uart, char* msg)
 {
-	uart_t uart = UART0;
 	UARTHALFIFOWrite(uart, msg);
 }

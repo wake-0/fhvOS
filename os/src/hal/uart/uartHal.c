@@ -34,7 +34,6 @@ static uint8_t getStopBitOfUART(stopbit_t);
 static uint8_t getCharLengthOfUART(charlength_t);
 static uint8_t getParityOfUART(parity_t);
 
-
 /*
  * Implementations of the functions from the h file
  */
@@ -42,9 +41,11 @@ void UARTHALSoftwareReset(uart_t uart) {
 	address_t baseAddress = getBaseAddressOfUART(uart);
 
 	// 1. Initiate a software reset
+	// Set the UARTi.UART_SYSC[1] SOFTRESET bit to 1.
 	HWREG_SET(baseAddress + UART_SYSC_OFF, UART_SYSC_SOFT_RESET);
 
 	// 2. Wait for the end of the reset operation
+	// Poll the UARTi.UART_SYSS[0] RESETDONE bit until it equals 1.
 	while (!HWREG_CHECK(baseAddress + UART_SYSS_OFF, UART_SYSS_SOFT_RESET));
 }
 
@@ -81,8 +82,11 @@ void UARTHALFIFOSettings(uart_t uart) {
 	// Set the UARTi.UART_FCR[0] FIFO_ENABLE (0: Disable the FIFO; 1: Enable the FIFO)
 	// 8 char Trigger (RX/TX), DMA-Mode 1, FIFO-Enable
 	HWREG_UNSET(baseAddress + UART_FCR_OFF, 0xF9);
-	uint8_t fifoMask = 0b00001001;
-	HWREG_SET(baseAddress + UART_FCR_OFF, fifoMask);
+	// RX_FIFO_TRIG: 8 chars  --> [7:6] = 0:0
+	// TX_FIFO_TROG: 8 spaces --> [5:4] = 0:0
+	// DMA_MODE:	 1 (UART_NDMA_REQ[0] in TX, UART_NDMA_REQ[1] in RX).
+	// FIFO_ENABLE:  1 Enables the transmit and receive FIFOs. The transmit and receive holding registers are 1-byte
+	HWREG_SET(baseAddress + UART_FCR_OFF, (1 << 0));
 
 	// 6. Switch to register configuration mode B to access the UARTi.UART_EFR register
 	// Set the UARTi.UART_LCR register value to 0x00BF.
@@ -91,22 +95,18 @@ void UARTHALFIFOSettings(uart_t uart) {
 	// 7. Load the new FIFO triggers
 	// Set the UARTi.UART_TLR[7:4] RX_FIFO_TRIG_DMA
 	// Set the UARTi.UART_TLR[3:0] TX_FIFO_TRIG_DMA
-	// Reset RX_FIFO_TRIG_DMA and TX_FIFO_TRIG_DMA to 0
-	uint8_t triggerMask = 0xFF;
-	HWREG_UNSET(baseAddress + UART_TLR_OFF, triggerMask);
+	// Reset RX_FIFO_TRIG_DMA and TX_FIFO_TRIG_DMA to 0 --> defined by FCR[5:4]
+	HWREG_UNSET(baseAddress + UART_TLR_OFF, 0xFF);
 
 	// 8. Load the new FIFO triggers and the new DMA mode
 	// Set the UARTi.UART_SCR[7] RX_TRIG_GRANU1
 	// Set the UARTi.UART_SCR[6] TX_TRIG_GRANU1
 	// Set the UARTi.UART_SCR[2:1] DMA_MODE_2
 	// Set the UARTi.UART_SCR[0] DMA_MODE_CTL
-	// Granularity enabled for RX and TX, DMA Mode both directions
 	HWREG_UNSET(baseAddress + UART_SCR_OFF, 0xC7);
-	//HWREG_SET(baseAddress + UART_SCR_OFF, UART_SCR_RX_TRIG_GRANU);
-	HWREG_SET(baseAddress + UART_SCR_OFF, UART_SCR_TX_TRIG_GRANU);
-	HWREG_SET(baseAddress + UART_SCR_OFF, UART_SCR_DMA_MODE_0);
-	HWREG_UNSET(baseAddress + UART_SCR_OFF, UART_SCR_DMA_MODE_1);
-	HWREG_SET(baseAddress + UART_SCR_OFF, UART_SCR_DMA_MODE_CTL);
+	// DMA_MODE_CTL: 1 The DMAMODE is set with SCR[2:1].
+	// DMA_MODE_2: 0x03 DMA mode 3 (UARTnDMAREQ[0] in TX)
+	HWREG_SET(baseAddress + UART_SCR_OFF, (1 << 0) | (1 << 1) | (1 << 2));
 
 	// 9. Restore the UARTi.UART_EFR[4] ENHANCED_EN value saved
 	if(efrValue & UART_LCR_ENHANCED_EN) {
@@ -154,7 +154,7 @@ void UARTHALSettings(uart_t uart, configuration_t config) {
 	// 5. Clear the UARTi.UART_IER register (set the UARTi.UART_IER[4] SLEEP_MODE bit to 0 to change
 	// the UARTi.UART_DLL and UARTi.UART_DLH registers).
 	//Set the UARTi.UART_IER register value to 0x0000.
-	HWREG_CLEAR(baseAddress + UART_IER_OFF);
+	HWREG_UNSET(baseAddress + UART_IER_OFF, 0xFFFF);
 
 	// 6. Switch to register configuration mode B to access the UARTi.UART_DLL and UARTi.UART_DLH registers
 	// Set the UARTi.UART_LCR register value to 0x00BF.
@@ -163,8 +163,13 @@ void UARTHALSettings(uart_t uart, configuration_t config) {
 	// 7. Load the new divisor value
 	// Set the UARTi.UART_DLL[7:0] CLOCK_LSB and UARTi.UART_DLH[5:0] CLOCK_MSB bit fields to the desired values.
 	uint16_t divisorValue = UART_DEFAULT_CLK / (16 * getBaudRateOfUART(config.baudeRate));
-	HWREG_WRITE(baseAddress + UART_DLL_OFF, divisorValue);
-	HWREG_WRITE(baseAddress + UART_DLH_OFF, (divisorValue >> 8));
+	//HWREG_WRITE(baseAddress + UART_DLL_OFF, divisorValue);
+	//HWREG_WRITE(baseAddress + UART_DLH_OFF, (divisorValue >> 8));
+	// TODO: fix baudrate Test with 9600
+	HWREG_UNSET(baseAddress + UART_DLL_OFF, 0xFF);
+	HWREG_SET(baseAddress + UART_DLL_OFF, 0x38);
+	HWREG_UNSET(baseAddress + UART_DLH_OFF, 0xFF);
+	HWREG_SET(baseAddress + UART_DLH_OFF, 0x01);
 
 	// 8. Switch to register operational mode to access the UARTi.UART_IER register
 	// Set the UARTi.UART_LCR register value to 0x0000.
@@ -179,8 +184,7 @@ void UARTHALSettings(uart_t uart, configuration_t config) {
 	// Set the UARTi.UART_IER[2] LINE_STS_IT
 	// Set the UARTi.UART_IER[1] THR_IT
 	// Set the UARTi.UART_IER[0] RHR_IT
-	// Enable only the RHR interrupt
-	HWREG_WRITE(baseAddress + UART_IER_OFF, UART_IER_RHR_IT);
+	HWREG_SET(baseAddress + UART_IER_OFF, 0xFF);
 
 	// 10. Switch to register configuration mode B to access the UARTi.UART_EFR register
 	// Set the UARTi.UART_LCR register value to 0x00BF.
@@ -291,7 +295,7 @@ static uint32_t getBaudRateOfUART(baudrate_t baudRate) {
 static uint8_t getStopBitOfUART(stopbit_t stopBit) {
 	uint8_t stop_bit;
 	switch (stopBit) {
-	case UART_STOPBIT_ENABLED:
+	case UART_STOPBIT_1:
 		stop_bit = 1;
 		break;
 	default:
