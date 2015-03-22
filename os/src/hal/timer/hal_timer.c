@@ -14,16 +14,31 @@
             if(HWREG(baseAdd + TSICR) & DMTIMER_TSICR_POSTED)\
             while((reg & DMTimerWritePostedStatusGet(baseAdd)));	// When equal to 1, a write is pending to the controlRegister register
 
+#define enableCompare1 0x00
 
+
+
+
+
+
+void setTimerControlRegisterField(unsigned int baseRegister, unsigned int controlSettings)
+{
+	if(DMTIMER1_MS == baseRegister)
+		HWREG(baseRegister + TCLR_1MS) |= controlSettings;
+	else
+		HWREG(baseRegister + TCLR) |= controlSettings;
+}
+
+void setTimerSettings(unsigned int baseRegister, unsigned int timerSettings)
+{
+
+}
 
 void startTimer(unsigned int baseRegister)
 {
 	DMTimerWaitForWrite(DMTIMER_WRITE_POST_TCRR, baseRegister);
 
-	if(DMTIMER1_MS == baseRegister)
-		HWREG(baseRegister + TCLR_1MS) |= DMTIMER_TCLR_START;
-	else
-		HWREG(baseRegister + TCLR) |= DMTIMER_TCLR_START;
+	setTimerControlRegisterField(baseRegister, DMTIMER_TCLR_START);
 }
 
 void stopTimer(unsigned int baseRegister)
@@ -45,6 +60,7 @@ void setTimerCounterValue(unsigned int baseRegister, unsigned int counterValue)
 	else
 		HWREG(baseRegister + TCRR) = counterValue;
 }
+
 
 /*
  *	\brief:
@@ -96,30 +112,48 @@ void configureTimerMode(unsigned int baseRegister, unsigned int compareMode, uns
  *	\param: reloadMode				0x00 one-shot timer
  *									0x02 auto-reload
  */
-void setTimerCounterReloadMode(unsigned int baseRegister, unsigned int reloadMode)
+void setTimerCounterReloadMode(unsigned int baseRegister, timerReloadMode_t reloadMode)
 {
 	DMTimerWaitForWrite(DMTIMER_WRITE_POST_TCLR, baseRegister);
 
-	if(DMTIMER1_MS == baseRegister)
-		HWREG(baseRegister + TCLR_1MS) |= reloadMode;
-	else
-		HWREG(baseRegister + TCLR) |= reloadMode;
+	unsigned int controlSetting = 0;
+
+	switch(reloadMode)
+	{
+		case oneShotTimer:
+			controlSetting = DMTIMER_TCLR_ONE_SHOT_TIMER;
+			break;
+		case autoReload:
+			controlSetting = DMTIMER_TCLR_AUTO_RELOAD;
+			break;
+	}
+
+	setTimerControlRegisterField(baseRegister, controlSetting);
 }
 
 /*
  *	\brief:
  *	\param: baseRegister		base address of timer
- *	\param: compareMode				0x00 compare mode disabled
+ *	\param: mode				0x00 compare mode disabled
  *									0x20 compare mode enabled
  */
-void setTimerCounterCompareMode(unsigned int baseRegister, unsigned int compareMode)
+void setTimerCounterCompareMode(unsigned int baseRegister, timerCompareMode_t compareMode)
 {
 	DMTimerWaitForWrite(DMTIMER_WRITE_POST_TCLR, baseRegister);
 
-	if(DMTIMER1_MS == baseRegister)
-		HWREG(baseRegister + TCLR_1MS) |= compareMode;
-	else
-		HWREG(baseRegister + TCLR) |= compareMode;
+	unsigned int controlSetting = 0;
+
+	switch(compareMode)
+	{
+		case enableCompare:
+			controlSetting = DMTIMER_TCLR_ENABLE_COMPARE;
+			break;
+		case disableCompare:
+			controlSetting = DMTIMER_TCLR_DISABLE_COMPARE;
+			break;
+	}
+
+	setTimerControlRegisterField(baseRegister, controlSetting);
 }
 
 /*
@@ -129,30 +163,51 @@ void setTimerCounterCompareMode(unsigned int baseRegister, unsigned int compareM
  *									0x400 trigger on overflow
  *									0x800 trigger on overflow and match
  */
-void setTimerCounterTriggerMode(unsigned int baseRegister, unsigned int triggerMode)
+void setTimerCounterTriggerMode(unsigned int baseRegister, timerTriggerMode_t triggerMode)
 {
 	DMTimerWaitForWrite(DMTIMER_WRITE_POST_TCLR, baseRegister);
 
-	if(DMTIMER1_MS == baseRegister)
-		HWREG(baseRegister + TCLR_1MS) |= triggerMode;
-	else
-		HWREG(baseRegister + TCLR) |= triggerMode;
+	unsigned int controlSetting = 0;
+
+	switch(triggerMode)
+	{
+		case noTrigger:
+			controlSetting = DMTIMER_TCLR_NO_TRIGGER;
+			break;
+		case overflowTrigger:
+			controlSetting = DMTIMER_TCLR_OVERFLOW_TRIGGER;
+			break;
+		case overflowAndMatchTrigger:
+			controlSetting = DMTIMER_TCLR_OVERFLOW_MATCH_TRIGGER;
+			break;
+	}
+
+	setTimerControlRegisterField(baseRegister, controlSetting);
 }
 
 /*
  *	\brief:
  *	\param: baseRegister		base address of timer
- *	\param: triggerMode				0x0000 single capture
+ *	\param: captureMode				0x0000 single capture
  *									0x4000 capture on second event
  */
-void setTimerCounterCaptureMode(unsigned int baseRegister, unsigned int controlRegister, unsigned int captureMode)
+void setTimerCounterCaptureMode(unsigned int baseRegister, timerCaptureMode_t captureMode)
 {
 	DMTimerWaitForWrite(DMTIMER_WRITE_POST_TCLR, baseRegister);
 
-	if(DMTIMER1_MS == baseRegister)
-		HWREG(baseRegister + TCLR_1MS) |= captureMode;
-	else
-		HWREG(baseRegister + TCLR) |= captureMode;
+	unsigned int controlSetting = 0;
+
+	switch(captureMode)
+	{
+		case singleCapture:
+			controlSetting = DMTIMER_TCLR_SINGLE_CAPTURE;
+			break;
+		case onSecondEvent:
+			controlSetting = DMTIMER_TCLR_CAPTURE_ON_SECOND_EVENT;
+			break;
+	}
+
+	setTimerControlRegisterField(baseRegister, controlSetting);
 }
 
 /*
@@ -161,32 +216,56 @@ void setTimerCounterCaptureMode(unsigned int baseRegister, unsigned int controlR
  *	\param: pinMode					0x0000 pulse
  *									0x1000 toggle
  */
-void setOutputPinMode(unsigned int baseRegister, unsigned int controlRegister, unsigned int pinMode)
+void setOutputPinMode(unsigned int baseRegister, unsigned int controlRegister, timerPinMode_t pinMode)
 {
 	DMTimerWaitForWrite(DMTIMER_WRITE_POST_TCLR, baseRegister);
 
-	if(DMTIMER1_MS == baseRegister)
-		HWREG(baseRegister + TCLR_1MS) |= pinMode;
-	else
-		HWREG(baseRegister + TCLR) |= pinMode;
+	unsigned int controlSetting = 0;
+
+	switch(pinMode)
+	{
+		case pulse:
+			controlSetting = DMTIMER_TCLR_PINMODE_PULSE;
+			break;
+		case toggle:
+			controlSetting = DMTIMER_TCLR_PINMODE_TOGGLE;
+			break;
+	}
+
+	setTimerControlRegisterField(baseRegister, controlSetting);
 }
 
 /*
  *	\brief:
- *	\param: baseRegister		base address of timer
+ *	\param: baseRegister			base address of timer
  *	\param: transitionMode			0x000 no capture
  *									0x100 capture on low to high transition
  *									0x200 capture on high to low transition
  *									0x300 capture on both edge transition
  */
-void setTransitionCaptureMode(unsigned int baseRegister, unsigned int transitionMode)
+void setTransitionCaptureMode(unsigned int baseRegister, timerTransitionMode_t transitionMode)
 {
 	DMTimerWaitForWrite(DMTIMER_WRITE_POST_TCLR, baseRegister);
 
-	if(DMTIMER1_MS == baseRegister)
-		HWREG(baseRegister + TCLR_1MS) |= transitionMode;
-	else
-		HWREG(baseRegister + TCLR) |= transitionMode;
+	unsigned int controlSetting = 0;
+
+	switch(transitionMode)
+	{
+		case noCapture:
+			controlSetting = DMTIMER_TCLR_NO_CAPTURE;
+			break;
+		case lowToHigh:
+			controlSetting = DMTIMER_TCLR_CAPTURE_ON_TRANSITION_LOW_TO_HIGH;
+			break;
+		case highToLow:
+			controlSetting = DMTIMER_TCLR_CAPTURE_ON_TRANSITION_HIGH_TO_LOW;
+			break;
+		case bothEdges:
+			controlSetting = DMTIMER_TCLR_CAPTURE_ON_BOTH_EDGE_TRANSITION;
+			break;
+	}
+
+	setTimerControlRegisterField(baseRegister, controlSetting);
 }
 
 
