@@ -25,10 +25,16 @@
 void (*fnRAMVectors[NUM_INTERRUPTS])(void);
 
 
+intHandler_t intIrqHandlers[NUM_INTERRUPTS];
+intResetHandler_t intIrqResetHandlers[NUM_INTERRUPTS];
+
+
 static void IntDefaultHandler(void);
+static void IntDefaultResetHandler(void);
 static void resetAintc(void);
 static void enableInterruptGeneration(void);
 static void registerDefaultHandlers(void);
+
 
 
 /**

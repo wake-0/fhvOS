@@ -2,6 +2,7 @@
 //#include <stdio.h>
 
 #include "driver/uart/uartDriver.h"
+#include "driver/timer/driver_timer.h"
 
 void CPUirqd1(void);
 void CPUirqe1(void);
@@ -11,9 +12,12 @@ interrupt void undef_handler(void);
 interrupt void fiq_handler(void);
 interrupt void irq_handler(void);
 
-int main(void) {
+int main(void)
+{
+	TimerReset(TIMER0);
+	TimerValueLoad(TIMER0, 0x10);
 
-	//printf("blabla\n");
+	TimerStart(TIMER0);
 
 	CPUirqe1();
 
