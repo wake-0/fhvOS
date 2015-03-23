@@ -63,7 +63,7 @@ _intIrqResetHandlers:
 ; The SVC Handler switches to system mode if the SVC number is 458752. If the
 ; SVC number is different, no mode switching will be done.
 ;
-SVC_Handler:
+swi_handler:
     STMFD    r13!, {r0-r1, r14}       ; Save context in SVC stack
     SUB      r13, r13, #0x4           ; Adjust the stack pointer
     LDR      r0, [r14, #-4]           ; R0 points to SWI instruction

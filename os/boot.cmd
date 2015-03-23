@@ -25,48 +25,48 @@ MEMORY
 {
 	bootROM128:				o = 0x40000000	l = 0x1FFFF			// 128kB BOOT ROM
 	bootROM48:				o = 0x40020000	l = 0xBFFF			// 48kB BOOT ROM
-    internalSRAM:     		o = 0x402F0400  l = 0x0000FBFF  	// 64kB internal SRAM
-    L3OCMC0:  				o = 0x40300000  l = 0x00010000  	// 64kB L3 OCMC SRAM
+    internalSRAM:     		o = 0x402F0400  l = 0x0000FC00  	// 64kB internal SRAM
+    //L3OCMC0:  				o = 0x40300000  l = 0x00010000  	// 64kB L3 OCMC SRAM
     externalSDRAM:     		o = 0x80000000  l = 0x40000000  	// 1GB external DDR Bank 0
-    //exceptions:				o = 0x4030CE04	l = 0x38
+    exceptions:				o = 0x4030CE04	l = 0x38
 }
 
 
 // specify sections allocation into memory
 SECTIONS
 {
-    .intvecs   > L3OCMC0 {
-		L3OCMC0 = .;
+    .intvecs   > exceptions {
+		exceptions = .;
 		*(.intvecs)
 	}
 
-	.interrupts	> L3OCMC0
+	.interrupts	> internalSRAM
 
-    .text          >  L3OCMC0
-    .stack         >  L3OCMC0
-    .bss           >  L3OCMC0
+    .text          >  internalSRAM
+    .stack         >  internalSRAM
+    .bss           >  internalSRAM
                     RUN_START(bss_start)
                     RUN_END(bss_end)
-    .cio           >  L3OCMC0
-    .const         >  L3OCMC0
-    .data          >  L3OCMC0
-    .switch        >  L3OCMC0
-    .sysmem        >  L3OCMC0
-    .far           >  L3OCMC0
-    .args          >  L3OCMC0
-    .ppinfo        >  L3OCMC0
-    .ppdata        >  L3OCMC0
+    .cio           >  internalSRAM
+    .const         >  internalSRAM
+    .data          >  internalSRAM
+    .switch        >  internalSRAM
+    .sysmem        >  internalSRAM
+    .far           >  internalSRAM
+    .args          >  internalSRAM
+    .ppinfo        >  internalSRAM
+    .ppdata        >  internalSRAM
 
     /* TI-ABI or COFF sections */
-    .pinit         >  L3OCMC0
-    .cinit         >  L3OCMC0
+    .pinit         >  internalSRAM
+    .cinit         >  internalSRAM
 
     /* EABI sections */
-    .binit         >  L3OCMC0
-    .init_array    >  L3OCMC0
-    .neardata      >  L3OCMC0
-    .fardata       >  L3OCMC0
-    .rodata        >  L3OCMC0
-    .c6xabi.exidx  >  L3OCMC0
-    .c6xabi.extab  >  L3OCMC0
+    .binit         >  internalSRAM
+    .init_array    >  internalSRAM
+    .neardata      >  internalSRAM
+    .fardata       >  internalSRAM
+    .rodata        >  internalSRAM
+    .c6xabi.exidx  >  internalSRAM
+    .c6xabi.extab  >  internalSRAM
 }
