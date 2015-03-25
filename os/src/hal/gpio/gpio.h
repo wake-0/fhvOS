@@ -13,17 +13,17 @@
 #define PIN_MODE_PWMSEL			1
 // TODO Add more pin modes
 
-typedef enum pin_direction_t {
+typedef enum {
 	PIN_DIRECTION_IN = 1,
 	PIN_DIRECTION_OUT = 2
 } pin_direction_t;
 
-typedef enum pin_value_t {
+typedef enum {
 	PIN_VALUE_HIGH = 1,
 	PIN_VALUE_LOW = 2
 } pin_value_t;
 
-typedef enum mux_mode_t {
+typedef enum {
 	MUX_MODE_LED = 1
 } mux_mode_t;
 

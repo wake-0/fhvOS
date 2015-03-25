@@ -12,7 +12,7 @@
 #define MAX_DEVICES		32
 #define MAX_DEVICE_NAME	255
 
-typedef struct device_map_entry_t {
+typedef struct {
 	char name[MAX_DEVICE_NAME];
 	driver_id_t driverId;
 	short driverMsg;

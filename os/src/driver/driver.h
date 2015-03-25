@@ -12,7 +12,7 @@
 #define DRIVER_ERROR					-1
 #define DRIVER_OK						0
 
-typedef struct driver_t {
+typedef struct {
 	int (*init)(short);
 	int (*open)(short);
 	int (*close)(short);
