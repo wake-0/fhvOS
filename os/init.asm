@@ -1,10 +1,11 @@
 ;
-; init.asm - Init code routines
+; init.asm - init code routines for ARM335x
 ;
-
-
-
-
+;  Created on: 16.03.2015
+;      Author: Marko Petrovic
+;			   Kevin Wallis
+;			   Nicolaj Hoess
+;
         .global Entry
         .global start_boot
         .global __TI_auto_init

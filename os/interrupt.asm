@@ -1,6 +1,10 @@
+;
+; 	interrupt.asm - contains the implementations of the exception handlers of ARM335x
+;
+;  	Created on: 16.03.2015
+;      Author: Marko Petrovic
+;
 
-; Description:
-; Assembler interrupt handler
 
 ;
 ; define section of memory
@@ -42,36 +46,52 @@ I_BIT             .set   0x80
 ;
 	.global irq_handler
 	.global swi_handler
-	.ref intIrqHandlers
-	.ref intIrqResetHandlers
-	;.ref SwiHandler
+	.ref interruptRamVectors
+	;.ref intIrqResetHandlers
 
 ;
-; definition of irq handlers
+; Definition of registerable IRQ handlers.
+; Implemented in interrupt.c in HAL.
 ;
 _intIrqHandlers:
-	.word intIrqHandlers
+	.word interruptRamVectors
 
 ;
 ; definition of irq reset handlers
 ;
-_intIrqResetHandlers:
-	.word intIrqResetHandlers
+;_intIrqResetHandlers:
+;	.word intIrqResetHandlers
 
 
 ;
-; The SVC Handler switches to system mode if the SVC number is 458752. If the
-; SVC number is different, no mode switching will be done.
+; The SWI Handler switches to system mode (0x1F).
+; User context will be saved before switching and restored after.
 ;
 swi_handler:
-    STMFD    r13!, {r0-r1, r14}       ; Save context in SVC stack
-    SUB      r13, r13, #0x4           ; Adjust the stack pointer
-    LDR      r0, [r14, #-4]           ; R0 points to SWI instruction
-    BIC      r0, r0, #MASK_SVC_NUM    ; Get the SWI number
-    CMP      r0, #458752
-    MRSEQ    r1, spsr                 ; Copy SPSR
-    ORREQ    r1, r1, #0x1F            ; Change the mode to System
-    MSREQ    spsr_cf, r1              ; Restore SPSR
-    ADD      r13, r13, #0x4           ; Adjust the stack pointer
-    LDMFD    r13!, {r0-r1, pc}^       ; Restore registers from IRQ stack
+	STMFD sp!,{r0-r12,lr} 			; Store registers.
+	LDR r0,[lr,#-4] 				; Calculate address of SWI instruction and load it into r0.
+	BIC r0,r0,#0xff000000 			; Mask off top 8 bits of instruction to give SWI number.
+	 ;
+	 ; for future development: call user-defined swi_handler in c here in needed
+	 ;
+	LDMFD sp!, {r0-r12,pc}^ 		; Restore registers and return.
 
+
+irq_handler:
+	SUBS pc, lr, #4
+
+
+fig_handler:
+	SUBS pc, lr, #4
+
+
+udef_handler:
+	MOVS pc,lr
+
+
+pabt_handler:
+	SUBS pc,lr, #4
+
+
+dabt_handler:
+	SUBS pc, lr, #8
