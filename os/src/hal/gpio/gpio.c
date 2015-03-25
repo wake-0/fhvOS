@@ -36,34 +36,34 @@ void GPIOEnable(int pinNo)
 	if (gpioXEnabled[getGPIOFromPin(pinNo)]) return;
 
 	// Enable the GPIO Clock
-	/* Writing to MODULEMODE field of CM_PER_GPIO1_CLKCTRL register. */
+	// Writing to MODULEMODE field of CM_PER_GPIO1_CLKCTRL register.
 	HWREG(SOC_CM_PER_REGS + getCM_PER_GPIOx_CLKCTRL(pinNo)) |=
 			getCM_PER_GPIOx_CLKCTRL_MODULEMODE(pinNo);
 
-	/* Waiting for MODULEMODE field to reflect the written value. */
+	// Waiting for MODULEMODE field to reflect the written value.
 	while (getCM_PER_GPIOx_CLKCTRL_MODULEMODE_ENABLE(pinNo)
 			!= (HWREG(SOC_CM_PER_REGS + getCM_PER_GPIOx_CLKCTRL(pinNo))
 					& getCM_PER_GPIOx_CLKCTRL_MODULEMODE(pinNo)))
 		;
 
-	/* Writing to OPTFCLKEN_GPIO_1_GDBCLK bit in CM_PER_GPIO1_CLKCTRL register. */
+	// Writing to OPTFCLKEN_GPIO_1_GDBCLK bit in CM_PER_GPIO1_CLKCTRL register.
 	HWREG(SOC_CM_PER_REGS + getCM_PER_GPIOx_CLKCTRL(pinNo)) |=
 			getCM_PER_GPIOx_CLKCTRL_OPTFCLKEN_GPIO_x_GDBCLK(pinNo);
 
-	/* Waiting for OPTFCLKEN_GPIO_1_GDBCLK bit to reflect the desired value. */
+	// Waiting for OPTFCLKEN_GPIO_1_GDBCLK bit to reflect the desired value.
 	while (getCM_PER_GPIOx_CLKCTRL_OPTFCLKEN_GPIO_x_GDBCLK(pinNo)
 			!= (HWREG(SOC_CM_PER_REGS + getCM_PER_GPIOx_CLKCTRL(pinNo))
 					& getCM_PER_GPIOx_CLKCTRL_OPTFCLKEN_GPIO_x_GDBCLK(pinNo)))
 		;
 
-	/* Waiting for IDLEST field in CM_PER_GPIO1_CLKCTRL register to attain the desired value. */
+	// Waiting for IDLEST field in CM_PER_GPIO1_CLKCTRL register to attain the desired value.
 	while ((getCM_PER_GPIOx_CLKCTRL_IDLEST_FUNC(pinNo)
 			<< getCM_PER_GPIOx_CLKCTRL_IDLEST_SHIFT(pinNo))
 			!= (HWREG(SOC_CM_PER_REGS + CM_PER_GPIO1_CLKCTRL)
 					& getCM_PER_GPIOx_CLKCTRL_IDLEST(pinNo)))
 		;
 
-	/* Waiting for CLKACTIVITY_GPIO_1_GDBCLK bit in CM_PER_L4LS_CLKSTCTRL register to attain desired value. */
+	// Waiting for CLKACTIVITY_GPIO_1_GDBCLK bit in CM_PER_L4LS_CLKSTCTRL register to attain desired value.
 	while (getCM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_GPIO_x_GDBCLK(pinNo)
 			!= (HWREG(SOC_CM_PER_REGS + CM_PER_L4LS_CLKSTCTRL)
 					& getCM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_GPIO_x_GDBCLK(pinNo)))
@@ -84,12 +84,11 @@ void GPIODisable(int pinNo)
 
 void GPIOReset(int pinNo)
 {
-	/* Setting the SOFTRESET bit in System Configuration register.
-	 Doing so would reset the GPIO module.
-	 */
+	// Setting the SOFTRESET bit in System Configuration register.
+	// Doing so would reset the GPIO module.
 	HWREG(getSOC_GPIO_x_REGS(pinNo) + GPIO_SYSCONFIG) |= (GPIO_SYSCONFIG_SOFTRESET);
 
-	/* Waiting until the GPIO Module is reset.*/
+	// Waiting until the GPIO Module is reset.
 	while (!(HWREG(getSOC_GPIO_x_REGS(pinNo) + GPIO_SYSSTATUS) & GPIO_SYSSTATUS_RESETDONE))
 		;
 }
@@ -110,10 +109,10 @@ void GPIOSetMux(int pin, mux_mode_t mux)
 	switch (gpio) {
 		case 1:
 			HWREG(SOC_CONTROL_REGS + CONTROL_CONF_GPMC_AD(pin)) =
-				(CONTROL_CONF_GPMC_AD_CONF_GPMC_AD_SLEWCTRL | 	/* Slew rate slow */
-				CONTROL_CONF_GPMC_AD_CONF_GPMC_AD_RXACTIVE |	/* Receiver enabled */
-				(CONTROL_CONF_GPMC_AD_CONF_GPMC_AD_PUDEN & (~CONTROL_CONF_GPMC_AD_CONF_GPMC_AD_PUDEN)) | /* PU_PD enabled */
-				(CONTROL_CONF_GPMC_AD_CONF_GPMC_AD_PUTYPESEL & (~CONTROL_CONF_GPMC_AD_CONF_GPMC_AD_PUTYPESEL)) | /* PD */
+				(CONTROL_CONF_GPMC_AD_CONF_GPMC_AD_SLEWCTRL | 	// Slew rate slow
+				CONTROL_CONF_GPMC_AD_CONF_GPMC_AD_RXACTIVE |	// Receiver enabled
+				(CONTROL_CONF_GPMC_AD_CONF_GPMC_AD_PUDEN & (~CONTROL_CONF_GPMC_AD_CONF_GPMC_AD_PUDEN)) | // PU_PD enabled
+				(CONTROL_CONF_GPMC_AD_CONF_GPMC_AD_PUTYPESEL & (~CONTROL_CONF_GPMC_AD_CONF_GPMC_AD_PUTYPESEL)) | // PD
 				(CONTROL_CONF_MUXMODE(muxMode))	/* Select mode 7 */
 				);
 			break;
