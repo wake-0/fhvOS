@@ -17,7 +17,7 @@ extern void TimerReset(Timer_t timer);
 extern void TimerCountingHalt(Timer_t timer);
 extern void TimerCountingResume(Timer_t timer);
 extern void TimerValueLoad(Timer_t timer, unsigned int value);
-extern void TimerModeConfigure(Timer_t timer, unsigned int mode);
+extern void TimerModeConfigure(Timer_t timer, unsigned int compareMode, unsigned int reloadMode);
 extern void TimerInterruptEnable(Timer_t timer);
 extern void TimerInterruptDisable(Timer_t timer);
 extern void TimerConfigureInterrupt(Timer_t timer, ISR intHandler, unsigned int timeInMilis);
