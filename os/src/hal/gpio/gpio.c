@@ -33,7 +33,7 @@ static int getSOC_GPIO_x_REGS(int pinNo);
 
 void GPIOEnable(int pinNo)
 {
-	if (gpioXEnabled[getGPIOFromPin(pinNo)]) return;
+	if (gpioXEnabled[getGPIOFromPin(pinNo)]) { return; }
 
 	// Enable the GPIO Clock
 	// Writing to MODULEMODE field of CM_PER_GPIO1_CLKCTRL register.
@@ -44,7 +44,7 @@ void GPIOEnable(int pinNo)
 	while (getCM_PER_GPIOx_CLKCTRL_MODULEMODE_ENABLE(pinNo)
 			!= (HWREG(SOC_CM_PER_REGS + getCM_PER_GPIOx_CLKCTRL(pinNo))
 					& getCM_PER_GPIOx_CLKCTRL_MODULEMODE(pinNo)))
-		;
+	{ }
 
 	// Writing to OPTFCLKEN_GPIO_1_GDBCLK bit in CM_PER_GPIO1_CLKCTRL register.
 	HWREG(SOC_CM_PER_REGS + getCM_PER_GPIOx_CLKCTRL(pinNo)) |=
@@ -54,20 +54,20 @@ void GPIOEnable(int pinNo)
 	while (getCM_PER_GPIOx_CLKCTRL_OPTFCLKEN_GPIO_x_GDBCLK(pinNo)
 			!= (HWREG(SOC_CM_PER_REGS + getCM_PER_GPIOx_CLKCTRL(pinNo))
 					& getCM_PER_GPIOx_CLKCTRL_OPTFCLKEN_GPIO_x_GDBCLK(pinNo)))
-		;
+	{ }
 
 	// Waiting for IDLEST field in CM_PER_GPIO1_CLKCTRL register to attain the desired value.
 	while ((getCM_PER_GPIOx_CLKCTRL_IDLEST_FUNC(pinNo)
 			<< getCM_PER_GPIOx_CLKCTRL_IDLEST_SHIFT(pinNo))
 			!= (HWREG(SOC_CM_PER_REGS + CM_PER_GPIO1_CLKCTRL)
 					& getCM_PER_GPIOx_CLKCTRL_IDLEST(pinNo)))
-		;
+	{ }
 
 	// Waiting for CLKACTIVITY_GPIO_1_GDBCLK bit in CM_PER_L4LS_CLKSTCTRL register to attain desired value.
 	while (getCM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_GPIO_x_GDBCLK(pinNo)
 			!= (HWREG(SOC_CM_PER_REGS + CM_PER_L4LS_CLKSTCTRL)
 					& getCM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_GPIO_x_GDBCLK(pinNo)))
-		;
+	{ }
 
 
 	// Enable the Module
@@ -78,7 +78,7 @@ void GPIOEnable(int pinNo)
 
 void GPIODisable(int pinNo)
 {
-	if (!gpioXEnabled[getGPIOFromPin(pinNo)]) return;
+	if (!gpioXEnabled[getGPIOFromPin(pinNo)]) { return; }
 	HWREG(getSOC_GPIO_x_REGS(pinNo) + GPIO_CTRL) |= (GPIO_CTRL_DISABLEMODULE);
 }
 
@@ -90,7 +90,7 @@ void GPIOReset(int pinNo)
 
 	// Waiting until the GPIO Module is reset.
 	while (!(HWREG(getSOC_GPIO_x_REGS(pinNo) + GPIO_SYSSTATUS) & GPIO_SYSSTATUS_RESETDONE))
-		;
+	{ }
 }
 
 void GPIOSetMux(int pin, mux_mode_t mux)
@@ -103,7 +103,7 @@ void GPIOSetMux(int pin, mux_mode_t mux)
 		default:
 			break;
 	}
-	if (muxMode == -1) return; // Invalid mux mode for beaglebone
+	if (muxMode == -1) { return; } // Invalid mux mode for beaglebone
 
 	int gpio = getGPIOFromPin(pin);
 	switch (gpio) {
