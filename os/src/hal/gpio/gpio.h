@@ -8,11 +8,6 @@
 #ifndef HAL_GPIO_GPIO_H_
 #define HAL_GPIO_GPIO_H_
 
-#define pin_mode_t				unsigned char
-#define PIN_MODE_GPIO			0
-#define PIN_MODE_PWMSEL			1
-// TODO Add more pin modes
-
 typedef enum {
 	PIN_DIRECTION_IN = 1,
 	PIN_DIRECTION_OUT = 2

@@ -16,9 +16,7 @@
 
 #include "../platform/platform.h"
 
-#define PIN_COUNT		(23 * 4)
 #define GPIO_COUNT		4
-#define LED_COUNT		4
 
 static tBoolean gpioXEnabled[GPIO_COUNT];
 
