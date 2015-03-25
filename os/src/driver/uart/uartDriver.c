@@ -12,14 +12,16 @@ void UARTDriverInit(uart_t uart)
 	UARTHALSoftwareReset(uart);
 	UARTHALFIFOSettings(uart);
 
-	configuration_t config = { UART_BAUDRATE_9600,
-							   UART_PARITY_NONE,
-							   UART_CHARLENGTH_8,
-							   UART_STOPBIT_1 };
+	configuration_t config;
+	config.baudRate = UART_BAUDRATE_9600;
+	config.parity =  UART_PARITY_NONE;
+	config.charLength = UART_CHARLENGTH_8;
+	config.stopBit = UART_STOPBIT_1;
+
 	UARTHALSettings(uart, config);
 }
 
-void UARTDriverWrite(uart_t uart, char* msg)
+void UARTDriverWrite(uart_t uart, uint8_t* msg)
 {
 	UARTHALFIFOWrite(uart, msg);
 }

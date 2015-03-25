@@ -12,8 +12,10 @@ interrupt void undef_handler(void);
 interrupt void fiq_handler(void);
 interrupt void irq_handler(void);
 
+#include <inttypes.h>
 int main(void)
 {
+	/*
 	TimerReset(TIMER0);
 	TimerValueLoad(TIMER0, 0x10);
 
@@ -24,9 +26,18 @@ int main(void)
 	CPUSwitchToUserMode1();
 
 	CPUSwitchToPrivilegedMode1();
+*/
 
+	uart_t uart = UART0;
+	UARTDriverInit(uart);
+	uint8_t a = 'a';
+	UARTDriverWrite(uart, &a);
 	while(1)
 	{
+		UARTDriverWrite(uart, &a);
+		volatile int i = 0;
+		for (i = 0; i < 1000000; i++) { }
+
 	}
 }
 
