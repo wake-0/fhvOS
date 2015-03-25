@@ -6,10 +6,12 @@
  */
 
 #include "hal_timer.h"
-
+#include "../../hal/am335x/hw_cm_per.h"
+#include "../../hal/am335x/soc_AM335x.h"
 #include "../../hal/am335x/hw_timer.h"
 #include "../../hal/am335x/hw_types.h"
 #include "../../hal/interrupt/interrupt.h"
+#include "../../hal/am335x/hw_cm_dpll.h"
 
 #define DMTimerWaitForWrite(reg, baseAdd)   \
             if(HWREG(baseAdd + TSICR) & DMTIMER_TSICR_POSTED)\
@@ -246,10 +248,138 @@ void setTransitionCaptureMode(unsigned int baseRegister, unsigned int transition
 
 
 
-unsigned int DMTimerWritePostedStatusGet(unsigned int baseAdd)
+unsigned int DMTimerWritePostedStatusGet(unsigned int baseRegister)
 {
-    return (HWREG(baseAdd + TWPS));
+    return (HWREG(baseRegister + TWPS));
 }
+
+
+void enableClockPrescaler(unsigned int baseRegister, unsigned int prescalerValue)
+{
+	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseRegister);
+
+	HWREG(baseRegister + TCLR) |= (prescalerValue & (PRESCALER_ENABLE | PRESCALER_VALUE_RANGE));
+}
+
+
+void disableClockPrescaler(unsigned int baseRegister)
+{
+    DMTimerWaitForWrite(WRITE_PEND_TCLR, baseRegister);
+
+    HWREG(baseRegister + TCLR) &= PRESCALER_DISABLE;
+}
+
+
+static void moduleClockConfig(void)
+{
+    HWREG(SOC_CM_PER_REGS + CM_PER_L3S_CLKSTCTRL) =
+                             CM_PER_L3S_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
+
+    while((HWREG(SOC_CM_PER_REGS + CM_PER_L3S_CLKSTCTRL) &
+     CM_PER_L3S_CLKSTCTRL_CLKTRCTRL) != CM_PER_L3S_CLKSTCTRL_CLKTRCTRL_SW_WKUP);
+
+    HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKSTCTRL) =
+                             CM_PER_L3_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
+
+    while((HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKSTCTRL) &
+     CM_PER_L3_CLKSTCTRL_CLKTRCTRL) != CM_PER_L3_CLKSTCTRL_CLKTRCTRL_SW_WKUP);
+
+    HWREG(SOC_CM_PER_REGS + CM_PER_L3_INSTR_CLKCTRL) =
+                             CM_PER_L3_INSTR_CLKCTRL_MODULEMODE_ENABLE;
+
+    while((HWREG(SOC_CM_PER_REGS + CM_PER_L3_INSTR_CLKCTRL) &
+                               CM_PER_L3_INSTR_CLKCTRL_MODULEMODE) !=
+                                   CM_PER_L3_INSTR_CLKCTRL_MODULEMODE_ENABLE);
+
+    HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKCTRL) = CM_PER_L3_CLKCTRL_MODULEMODE_ENABLE;
+
+    while((HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKCTRL) &
+        CM_PER_L3_CLKCTRL_MODULEMODE) != CM_PER_L3_CLKCTRL_MODULEMODE_ENABLE);
+
+    HWREG(SOC_CM_PER_REGS + CM_PER_OCPWP_L3_CLKSTCTRL) =
+                             CM_PER_OCPWP_L3_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
+
+    while((HWREG(SOC_CM_PER_REGS + CM_PER_OCPWP_L3_CLKSTCTRL) &
+                              CM_PER_OCPWP_L3_CLKSTCTRL_CLKTRCTRL) !=
+                                CM_PER_OCPWP_L3_CLKSTCTRL_CLKTRCTRL_SW_WKUP);
+
+    HWREG(SOC_CM_PER_REGS + CM_PER_L4LS_CLKSTCTRL) =
+                             CM_PER_L4LS_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
+
+    while((HWREG(SOC_CM_PER_REGS + CM_PER_L4LS_CLKSTCTRL) &
+                             CM_PER_L4LS_CLKSTCTRL_CLKTRCTRL) !=
+                               CM_PER_L4LS_CLKSTCTRL_CLKTRCTRL_SW_WKUP);
+
+    HWREG(SOC_CM_PER_REGS + CM_PER_L4LS_CLKCTRL) =
+                             CM_PER_L4LS_CLKCTRL_MODULEMODE_ENABLE;
+
+    while((HWREG(SOC_CM_PER_REGS + CM_PER_L4LS_CLKCTRL) &
+      CM_PER_L4LS_CLKCTRL_MODULEMODE) != CM_PER_L4LS_CLKCTRL_MODULEMODE_ENABLE);
+}
+
+
+void selectClockSourceForTimer(unsigned int timerMuxSelectionRegister, unsigned int timerClockControlRegister)
+{
+	moduleClockConfig();
+
+    // Select the clock source for the Timer2 instance.
+    HWREG(SOC_CM_DPLL_REGS + timerMuxSelectionRegister) &=
+          ~(CM_DPLL_CLKSEL_TIMER2_CLK_CLKSEL);
+
+    HWREG(SOC_CM_DPLL_REGS + timerMuxSelectionRegister) |=
+          CM_DPLL_CLKSEL_TIMER2_CLK_CLKSEL_CLK_M_OSC;
+
+    while((HWREG(SOC_CM_DPLL_REGS + timerMuxSelectionRegister) &
+           CM_DPLL_CLKSEL_TIMER2_CLK_CLKSEL) !=
+           CM_DPLL_CLKSEL_TIMER2_CLK_CLKSEL_CLK_M_OSC);
+
+    HWREG(SOC_CM_PER_REGS + timerClockControlRegister) |=
+                             CM_PER_TIMER2_CLKCTRL_MODULEMODE_ENABLE;
+
+    while((HWREG(SOC_CM_PER_REGS + timerClockControlRegister) &
+    CM_PER_TIMER2_CLKCTRL_MODULEMODE) != CM_PER_TIMER2_CLKCTRL_MODULEMODE_ENABLE);
+
+    while((HWREG(SOC_CM_PER_REGS + timerClockControlRegister) &
+       CM_PER_TIMER2_CLKCTRL_IDLEST) != CM_PER_TIMER2_CLKCTRL_IDLEST_FUNC);
+
+    while(!(HWREG(SOC_CM_PER_REGS + CM_PER_L3S_CLKSTCTRL) &
+            CM_PER_L3S_CLKSTCTRL_CLKACTIVITY_L3S_GCLK));
+
+    while(!(HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKSTCTRL) &
+            CM_PER_L3_CLKSTCTRL_CLKACTIVITY_L3_GCLK));
+
+    while(!(HWREG(SOC_CM_PER_REGS + CM_PER_OCPWP_L3_CLKSTCTRL) &
+           (CM_PER_OCPWP_L3_CLKSTCTRL_CLKACTIVITY_OCPWP_L3_GCLK |
+            CM_PER_OCPWP_L3_CLKSTCTRL_CLKACTIVITY_OCPWP_L4_GCLK)));
+
+    while(!(HWREG(SOC_CM_PER_REGS + CM_PER_L4LS_CLKSTCTRL) &
+           (CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_L4LS_GCLK |
+            CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_TIMER2_GCLK)));
+}
+
+unsigned int getTimerMuxSelectionRegisterAddress(Timer_t timer)
+{
+	switch(timer)
+	{
+		case TIMER0:
+			return 0;				// no clock settings for timer0
+		case TIMER1_MS:
+			return CM_DPLL_CLKSEL_TIMER1MS_CLK;
+		case TIMER2:
+			return CM_DPLL_CLKSEL_TIMER2_CLK;
+		case TIMER3:
+			return CM_DPLL_CLKSEL_TIMER3_CLK;
+		case TIMER4:
+			return CM_DPLL_CLKSEL_TIMER4_CLK;
+		case TIMER5:
+			return CM_DPLL_CLKSEL_TIMER5_CLK;
+		case TIMER6:
+			return CM_DPLL_CLKSEL_TIMER6_CLK;
+		case TIMER7:
+			return CM_DPLL_CLKSEL_TIMER7_CLK;
+	}
+}
+
 
 /*
  *	\brief:
@@ -263,7 +393,7 @@ unsigned int getTimerBaseRegisterAddress(Timer_t timer)
 		case TIMER0:
 			return DMTIMER0;
 		case TIMER1_MS:
-			//return DMTIMER1_MS;
+			return DMTIMER1_MS;
 			break;
 		case TIMER2:
 			return DMTIMER2;
