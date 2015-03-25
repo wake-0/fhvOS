@@ -137,14 +137,16 @@ void GPIOSetPinDirection(int pin, pin_direction_t dir)
 
 void GPIOSetPinValue(int pin, pin_value_t dir)
 {
-    if(dir == PIN_VALUE_HIGH)
-    {
-        HWREG(getSOC_GPIO_x_REGS(pin) + GPIO_SETDATAOUT) = (1 << pin);
-    }
-    else if (dir == PIN_VALUE_LOW)
-    {
-        HWREG(getSOC_GPIO_x_REGS(pin) + GPIO_CLEARDATAOUT) = (1 << pin);
-    }
+	switch (dir)
+	{
+		case PIN_VALUE_HIGH:
+			HWREG(getSOC_GPIO_x_REGS(pin) + GPIO_SETDATAOUT) = (1 << pin);
+			break;
+		case PIN_VALUE_LOW:
+			HWREG(getSOC_GPIO_x_REGS(pin) + GPIO_CLEARDATAOUT) = (1 << pin);
+			break;
+		default:
+	}
 }
 
 pin_value_t GPIOGetPinValue(int pin)

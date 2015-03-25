@@ -41,9 +41,18 @@ int LEDWrite (short id, char* buf, int len)
 	if (id > ledCount - 1) return DRIVER_ERROR;
 
 	if (len != 1) return DRIVER_ERROR;
-	if (buf[0] == 1) GPIOSetPinValue(BOARD_LED(id), PIN_VALUE_HIGH);
-	else if (buf[0] == 0) GPIOSetPinValue(BOARD_LED(id), PIN_VALUE_LOW);
-	else return DRIVER_ERROR;
+
+	switch(buf[0])
+	{
+		case 1:
+			GPIOSetPinValue(BOARD_LED(id), PIN_VALUE_HIGH);
+			break;
+		case 0:
+			GPIOSetPinValue(BOARD_LED(id), PIN_VALUE_LOW);
+			break;
+		default:
+			return DRIVER_ERROR;
+	}
 	return DRIVER_OK;
 }
 
