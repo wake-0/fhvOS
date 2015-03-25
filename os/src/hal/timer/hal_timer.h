@@ -33,6 +33,8 @@ typedef enum {singleCapture, onSecondEvent} timerCaptureMode_t;
 typedef enum {oneShotTimer, autoReload} timerReloadMode_t;
 typedef enum {noCapture, lowToHigh, highToLow, bothEdges} timerTransitionMode_t;
 typedef enum {pulse, toggle} timerPinMode_t;
+typedef enum {captureInterrupt, overflowInterrupt, matchInterrupt} timerInterrupts_t;
+
 typedef enum {TIMER0, TIMER1_MS, TIMER2,
 	TIMER3, TIMER4, TIMER5, TIMER6, TIMER7
 	} Timer_t;

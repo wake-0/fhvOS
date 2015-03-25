@@ -14,11 +14,6 @@
             if(HWREG(baseAdd + TSICR) & DMTIMER_TSICR_POSTED)\
             while((reg & DMTimerWritePostedStatusGet(baseAdd)));	// When equal to 1, a write is pending to the controlRegister register
 
-#define enableCompare1 0x00
-
-
-
-
 
 
 void setTimerControlRegisterField(unsigned int baseRegister, unsigned int controlSettings)
@@ -27,6 +22,21 @@ void setTimerControlRegisterField(unsigned int baseRegister, unsigned int contro
 		HWREG(baseRegister + TCLR_1MS) |= controlSettings;
 	else
 		HWREG(baseRegister + TCLR) |= controlSettings;
+}
+
+/*
+void enableTimerInterrupts(unsigned int baseRegister, timerInterrupts_t irq)
+{
+    HWREG(baseRegister + DMTIMER_IRQENABLE_SET) = (intFlags &
+                                           (DMTIMER_IRQENABLE_SET_TCAR_EN_FLAG |
+                                            DMTIMER_IRQENABLE_SET_OVF_EN_FLAG |
+                                            DMTIMER_IRQENABLE_SET_MAT_EN_FLAG));
+}
+*/
+
+void disableTimerInterrupts(unsigned int baseRegister)
+{
+
 }
 
 void setTimerSettings(unsigned int baseRegister, unsigned int timerSettings)
