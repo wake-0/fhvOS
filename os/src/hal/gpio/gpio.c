@@ -14,24 +14,22 @@
 #include "../am335x/hw_types.h"
 #include "../am335x/hw_control_AM335x.h"
 
-#include "../platform/platform.h"
-
 #define GPIO_COUNT		4
 
 static boolean_t gpioXEnabled[GPIO_COUNT];
 
-static int getGPIOFromPin(int pinNo);
-static int getCM_PER_GPIOx_CLKCTRL(int pinNo);
-static int getCM_PER_GPIOx_CLKCTRL_MODULEMODE(int pinNo);
-static int getCM_PER_GPIOx_CLKCTRL_MODULEMODE_ENABLE(int pinNo);
-static int getCM_PER_GPIOx_CLKCTRL_OPTFCLKEN_GPIO_x_GDBCLK(int pinNo);
-static int getCM_PER_GPIOx_CLKCTRL_IDLEST_FUNC(int pinNo);
-static int getCM_PER_GPIOx_CLKCTRL_IDLEST_SHIFT(int pinNo);
-static int getCM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_GPIO_x_GDBCLK(int pinNo);
-static int getCM_PER_GPIOx_CLKCTRL_IDLEST(int pinNo);
-static int getSOC_GPIO_x_REGS(int pinNo);
+static int getGPIOFromPin(uint16_t pinNo);
+static int getCM_PER_GPIOx_CLKCTRL(uint16_t pinNo);
+static int getCM_PER_GPIOx_CLKCTRL_MODULEMODE(uint16_t pinNo);
+static int getCM_PER_GPIOx_CLKCTRL_MODULEMODE_ENABLE(uint16_t pinNo);
+static int getCM_PER_GPIOx_CLKCTRL_OPTFCLKEN_GPIO_x_GDBCLK(uint16_t pinNo);
+static int getCM_PER_GPIOx_CLKCTRL_IDLEST_FUNC(uint16_t pinNo);
+static int getCM_PER_GPIOx_CLKCTRL_IDLEST_SHIFT(uint16_t pinNo);
+static int getCM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_GPIO_x_GDBCLK(uint16_t pinNo);
+static int getCM_PER_GPIOx_CLKCTRL_IDLEST(uint16_t pinNo);
+static int getSOC_GPIO_x_REGS(uint16_t pinNo);
 
-void GPIOEnable(int pinNo)
+void GPIOEnable(uint16_t pinNo)
 {
 	if (gpioXEnabled[getGPIOFromPin(pinNo)]) { return; }
 
@@ -76,13 +74,13 @@ void GPIOEnable(int pinNo)
 	gpioXEnabled[getGPIOFromPin(pinNo)] = true;
 }
 
-void GPIODisable(int pinNo)
+void GPIODisable(uint16_t pinNo)
 {
 	if (!gpioXEnabled[getGPIOFromPin(pinNo)]) { return; }
 	HWREG(getSOC_GPIO_x_REGS(pinNo) + GPIO_CTRL) |= (GPIO_CTRL_DISABLEMODULE);
 }
 
-void GPIOReset(int pinNo)
+void GPIOReset(uint16_t pinNo)
 {
 	// Setting the SOFTRESET bit in System Configuration register.
 	// Doing so would reset the GPIO module.
@@ -93,7 +91,7 @@ void GPIOReset(int pinNo)
 	{ }
 }
 
-void GPIOSetMux(int pin, mux_mode_t mux)
+void GPIOSetMux(uint16_t pin, mux_mode_t mux)
 {
 	int muxMode = -1;
 	switch (mux) {
@@ -122,7 +120,7 @@ void GPIOSetMux(int pin, mux_mode_t mux)
 	}
 }
 
-void GPIOSetPinDirection(int pin, pin_direction_t dir)
+void GPIOSetPinDirection(uint16_t pin, pin_direction_t dir)
 {
 
     if(dir == PIN_DIRECTION_OUT)
@@ -135,7 +133,7 @@ void GPIOSetPinDirection(int pin, pin_direction_t dir)
     }
 }
 
-void GPIOSetPinValue(int pin, pin_value_t dir)
+void GPIOSetPinValue(uint16_t pin, pin_value_t dir)
 {
 	switch (dir)
 	{
@@ -149,13 +147,13 @@ void GPIOSetPinValue(int pin, pin_value_t dir)
 	}
 }
 
-pin_value_t GPIOGetPinValue(int pin)
+pin_value_t GPIOGetPinValue(uint16_t pin)
 {
 	// TODO Implement this
 	return PIN_VALUE_LOW;
 }
 
-static int getGPIOFromPin(int pinNo)
+static int getGPIOFromPin(uint16_t pinNo)
 {
 	switch (pinNo) {
 		case 21:
@@ -168,7 +166,7 @@ static int getGPIOFromPin(int pinNo)
 	}
 }
 
-static int getCM_PER_GPIOx_CLKCTRL(int pinNo)
+static int getCM_PER_GPIOx_CLKCTRL(uint16_t pinNo)
 {
 	switch (pinNo) {
 		case 21:
@@ -180,7 +178,7 @@ static int getCM_PER_GPIOx_CLKCTRL(int pinNo)
 			return -1;
 	}
 }
-static int getCM_PER_GPIOx_CLKCTRL_MODULEMODE(int pinNo)
+static int getCM_PER_GPIOx_CLKCTRL_MODULEMODE(uint16_t pinNo)
 {
 	switch (pinNo) {
 		case 21:
@@ -192,7 +190,7 @@ static int getCM_PER_GPIOx_CLKCTRL_MODULEMODE(int pinNo)
 			return -1;
 	}
 }
-static int getCM_PER_GPIOx_CLKCTRL_MODULEMODE_ENABLE(int pinNo)
+static int getCM_PER_GPIOx_CLKCTRL_MODULEMODE_ENABLE(uint16_t pinNo)
 {
 	switch (pinNo) {
 		case 21:
@@ -205,7 +203,7 @@ static int getCM_PER_GPIOx_CLKCTRL_MODULEMODE_ENABLE(int pinNo)
 	}
 }
 
-static int getCM_PER_GPIOx_CLKCTRL_OPTFCLKEN_GPIO_x_GDBCLK(int pinNo)
+static int getCM_PER_GPIOx_CLKCTRL_OPTFCLKEN_GPIO_x_GDBCLK(uint16_t pinNo)
 {
 	switch (pinNo) {
 		case 21:
@@ -218,7 +216,7 @@ static int getCM_PER_GPIOx_CLKCTRL_OPTFCLKEN_GPIO_x_GDBCLK(int pinNo)
 	}
 }
 
-static int getCM_PER_GPIOx_CLKCTRL_IDLEST_FUNC(int pinNo)
+static int getCM_PER_GPIOx_CLKCTRL_IDLEST_FUNC(uint16_t pinNo)
 {
 	switch (pinNo) {
 		case 21:
@@ -230,7 +228,7 @@ static int getCM_PER_GPIOx_CLKCTRL_IDLEST_FUNC(int pinNo)
 			return -1;
 	}
 }
-static int getCM_PER_GPIOx_CLKCTRL_IDLEST_SHIFT(int pinNo)
+static int getCM_PER_GPIOx_CLKCTRL_IDLEST_SHIFT(uint16_t pinNo)
 {
 	switch (pinNo) {
 		case 21:
@@ -242,7 +240,7 @@ static int getCM_PER_GPIOx_CLKCTRL_IDLEST_SHIFT(int pinNo)
 			return -1;
 	}
 }
-static int getCM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_GPIO_x_GDBCLK(int pinNo)
+static int getCM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_GPIO_x_GDBCLK(uint16_t pinNo)
 {
 	switch (pinNo) {
 		case 21:
@@ -254,7 +252,7 @@ static int getCM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_GPIO_x_GDBCLK(int pinNo)
 			return -1;
 	}
 }
-static int getCM_PER_GPIOx_CLKCTRL_IDLEST(int pinNo)
+static int getCM_PER_GPIOx_CLKCTRL_IDLEST(uint16_t pinNo)
 {
 	switch (pinNo) {
 		case 21:
@@ -267,7 +265,7 @@ static int getCM_PER_GPIOx_CLKCTRL_IDLEST(int pinNo)
 	}
 }
 
-static int getSOC_GPIO_x_REGS(int pinNo)
+static int getSOC_GPIO_x_REGS(uint16_t pinNo)
 {
 	switch (pinNo) {
 		case 21:

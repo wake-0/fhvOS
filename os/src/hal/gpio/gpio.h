@@ -8,6 +8,8 @@
 #ifndef HAL_GPIO_GPIO_H_
 #define HAL_GPIO_GPIO_H_
 
+#include "../platform/platform.h"
+
 typedef enum {
 	PIN_DIRECTION_IN = 1,
 	PIN_DIRECTION_OUT = 2
@@ -24,12 +26,12 @@ typedef enum {
 
 #define UNDEFINED_PIN			-1
 
-extern void 		GPIOEnable(int pin);
-extern void 		GPIODisable(int pin);
-extern void 		GPIOReset(int pin);
-extern void 		GPIOSetMux(int pin, mux_mode_t mux);
-extern void 		GPIOSetPinDirection(int pin, pin_direction_t dir);
-extern void 		GPIOSetPinValue(int pin, pin_value_t value);
-extern pin_value_t 	GPIOGetPinValue(int pin);
+extern void 		GPIOEnable(uint16_t pin);
+extern void 		GPIODisable(uint16_t pin);
+extern void 		GPIOReset(uint16_t pin);
+extern void 		GPIOSetMux(uint16_t pin, mux_mode_t mux);
+extern void 		GPIOSetPinDirection(uint16_t pin, pin_direction_t dir);
+extern void 		GPIOSetPinValue(uint16_t pin, pin_value_t value);
+extern pin_value_t 	GPIOGetPinValue(uint16_t pin);
 
 #endif /* HAL_GPIO_GPIO_H_ */

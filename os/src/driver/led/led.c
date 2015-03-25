@@ -9,9 +9,9 @@
 #include "led.h"
 #include "../../hal/gpio/gpio.h"
 
-int LEDInit	(short id)
+int LEDInit	(uint16_t id)
 {
-	int ledCount = BOARD_LED_COUNT;
+	uint8_t ledCount = BOARD_LED_COUNT;
 	if (id > ledCount - 1) return DRIVER_ERROR;
 	// Set up the GPIO pin
 	GPIOEnable(BOARD_LED(id));
@@ -21,23 +21,23 @@ int LEDInit	(short id)
 	return DRIVER_OK;
 }
 
-int LEDOpen	(short id)
+int LEDOpen	(uint16_t id)
 {
-	int ledCount = BOARD_LED_COUNT;
+	uint8_t ledCount = BOARD_LED_COUNT;
 	if (id > ledCount - 1) return DRIVER_ERROR;
 	return DRIVER_OK;
 }
 
-int LEDClose (short id)
+int LEDClose (uint16_t id)
 {
 	// We turn off the led
 	char buf[1] = { 0 };
 	return LEDWrite(id, &buf[0], 1);
 }
 
-int LEDWrite (short id, char* buf, int len)
+int LEDWrite (uint16_t id, char* buf, uint16_t len)
 {
-	int ledCount = BOARD_LED_COUNT;
+	uint8_t ledCount = BOARD_LED_COUNT;
 	if (id > ledCount - 1) return DRIVER_ERROR;
 
 	if (len != 1) return DRIVER_ERROR;
@@ -56,13 +56,13 @@ int LEDWrite (short id, char* buf, int len)
 	return DRIVER_OK;
 }
 
-int LEDRead	(short id, char* buf, int len)
+int LEDRead	(uint16_t id, char* buf, uint16_t len)
 {
 	// TODO Implement this
 	return DRIVER_FUNCTION_NOT_SUPPORTED;
 }
 
-int LEDIoctl (short id, int cmd, int mode, char* buf, int len)
+int LEDIoctl (uint16_t id, uint16_t cmd, uint8_t mode, char* buf, uint16_t len)
 {
 	return DRIVER_FUNCTION_NOT_SUPPORTED;
 }
