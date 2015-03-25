@@ -18,7 +18,7 @@
 
 #define GPIO_COUNT		4
 
-static tBoolean gpioXEnabled[GPIO_COUNT];
+static boolean_t gpioXEnabled[GPIO_COUNT];
 
 static int getGPIOFromPin(int pinNo);
 static int getCM_PER_GPIOx_CLKCTRL(int pinNo);

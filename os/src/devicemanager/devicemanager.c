@@ -18,7 +18,7 @@ typedef struct {
 	short driverMsg;
 } device_map_entry_t;
 
-static tBoolean compareEntry(device_map_entry_t* entry, char* name, int len);
+static boolean_t compareEntry(device_map_entry_t* entry, char* name, int len);
 
 /*
  * This is a mapping between device names and the driver for that device.
@@ -89,10 +89,10 @@ int DeviceManagerIoctl(device_t device, int msg, int mode, char* buf, int len)
 	return driver->ioctl(device.driverMsg, msg, mode, buf, len);
 }
 
-tBoolean compareEntry(device_map_entry_t* entry, char* name, int len)
+boolean_t compareEntry(device_map_entry_t* entry, char* name, int len)
 {
 	int cnt = 0;
-	tBoolean equal = true;
+	boolean_t equal = true;
 	while (entry->name[cnt] != '\0' && cnt <= len) {
 		if (entry->name[cnt] != name[cnt]) equal = false;
 		cnt++;

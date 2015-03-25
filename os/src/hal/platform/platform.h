@@ -15,7 +15,7 @@
 // Define a boolean type, and values for true and false.
 //
 //*****************************************************************************
-typedef unsigned char tBoolean;
+typedef unsigned char boolean_t;
 
 #ifndef true
 #define true 1
