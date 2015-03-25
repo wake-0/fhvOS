@@ -6,12 +6,11 @@
 // Macros for hardware access, both direct and via the bit-band region.
 //
 //*****************************************************************************
-#define HWREG(address) 					(*((volatile unsigned int *)(address)))
-#define HWREG_SET(address,bit) 			(HWREG(address) |= bit)
-#define HWREG_UNSET(address,bit) 		(HWREG(address) &= ~bit)
-#define HWREG_CHECK(address, checkbit)	((HWREG(address) & checkbit) == checkbit)
-#define HWREG_CLEAR(address)			(HWREG(address) &= ~0xFFFF)
-#define HWREG_WRITE(address, value)		(HWREG(address) = value)
+#define HWREG(address) 						(*((volatile unsigned int *)(address)))
+#define HWREG_SET(address,bitmask) 			(HWREG(address) |= bitmask)
+#define HWREG_UNSET(address,bitmask) 		(HWREG(address) &= ~bitmask)
+#define HWREG_CHECK(address, checkbit)		((HWREG(address) & checkbit) == checkbit)
+#define HWREG_WRITE(address, value)			(HWREG(address) = value)
 
 #define HWREGH(x)                                                             \
         (*((volatile unsigned short *)(x)))
