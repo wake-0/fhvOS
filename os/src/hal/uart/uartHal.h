@@ -81,9 +81,9 @@ typedef struct {
 /*
  * functions
  */
-void UARTHALSoftwareReset(uart_t uart);
-void UARTHALFIFOSettings(uart_t uart);
-void UARTHALSettings(uart_t uart, configuration_t* config);
-void UARTHALFIFOWrite(uart_t uart, uint8_t* msg);
+void UARTHalSoftwareReset(uart_t uart);
+void UARTHalFifoSettings(uart_t uart);
+void UARTHalSettings(uart_t uart, configuration_t* config);
+void UARTHalFifoWrite(uart_t uart, uint8_t* msg);
 
 #endif /* UART_HAL_H_ */

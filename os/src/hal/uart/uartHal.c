@@ -32,7 +32,7 @@ static void switchToConfModeOp(address_t baseAddress);
 /*
  * Implementations of the functions from the h file
  */
-void UARTHALSoftwareReset(uart_t uart) {
+void UARTHalSoftwareReset(uart_t uart) {
 	address_t baseAddress = getBaseAddressOfUART(uart);
 
 	// 1. Initiate a software reset
@@ -46,7 +46,7 @@ void UARTHALSoftwareReset(uart_t uart) {
 }
 
 //TODO: add some logic to decide write/read, ...
-void UARTHALFIFOSettings(uart_t uart) {
+void UARTHalFifoSettings(uart_t uart) {
 	address_t baseAddress = getBaseAddressOfUART(uart);
 
 	// 1. Switch to register configuration mode B to access the UARTi.UART_EFR register
@@ -118,7 +118,7 @@ void UARTHALFIFOSettings(uart_t uart) {
 	HWREG_WRITE(baseAddress + UART_LCR_OFF, lcrValue);
 }
 
-void UARTHALSettings(uart_t uart, configuration_t* config) {
+void UARTHalSettings(uart_t uart, configuration_t* config) {
 	address_t baseAddress = getBaseAddressOfUART(uart);
 
 	// 1. Disable UART to access the UARTi.UART_DLL and UARTi.UART_DLH registers
@@ -228,7 +228,7 @@ void UARTHALSettings(uart_t uart, configuration_t* config) {
 	HWREG_UNSET(baseAddress + UART_MDR1_OFF, UART_MODE_DISABLE_UART);
 }
 
-void UARTHALFIFOWrite(uart_t uart, uint8_t* msg) {
+void UARTHalFifoWrite(uart_t uart, uint8_t* msg) {
 	address_t baseAddress = getBaseAddressOfUART(uart);
 	//HWREG(baseAddress + UART_THR_OFF) = *(msg);
 	HWREG(baseAddress + UART_THR_OFF) = *(msg);

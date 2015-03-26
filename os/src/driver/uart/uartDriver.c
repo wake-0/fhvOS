@@ -5,11 +5,10 @@
  *      Author: Kevin
  */
 #include "uartDriver.h"
-#include "../../hal/uart/uartHal.h"
 
 void UARTDriverInit(uart_t uart)
 {
-	UARTHALSoftwareReset(uart);
+	UARTHalSoftwareReset(uart);
 
 	configuration_t config;
 	config.baudRate = UART_BAUDRATE_9600;
@@ -17,11 +16,11 @@ void UARTDriverInit(uart_t uart)
 	config.charLength = UART_CHARLENGTH_8;
 	config.stopBit = UART_STOPBIT_1;
 
-	UARTHALFIFOSettings(uart);
-	UARTHALSettings(uart, &config);
+	UARTHalFifoSettings(uart);
+	UARTHalSettings(uart, &config);
 }
 
 void UARTDriverWrite(uart_t uart, uint8_t* msg)
 {
-	UARTHALFIFOWrite(uart, msg);
+	UARTHalFifoWrite(uart, msg);
 }
