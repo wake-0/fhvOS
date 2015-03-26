@@ -10,7 +10,6 @@
 void UARTDriverInit(uart_t uart)
 {
 	UARTHALSoftwareReset(uart);
-	UARTHALFIFOSettings(uart);
 
 	configuration_t config;
 	config.baudRate = UART_BAUDRATE_9600;
@@ -18,7 +17,8 @@ void UARTDriverInit(uart_t uart)
 	config.charLength = UART_CHARLENGTH_8;
 	config.stopBit = UART_STOPBIT_1;
 
-	UARTHALSettings(uart, config);
+	UARTHALFIFOSettings(uart);
+	UARTHALSettings(uart, &config);
 }
 
 void UARTDriverWrite(uart_t uart, uint8_t* msg)

@@ -54,10 +54,10 @@ typedef enum {
  * UART character length
  */
 typedef enum {
-	UART_CHARLENGTH_5,
-	UART_CHARLENGTH_6,
-	UART_CHARLENGTH_7,
-	UART_CHARLENGTH_8
+	UART_CHARLENGTH_5 = 0x0,
+	UART_CHARLENGTH_6 = 0x1,
+	UART_CHARLENGTH_7 = 0x2,
+	UART_CHARLENGTH_8 = 0x3
 } charlength_t;
 
 /*
@@ -83,7 +83,7 @@ typedef struct {
  */
 void UARTHALSoftwareReset(uart_t uart);
 void UARTHALFIFOSettings(uart_t uart);
-void UARTHALSettings(uart_t uart, configuration_t config);
+void UARTHALSettings(uart_t uart, configuration_t* config);
 void UARTHALFIFOWrite(uart_t uart, uint8_t* msg);
 
 #endif /* UART_HAL_H_ */

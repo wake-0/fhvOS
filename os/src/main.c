@@ -9,6 +9,7 @@ static void DMTimerIsr(void);
 
 int main(void)
 {
+	/*
 	AintcInit();
 
 	InterruptHandlerRegister(SYS_INT_TINT2,DMTimerIsr);
@@ -27,6 +28,16 @@ int main(void)
 	while(1)
 	{
 	}
+	*/
+			uint8_t a = 'a';
+			UARTDriverInit(UART0);
+			UARTDriverWrite(UART0, &a);
+
+			while(1)
+			{
+				UARTDriverWrite(UART0, &a);
+			}
+
 }
 
 
