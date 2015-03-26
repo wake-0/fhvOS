@@ -12,9 +12,6 @@
 #include "../../hal/uart/uartHal.h"
 #include "../driver.h"
 
-void UARTDriverInit(uart_t);
-void UARTDriverWrite(uart_t, uint8_t* msg);
-
 extern int UARTDriverInit(uint16_t id);
 extern int UARTDriverOpen(uint16_t id);
 extern int UARTDriverClose(uint16_t id);
