@@ -1,82 +1,57 @@
 
-//#include <stdio.h>
-
+#include <stdio.h>
 #include "driver/uart/uartDriver.h"
 #include "driver/timer/driver_timer.h"
+#include "hal/interrupt/interrupt.h"
+#include "hal/cpu/cpu.h"
 
-void CPUirqd1(void);
-void CPUirqe1(void);
-void CPUSwitchToUserMode1(void);
-void CPUSwitchToPrivilegedMode1(void);
-interrupt void undef_handler(void);
-interrupt void fiq_handler(void);
-interrupt void irq_handler(void);
+static void DMTimerIsr(void);
 
 int main(void)
 {
+	/*
+	AintcInit();
+
+	InterruptHandlerRegister(SYS_INT_TINT2,DMTimerIsr);
+
 	TimerReset(TIMER0);
+
+
+	CPUirqe();
+
+	CPUSwitchToUserMode();
+
+
 	TimerValueLoad(TIMER0, 0x10);
 
 	TimerStart(TIMER0);
-
-	CPUirqe1();
-
-	CPUSwitchToUserMode1();
-
-	CPUSwitchToPrivilegedMode1();
-
 	while(1)
 	{
 	}
-}
+	*/
+	char* a = "a";
+	UARTDriverInit(0);
+	UARTDriverWrite(0, a, 0);
 
-#pragma INTERRUPT(udef_handler, UDEF)
-interrupt void udef_handler() {
-	printf("udef interrupt\n");
-}
-
-#pragma INTERRUPT(fiq_handler, FIQ)
-interrupt void fiq_handler() {
-	printf("fiq interrupt\n");
-}
-
-/**
- * Is called on any prefetch abort.
- */
-#pragma INTERRUPT(pabt_handler, PABT)
-interrupt void pabt_handler() {
-	printf("pabt interrupt\n");
+	while(1)
+	{
+		UARTDriverWrite(0, a, 0);
+	}
 }
 
 
-
-
-void CPUSwitchToPrivilegedMode1(void)
-{
-    asm("    SWI   #458752");
-}
-
-void CPUSwitchToUserMode1(void)
-{
-    asm("    mrs     r0, CPSR\n\t"
-        "    bic     r0, r0, #0x0F\n\t"
-        "    orr     r0, r0, #0x10\n\t "
-        "    msr     CPSR_c, r0");
-}
-
-void CPUirqd1(void)
+static void DMTimerIsr(void)
 {
 
-    // Disable IRQ in CPSR
-    asm("    mrs     r0, CPSR\n\t"
-        "    orr     r0, r0, #0x80\n\t"
-        "    msr     CPSR_c, r0");
-}
+    /* Disable the DMTimer interrupts */
+    //DMTimerIntDisable(DMTIMER_INSTANCE, DMTIMER_INT_OVF_EN_FLAG);
 
-void CPUirqe1(void)
-{
-    // Enable IRQ in CPSR
-    asm("    mrs     r0, CPSR\n\t"
-        "    bic     r0, r0, #0x80\n\t"
-        "    msr     CPSR_c, r0");
+    /* Clear the status of the interrupt flags */
+    //DMTimerIntStatusClear(DMTIMER_INSTANCE, DMTIMER_INT_OVF_IT_FLAG);
+
+	printf("\nTimer Interrupt occured!\n");
+    //flagIsr = 1;
+
+    /* Enable the DMTimer interrupts */
+    //DMTimerIntEnable(DMTIMER_INSTANCE, DMTIMER_INT_OVF_EN_FLAG);
 }

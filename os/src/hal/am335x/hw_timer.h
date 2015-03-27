@@ -42,17 +42,45 @@
 #define TSICR					(0x54)						// Timer Synchronous Interface Control Register
 #define TCAR2					(0x58)						// Timer Capture Register
 
-
+// TCLR
+#define ENABLE_COMPARE 0x20
+#define DISABLE_COMPARE 0x00
+#define NO_TRIGGER 0x0
+#define OVERFLOW_TRIGGER 0x400
+#define OVERFLOW_MATCH_TRIGGER 0x800
+#define SINGLE_CAPTURE 0x0
+#define CAPTURE_ON_SECOND_EVENT 0x4000
+#define ONE_SHOT_TIMER 0x0
+#define AUTO_RELOAD 0x02
+#define NO_CAPTURE 0x0
+#define CAPTURE_ON_TRANSITION_LOW_TO_HIGH 0x100
+#define CAPTURE_ON_TRANSITION_HIGH_TO_LOW 0x200
+#define CAPTURE_ON_BOTH_EDGE_TRANSITION 0x300
+#define PINMODE_PULSE 0x0
+#define PINMODE_TOGGLE 0x1000
+#define PRESCALER_DISABLE   		~(0x00000020u)
+#define PRESCALER_ENABLE   			(0x00000020u)
+#define PRESCALER_VALUE_RANGE		(0x1Cu)
 
 // TSICR
 #define DMTIMER_TSICR_POSTED   		(0x00000004u)
 
 // TWPS
-#define DMTIMER_TWPS_W_PEND_TCLR   	(0x00000001u)
+#define WRITE_PEND_TCLR   	(0x1u)				// When equal to 1, a write is pending to the TCLR register
+#define WRITE_PEND_TCRR		(0x2u)				// When equal to 1, a write is pending to the TCRR register
+#define WRITE_PEND_TLDR		(0x4u)				// When equal to 1, a write is pending to the TLDR register
+#define WRITE_PEND_TTGR		(0x8u)				// When equal to 1, a write is pending to the TTGR register
+#define WRITE_PEND_TMAR 	(0x16u)				// When equal to 1, a write is pending to the TMAR register
+
 
 // TIOCP_CFG
 #define TIOCP_CFG_SOFTRESET_DONE   (0x0u)
 #define TIOCP_CFG_SOFTRESET   (0x00000001u)
+
+// IRQENABLE_SET
+#define IRQ_CAPTURE_ENABLE 			(0x4)
+#define IRQ_OVERFLOW_ENABLE			(0x2)
+#define IRQ_MATCH_ENABLE			(0x1)
 
 // register offsets for DMTIMER1 (1MS)
 

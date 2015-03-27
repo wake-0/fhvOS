@@ -63,21 +63,38 @@ void TimerValueLoad(Timer_t timer, unsigned int timerCounterValue)
 }
 
 
-void TimerConfigureInterrupt(Timer_t timer, ISR intHandler, unsigned int timeInMilis)
+void TimerModeConfigure(Timer_t timer, unsigned int compareMode, unsigned int reloadMode)
+{
+	unsigned int timerBaseRegister = getTimerBaseRegisterAddress(timer);
+	configureTimerMode(timerBaseRegister, compareMode, reloadMode);
+}
+
+
+
+void TimerConfigureCyclicInterrupt(Timer_t timer, ISR intHandler, unsigned int timeInMilis)
+{
+	unsigned int timerBaseRegister = getTimerBaseRegisterAddress(timer);
+}
+
+
+
+void TimerInterruptEnable(Timer_t timer)
+{
+	unsigned int timerBaseRegister = getTimerBaseRegisterAddress(timer);
+}
+
+void TimerInterruptDisable(Timer_t timer)
+{
+	unsigned int timerBaseRegister = getTimerBaseRegisterAddress(timer);
+}
+
+void TimerConfigureCapture(Timer_t timer, unsigned int compareMode, unsigned int compareValue)
 {
 
 }
 
-void TimerConfigureCapture(Timer_t timer, timerCompareMode_t compareMode, unsigned int compareValue)
-{
-
-}
 
 
-void TimerModeConfigure(Timer_t timer, unsigned int mode)
-{
-
-}
 
 void TimerCountingHalt(Timer_t timer)
 {

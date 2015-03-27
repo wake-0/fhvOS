@@ -8,6 +8,8 @@
 #ifndef UART_HAL_H_
 #define UART_HAL_H_
 
+#include "../platform/platform.h"
+
 /*
  * UART abstraction
  */
@@ -52,10 +54,10 @@ typedef enum {
  * UART character length
  */
 typedef enum {
-	UART_CHARLENGTH_5,
-	UART_CHARLENGTH_6,
-	UART_CHARLENGTH_7,
-	UART_CHARLENGTH_8
+	UART_CHARLENGTH_5 = 0x0,
+	UART_CHARLENGTH_6 = 0x1,
+	UART_CHARLENGTH_7 = 0x2,
+	UART_CHARLENGTH_8 = 0x3
 } charlength_t;
 
 /*
@@ -70,7 +72,7 @@ typedef enum {
  * UART configuration
  */
 typedef struct {
-	baudrate_t baudeRate;
+	baudrate_t baudRate;
 	parity_t parity;
 	charlength_t charLength;
 	stopbit_t stopBit;
@@ -79,9 +81,9 @@ typedef struct {
 /*
  * functions
  */
-void UARTHALSoftwareReset(uart_t uart);
-void UARTHALFIFOSettings(uart_t uart);
-void UARTHALSettings(uart_t uart, configuration_t config);
-void UARTHALFIFOWrite(uart_t uart, char* msg);
+void UARTHalSoftwareReset(uart_t uart);
+void UARTHalFifoSettings(uart_t uart);
+void UARTHalSettings(uart_t uart, configuration_t* config);
+void UARTHalFifoWrite(uart_t uart, uint8_t* msg);
 
 #endif /* UART_HAL_H_ */
