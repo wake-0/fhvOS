@@ -14,6 +14,11 @@
 typedef uint32_t address_t;
 
 /*
+ * General defines
+ */
+#define UART_BASE_ADR_NOT_FOUND 0x00
+
+/*
  * Bits for the UART reset
  */
 #define UART_SYSC_SOFT_RESET	(1 << 1)
@@ -22,8 +27,8 @@ typedef uint32_t address_t;
 /*
  * Forward declarations
  */
-static address_t getBaseAddressOfUART(uart_t);
-static uint32_t getBaudRateOfUART(baudrate_t);
+static address_t getBaseAddressOfUART(uartPins_t uartPins);
+static uint32_t getBaudRateOfUART(baudrate_t baudRate);
 
 static void switchToConfModeA(address_t baseAddress);
 static void switchToConfModeB(address_t baseAddress);
@@ -32,8 +37,11 @@ static void switchToConfModeOp(address_t baseAddress);
 /*
  * Implementations of the functions from the h file
  */
-void UARTHalSoftwareReset(uart_t uart) {
-	address_t baseAddress = getBaseAddressOfUART(uart);
+int UARTHalSoftwareReset(uartPins_t uartPins) {
+	address_t baseAddress = getBaseAddressOfUART(uartPins);
+	if (baseAddress == UART_BASE_ADR_NOT_FOUND) {
+		return UART_HAL_ERROR;
+	}
 
 	// 1. Initiate a software reset
 	// Set the UARTi.UART_SYSC[1] SOFTRESET bit to 1.
@@ -43,11 +51,16 @@ void UARTHalSoftwareReset(uart_t uart) {
 	// Poll the UARTi.UART_SYSS[0] RESETDONE bit until it equals 1.
 	while (!HWREG_CHECK(baseAddress + UART_SYSS_OFF, UART_SYSS_SOFT_RESET)) {
 	}
+
+	return UART_HAL_OK;
 }
 
 //TODO: add some logic to decide write/read, ...
-void UARTHalFifoSettings(uart_t uart) {
-	address_t baseAddress = getBaseAddressOfUART(uart);
+int UARTHalFifoSettings(uartPins_t uartPins) {
+	address_t baseAddress = getBaseAddressOfUART(uartPins);
+	if (baseAddress == UART_BASE_ADR_NOT_FOUND) {
+		return UART_HAL_ERROR;
+	}
 
 	// 1. Switch to register configuration mode B to access the UARTi.UART_EFR register
 	// Save the current UARTi.UART_LCR register value.
@@ -116,10 +129,15 @@ void UARTHalFifoSettings(uart_t uart) {
 
 	// 12. Restore the UARTi.UART_LCR value saved
 	HWREG_WRITE(baseAddress + UART_LCR_OFF, lcrValue);
+
+	return UART_HAL_OK;
 }
 
-void UARTHalSettings(uart_t uart, configuration_t* config) {
-	address_t baseAddress = getBaseAddressOfUART(uart);
+int UARTHalSettings(uartPins_t uartPins, configuration_t* config) {
+	address_t baseAddress = getBaseAddressOfUART(uartPins);
+	if (baseAddress == UART_BASE_ADR_NOT_FOUND) {
+		return UART_HAL_ERROR;
+	}
 
 	// 1. Disable UART to access the UARTi.UART_DLL and UARTi.UART_DLH registers
 	// Set the UARTi.UART_MDR1[2:0] MODE_SELECT bit field to 0x7.
@@ -226,12 +244,15 @@ void UARTHalSettings(uart_t uart, configuration_t* config) {
 	// 13. Load the new UART mode
 	// Set the UARTi.UART_MDR1[2:0] MODE_SELECT bit field to the desired value.
 	HWREG_UNSET(baseAddress + UART_MDR1_OFF, UART_MODE_DISABLE_UART);
+
+	return UART_HAL_OK;
 }
 
-void UARTHalFifoWrite(uart_t uart, uint8_t* msg) {
-	address_t baseAddress = getBaseAddressOfUART(uart);
-	//HWREG(baseAddress + UART_THR_OFF) = *(msg);
+int UARTHalFifoWrite(uartPins_t uartPins, uint8_t* msg) {
+	address_t baseAddress = getBaseAddressOfUART(uartPins);
 	HWREG(baseAddress + UART_THR_OFF) = *(msg);
+
+	return UART_HAL_OK;
 }
 
 /*
@@ -252,29 +273,24 @@ void switchToConfModeOp(address_t baseAddress) {
 	HWREG_WRITE(baseAddress + UART_LCR_OFF, UART_LCR_MODE_OPERATIONAL);
 }
 
-static address_t getBaseAddressOfUART(uart_t uart) {
-	address_t baseAddress;
-	switch (uart) {
-	case UART0:
-		baseAddress = UART0_BASE_ADR;
-		break;
-	case UART1:
-		baseAddress = UART1_BASE_ADR;
-		break;
-	case UART2:
-		baseAddress = UART2_BASE_ADR;
-		break;
-	case UART3:
-		baseAddress = UART3_BASE_ADR;
-		break;
-	case UART4:
-		baseAddress = UART4_BASE_ADR;
-		break;
-	default:
-		baseAddress = UART5_BASE_ADR;
+static address_t getBaseAddressOfUART(uartPins_t uartPins) {
+	if (uartPins.rxd == BOARD_UART0_RXD && uartPins.txd == BOARD_UART0_TXD) {
+		return UART0_BASE_ADR;
+	}
+	if (uartPins.rxd == BOARD_UART1_RXD && uartPins.txd == BOARD_UART1_TXD) {
+		return UART1_BASE_ADR;
+	}
+	if (uartPins.rxd == BOARD_UART2_RXD && uartPins.txd == BOARD_UART2_TXD) {
+		return UART2_BASE_ADR;
+	}
+	if (uartPins.rxd == BOARD_UART4_RXD && uartPins.txd == BOARD_UART4_TXD) {
+		return UART4_BASE_ADR;
+	}
+	if (uartPins.rxd == BOARD_UART5_RXD && uartPins.txd == BOARD_UART5_TXD) {
+		return UART5_BASE_ADR;
 	}
 
-	return baseAddress;
+	return UART_BASE_ADR_NOT_FOUND;
 }
 
 static uint32_t getBaudRateOfUART(baudrate_t baudRate) {
