@@ -92,6 +92,7 @@ int UARTHalFifoSettings(uartPins_t uartPins) {
 	// Set the UARTi.UART_FCR[3] DMA_MODE
 	// Set the UARTi.UART_FCR[0] FIFO_ENABLE (0: Disable the FIFO; 1: Enable the FIFO)
 	HWREG_UNSET(baseAddress + UART_FCR_OFF, 0b11111001);
+	HWREG_SET(baseAddress + UART_FCR_OFF, (1 << 0));
 
 	// 6. Switch to register configuration mode B to access the UARTi.UART_EFR register
 	// Set the UARTi.UART_LCR register value to 0x00BF.
@@ -251,6 +252,8 @@ int UARTHalSettings(uartPins_t uartPins, configuration_t* config) {
 int UARTHalFifoWrite(uartPins_t uartPins, uint8_t* msg) {
 	address_t baseAddress = getBaseAddressOfUART(uartPins);
 	HWREG(baseAddress + UART_THR_OFF) = *(msg);
+
+	while (HWREG(baseAddress + UART_THR_OFF) != 0x00);
 
 	return UART_HAL_OK;
 }
