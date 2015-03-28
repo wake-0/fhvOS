@@ -1,0 +1,107 @@
+\newcommand{\getAuthor}{AUTHOR}
+\newcommand{\setAuthor}[1]{\renewcommand{\getAuthor}{#1}}
+
+\newcommand{\getAuthorId}{Matrikelnummer}
+\newcommand{\setAuthorId}[1]{\renewcommand{\getAuthorId}{#1}} 
+
+\newcommand{\getSupervisor}{1234}
+\newcommand{\setSupervisor}[1]{\renewcommand{\getSupervisor}{#1}} 
+
+\newcommand{\getTitle}{TITLE}
+\newcommand{\setTitle}[1]{\renewcommand{\getTitle}{#1}}
+
+\newcommand{\getInstituteLocation}{Dornbirn, Austria}
+\newcommand{\setInstituteLocation}[1]{\renewcommand{\getInstituteLocation}{#1}}
+
+\newcommand{\getInstituteGraphic}{\includegraphics[width = 0.5 \textwidth]{./img/FHVlogo}}
+\newcommand{\setInstituteGraphic}[1]{\renewcommand{\getInstituteGraphic}{#1}}
+
+\renewcommand{\maketitle}{
+\begin{titlepage}
+\begin{center}
+
+% Upper part of the page. The '~' is needed because \\
+% only works if a paragraph has started.
+
+\textsc~\getInstituteGraphic
+\\[1.5cm]
+
+\textsc{\Large Bachelorarbeit über das Berufspraktikum im Rahmen des Bachelor Studienganges Informatik  - Software and Information Engineering}\\[1.5cm]
+%Title
+\hrule
+
+\vspace{0.5cm}
+\textsc{\huge \bfseries \getTitle}\\[0.5cm]
+
+\hrule
+\vspace{1.5cm}
+
+% Author and supervisor
+\textsc{verfasst von}
+\\[0.4cm]
+
+\textsc{\Large \getAuthor}
+\\
+\getAuthorId
+\\[1cm]
+
+
+\textsc{Betreut durch}
+\vspace{0.4cm}
+
+\textsc{\Large \getSupervisor}
+
+\vspace{1.5cm}
+
+\textsc{durchgeführt bei proTask GmbH betreut durch}
+\vspace{0.4cm} 
+\\ 
+\textsc{\Large Andreas Saler}
+
+\vspace{1.5cm}
+
+% Bottom of the page
+\textsc{Dornbirn, \today}
+
+\end{center}
+\end{titlepage}
+}
+
+\newcommand{\newAcronymAndGlossaryEntry}[4]
+{
+\newacronym[description={\glslink{#2}{#3}}]
+{#1}{#2}{#3}
+
+\newglossaryentry{#2}{name=\glslink{#1}{#3},
+text=#3,
+description=#4}
+}
+
+\newcommand{\glossaryAndBibliography}{
+
+% Table of Illustrations
+\renewcommand\listfigurename{Abbildungen}
+\listoffigures
+\addcontentsline{toc}{chapter}{Abbildungen}
+
+% Anything following the further research must not have a chapternumber
+\renewcommand{\chaptername}{}
+\renewcommand{\thechapter}{}
+
+%Glossary
+%\addcontentsline{toc}{chapter}{Glossary}
+%\printglossaries
+
+\printglossary[type=\acronymtype] % prints just the list of acronyms
+
+%\glsaddall
+
+%\addcontentsline{toc}{chapter}{Glossary}
+\printglossary % if no option is supplied the default glossary is printed.
+
+% Bibliography
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{Literaturverzeichnis}
+\bibliography{./bib/mybibtexfile}{}
+}
