@@ -15,8 +15,8 @@ int UARTDriverInit(uint16_t id) {
 	UARTHalSoftwareReset(pins);
 
 	configuration_t config;
-	config.baudRate = UART_BAUDRATE_2400;
-	config.parity =  UART_PARITY_NONE;
+	config.baudRate = UART_BAUDRATE_9600;
+	config.parity =  UART_PARITY_0;
 	config.charLength = UART_CHARLENGTH_8;
 	config.stopBit = UART_STOPBIT_1;
 
