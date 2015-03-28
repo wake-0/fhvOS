@@ -29,10 +29,15 @@ int main(void)
 	{
 	}
 	*/
-	char* text = "hallo";
-	int length = 5;
 	UARTDriverInit(0);
 
+	char* text = "hallo";
+	int length = 5;
+
+	UARTDriverWrite(0, text, length);
+
+	text = "kleiner Test";
+	length = 12;
 	while(1)
 	{
 		UARTDriverWrite(0, text, length);
