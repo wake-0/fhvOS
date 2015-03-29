@@ -37,6 +37,7 @@ int UARTDriverWrite(uint16_t id, char* buf, uint16_t len) {
 	if (id > BOARD_UART_COUNT - 1) { return DRIVER_ERROR; }
 	uartPins_t pins = GetUARTPins(id);
 
+	// Write chunks
 	int i;
 	uint8_t msg;
 	for (i = 0; i < len; i++) {
@@ -48,6 +49,15 @@ int UARTDriverWrite(uint16_t id, char* buf, uint16_t len) {
 }
 
 int UARTDriverRead(uint16_t id, char* buf, uint16_t len) {
+	if (id > BOARD_UART_COUNT - 1) { return DRIVER_ERROR; }
+	uartPins_t pins = GetUARTPins(id);
+
+	// Read chunks
+	int i;
+	for (i = 0; i < len; i++) {
+		UARTHalFifoRead(pins, (uint8_t*)(buf+i));
+	}
+
 	return DRIVER_OK;
 }
 

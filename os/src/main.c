@@ -31,15 +31,13 @@ int main(void)
 	*/
 	UARTDriverInit(0);
 
-	char* text = "hallo";
-	int length = 5;
+	char text[12];
+	int length = 12;
 
-	UARTDriverWrite(0, text, length);
-
-	text = "kleiner Test";
-	length = 12;
 	while(1)
 	{
+		UARTDriverRead(0, text, length);
+
 		UARTDriverWrite(0, text, length);
 	}
 }
