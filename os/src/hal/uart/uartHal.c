@@ -252,12 +252,14 @@ int UARTHalSettings(uartPins_t uartPins, configuration_t* config) {
 int UARTHalFifoWrite(uartPins_t uartPins, uint8_t* msg) {
 	address_t baseAddress = getBaseAddressOfUART(uartPins);
 	HWREG(baseAddress + UART_THR_OFF) = *(msg);
+
 	return UART_HAL_OK;
 }
 
 int UARTHalFifoRead(uartPins_t uartPins, uint8_t* msg) {
 	address_t baseAddress = getBaseAddressOfUART(uartPins);
 	*(msg) = HWREG(baseAddress + UART_RHR_OFF);
+
 	return UART_HAL_OK;
 }
 
