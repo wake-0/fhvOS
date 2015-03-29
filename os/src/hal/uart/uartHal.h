@@ -8,7 +8,7 @@
 #ifndef UART_HAL_H_
 #define UART_HAL_H_
 
-#include "../platform/platform.h"
+#include "../../platform/platform.h"
 #include "../board/beaglebone/hw_uart.h"
 
 #define UART_HAL_OK		1

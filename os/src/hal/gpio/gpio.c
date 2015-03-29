@@ -14,7 +14,7 @@
 #include "../am335x/hw_types.h"
 #include "../am335x/hw_control_AM335x.h"
 
-#include "../platform/platform.h"
+#include "../../platform/platform.h"
 
 #define GPIO_COUNT		4
 

@@ -8,7 +8,7 @@
 #ifndef DRIVER_UART_UARTDRIVER_H_
 #define DRIVER_UART_UARTDRIVER_H_
 
-#include "../../hal/platform/platform.h"
+#include "../../../platform/platform.h"
 #include "../../hal/uart/uartHal.h"
 #include "../driver.h"
 

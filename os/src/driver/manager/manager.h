@@ -8,7 +8,7 @@
 #ifndef DRIVER_MANAGER_MANAGER_H_
 #define DRIVER_MANAGER_MANAGER_H_
 
-#include "../../hal/platform/platform.h"
+#include "../../../platform/platform.h"
 #include "../driver.h"
 
 /*

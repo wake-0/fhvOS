@@ -8,7 +8,7 @@
 #ifndef HAL_BOARD_BEAGLEBONE_HW_UART_H_
 #define HAL_BOARD_BEAGLEBONE_HW_UART_H_
 
-#include "../../platform/platform.h"
+#include "../../../platform/platform.h"
 
 typedef struct {
 	int16_t txd;
