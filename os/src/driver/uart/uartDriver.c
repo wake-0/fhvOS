@@ -8,20 +8,20 @@
 #include "../beaglebone/hw_uart.h"
 
 int UARTDriverInit(uint16_t id) {
-	int uartCount = BOARD_UART_COUNT;
-	if (id > uartCount - 1) { return DRIVER_ERROR; }
+	if (id > BOARD_UART_COUNT - 1) { return DRIVER_ERROR; }
 
 	//Setup the uart
-	UARTHalSoftwareReset(UART0);
+	uartPins_t pins = GetUARTPins(id);
+	UARTHalSoftwareReset(pins);
 
 	configuration_t config;
 	config.baudRate = UART_BAUDRATE_9600;
-	config.parity =  UART_PARITY_NONE;
+	config.parity =  UART_PARITY_0;
 	config.charLength = UART_CHARLENGTH_8;
 	config.stopBit = UART_STOPBIT_1;
 
-	UARTHalFifoSettings(UART0);
-	UARTHalSettings(UART0, &config);
+	UARTHalFifoSettings(pins);
+	UARTHalSettings(pins, &config);
 	return DRIVER_OK;
 }
 
@@ -34,13 +34,30 @@ int UARTDriverClose(uint16_t id) {
 }
 
 int UARTDriverWrite(uint16_t id, char* buf, uint16_t len) {
-	//TODO: use buf
-	uint8_t msg = 'a';
-	UARTHalFifoWrite(UART0, &msg);
+	if (id > BOARD_UART_COUNT - 1) { return DRIVER_ERROR; }
+	uartPins_t pins = GetUARTPins(id);
+
+	// Write chunks
+	int i;
+	uint8_t msg;
+	for (i = 0; i < len; i++) {
+		msg = (uint8_t)*(buf+i);
+		UARTHalFifoWrite(pins, &msg);
+	}
+
 	return DRIVER_OK;
 }
 
 int UARTDriverRead(uint16_t id, char* buf, uint16_t len) {
+	if (id > BOARD_UART_COUNT - 1) { return DRIVER_ERROR; }
+	uartPins_t pins = GetUARTPins(id);
+
+	// Read chunks
+	int i;
+	for (i = 0; i < len; i++) {
+		UARTHalFifoRead(pins, (uint8_t*)(buf+i));
+	}
+
 	return DRIVER_OK;
 }
 

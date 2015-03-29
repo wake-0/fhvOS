@@ -1,0 +1,130 @@
+\documentclass[11pt]{scrartcl}
+\usepackage{wrapfig}
+\usepackage{verbatim} 
+
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\usepackage{fourier} % Use the Adobe Utopia font for the document - comment this line to return to the LaTeX default
+%\usepackage[english]{babel} % german headers
+\usepackage{ucs}             % neccessary for äöü
+\usepackage[utf8x]{inputenc} % utf8 support
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+\usepackage{hyperref}   % use for hypertext links, including those to external documents and URLs
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{extramarks} % Required for headers and footers
+\usepackage{graphicx} % Required to insert images
+\usepackage{subfigure} % Required to insert images
+\usepackage{listings} % Required for insertion of code
+\usepackage{courier} % Required for the courier font
+\usepackage{color}
+\usepackage{sectsty} % Allows customizing section commands
+\usepackage{epstopdf}
+
+\usepackage{cite}
+\usepackage{textcomp}
+\usepackage{subfiles}
+% Style of citations
+\bibliographystyle{plain}  
+\usepackage{./sty/fhv}
+
+%language
+\usepackage[ngerman]{babel}
+
+
+%general data
+\newcommand{\myauthor}{Höss, Petrovic, Wallis}
+\newcommand{\mytitle}{Dokumentation des OS}
+\newcommand{\myuniversity}{Fachhochschule Vorarlberg}
+\newcommand{\mycourse}{S1: Softwarelösungen für ressourcenbeschränkte Systeme}
+\newcommand{\mystudy}{Master Informatik (ITM2)}
+\newcommand{\mydate}{\today{}, Dornbirn}
+%document meta data
+\title{\mytitle}
+\author{\myauthor}
+\date{\today{}, Dornbirn}
+
+%header/footer - KOMA
+\usepackage{lastpage}
+\usepackage[automark]{scrpage2}
+\pagestyle{scrheadings}
+\clearscrheadfoot
+%header left
+\ihead[]{\headmark}
+%header center
+\chead[]{}
+%header right
+\ohead[]{\includegraphics[width=2cm]{figures/FHV} }
+%footer left
+\ifoot[]{\myauthor}
+%footer center
+\cfoot[]{}
+%footer right
+\ofoot[]{\thepage\ von \pageref{LastPage}}
+
+\begin{document}
+
+%%Titelseite
+\begin{titlepage}
+
+\begin{minipage}{.5\textwidth} 
+  \hspace{12cm}\hfill \includegraphics[width=3cm]{figures/FHV} 
+\end{minipage}\vspace{2cm} 
+
+\begin{center}
+~
+\vfill\vfill\vfill
+
+{\Huge\bfseries\mytitle}
+
+\vfill
+
+\Large{eine Arbeit von}
+
+\vfill
+
+{\LARGE\bfseries\myauthor}
+\vfill
+{\Large\bfseries\mystudy}
+\vfill
+\vfill
+\Large{für die Lehrveranstaltung}
+
+\vfill
+
+{\LARGE\bfseries\mycourse}
+
+\vfill\vfill\vfill
+\vfill\vfill\vfill
+\vfill\vfill\vfill
+
+\myuniversity
+\vfill
+\mydate
+\end{center}
+\end{titlepage}
+%%Ende Titelseite
+
+%%Abstract
+\include{chapters/abstract/abstract}
+
+\thispagestyle{plain}
+%%Inhaltsverzeichnis
+\tableofcontents
+
+%%Abbildungsverzeichnis
+\listoffigures
+
+\pagebreak
+
+\include{chapters/general/general}
+\include{chapters/architecture/architecture}
+\include{chapters/hal/hal}
+\include{chapters/driver/driver}
+\include{chapters/summary/summary}
+
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{Literaturverzeichnis}
+\bibliography{./bib/Bibliography}
+
+\end{document}

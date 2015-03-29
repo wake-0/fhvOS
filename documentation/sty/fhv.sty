@@ -1,0 +1,206 @@
+\newcommand{\getLanguage}{english}
+\newcommand{\setLanguage}[1]{\renewcommand{\getLanguage}{#1}}
+
+\newcommand{\getThesistype}{Bachelor}
+\newcommand{\setThesistype}[1]{\renewcommand{\getThesistype}{#1}}
+
+\newcommand{\getStudyprogram}{Informatik - Software and Information Engineering}
+\newcommand{\setStudyprogram}[1]{\renewcommand{\getStudyprogram}{#1}}
+
+
+\newcommand{\getAuthor}{AUTHOR}
+\newcommand{\setAuthor}[1]{\renewcommand{\getAuthor}{#1}}
+
+\newcommand{\getAuthorId}{Matrikelnummer}
+\newcommand{\setAuthorId}[1]{\renewcommand{\getAuthorId}{#1}} 
+
+\newcommand{\getSupervisor}{1234}
+\newcommand{\setSupervisor}[1]{\renewcommand{\getSupervisor}{#1}} 
+
+
+
+
+\newcommand{\getTitle}{TITLE}
+\newcommand{\setTitle}[1]{\renewcommand{\getTitle}{#1}}
+
+
+
+\newcommand{\getInstituteLocation}
+{
+	\ifthenelse
+	{
+		\equal{\getLanguage}{english}
+	}
+  	{
+  	Dornbirn, Austria
+  	}
+  	{
+  	Dornbirn, \"{o}sterreich
+  	}
+}
+\newcommand{\setInstituteLocation}[1]{\renewcommand{\getInstituteLocation}{#1}}
+
+\newcommand{\getInstituteGraphic}{\includegraphics[width = 0.5 \textwidth]{./img/FHVlogo}}
+\newcommand{\setInstituteGraphic}[1]{\renewcommand{\getInstituteGraphic}{#1}}
+
+
+
+\newcommand{\statuoryDeclaration}
+{
+	\ifthenelse
+	{
+		\equal{\getLanguage}{english}
+	}
+  	{
+  		\chapter*{Statuatory Declaration}
+		I declare that I have developed and written the enclosed work completely by myself, and have not used sources or means without declaration in the text. Any thoughts from others or literal quotations are clearly marked. This Bachelor Thesis was not used in the same or in a similar version to achieve an academic degree nor has it been published elsewhere.
+  	}
+  	{
+  		\chapter*{Eidesstattliche Erkl\"{a}rung}
+	Ich erkl\"{a}re hiermit ehrenw\"{o}rtlich, dass ich die vorliegende Arbeit selbstst\"{a}ndig angefertigt habe. Die aus fremden Quellen direkt oder indirekt \"{u}bernommenen Gedanken sind als solche kenntlich gemacht. Die Arbeit wurde bisher keiner anderen Pr\"{u}fungsbeh\"{o}rde vorgelegt und auch noch nicht ver\"{o}ffentlicht.
+  	}
+  	 	  
+	\newpage
+}
+
+
+
+
+
+\renewcommand{\maketitle}{
+\begin{titlepage}
+\begin{center}
+
+% Upper part of the page. The '~' is needed because \\
+% only works if a paragraph has started.
+\textsc~\getInstituteGraphic
+\vspace{1.5cm}
+
+\textsc{\Large \ifthenelse{\equal{\getLanguage}{english}}
+  	{\getThesistype thesis in the study program \getStudyprogram}
+  	{\getThesistype arbeit im Rahmen des \getThesistype  studiengangs \getStudyprogram}
+}
+\\[1.5cm]
+%Title
+\hrule
+
+\vspace{0.5cm}
+\textsc{\huge \bfseries \getTitle}\\[0.5cm]
+
+\hrule
+\vspace{1.5cm}
+
+% Author and supervisor
+\textsc{	\ifthenelse
+	{
+		\equal{\getLanguage}{english}
+	}
+  	{written by}
+  	{vorgelegt von}
+  	}
+\\[0.4cm]
+
+\textsc{\Large \getAuthor}
+\\
+\getAuthorId
+\\[1cm]
+
+
+\textsc{
+	\ifthenelse
+	{
+		\equal{\getLanguage}{english}
+	}
+  	{Supervised by}
+  	{betreut von}
+  	}
+\vspace{0.4cm}
+
+\textsc{\Large \getSupervisor}
+
+\vspace{1.5cm}
+
+\textsc{
+	\ifthenelse
+	{
+		\equal{\getLanguage}{english}
+	}
+  	{Supervised by}
+  	{durchgef\"{u}hrt bei proTask GmbH}
+	}
+\\
+\textsc{betreut von}
+\vspace{0.4cm} 
+\\ %zeilenumbruch
+\textsc{\Large Andreas Saler}
+
+\vspace{1.5cm}
+
+% Bottom of the page
+\textsc
+{
+	Dornbirn, 	
+	\ifthenelse
+	{
+		\equal{\getLanguage}{english}
+	}
+  	{\today}
+  	{\the\day .\the\month .\the\year}
+}
+
+\end{center}
+\end{titlepage}
+}
+
+
+
+
+
+
+\newcommand{\newAcronymAndGlossaryEntry}[4]
+{
+\newacronym[description={\glslink{#2}{#3}}]
+{#1}{#2}{#3}
+
+\newglossaryentry{#2}{name=\glslink{#1}{#3},
+text={#3},
+description={#4},
+sort={#3}}
+}
+
+
+
+
+
+
+
+
+\newcommand{\glossaryAndBibliography}{
+
+% Table of Illustrations  	
+\listoffigures
+\ifthenelse{\equal{\getLanguage}{english}}
+  		{\addcontentsline{toc}{chapter}{Figures}}
+  		{\addcontentsline{toc}{chapter}{Abbildungsverzeichnis}}	
+		
+% Anything following the further research must not have a chapternumber
+\renewcommand{\chaptername}{}
+\renewcommand{\thechapter}{}
+
+%Glossary
+%\ifthenelse{\equal{\getLanguage}{english}} % prints just the list of acronyms
+%  		{\printglossary[type=\acronymtype]}
+%  		{\printglossary[type=\acronymtype, title=Abk\"{u}rzungsverzeichnis]}
+  		
+%\printglossary % if no option is supplied the default glossary is printed.
+
+% Bibliography
+\clearpage
+\phantomsection
+
+\ifthenelse{	\equal{\getLanguage}{english}}
+  	{\addcontentsline{toc}{chapter}{Bibliography}}
+  	{\addcontentsline{toc}{chapter}{Literaturverzeichnis}}
+  	
+\bibliography{./bib/Bibliography}
+}

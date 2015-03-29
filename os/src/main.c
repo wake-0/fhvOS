@@ -29,13 +29,16 @@ int main(void)
 	{
 	}
 	*/
-	char* a = "a";
 	UARTDriverInit(0);
-	UARTDriverWrite(0, a, 0);
+
+	char text[12];
+	int length = 12;
 
 	while(1)
 	{
-		UARTDriverWrite(0, a, 0);
+		UARTDriverRead(0, text, length);
+
+		UARTDriverWrite(0, text, length);
 	}
 }
 

@@ -7,8 +7,6 @@
 
 #include "devicemanager.h"
 
-#include "../hal/platform/platform.h"
-
 #define MAX_DEVICES		32
 #define MAX_DEVICE_NAME	255
 

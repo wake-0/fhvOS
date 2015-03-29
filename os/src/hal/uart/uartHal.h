@@ -8,19 +8,11 @@
 #ifndef UART_HAL_H_
 #define UART_HAL_H_
 
-#include "../platform/platform.h"
+#include "../../platform/platform.h"
+#include "../board/beaglebone/hw_uart.h"
 
-/*
- * UART abstraction
- */
-typedef enum {
-	UART0,
-	UART1,
-	UART2,
-	UART3,
-	UART4,
-	UART5
-} uart_t;
+#define UART_HAL_OK		1
+#define UART_HAL_ERROR	0
 
 /*
  * UART baudrates
@@ -81,9 +73,10 @@ typedef struct {
 /*
  * functions
  */
-void UARTHalSoftwareReset(uart_t uart);
-void UARTHalFifoSettings(uart_t uart);
-void UARTHalSettings(uart_t uart, configuration_t* config);
-void UARTHalFifoWrite(uart_t uart, uint8_t* msg);
+extern int UARTHalSoftwareReset(uartPins_t uartPins);
+extern int UARTHalFifoSettings(uartPins_t uartPins);
+extern int UARTHalSettings(uartPins_t uartPins, configuration_t* config);
+extern int UARTHalFifoWrite(uartPins_t uartPins, uint8_t* msg);
+extern int UARTHalFifoRead(uartPins_t uartPins, uint8_t* msg);
 
 #endif /* UART_HAL_H_ */
