@@ -35,7 +35,8 @@
 #define UART_IER_OFF			(0x004)	// Interrupt Enable Register
 #define UART_DLL_OFF			(0x000)	// Divisor Latches Low Register
 #define UART_DLH_OFF			(0x004)	// Divisor Latches High Register
-#define UART_THR_OFF			(0x000)
+#define UART_THR_OFF			(0x000) // Transmit Holding Register
+#define UART_RHR_OFF			(0x000) // Receive Holding Register
 
 /*
  * Bits for the UART FIFO settings
