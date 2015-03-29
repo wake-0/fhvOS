@@ -9,6 +9,7 @@
 #include <stdlib.h>
 
 #include "../led/led.h"
+#include "../uart/uartDriver.h"
 
 #define MAX_DRIVER		255
 
@@ -28,6 +29,15 @@ extern void DriverManagerInit()
 	led->ioctl = &LEDIoctl;
 	drivers[DRIVER_ID_LED] = led;
 
+	// UART Driver
+	driver_t* uart = malloc(sizeof(driver_t));
+	uart->init = &UARTDriverInit;
+	uart->open = &UARTDriverOpen;
+	uart->close = &UARTDriverClose;
+	uart->read = &UARTDriverRead;
+	uart->write = &UARTDriverWrite;
+	uart->ioctl = &UARTDriverIoctl;
+	drivers[DRIVER_ID_UART] = uart;
 }
 
 extern driver_t* DriverManagerGetDriver(driver_id_t driver_id)
