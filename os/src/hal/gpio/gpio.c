@@ -125,13 +125,16 @@ void GPIOSetMux(uint16_t pin, mux_mode_t mux)
 void GPIOSetPinDirection(uint16_t pin, pin_direction_t dir)
 {
 
-    if(dir == PIN_DIRECTION_OUT)
+    switch(dir)
     {
-        HWREG(getSOC_GPIO_x_REGS(pin) + GPIO_OE) &= ~(1 << pin);
-    }
-    else if(dir == PIN_DIRECTION_IN)
-    {
-        HWREG(getSOC_GPIO_x_REGS(pin) + GPIO_OE) |= (1 << pin);
+    	case PIN_DIRECTION_OUT:
+			HWREG(getSOC_GPIO_x_REGS(pin) + GPIO_OE) &= ~(1 << pin);
+			break;
+    	case PIN_DIRECTION_IN:
+			HWREG(getSOC_GPIO_x_REGS(pin) + GPIO_OE) |= (1 << pin);
+    		break;
+    	default:
+    		break;
     }
 }
 
