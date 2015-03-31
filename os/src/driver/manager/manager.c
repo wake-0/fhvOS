@@ -15,7 +15,7 @@
 
 static driver_t* drivers[MAX_DRIVER];
 
-extern void DriverManagerInit()
+void DriverManagerInit()
 {
 	// Create all drivers
 
@@ -40,7 +40,18 @@ extern void DriverManagerInit()
 	drivers[DRIVER_ID_UART] = uart;
 }
 
-extern driver_t* DriverManagerGetDriver(driver_id_t driver_id)
+driver_t* DriverManagerGetDriver(driver_id_t driver_id)
 {
 	return drivers[driver_id];
+}
+
+void DriverManagerDestruct()
+{
+	int i;
+	for (i = 0; i < MAX_DRIVER; i++) {
+		if (drivers[i] != NULL) {
+			free(drivers[i]);
+			drivers[i] = NULL;
+		}
+	}
 }
