@@ -1,7 +1,7 @@
 
 #include <stdio.h>
-#include "driver/uart/uartDriver.h"
 #include "driver/timer/driver_timer.h"
+#include "driver/uart/driver_uart.h"
 #include "hal/interrupt/interrupt.h"
 #include "hal/cpu/cpu.h"
 

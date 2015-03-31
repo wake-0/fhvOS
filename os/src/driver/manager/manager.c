@@ -9,7 +9,7 @@
 #include <stdlib.h>
 
 #include "../led/led.h"
-#include "../uart/uartDriver.h"
+#include "../uart/driver_uart.h"
 
 #define MAX_DRIVER		255
 

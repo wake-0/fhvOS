@@ -4,7 +4,8 @@
  *  Created on: 15.03.2015
  *      Author: Kevin
  */
-#include "uartHal.h"
+#include "hal_uart.h"
+
 #include "../am335x/hw_types.h"
 #include "../am335x/hw_uart.h"
 

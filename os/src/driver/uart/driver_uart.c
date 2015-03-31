@@ -4,7 +4,8 @@
  *  Created on: 20.03.2015
  *      Author: Kevin
  */
-#include "uartDriver.h"
+#include "driver_uart.h"
+
 #include "../beaglebone/hw_uart.h"
 
 int UARTDriverInit(uint16_t id) {
