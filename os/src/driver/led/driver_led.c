@@ -5,9 +5,11 @@
  *      Author: Nicolaj Hoess
  */
 
+#include "driver_led.h"
+
 #include <hw_led.h>
-#include "led.h"
-#include "../../hal/gpio/gpio.h"
+
+#include "../../hal/gpio/hal_gpio.h"
 
 int LEDInit	(uint16_t id)
 {

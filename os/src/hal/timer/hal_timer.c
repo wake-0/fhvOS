@@ -10,8 +10,8 @@
 #include "../../hal/am335x/soc_AM335x.h"
 #include "../../hal/am335x/hw_timer.h"
 #include "../../hal/am335x/hw_types.h"
-#include "../../hal/interrupt/interrupt.h"
 #include "../../hal/am335x/hw_cm_dpll.h"
+#include "../interrupt/hal_interrupt.h"
 
 #define DMTimerWaitForWrite(reg, baseAdd)   \
             if(HWREG(baseAdd + TSICR) & DMTIMER_TSICR_POSTED)\

@@ -5,8 +5,8 @@
  *      Author: Nicolaj Hoess
  */
 
-#ifndef DRIVER_LED_LED_H_
-#define DRIVER_LED_LED_H_
+#ifndef DRIVER_LED_DRIVER_LED_H_
+#define DRIVER_LED_DRIVER_LED_H_
 
 #include "../driver.h"
 
@@ -17,4 +17,4 @@ extern int LEDWrite	(uint16_t id, char* buf, uint16_t len);
 extern int LEDRead	(uint16_t id, char* buf, uint16_t len);
 extern int LEDIoctl	(uint16_t id, uint16_t cmd, uint8_t mode, char* buf, uint16_t len);
 
-#endif /* DRIVER_LED_LED_H_ */
+#endif /* DRIVER_LED_DRIVER_LED_H_ */

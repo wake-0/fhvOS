@@ -5,9 +5,6 @@
  *      Author: Nicolaj Hoess
  */
 
-#include "gpio.h"
-
-// Platform dependant includes
 #include "../am335x/soc_AM335x.h"
 #include "../am335x/hw_gpio_v2.h"
 #include "../am335x/hw_cm_per.h"
@@ -15,6 +12,7 @@
 #include "../am335x/hw_control_AM335x.h"
 
 #include "../../platform/platform.h"
+#include "hal_gpio.h"
 
 #define GPIO_COUNT		4
 

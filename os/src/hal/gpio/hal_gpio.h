@@ -5,8 +5,8 @@
  *      Author: Nicolaj Hoess
  */
 
-#ifndef HAL_GPIO_GPIO_H_
-#define HAL_GPIO_GPIO_H_
+#ifndef HAL_GPIO_HAL_GPIO_H_
+#define HAL_GPIO_HAL_GPIO_H_
 
 #include "../../platform/platform.h"
 
@@ -34,4 +34,4 @@ extern void 		GPIOSetPinDirection(uint16_t pin, pin_direction_t dir);
 extern void 		GPIOSetPinValue(uint16_t pin, pin_value_t value);
 extern pin_value_t 	GPIOGetPinValue(uint16_t pin);
 
-#endif /* HAL_GPIO_GPIO_H_ */
+#endif /* HAL_GPIO_HAL_GPIO_H_ */

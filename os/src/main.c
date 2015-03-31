@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include "driver/timer/driver_timer.h"
 #include "driver/uart/driver_uart.h"
-#include "hal/interrupt/interrupt.h"
-#include "hal/cpu/cpu.h"
+#include "hal/cpu/hal_cpu.h"
+#include "hal/interrupt/hal_interrupt.h"
 
 static void DMTimerIsr(void);
 

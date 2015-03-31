@@ -5,10 +5,11 @@
  *      Author: Nicolaj Hoess
  */
 
-#include "manager.h"
+#include "driver_manager.h"
+
 #include <stdlib.h>
 
-#include "../led/led.h"
+#include "../led/driver_led.h"
 #include "../uart/driver_uart.h"
 
 #define MAX_DRIVER		255

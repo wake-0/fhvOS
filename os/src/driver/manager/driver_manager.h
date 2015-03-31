@@ -5,8 +5,8 @@
  *      Author: Nicolaj Hoess
  */
 
-#ifndef DRIVER_MANAGER_MANAGER_H_
-#define DRIVER_MANAGER_MANAGER_H_
+#ifndef DRIVER_MANAGER_DRIVER_MANAGER_H_
+#define DRIVER_MANAGER_DRIVER_MANAGER_H_
 
 #include "../../../platform/platform.h"
 #include "../driver.h"
@@ -26,4 +26,4 @@ extern void DriverManagerInit();
 extern driver_t* DriverManagerGetDriver(driver_id_t driver_id);
 extern void DriverManagerDestruct();
 
-#endif /* DRIVER_MANAGER_MANAGER_H_ */
+#endif /* DRIVER_MANAGER_DRIVER_MANAGER_H_ */
