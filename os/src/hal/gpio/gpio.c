@@ -38,7 +38,7 @@ void GPIOEnable(uint16_t pinNo)
 	// Enable the GPIO Clock
 	// Writing to MODULEMODE field of CM_PER_GPIO1_CLKCTRL register.
 	HWREG(SOC_CM_PER_REGS + getCM_PER_GPIOx_CLKCTRL(pinNo)) |=
-			getCM_PER_GPIOx_CLKCTRL_MODULEMODE(pinNo);
+			getCM_PER_GPIOx_CLKCTRL_MODULEMODE_ENABLE(pinNo);
 
 	// Waiting for MODULEMODE field to reflect the written value.
 	while (getCM_PER_GPIOx_CLKCTRL_MODULEMODE_ENABLE(pinNo)
@@ -275,7 +275,7 @@ static int getSOC_GPIO_x_REGS(uint16_t pinNo)
 		case 22:
 		case 23:
 		case 24:
-			return SOC_GPIO_0_REGS;
+			return SOC_GPIO_1_REGS;
 		default:
 			return -1;
 	}

@@ -15,7 +15,7 @@ int LEDInit	(uint16_t id)
 	if (id > ledCount - 1) return DRIVER_ERROR;
 	// Set up the GPIO pin
 	GPIOEnable(BOARD_LED(id));
-	GPIOReset(BOARD_LED(id));
+	//GPIOReset(BOARD_LED(id)); // XXX TODO Resetting here causes all prev turned on leds to turn off again. It works without this but maybe its not clean
 	GPIOSetMux(BOARD_LED(id), MUX_MODE_LED);
 	GPIOSetPinDirection(BOARD_LED(id), PIN_DIRECTION_OUT);
 	return DRIVER_OK;
@@ -44,10 +44,10 @@ int LEDWrite (uint16_t id, char* buf, uint16_t len)
 
 	switch(buf[0])
 	{
-		case 1:
+		case '1':
 			GPIOSetPinValue(BOARD_LED(id), PIN_VALUE_HIGH);
 			break;
-		case 0:
+		case '0':
 			GPIOSetPinValue(BOARD_LED(id), PIN_VALUE_LOW);
 			break;
 		default:
