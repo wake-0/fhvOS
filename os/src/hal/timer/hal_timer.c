@@ -394,7 +394,6 @@ unsigned int getTimerBaseRegisterAddress(Timer_t timer)
 			return DMTIMER0;
 		case TIMER1_MS:
 			return DMTIMER1_MS;
-			break;
 		case TIMER2:
 			return DMTIMER2;
 		case TIMER3:

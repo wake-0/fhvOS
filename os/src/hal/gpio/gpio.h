@@ -8,7 +8,7 @@
 #ifndef HAL_GPIO_GPIO_H_
 #define HAL_GPIO_GPIO_H_
 
-#include "../platform/platform.h"
+#include "../../platform/platform.h"
 
 typedef enum {
 	PIN_DIRECTION_IN = 1,

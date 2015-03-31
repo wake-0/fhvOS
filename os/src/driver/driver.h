@@ -8,7 +8,7 @@
 #ifndef DRIVER_DRIVER_H_
 #define DRIVER_DRIVER_H_
 
-#include "../hal/platform/platform.h"
+#include "../platform/platform.h"
 
 #define DRIVER_FUNCTION_NOT_SUPPORTED 	-2
 #define DRIVER_ERROR					-1

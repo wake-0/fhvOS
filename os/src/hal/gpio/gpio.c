@@ -146,6 +146,7 @@ void GPIOSetPinValue(uint16_t pin, pin_value_t dir)
 			HWREG(getSOC_GPIO_x_REGS(pin) + GPIO_CLEARDATAOUT) = (1 << pin);
 			break;
 		default:
+			break;
 	}
 }
 
