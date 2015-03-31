@@ -1,4 +1,5 @@
-/Debug/
-/Release/
+/Debug
+/Release
 /Debug_*
 /.launches
+/.launches/*
