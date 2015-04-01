@@ -1,16 +1,14 @@
 
-<<<<<<< HEAD
 //#include <stdio.h>
 
-#include "driver/uart/uartDriver.h"
+#include "driver/uart/driver_uart.h"
 #include "driver/timer/driver_timer.h"
-#include "hal/interrupt/interrupt.h"
+#include "hal/interrupt/hal_interrupt.h"
 #include "hal/am335x/hw_cm_dpll.h"
 #include "hal/am335x/hw_cm_per.h"
 #include "hal/am335x/soc_AM335x.h"
 #include "hal/am335x/hw_timer.h"
 #include "hal/am335x/hw_types.h"
-#include "hal/interrupt/interrupt.h"
 #include "hal/am335x/hw_cm_dpll.h"
 
 #define DMTIMER_TCLR_AR   (0x00000002u)
@@ -78,18 +76,10 @@ interrupt void irq_handler(void);
 static volatile unsigned int cntValue = 10;
 static volatile unsigned int flagIsr = 0;
 
-=======
-#include <stdio.h>
-#include "driver/timer/driver_timer.h"
-#include "driver/uart/driver_uart.h"
-#include "hal/cpu/hal_cpu.h"
-#include "hal/interrupt/hal_interrupt.h"
->>>>>>> 7f708c7a91b8e83fea052f0f7f060e5235d597ce
 
 
 int main(void)
 {
-<<<<<<< HEAD
 	TimerReset(TIMER2);
 	DMTimer2ModuleClkConfig();
 
@@ -99,9 +89,6 @@ int main(void)
 	// ----- INTERRUPT settings -----
 	InterruptMasterIRQEnable();
 
-=======
-	/*
->>>>>>> 7f708c7a91b8e83fea052f0f7f060e5235d597ce
 	AintcInit();
 	InterruptHandlerRegister(SYS_INT_TINT2, timerISR);
 	InterruptPrioritySet(SYS_INT_TINT2, 0x01);
@@ -137,18 +124,6 @@ int main(void)
 
 	while(1)
 	{
-	}
-	*/
-	UARTDriverInit(0);
-
-	char text[12];
-	int length = 12;
-
-	while(1)
-	{
-		UARTDriverRead(0, text, length);
-
-		UARTDriverWrite(0, text, length);
 	}
 }
 

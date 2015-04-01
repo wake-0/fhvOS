@@ -6,7 +6,7 @@
  */
 
 #include "driver_timer.h"
-#include "../../hal/interrupt/interrupt.h"
+#include "../../hal/interrupt/hal_interrupt.h"
 
 #define TIMER_RESET_VALUE 0x00
 
