@@ -23,7 +23,7 @@
 
 
 intHandler_t interruptRamVectors[NUMBER_OF_INTERRUPTS];
-
+intHandler_t interruptIrqResetHandlers[NUMBER_OF_INTERRUPTS];
 
 static void InterruptDefaultHandler(void);
 
@@ -51,13 +51,29 @@ static void registerDefaultHandlers(void)
 	for(intrNum = 0; intrNum < NUMBER_OF_INTERRUPTS; intrNum++)
 	{
 		interruptRamVectors[intrNum] = InterruptDefaultHandler;
+		interruptIrqResetHandlers[intrNum] = InterruptDefaultHandler;
 	}
+}
+
+
+// set 1 according to data sheet
+static void enableInterfaceClockAutogating(void)
+{
+	HWREG(SOC_AINTC_REGS + INTC_SYSCONFIG) |= SYSCONFIG_SET_AUTO_CLK_GATE;
+}
+
+// set 2 according to data sheet
+static void setFunctionalClock(void)
+{
+	HWREG(SOC_AINTC_REGS + INTC_IDLE) |= IDLE_SET_FUNC_CLOCK;
 }
 
 // API Function
 void AintcInit(void)
 {
     resetAintc();
+    enableInterfaceClockAutogating();
+    setFunctionalClock();
     enableInterruptGeneration();
     registerDefaultHandlers();
 }
@@ -97,31 +113,76 @@ void InterruptHandlerDisable(unsigned int intrNum)
     
     /* Enable the system interrupt in the corresponding MIR_SET register */
     HWREG(SOC_AINTC_REGS + INTC_MIR_SET(intrNum >> REG_IDX_SHIFT)) 
-                                   = (0x01 << (intrNum & REG_BIT_MASK));
+                                       |= (0x01 << (intrNum & REG_BIT_MASK));
+    /*HWREG(SOC_AINTC_REGS + INTC_MIR_SET(intrNum >> REG_IDX_SHIFT))
+                                   = (0x01 << (intrNum & REG_BIT_MASK));*/
+}
+
+void InterruptAllowNewIrqGeneration()
+{
+	HWREG(SOC_AINTC_REGS + INTC_CONTROL) |= INTC_CONTROL_NEWIRQAGR;
 }
 
 // API Function
-void InterruptHandlerRegister(unsigned int intrNum, intHandler_t fnHandler)
+void InterruptHandlerRegister(unsigned int interruptNumber, intHandler_t fnHandler)
 {
 	//InterruptHandlerEnable(intrNum);
 
-	interruptRamVectors[intrNum] = fnHandler;
+	interruptRamVectors[interruptNumber] = fnHandler;
 }
 
 // API Function
-void InterruptUnRegister(unsigned int intrNum)
+void InterruptUnRegister(unsigned int interruptNumber)
 {
 	//InterruptHandlerDisable(intrNum);
 
-	interruptRamVectors[intrNum] = InterruptDefaultHandler;
+	interruptRamVectors[interruptNumber] = InterruptDefaultHandler;
 }
 
+void InterruptSetGlobalMaskRegister(unsigned int interruptMaskRegister, unsigned int mask)
+{
+	HWREG(SOC_AINTC_REGS + INTC_MIR_SET(interruptMaskRegister)) |= mask;
+}
+
+void InterruptClearGlobalMaskRegister(unsigned int interruptMaskRegister, unsigned int mask)
+{
+	HWREG(SOC_AINTC_REGS + INTC_MIR_SET(interruptMaskRegister)) &= ~mask;
+}
 
 unsigned int InterruptActiveIrqNumberGet(void)
 {
     return (HWREG(SOC_AINTC_REGS + INTC_SIR_IRQ) &  INTC_SIR_IRQ_ACTIVEIRQ);
 }
 
+intHandler_t InterruptGetHandler(unsigned int interruptNumber)
+{
+	if(interruptNumber > 127)
+		return -1;
+	else
+		return interruptRamVectors[interruptNumber];
+}
+
+void InterruptSaveUserContext(void)
+{
+	asm("    STMFD		SP, { R0 - R14 }^\n\t"
+		"    SUB		SP, SP, #60\n\t"
+		"    STMFD		SP!, { LR }\n\t"
+		"    MRS		r1, spsr\n\t"
+		"    STMFD		SP!, {r1}\n\t"
+		"    MOV 		R0, SP\n\t"
+			);
+}
+
+void InterruptRestoreUserContext(void)
+{
+	asm("    LDMFD		SP!, { R1 }\n\t"
+		"    MSR		SPSR_cxsf, R1\n\t"
+		"    LDMFD		SP!, { LR }\n\t"
+		"    LDMFD		SP, { R0 - R14 }^\n\t"
+		"    ADD		SP, SP, #60\n\t"
+		"    SUBS		PC, LR, #4\n\t"
+			);
+}
 
 void InterruptMasterIRQEnable(void)
 {

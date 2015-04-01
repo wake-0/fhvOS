@@ -153,7 +153,7 @@ extern void IntFuncClkAutoGateSet(void);
 extern void IntPriorityThresholdSet(unsigned int threshold);
 extern void IntSoftwareIntSet(unsigned int intrNum);
 extern void IntSoftwareIntClear(unsigned int intrNum);
-extern void IntMasterIRQEnable(void);
+extern void InterruptMasterIRQEnable(void);
 extern void IntMasterIRQDisable(void);
 extern void IntMasterFIQEnable(void);
 extern void IntMasterFIQDisable(void);
