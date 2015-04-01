@@ -11,9 +11,6 @@
 #define TIMER_RESET_VALUE 0x00
 
 
-static int timers[NUMBER_OF_TIMERS];
-
-
 
 /*
  *	\brief:		Driver-Function for starting the counting of the specified timer
@@ -21,11 +18,8 @@ static int timers[NUMBER_OF_TIMERS];
  */
 void TimerStart(Timer_t timer)
 {
-	unsigned int timerBaseRegister = getTimerBaseRegisterAddress(timer);
-
-	//resetTimerCounterRegister(timerBaseRegister, TIMER_RESET_VALUE);
-
-	startTimer(timerBaseRegister);
+	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
+	TimerHalStart(timerBaseRegister);
 }
 
 /*
@@ -34,8 +28,8 @@ void TimerStart(Timer_t timer)
  */
 void TimerStop(Timer_t timer)
 {
-	unsigned int timerBaseRegister = getTimerBaseRegisterAddress(timer);
-	stopTimer(timerBaseRegister);
+	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
+	TimerHalStop(timerBaseRegister);
 }
 
 /*
@@ -45,8 +39,8 @@ void TimerStop(Timer_t timer)
  */
 void TimerReset(Timer_t timer)
 {
-	unsigned int timerBaseRegister = getTimerBaseRegisterAddress(timer);
-	resetTimerCounterRegister(timerBaseRegister, TIMER_RESET_VALUE);
+	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
+	TimerHalResetCounterRegister(timerBaseRegister, TIMER_RESET_VALUE);
 }
 
 /*
@@ -56,29 +50,28 @@ void TimerReset(Timer_t timer)
  */
 void TimerCounterValueSet(Timer_t timer, unsigned int timerCounterValue)
 {
-	unsigned int timerBaseRegister = getTimerBaseRegisterAddress(timer);
-	setTimerCounterValue(timerBaseRegister, timerCounterValue);
+	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
+	TimerHalSetCounterValue(timerBaseRegister, timerCounterValue);
 }
 
 void TimerReloadValueSet(Timer_t timer, unsigned int timerCounterReloadValue)
 {
-	unsigned int timerBaseRegister = getTimerBaseRegisterAddress(timer);
-	setTimerCounterReloadValue(timerBaseRegister, timerCounterReloadValue);
+	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
+	TimerHalSetCounterReloadValue(timerBaseRegister, timerCounterReloadValue);
 }
 
 
 void TimerModeConfigure(Timer_t timer, unsigned int compareMode, unsigned int reloadMode)
 {
-	unsigned int timerBaseRegister = getTimerBaseRegisterAddress(timer);
-	configureTimerMode(timerBaseRegister, compareMode, reloadMode);
+	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
+	TimerHalConfigureMode(timerBaseRegister, compareMode, reloadMode);
 }
-
 
 
 void TimerConfigureCyclicInterrupt(Timer_t timer, intHandler_t intHandler, unsigned int timeInMilis)
 {
-	unsigned int timerBaseRegister 	= getTimerBaseRegisterAddress(timer);
-	unsigned int interruptNumber 	= getTimerInterruptNumber(timer);
+	unsigned int timerBaseRegister 	= TimerHalGetTimerBaseAddress(timer);
+	unsigned int interruptNumber 	= TimerHalGetInterruptNumber(timer);
 
 	// calculate value to load to tldr
 
@@ -90,48 +83,48 @@ void TimerConfigureCyclicInterrupt(Timer_t timer, intHandler_t intHandler, unsig
 
 void TimerSetUp(Timer_t timer, unsigned int initialValue, unsigned int reloadValue, unsigned int compareMode, unsigned int reloadMode)
 {
-	unsigned int timerBaseRegister = getTimerBaseRegisterAddress(timer);
+	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
 	TimerCounterValueSet(timer, initialValue);
 	TimerReloadValueSet(timer, reloadValue);
-	configureTimerMode(timerBaseRegister, compareMode, reloadMode);
+	TimerHalConfigureMode(timerBaseRegister, compareMode, reloadMode);
 }
 
 
 
 void TimerInterruptEnable(Timer_t timer, unsigned timerIrq)
 {
-	unsigned int timerBaseRegister = getTimerBaseRegisterAddress(timer);
-	enableTimerInterrupts(timerBaseRegister, timerIrq);
+	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
+	TimerHalEnableInterrupts(timerBaseRegister, timerIrq);
 }
 
 void TimerInterruptDisable(Timer_t timer, unsigned int timerIrq)
 {
-	unsigned int timerBaseRegister = getTimerBaseRegisterAddress(timer);
-	disableTimerInterrupts(timerBaseRegister, timerIrq);
+	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
+	TimerHalDisableInterrupts(timerBaseRegister, timerIrq);
 }
 
 void TimerInterruptStatusClear(Timer_t timer, unsigned int timerIrq)
 {
-	unsigned int timerBaseRegister = getTimerBaseRegisterAddress(timer);
-	clearInterruptStatus(timerBaseRegister, timerIrq);
+	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
+	TimerHalClearInterruptStatus(timerBaseRegister, timerIrq);
 }
 
 unsigned int TimerCurrentValueGet(Timer_t timer)
 {
-	unsigned int timerBaseRegister = getTimerBaseRegisterAddress(timer);
-	return getTimerCounterValue(timerBaseRegister);
+	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
+	return TimerHalGetCounterValue(timerBaseRegister);
 }
 
 void TimerTriggerSoftwareInterrupt(Timer_t timer, unsigned int timerIrq)
 {
-	unsigned int timerBaseRegister = getTimerBaseRegisterAddress(timer);
-	writeIrqStatusRawRegister(timerBaseRegister, timerIrq);
+	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
+	TimerHalWriteIrqStatusRawRegister(timerBaseRegister, timerIrq);
 }
 
 void TimerIrqPendingClear(Timer_t timer, unsigned int timerIrq)
 {
-	unsigned int timerBaseRegister = getTimerBaseRegisterAddress(timer);
-	clearTimerIrqPendingFlag(timerBaseRegister, timerIrq);
+	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
+	TimerHalClearIrqPendingFlag(timerBaseRegister, timerIrq);
 }
 
 void TimerConfigureCapture(Timer_t timer, unsigned int compareMode, unsigned int compareValue)
@@ -142,13 +135,12 @@ void TimerConfigureCapture(Timer_t timer, unsigned int compareMode, unsigned int
 
 void TimerClockConfig(Timer_t timer, unsigned int clkSource)
 {
-	unsigned int timerBaseRegister = getTimerBaseRegisterAddress(timer);
-	unsigned int timerMuxSelectionRegister = getTimerMuxSelectionRegisterAddress(timer);
-	unsigned int timerClockControlRegister = getTimerClockControlRegisterAddress(timer);
+	unsigned int timerBaseRegister 			= TimerHalGetTimerBaseAddress(timer);
+	unsigned int timerMuxSelectionRegister 	= TimerHalGetMuxRegisterAddress(timer);
+	unsigned int timerClockControlRegister 	= TimerHalGetClockControlRegisterAddress(timer);
 
-	selectClockSourceForTimer(timerMuxSelectionRegister, timerClockControlRegister, clkSource);
+	TimerHalSetClockSettings(timerMuxSelectionRegister, timerClockControlRegister, clkSource);
 }
-
 
 
 void TimerCountingHalt(Timer_t timer)

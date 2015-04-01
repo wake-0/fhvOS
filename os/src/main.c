@@ -89,7 +89,7 @@ int main(void)
 	// ----- INTERRUPT settings -----
 	InterruptMasterIRQEnable();
 
-	AintcInit();
+	InterruptResetAINTC();
 	InterruptHandlerRegister(SYS_INT_TINT2, timerISR);
 	InterruptPrioritySet(SYS_INT_TINT2, 0x01);
 	InterruptHandlerEnable(SYS_INT_TINT2);
@@ -99,7 +99,7 @@ int main(void)
 	unsigned int compareMode = 0x00;		// compare mode disabled
 	unsigned int reloadMode = 0x02;			// 0x02 auto-reload
 
-	unsigned int countVal = 0xE0000000;//TIMER_OVERFLOW - (milliSec * TIMER_1MS_COUNT);
+	unsigned int countVal = 0xDFFFFFFD;//TIMER_OVERFLOW - (milliSec * TIMER_1MS_COUNT);
 
 	TimerCounterValueSet(TIMER2, countVal);
 	TimerReloadValueSet(TIMER2, countVal);
@@ -143,51 +143,6 @@ void timerISR(void)
 	TimerInterruptEnable(TIMER2, 0x2);		// IRQ_OVERFLOW_ENABLE
 }
 
-#pragma INTERRUPT(irq_handler, IRQ)
-interrupt void irq_handler()
-{
-	//InterruptSaveUserContext();
-
-	unsigned int activeIrq = InterruptActiveIrqNumberGet();
-
-	intHandler_t timerIsr = InterruptGetHandler(activeIrq);
-	timerIsr();
-
-	// Set INTC_CONTROL NewIRQAgr to 1
-	InterruptAllowNewIrqGeneration();
-	// Set INTC_CONTROL NewFIQAgr to 1
-
-	//InterruptRestoreUserContext();
-}
-
-
-#pragma INTERRUPT(udef_handler, UDEF)
-interrupt void udef_handler() {
-	printf("udef interrupt\n");
-	;
-
-}
-
-#pragma INTERRUPT(fiq_handler, FIQ)
-interrupt void fiq_handler() {
-	printf("fiq interrupt\n");
-	;
-}
-
-#pragma INTERRUPT(pabt_handler, PABT)
-interrupt void pabt_handler() {
-	printf("pabt interrupt\n");
-	;
-}
-
-
-/**
- * Is called on any prefetch abort.
- */
-#pragma INTERRUPT(dabt_handler, PABT)
-interrupt void dabt_handler() {
-	printf("dabt interrupt\n");
-}
 
 
 void DMTimer2ModuleClkConfig(void)
@@ -273,11 +228,6 @@ void DMTimer2ModuleClkConfig(void)
 
 }
 
-static void IntDefaultHandler(void)
-{
-    /* Go Back. Nothing to be done */
-    ;
-}
 
 
 

@@ -1,15 +1,13 @@
-/**
- *  \file   interrupt.c
+/*
+ * hal_interrupt.c
  *
- *  \brief  Interrupt related APIs.
- *
- *   This file contains the APIs for configuring AINTC
+ *  Created on: 16.03.2015
+ *      Author: Marko Petrovic
  */
 
 
 
 #include "hal_interrupt.h"
-
 #include "../am335x/hw_intc.h"
 #include "../am335x/hw_types.h"
 #include "../am335x/soc_AM335x.h"
@@ -29,9 +27,7 @@ intHandler_t interruptIrqResetHandlers[NUMBER_OF_INTERRUPTS];
 static void InterruptDefaultHandler(void);
 
 
-
-
-static void resetAintc(void)
+static void InterruptResetController(void)
 {
 	HWREG(SOC_AINTC_REGS + INTC_SYSCONFIG) = INTC_SYSCONFIG_SOFTRESET;
 
@@ -39,13 +35,13 @@ static void resetAintc(void)
 	          & INTC_SYSSTATUS_RESETDONE) != INTC_SYSSTATUS_RESETDONE);
 }
 
-static void enableInterruptGeneration(void)
+static void InterruptEnableGeneration(void)
 {
 	/* Enable any interrupt generation by setting priority threshold */
 	HWREG(SOC_AINTC_REGS + INTC_THRESHOLD) = INTC_THRESHOLD_PRIORITYTHRESHOLD;
 }
 
-static void registerDefaultHandlers(void)
+static void InterruptRegisterDefaultHandler(void)
 {
 	unsigned int intrNum;
 
@@ -58,37 +54,29 @@ static void registerDefaultHandlers(void)
 
 
 // set 1 according to data sheet
-static void enableInterfaceClockAutogating(void)
+static void InterruptEnableInterfaceClockAutogating(void)
 {
 	HWREG(SOC_AINTC_REGS + INTC_SYSCONFIG) |= SYSCONFIG_SET_AUTO_CLK_GATE;
 }
 
 // set 2 according to data sheet
-static void setFunctionalClock(void)
+static void InterruptSetFunctionalClock(void)
 {
 	HWREG(SOC_AINTC_REGS + INTC_IDLE) |= IDLE_SET_FUNC_CLOCK;
 }
 
 // API Function
-void AintcInit(void)
+void InterruptResetAINTC(void)
 {
-    resetAintc();
-    enableInterfaceClockAutogating();
-    setFunctionalClock();
-    enableInterruptGeneration();
-    registerDefaultHandlers();
+    InterruptResetController();
+    InterruptEnableInterfaceClockAutogating();
+    InterruptSetFunctionalClock();
+    InterruptEnableGeneration();
+    InterruptRegisterDefaultHandler();
 }
 
 
-/**
- * \brief   This API assigns a priority to an interrupt and routes it to
- *          either IRQ or to FIQ. Priority 0 is the highest priority level
- *          Among the host interrupts, FIQ has more priority than IRQ.
- * \param   intrNum  - Interrupt number
- * \param   priority - Interrupt priority level
- *     'priority' can take any value from 0 to 127, 0 being the highest and
- *     127 being the lowest priority.              
- **/
+
 void InterruptPrioritySet(unsigned int intrNum, unsigned int priority)
 {
     HWREG(SOC_AINTC_REGS + INTC_ILR(intrNum)) =
@@ -158,7 +146,7 @@ unsigned int InterruptActiveIrqNumberGet(void)
 intHandler_t InterruptGetHandler(unsigned int interruptNumber)
 {
 	if(interruptNumber > 127)
-		return -1;
+		return 0;
 	else
 		return interruptRamVectors[interruptNumber];
 }
@@ -211,4 +199,43 @@ void InterruptMasterFIQDisable(void)
 static void InterruptDefaultHandler(void)
 {
     ;
+}
+
+
+#pragma INTERRUPT(irq_handler, IRQ)
+interrupt void irq_handler()
+{
+	unsigned int activeIrq = InterruptActiveIrqNumberGet();
+
+	intHandler_t interruptHandler = InterruptGetHandler(activeIrq);
+	interruptHandler();
+
+	InterruptAllowNewIrqGeneration();
+}
+
+#pragma INTERRUPT(udef_handler, UDEF)
+interrupt void udef_handler() {
+	printf("udef interrupt\n");
+	;
+
+}
+
+#pragma INTERRUPT(fiq_handler, FIQ)
+interrupt void fiq_handler() {
+	printf("fiq interrupt\n");
+	;
+}
+
+#pragma INTERRUPT(pabt_handler, PABT)
+interrupt void pabt_handler() {
+	printf("pabt interrupt\n");
+	;
+}
+
+/**
+ * Is called on any prefetch abort.
+ */
+#pragma INTERRUPT(dabt_handler, PABT)
+interrupt void dabt_handler() {
+	printf("dabt interrupt\n");
 }
