@@ -24,6 +24,7 @@ MASK_SYS_MODE		.set	0x1F
 MASK_IRQ_MODE		.set	0x12
 MASK_I_BIT			.set	0x80
 MASK_SWI_NUM		.set	0xFF000000
+NEWIRQAGR			.set 	0x00000001
 
 
 MASK_SVC_NUM      .set   0xFF000000
@@ -42,15 +43,21 @@ I_BIT             .set   0x80
 ;
 	.global irq_handler
 	.global swi_handler
-	.ref intIrqHandlers
-	.ref intIrqResetHandlers
+	.ref interruptRamVectors
+	.ref interruptIrqResetHandlers
 	;.ref SwiHandler
 
 ;
 ; definition of irq handlers
 ;
+_intIrqHandlers:
+	.word interruptRamVectors
 
-
+;
+; definition of irq reset handlers
+;
+_intIrqResetHandlers:
+	.word interruptIrqResetHandlers
 
 ;
 ; The SVC Handler switches to system mode if the SVC number is 458752. If the
@@ -69,69 +76,64 @@ swi_handler:
     LDMFD    r13!, {r0-r1, pc}^       ; Restore registers from IRQ stack
 
 
+irq_handler1:
+	SUB      r14, r14, #4             ; Apply lr correction
+    STMFD    r13!, {r0-r3, r12, r14}  ; Save context in IRQ stack
+    MRS      r12, spsr                ; Copy spsr
+    ;VMRS     r1,  fpscr               ; Copy fpscr
+    STMFD    r13!, {r12}          ; {r1, r12} Save fpscr and spsr
+    ;VSTMDB   r13!, {d0-d7}            ; Save D0-D7 NEON/VFP registers
 
-;
-; Handler for IRQ Exceptions.
-;
-irq_handler:
-	STMFD	SP, { R0 - R14 }^			; backup user context in irq stack
-	SUB		SP, SP, #60					; LR correction
-	STMFD	SP!, { LR }					; store LR in stack
-	MRS		r1, spsr					; copy SPSR
-	STMFD	SP!, {r1}					; backup SPSR in stack
-	MOV 	R0, SP						; pointer to SP in R0, to point to Context-struct, first function parameter
+    LDR      r0, ADDR_THRESHOLD       ; Get the IRQ Threshold
+    LDR      r1, [r0, #0]
+    STMFD    r13!, {r1}               ; Save the threshold value
 
-	;
-	; read active IRQ number
-	;
-	LDR		r1, ADDR_SIR_IRQ			; store IRQ status registe in r1
-	LDR		r2, [r1, #0]				; load value from ram (address in r1 + offset 0)
-	AND		r2, r2, #MASK_ACTIVE_IRQ	; mask active IRQ number
+    LDR      r2, ADDR_IRQ_PRIORITY   ; Get the active IRQ priority
+    LDR      r3, [r2, #0]
+    STR      r3, [r0, #0]             ; Set the priority as threshold
+    LDR      r1, ADDR_SIR_IRQ         ; Get the Active IRQ
+    LDR      r2, [r1]
+    AND      r2, r2, #MASK_ACTIVE_IRQ ; Mask the Active IRQ number
 
-	;
-	; start interrupt handler
-	;	+ r2	= contains active IRQ number
-	;	+ r14	= link register
-	;	+ pc	= program counter
-	;
-	;CPS		#MASK_SYS_MODE				; change to sys mode
-	;LDR		r3, _intIrqHandlers			; load base of interrupt handler (implemented in interrupt.c)
-	ADD		r14, pc, #0					; save return address in link register (return point)
-	LDR		pc, [r3, r2, lsl #2]		; jump to interrupt handler
+    MOV      r0, #NEWIRQAGR           ; To enable new IRQ Generation
+    LDR      r1, ADDR_CONTROL
 
-	;
-	; read active IRQ number
-	;
-	LDR		r1, ADDR_SIR_IRQ			; store IRQ status registe in r1
-	LDR		r2, [r1, #0]				; load value from ram (address in r1 + offset 0)
-	AND		r2, r2, #MASK_ACTIVE_IRQ	; mask active IRQ number
+    CMP      r3, #0                   ; Check if non-maskable priority 0
+    STRNE    r0, [r1]                 ; if > 0 priority, acknowledge INTC
+    DSB                               ; Make sure acknowledgement is completed
 
-	;
-	; reset interrupt flags
-	;
-	;LDR		r3, _intIrqResetHandlers	; load base of interrupt handler (implemented in interrupt.c)
-	ADD		r14, pc, #0					; save return address in link register (return point)
-	LDR		pc, [r3, r2, lsl #2]		; jump to interrupt handler
+    ;
+    ; Enable IRQ and switch to system mode. But IRQ shall be enabled
+    ; only if priority level is > 0. Note that priority 0 is non maskable.
+    ; Interrupt Service Routines will execute in System Mode.
+    ;
+    MRS      r14, cpsr                ; Read cpsr
+    ORR      r14, r14, #MODE_SYS
+    BICNE    r14, r14, #I_BIT         ; Enable IRQ if priority > 0
+    MSR      cpsr_cxsf, r14
 
-	;CPS		#MASK_IRQ_MODE				; change to irq mode
+    STMFD    r13!, {r14}              ; Save lr_usr
+    LDR      r0, _intIrqHandlers        ; Load the base of the vector table
+    ADD      r14, pc, #0              ; Save return address in LR
+    LDR      pc, [r0, r2, lsl #2]     ; Jump to the ISR
 
-	;
-	; enable IRQ generation
-	;
-	MOV		r3, #MASK_NEW_IRQ			; load mask for new IRQ generation in r0
-	LDR		r4, ADDR_CONTROL			; load address for interrupt control register in r1
-	STR		r3, [r4, #0]				; store content of r2 in RAM address in r1 + offset 0
+    LDMFD    r13!, {r14}              ; Restore lr_usr
+    ;
+    ; Disable IRQ and change back to IRQ mode
+    ;
+    CPSID    i, #MODE_IRQ
 
-	;
-	; TODO change comments
-	;
-	LDMFD	SP!, { R1 }					; restore SPSR, if changed by scheduler
-	MSR		SPSR_cxsf, R1				; set stored cpsr from user to the current CPSR - will be restored later during SUBS
-
-	LDMFD	SP!, { LR }					; restore LR, if changed by scheduler
-
-	LDMFD	SP, { R0 - R14 }^			; restore user-registers, if changed by scheduler
-	ADD		SP, SP, #60					; increment stack-pointer: 15 * 4 bytes = 60bytes
-
- 	; TODO: when a process-switch was performed: MOVS	PC, LR should be enough, otherwise we must return to the instruction which was canceled by IRQ thus using SUBS
- 	SUBS	PC, LR, #4					; return from IRQ
+    LDR      r0, ADDR_THRESHOLD      ; Get the IRQ Threshold
+    LDR      r1, [r0, #0]
+    CMP      r1, #0                   ; If priority 0
+    MOVEQ    r2, #NEWIRQAGR           ; Enable new IRQ Generation
+    LDREQ    r1, ADDR_CONTROL
+    STREQ    r2, [r1]
+    LDMFD    r13!, {r1}
+    STR      r1, [r0, #0]             ; Restore the threshold value
+    ;VLDMIA   r13!, {d0-d7}            ; Restore D0-D7 Neon/VFP registers
+    LDMFD    r13!, {r1, r12}          ; Get fpscr and spsr
+    MSR      spsr_cxsf, r12           ; Restore spsr
+    ;VMSR     fpscr, r1                ; Restore fpscr
+    LDMFD    r13!, {r0-r3, r12, pc}^  ; Restore the context and return
+.end
