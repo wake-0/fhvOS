@@ -137,6 +137,10 @@
 #define CM_PER_CLK_24MHZ_CLKSTCTRL   (0x150)
 
 
+/**************************************************************************
+ * Field Definition Macros
+\**************************************************************************/
+
 /* L4LS_CLKSTCTRL */
 #define CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_CAN_CLK   (0x00000800u)
 #define CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_CAN_CLK_SHIFT   (0x0000000Bu)

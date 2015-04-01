@@ -7,8 +7,6 @@
 
 #include "devicemanager.h"
 
-#include "../hal/platform/platform.h"
-
 #define MAX_DEVICES		32
 #define MAX_DEVICE_NAME	255
 
@@ -16,6 +14,7 @@ typedef struct {
 	char name[MAX_DEVICE_NAME];
 	driver_id_t driverId;
 	short driverMsg;
+	boolean_t initialized;
 } device_map_entry_t;
 
 static boolean_t compareEntry(device_map_entry_t* entry, char* name, int len);
@@ -25,10 +24,16 @@ static boolean_t compareEntry(device_map_entry_t* entry, char* name, int len);
  * All device names have to be \0-terminated.
  */
 static device_map_entry_t deviceMap[MAX_DEVICES] = {
-		{ "LED0\0", DRIVER_ID_LED, 0 },
-		{ "LED1\0", DRIVER_ID_LED, 1 },
-		{ "LED2\0", DRIVER_ID_LED, 2 },
-		{ "LED3\0", DRIVER_ID_LED, 3 }
+		{ "LED0", DRIVER_ID_LED, 0, false },
+		{ "LED1", DRIVER_ID_LED, 1, false },
+		{ "LED2", DRIVER_ID_LED, 2, false },
+		{ "LED3", DRIVER_ID_LED, 3, false },
+		{ "UART0", DRIVER_ID_UART, 0, false },
+		{ "UART1", DRIVER_ID_UART, 1, false },
+		{ "UART2", DRIVER_ID_UART, 2, false },
+		{ "UART3", DRIVER_ID_UART, 4, false },
+		{ "UART4", DRIVER_ID_UART, 5, false }
+
 };
 
 void DeviceManagerInit()
@@ -40,13 +45,19 @@ device_t DeviceManagerGetDevice(char* name, int len)
 {
 	int i = 0;
 	for (i = 0; i < MAX_DEVICES; i++) {
-		device_map_entry_t dev = deviceMap[0];
+		device_map_entry_t dev = deviceMap[i];
 		if (dev.name[0] != '\0') {
 			if (compareEntry(&dev, name, len))
 			{
 				device_t result;
 				result.driverId = dev.driverId;
 				result.driverMsg = dev.driverMsg;
+
+				// Initialize the driver if we return it for the first time
+				if (dev.initialized == false) {
+					DriverManagerGetDriver(dev.driverId)->init(dev.driverMsg);
+					dev.initialized = true;
+				}
 				return result;
 			}
 		}

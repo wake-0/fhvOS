@@ -5,49 +5,51 @@
  *      Author: Nicolaj Hoess
  */
 
-#include <hw_led.h>
-#include "led.h"
-#include "../../hal/gpio/gpio.h"
+#include "driver_led.h"
 
-int LEDInit	(short id)
+#include <hw_led.h>
+
+#include "../../hal/gpio/hal_gpio.h"
+
+int LEDInit	(uint16_t id)
 {
-	int ledCount = BOARD_LED_COUNT;
+	uint8_t ledCount = BOARD_LED_COUNT;
 	if (id > ledCount - 1) return DRIVER_ERROR;
 	// Set up the GPIO pin
 	GPIOEnable(BOARD_LED(id));
-	GPIOReset(BOARD_LED(id));
+	//GPIOReset(BOARD_LED(id)); // XXX TODO Resetting here causes all prev turned on leds to turn off again. It works without this but maybe its not clean
 	GPIOSetMux(BOARD_LED(id), MUX_MODE_LED);
 	GPIOSetPinDirection(BOARD_LED(id), PIN_DIRECTION_OUT);
 	return DRIVER_OK;
 }
 
-int LEDOpen	(short id)
+int LEDOpen	(uint16_t id)
 {
-	int ledCount = BOARD_LED_COUNT;
+	uint8_t ledCount = BOARD_LED_COUNT;
 	if (id > ledCount - 1) return DRIVER_ERROR;
 	return DRIVER_OK;
 }
 
-int LEDClose (short id)
+int LEDClose (uint16_t id)
 {
 	// We turn off the led
 	char buf[1] = { 0 };
 	return LEDWrite(id, &buf[0], 1);
 }
 
-int LEDWrite (short id, char* buf, int len)
+int LEDWrite (uint16_t id, char* buf, uint16_t len)
 {
-	int ledCount = BOARD_LED_COUNT;
+	uint8_t ledCount = BOARD_LED_COUNT;
 	if (id > ledCount - 1) return DRIVER_ERROR;
 
 	if (len != 1) return DRIVER_ERROR;
 
 	switch(buf[0])
 	{
-		case 1:
+		case '1':
 			GPIOSetPinValue(BOARD_LED(id), PIN_VALUE_HIGH);
 			break;
-		case 0:
+		case '0':
 			GPIOSetPinValue(BOARD_LED(id), PIN_VALUE_LOW);
 			break;
 		default:
@@ -56,13 +58,13 @@ int LEDWrite (short id, char* buf, int len)
 	return DRIVER_OK;
 }
 
-int LEDRead	(short id, char* buf, int len)
+int LEDRead	(uint16_t id, char* buf, uint16_t len)
 {
 	// TODO Implement this
 	return DRIVER_FUNCTION_NOT_SUPPORTED;
 }
 
-int LEDIoctl (short id, int cmd, int mode, char* buf, int len)
+int LEDIoctl (uint16_t id, uint16_t cmd, uint8_t mode, char* buf, uint16_t len)
 {
 	return DRIVER_FUNCTION_NOT_SUPPORTED;
 }

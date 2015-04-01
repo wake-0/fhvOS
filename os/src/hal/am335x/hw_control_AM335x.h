@@ -332,6 +332,11 @@ extern "C" {
 #define CONTROL_CONF_MUXMODE(n)        (n)
 
 
+
+/**************************************************************************
+ * Field Definition Macros
+\**************************************************************************/
+
 /* CONTROL_REVISION */
 #define CONTROL_REVISION_IP_REV_CUSTOM   (0x000000C0u)
 #define CONTROL_REVISION_IP_REV_CUSTOM_SHIFT   (0x00000006u)

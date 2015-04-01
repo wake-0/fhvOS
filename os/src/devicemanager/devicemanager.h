@@ -8,7 +8,8 @@
 #ifndef DEVICEMANAGER_DEVICEMANAGER_H_
 #define DEVICEMANAGER_DEVICEMANAGER_H_
 
-#include "../driver/manager/manager.h"
+#include "../../../platform/platform.h"
+#include "../driver/manager/driver_manager.h"
 
 #define DEVICE_MANAGER_NO_DRIVER	-10
 
