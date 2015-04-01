@@ -24,10 +24,16 @@ static boolean_t compareEntry(device_map_entry_t* entry, char* name, int len);
  * All device names have to be \0-terminated.
  */
 static device_map_entry_t deviceMap[MAX_DEVICES] = {
-		{ "LED0\0", DRIVER_ID_LED, 0, false },
-		{ "LED1\0", DRIVER_ID_LED, 1, false},
-		{ "LED2\0", DRIVER_ID_LED, 2, false },
-		{ "LED3\0", DRIVER_ID_LED, 3, false }
+		{ "LED0", DRIVER_ID_LED, 0, false },
+		{ "LED1", DRIVER_ID_LED, 1, false },
+		{ "LED2", DRIVER_ID_LED, 2, false },
+		{ "LED3", DRIVER_ID_LED, 3, false },
+		{ "UART0", DRIVER_ID_UART, 0, false },
+		{ "UART1", DRIVER_ID_UART, 1, false },
+		{ "UART2", DRIVER_ID_UART, 2, false },
+		{ "UART3", DRIVER_ID_UART, 4, false },
+		{ "UART4", DRIVER_ID_UART, 5, false }
+
 };
 
 void DeviceManagerInit()
