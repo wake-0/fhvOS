@@ -36,7 +36,7 @@ void setTimerControlRegisterField(unsigned int baseRegister, unsigned int contro
 
 void enableTimerInterrupts(unsigned int baseRegister, unsigned int timerIrq)
 {
-    HWREG(baseRegister + IRQENABLE_CLR) = (timerIrq &
+    HWREG(baseRegister + IRQENABLE_SET) = (timerIrq &
 	                                           (IRQ_CAPTURE_ENABLE |
 											    IRQ_OVERFLOW_ENABLE |
 												IRQ_MATCH_ENABLE));
@@ -51,6 +51,28 @@ void disableTimerInterrupts(unsigned int baseRegister, unsigned int timerIrq)
 												IRQ_MATCH_ENABLE));
 }
 
+
+void clearInterruptStatus(unsigned int baseRegister, unsigned int timerIrq)
+{
+    /* Clear the interrupt status from IRQSTATUS register */
+    HWREG(baseRegister + IRQSTATUS) = (timerIrq &
+                                         (IRQ_CAPTURE_ENABLE |
+										 IRQ_OVERFLOW_ENABLE |
+										 IRQ_MATCH_ENABLE));
+}
+
+void writeIrqStatusRawRegister(unsigned int baseRegister, unsigned int timerIrq)
+{
+	HWREG(baseRegister + IRQSTATUS_RAW) = (timerIrq &
+	                                         (IRQ_CAPTURE_ENABLE |
+											 IRQ_OVERFLOW_ENABLE |
+											 IRQ_MATCH_ENABLE));
+}
+
+void setIntcMirRegister(unsigned int mask)
+{
+
+}
 
 void startTimer(unsigned int baseRegister)
 {
@@ -81,6 +103,12 @@ void setTimerCounterValue(unsigned int baseRegister, unsigned int counterValue)
 		HWREG(baseRegister + TCRR) = counterValue;
 }
 
+unsigned int getTimerCounterValue(unsigned int baseRegiser)
+{
+    DMTimerWaitForWrite(WRITE_PEND_TCRR, baseRegiser);
+
+    return (HWREG(baseRegiser + TCRR));
+}
 
 /*
  *	\brief:
@@ -102,7 +130,7 @@ unsigned int readTimerCounterValue(unsigned int baseRegister)
  */
 void setTimerCounterReloadValue(unsigned int baseRegister, unsigned int timerCounterReloadValue)
 {
-	DMTimerWaitForWrite(WRITE_PEND_TCRR, baseRegister);
+	DMTimerWaitForWrite(WRITE_PEND_TLDR, baseRegister);
 
 	if(DMTIMER1_MS == baseRegister)
 		HWREG(baseRegister + TLDR_1MS) = timerCounterReloadValue;
@@ -254,6 +282,15 @@ unsigned int DMTimerWritePostedStatusGet(unsigned int baseRegister)
 }
 
 
+void clearTimerIrqPendingFlag(unsigned int baseRegister, unsigned int timerIrq)
+{
+	HWREG(baseRegister + IRQSTATUS) = (timerIrq &
+	                                         (IRQ_CAPTURE_ENABLE |
+											 IRQ_OVERFLOW_ENABLE |
+											 IRQ_MATCH_ENABLE));
+}
+
+
 void enableClockPrescaler(unsigned int baseRegister, unsigned int prescalerValue)
 {
 	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseRegister);
@@ -317,44 +354,128 @@ static void moduleClockConfig(void)
       CM_PER_L4LS_CLKCTRL_MODULEMODE) != CM_PER_L4LS_CLKCTRL_MODULEMODE_ENABLE);
 }
 
+void setTimerClkSource(unsigned int timerMuxSelectionRegister, unsigned int clkSource)
+{
+	HWREG(SOC_CM_DPLL_REGS + timerMuxSelectionRegister) &=
+	          ~(TIMER_CLK_SELECTION_RANGE);
 
-void selectClockSourceForTimer(unsigned int timerMuxSelectionRegister, unsigned int timerClockControlRegister)
+	unsigned int controlSetting = clkSource & (TIMER_CLK_SELECT_TCLKIN | TIMER_CLK_SELECT_M_OSC
+																	| TIMER_CLK_SELECT_32KHZ);
+
+	HWREG(SOC_CM_DPLL_REGS + timerMuxSelectionRegister) |= controlSetting;
+
+	while((HWREG(SOC_CM_DPLL_REGS + timerMuxSelectionRegister) &
+			TIMER_CLK_SELECTION_RANGE) != controlSetting);
+}
+
+void enableSelectedClockSource(unsigned int timerClockControlRegister)
+{
+	HWREG(SOC_CM_PER_REGS + timerClockControlRegister) |= CLK_ENABLE;
+
+	while((HWREG(SOC_CM_PER_REGS + timerClockControlRegister) &
+	CLK_MODULEMODE_RANGE) != CLK_ENABLE);
+}
+
+void waitForModuleBeingFullyFunctional(unsigned int timerClockControlRegister)
+{
+	while((HWREG(SOC_CM_PER_REGS + timerClockControlRegister) &
+			CLK_IDLE_STATUS_RANGE) != CLK_IDLE_STATUS_FULLY_FUNCTIONAL);
+}
+
+void waitForL3SClockBeingActive(void)
+{
+	while(!(HWREG(SOC_CM_PER_REGS + CM_PER_L3S_CLKSTCTRL) &
+			CM_PER_L3S_CLKSTCTRL_CLKACTIVITY_L3S_GCLK));
+}
+
+void waitForL3ClockBeingActive(void)
+{
+	while(!(HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKSTCTRL) &
+	            CM_PER_L3_CLKSTCTRL_CLKACTIVITY_L3_GCLK));
+}
+
+void waitForOcpwpClockBeingActive(void)
+{
+	while(!(HWREG(SOC_CM_PER_REGS + CM_PER_OCPWP_L3_CLKSTCTRL) &
+		   (CM_PER_OCPWP_L3_CLKSTCTRL_CLKACTIVITY_OCPWP_L3_GCLK |
+			CM_PER_OCPWP_L3_CLKSTCTRL_CLKACTIVITY_OCPWP_L4_GCLK)));
+}
+
+// TODO: refactor function to activate all timers, not just timer2
+void setTimerClockActive(void)
+{
+	while(!(HWREG(SOC_CM_PER_REGS + CM_PER_L4LS_CLKSTCTRL) &
+	           (CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_L4LS_GCLK |
+	            CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_TIMER2_GCLK)));
+}
+
+void selectClockSourceForTimer(unsigned int timerMuxSelectionRegister, unsigned int timerClockControlRegister, unsigned int clkSource)
 {
 	moduleClockConfig();
 
-    // Select the clock source for the Timer2 instance.
-    HWREG(SOC_CM_DPLL_REGS + timerMuxSelectionRegister) &=
-          ~(CM_DPLL_CLKSEL_TIMER2_CLK_CLKSEL);
+    setTimerClkSource(timerMuxSelectionRegister, clkSource);   //TIMER_CLK_SELECT_TCLKIN, TIMER_CLK_SELECT_M_OSC, TIMER_CLK_SELECT_32KHZ
 
-    HWREG(SOC_CM_DPLL_REGS + timerMuxSelectionRegister) |=
-          CM_DPLL_CLKSEL_TIMER2_CLK_CLKSEL_CLK_M_OSC;
+    enableSelectedClockSource(timerClockControlRegister);
 
-    while((HWREG(SOC_CM_DPLL_REGS + timerMuxSelectionRegister) &
-           CM_DPLL_CLKSEL_TIMER2_CLK_CLKSEL) !=
-           CM_DPLL_CLKSEL_TIMER2_CLK_CLKSEL_CLK_M_OSC);
+    waitForModuleBeingFullyFunctional(timerClockControlRegister);
 
-    HWREG(SOC_CM_PER_REGS + timerClockControlRegister) |=
-                             CM_PER_TIMER2_CLKCTRL_MODULEMODE_ENABLE;
+    waitForL3SClockBeingActive();
 
-    while((HWREG(SOC_CM_PER_REGS + timerClockControlRegister) &
-    CM_PER_TIMER2_CLKCTRL_MODULEMODE) != CM_PER_TIMER2_CLKCTRL_MODULEMODE_ENABLE);
+    waitForL3ClockBeingActive();
 
-    while((HWREG(SOC_CM_PER_REGS + timerClockControlRegister) &
-       CM_PER_TIMER2_CLKCTRL_IDLEST) != CM_PER_TIMER2_CLKCTRL_IDLEST_FUNC);
+    waitForOcpwpClockBeingActive(); // l4 ocpwp not active
 
-    while(!(HWREG(SOC_CM_PER_REGS + CM_PER_L3S_CLKSTCTRL) &
-            CM_PER_L3S_CLKSTCTRL_CLKACTIVITY_L3S_GCLK));
+    // TODO: refactor function to activate all timers, not just timer2
+    setTimerClockActive();
 
-    while(!(HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKSTCTRL) &
-            CM_PER_L3_CLKSTCTRL_CLKACTIVITY_L3_GCLK));
+}
 
-    while(!(HWREG(SOC_CM_PER_REGS + CM_PER_OCPWP_L3_CLKSTCTRL) &
-           (CM_PER_OCPWP_L3_CLKSTCTRL_CLKACTIVITY_OCPWP_L3_GCLK |
-            CM_PER_OCPWP_L3_CLKSTCTRL_CLKACTIVITY_OCPWP_L4_GCLK)));
 
-    while(!(HWREG(SOC_CM_PER_REGS + CM_PER_L4LS_CLKSTCTRL) &
-           (CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_L4LS_GCLK |
-            CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_TIMER2_GCLK)));
+unsigned int getTimerInterruptNumber(Timer_t timer)
+{
+	switch(timer)
+	{
+		case TIMER0:
+			return SYS_INT_TINT0;
+		case TIMER1_MS:
+			return SYS_INT_TINT1_1MS;
+		case TIMER2:
+			return SYS_INT_TINT2;
+		case TIMER3:
+			return SYS_INT_TINT3;
+		case TIMER4:
+			return SYS_INT_TINT4;
+		case TIMER5:
+			return SYS_INT_TINT5;
+		case TIMER6:
+			return SYS_INT_TINT6;
+		case TIMER7:
+			return SYS_INT_TINT7;
+	}
+}
+
+
+unsigned int getTimerClockControlRegisterAddress(Timer_t timer)
+{
+	switch(timer)
+	{
+		case TIMER0:
+			return 0;				// no clock settings for timer0
+		case TIMER1_MS:
+			return 0;				// CM_PER_TIMER1MS_CLKCTRL
+		case TIMER2:
+			return CM_PER_TIMER2_CLKCTRL;
+		case TIMER3:
+			return CM_PER_TIMER3_CLKCTRL;
+		case TIMER4:
+			return CM_PER_TIMER4_CLKCTRL;
+		case TIMER5:
+			return CM_PER_TIMER5_CLKCTRL;
+		case TIMER6:
+			return CM_PER_TIMER6_CLKCTRL;
+		case TIMER7:
+			return CM_PER_TIMER7_CLKCTRL;
+	}
 }
 
 unsigned int getTimerMuxSelectionRegisterAddress(Timer_t timer)
@@ -394,7 +515,6 @@ unsigned int getTimerBaseRegisterAddress(Timer_t timer)
 			return DMTIMER0;
 		case TIMER1_MS:
 			return DMTIMER1_MS;
-			break;
 		case TIMER2:
 			return DMTIMER2;
 		case TIMER3:
