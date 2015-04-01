@@ -97,9 +97,9 @@ int main(void)
 
 	// ----- TIMER settings -----
 	unsigned int compareMode = 0x00;		// compare mode disabled
-	unsigned int reloadMode = 0x00;			// 0x02 auto-reload
+	unsigned int reloadMode = 0x02;			// 0x02 auto-reload
 
-	unsigned int countVal = 0xFF000000;//TIMER_OVERFLOW - (milliSec * TIMER_1MS_COUNT);
+	unsigned int countVal = 0xE0000000;//TIMER_OVERFLOW - (milliSec * TIMER_1MS_COUNT);
 
 	TimerCounterValueSet(TIMER2, countVal);
 	TimerReloadValueSet(TIMER2, countVal);
@@ -111,11 +111,13 @@ int main(void)
 	// ----- TIMER start -----
 	TimerStart(TIMER2);
 
-
+	volatile int counter = 0;
 	while(cntValue)
 	{
+		counter++;
 		if(flagIsr == 1)
 		{
+			counter = 0;
 			//printf("\nOverflow\n");
 			cntValue--;
 			flagIsr = 0;
@@ -138,9 +140,7 @@ void timerISR(void)
 
 	//printf("\nTimer Interrupt!\n");
 
-	TimerStop(TIMER2);
-
-	//TimerInterruptEnable(TIMER2, 0x2);		// IRQ_OVERFLOW_ENABLE
+	TimerInterruptEnable(TIMER2, 0x2);		// IRQ_OVERFLOW_ENABLE
 }
 
 #pragma INTERRUPT(irq_handler, IRQ)
@@ -152,6 +152,10 @@ interrupt void irq_handler()
 
 	intHandler_t timerIsr = InterruptGetHandler(activeIrq);
 	timerIsr();
+
+	// Set INTC_CONTROL NewIRQAgr to 1
+	InterruptAllowNewIrqGeneration();
+	// Set INTC_CONTROL NewFIQAgr to 1
 
 	//InterruptRestoreUserContext();
 }
