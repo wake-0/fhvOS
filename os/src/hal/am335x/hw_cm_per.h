@@ -136,9 +136,6 @@
 #define CM_PER_CLKDIV32K_CLKCTRL   (0x14c)
 #define CM_PER_CLK_24MHZ_CLKSTCTRL   (0x150)
 
-/**************************************************************************\ 
- * Field Definition Macros
-\**************************************************************************/
 
 /* L4LS_CLKSTCTRL */
 #define CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_CAN_CLK   (0x00000800u)
@@ -1402,6 +1399,10 @@
 #define CM_PER_CLK_24MHZ_CLKSTCTRL_CLKTRCTRL_SW_SLEEP   (0x1u)
 #define CM_PER_CLK_24MHZ_CLKSTCTRL_CLKTRCTRL_SW_WKUP   (0x2u)
 
-
+#define CLK_MODULEMODE_RANGE 0x2
+#define CLK_ENABLE 0x2
+#define CLK_DISABLE 0x0
+#define CLK_IDLE_STATUS_RANGE	0x00030000
+#define CLK_IDLE_STATUS_FULLY_FUNCTIONAL 0x0
 
 #endif

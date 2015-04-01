@@ -60,6 +60,11 @@ extern "C" {
 #define INTC_IDLE 							(0x50)
 #define INTC_ILR_TINT2						(0x210)
 
+// INTC_SYSCONFIG
+#define SYSCONFIG_SET_AUTO_CLK_GATE		(0x01)
+
+// INTC_IDLE
+#define IDLE_SET_FUNC_CLOCK					(0x3)
 
 /* Commands for AINTC */
 #define INTC_SYSCONFIG_AUTOIDLE				(0x1)
