@@ -126,6 +126,21 @@ unsigned int TimerHalGetCounterValue(unsigned int baseRegister)
 	}
 }
 
+
+unsigned int TimerHalGetReloadValue(unsigned int baseRegister)
+{
+	if(DMTIMER1_MS == baseRegister)
+	{
+		DMTimerWaitForWrite_1MS(WRITE_PEND_TCRR, baseRegister);
+		return HWREG(baseRegister + TLDR_1MS);
+	}
+	else
+	{
+		DMTimerWaitForWrite(WRITE_PEND_TCRR, baseRegister);
+		return HWREG(baseRegister + TLDR);
+	}
+}
+
 /*
  *	\brief:
  *	\param: 	baseRegister				base address of timer
@@ -409,7 +424,7 @@ void TimerHalSetClockSettings(unsigned int timerMuxSelectionRegister, unsigned i
 }
 
 
-unsigned int TimerHalGetInterruptNumber(Timer_t timer)
+unsigned int TimerHalGetInterruptNumber(unsigned int timer)
 {
 	switch(timer)
 	{
@@ -429,11 +444,13 @@ unsigned int TimerHalGetInterruptNumber(Timer_t timer)
 			return SYS_INT_TINT6;
 		case TIMER7:
 			return SYS_INT_TINT7;
+		default:
+			return 0;
 	}
 }
 
 
-unsigned int TimerHalGetClockControlRegisterAddress(Timer_t timer)
+unsigned int TimerHalGetClockControlRegisterAddress(unsigned int timer)
 {
 	switch(timer)
 	{
@@ -453,10 +470,12 @@ unsigned int TimerHalGetClockControlRegisterAddress(Timer_t timer)
 			return CM_PER_TIMER6_CLKCTRL;
 		case TIMER7:
 			return CM_PER_TIMER7_CLKCTRL;
+		default:
+			return 0;
 	}
 }
 
-unsigned int TimerHalGetMuxRegisterAddress(Timer_t timer)
+unsigned int TimerHalGetMuxRegisterAddress(unsigned int timer)
 {
 	switch(timer)
 	{
@@ -476,6 +495,8 @@ unsigned int TimerHalGetMuxRegisterAddress(Timer_t timer)
 			return CM_DPLL_CLKSEL_TIMER6_CLK;
 		case TIMER7:
 			return CM_DPLL_CLKSEL_TIMER7_CLK;
+		default:
+			return 0;
 	}
 }
 
@@ -485,25 +506,27 @@ unsigned int TimerHalGetMuxRegisterAddress(Timer_t timer)
  *	\param: 	timer		number of used timer
 	\return: 	base register address of timer
  */
-unsigned int TimerHalGetTimerBaseAddress(Timer_t timer)
+unsigned int TimerHalGetTimerBaseAddress(unsigned int timer)
 {
 	switch(timer)
 	{
-		case TIMER0:
+		case 0:
 			return DMTIMER0;
-		case TIMER1_MS:
+		case 1:
 			return DMTIMER1_MS;
-		case TIMER2:
+		case 2:
 			return DMTIMER2;
-		case TIMER3:
+		case 3:
 			return DMTIMER3;
-		case TIMER4:
+		case 4:
 			return DMTIMER4;
-		case TIMER5:
+		case 5:
 			return DMTIMER5;
-		case TIMER6:
+		case 6:
 			return DMTIMER6;
-		case TIMER7:
+		case 7:
 			return DMTIMER7;
+		default:
+			return 0;
 	}
 }

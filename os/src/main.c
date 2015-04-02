@@ -80,8 +80,12 @@ static volatile unsigned int flagIsr = 0;
 
 int main(void)
 {
-	TimerReset(TIMER2);
-	DMTimer2ModuleClkConfig();
+	//TimerReset(TIMER2);
+	//DMTimer2ModuleClkConfig();
+
+	//TimerClockConfig(TIMER2, 0x01);
+
+	TimerSetUp(TIMER2);
 
 	CPUSwitchToUserMode();
 	CPUSwitchToPrivilegedMode();
@@ -90,6 +94,11 @@ int main(void)
 	InterruptMasterIRQEnable();
 
 	InterruptResetAINTC();
+	uint16_t timeInMilis = 2000;
+	uint16_t interruptMode = 0x02; // overflow
+	uint16_t priority = 0x1;
+	TimerConfigureCyclicInterrupt(TIMER2, timeInMilis, interruptMode, priority, timerISR);
+	/*
 	InterruptHandlerRegister(SYS_INT_TINT2, timerISR);
 	InterruptPrioritySet(SYS_INT_TINT2, 0x01);
 	InterruptHandlerEnable(SYS_INT_TINT2);
@@ -107,7 +116,7 @@ int main(void)
 
 	// ----- INTERRUPT enable -----
 	TimerInterruptEnable(TIMER2, DMTIMER_INT_OVF_EN_FLAG);
-
+	*/
 	// ----- TIMER start -----
 	TimerStart(TIMER2);
 
@@ -137,8 +146,6 @@ void timerISR(void)
 	TimerInterruptStatusClear(TIMER2, 0x2); // IRQ_OVERFLOW
 
 	flagIsr = 1;
-
-	//printf("\nTimer Interrupt!\n");
 
 	TimerInterruptEnable(TIMER2, 0x2);		// IRQ_OVERFLOW_ENABLE
 }

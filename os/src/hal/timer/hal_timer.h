@@ -20,10 +20,10 @@ typedef enum {TIMER0, TIMER1_MS, TIMER2,
 extern void TimerHalEnableInterrupts(unsigned int baseRegister, unsigned int timerIrq);
 extern void TimerHalDisableInterrupts(unsigned int baseRegister, unsigned int timerIrq);
 void TimerHalClearInterruptStatus(unsigned int baseRegister, unsigned int timerIrq);
-extern unsigned int TimerHalGetTimerBaseAddress(Timer_t timer);
-extern unsigned int TimerHalGetMuxRegisterAddress(Timer_t timer);
-extern unsigned int TimerHalGetClockControlRegisterAddress(Timer_t timer);
-extern unsigned int TimerHalGetInterruptNumber(Timer_t timer);
+extern unsigned int TimerHalGetTimerBaseAddress(unsigned int timer);
+extern unsigned int TimerHalGetMuxRegisterAddress(unsigned int timer);
+extern unsigned int TimerHalGetClockControlRegisterAddress(unsigned int timer);
+extern unsigned int TimerHalGetInterruptNumber(unsigned int timer);
 extern void TimerHalSetClockSettings(unsigned int timerMuxSelectionRegister, unsigned int timerClockControlRegister, unsigned int clkSource);
 extern void TimerHalEnableClockPrescaler(unsigned int baseRegister, unsigned int prescalerValue);
 extern void TimerHalDisableClockPrescaler(unsigned int baseRegister);
@@ -41,3 +41,4 @@ extern void TimerHalSetTriggerMode(unsigned int baseRegister, unsigned int trigg
 extern void TimerHalSetCaptureMode(unsigned int baseRegister, unsigned int captureMode);
 extern void TimerHalSetOutputPinMode(unsigned int baseRegister, unsigned int controlRegister, unsigned int pinMode);
 extern void TimerHalSetTransitionCaptureMode(unsigned int baseRegister, unsigned int transitionMode);
+unsigned int TimerHalGetReloadValue(unsigned int baseRegister);

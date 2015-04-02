@@ -11,6 +11,7 @@
 
 #include "../led/driver_led.h"
 #include "../uart/driver_uart.h"
+#include "../timer/driver_timer.h"
 
 #define MAX_DRIVER		255
 
@@ -39,6 +40,15 @@ void DriverManagerInit()
 	uart->write = &UARTDriverWrite;
 	uart->ioctl = &UARTDriverIoctl;
 	drivers[DRIVER_ID_UART] = uart;
+
+	// TIMER Driver
+	driver_t* timer = malloc(sizeof(driver_t));
+	timer->init = &TimerSetUp;
+	timer->open = &TimerStart;
+	timer->close = &TimerStop;
+	timer->write = &TimerSetCounterValues;
+	timer->read = &TimerCurrentValueGet;
+	timer->ioctl = &TimerConfigureCyclicInterrupt;
 }
 
 driver_t* DriverManagerGetDriver(driver_id_t driver_id)
