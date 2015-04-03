@@ -7,7 +7,6 @@
 
 #include "systemcallFunctions.h"
 
-
 void SystemCallChangeMode(int mode)
 {
 	switch(mode)

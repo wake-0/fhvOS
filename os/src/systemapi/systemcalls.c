@@ -10,108 +10,108 @@
 #include "systemcallFunctions.h"
 
 
-void SystemCall(int systemCallNumber, int destination, systemCallMessage_t message)
+void SystemCall(systemCallMessage_t * message)
 {
-	switch(systemCallNumber)
+	switch(message->systemCallNumber)
 	{
-		case EXIT:
+		case SYS_EXIT:
 			break;
-		case FORK:
+		case SYS_FORK:
 			break;
-		case READ:
+		case SYS_READ:
 			break;
-		case WRITE:
+		case SYS_WRITE:
 			break;
-		case OPEN:
+		case SYS_OPEN:
 			break;
-		case CLOSE:
+		case SYS_CLOSE:
 			break;
-		case WAIT:
+		case SYS_WAIT:
 			break;
-		case CREAT:
+		case SYS_CREAT:
 			break;
-		case LINK:
+		case SYS_LINK:
 			break;
-		case UNLINK:
+		case SYS_UNLINK:
 			break;
-		case WAITPID:
+		case SYS_WAITPID:
 			break;
-		case CHDIR:
+		case SYS_CHDIR:
 			break;
-		case TIME:
+		case SYS_TIME:
 			break;
-		case MKNOD:
+		case SYS_MKNOD:
 			break;
-		case CHMOD:
-			SystemCallChangeMode(message.messageArgs.args1.arg1);
+		case SYS_CHMOD:
+			SystemCallChangeMode(message->messageArgs.arg1);
 			break;
-		case CHOWN:
+		case SYS_CHOWN:
 			break;
-		case BRK:
+		case SYS_BRK:
 			break;
-		case STAT:
+		case SYS_STAT:
 			break;
-		case LSEEK:
+		case SYS_LSEEK:
 			break;
-		case GETPID:
+		case SYS_GETPID:
 			break;
-		case MOUNT:
+		case SYS_MOUNT:
 			break;
-		case UMOUNT:
+		case SYS_UMOUNT:
 			break;
-		case SETUID:
+		case SYS_SETUID:
 			break;
-		case GETUID:
+		case SYS_GETUID:
 			break;
-		case STIME:
+		case SYS_STIME:
 			break;
-		case PTRACE:
+		case SYS_PTRACE:
 			break;
-		case ALARM:
+		case SYS_ALARM:
 			break;
-		case FSTAT:
+		case SYS_FSTAT:
 			break;
-		case PAUSE:
+		case SYS_PAUSE:
 			break;
-		case UTIME:
+		case SYS_UTIME:
 			break;
-		case ACCESS:
+		case SYS_ACCESS:
 			break;
-		case SYNC:
+		case SYS_SYNC:
 			break;
-		case KILL:
+		case SYS_KILL:
 			break;
-		case RENAME:
+		case SYS_RENAME:
 			break;
-		case MKDIR:
+		case SYS_MKDIR:
 			break;
-		case RMDIR:
+		case SYS_RMDIR:
 			break;
-		case DUP:
+		case SYS_DUP:
 			break;
-		case PIPE:
+		case SYS_PIPE:
 			break;
-		case TIMES:
+		case SYS_TIMES:
 			break;
-		case SETGID:
+		case SYS_SETGID:
 			break;
-		case GETGID:
+		case SYS_GETGID:
 			break;
-		case SIGNAL:
+		case SYS_SIGNAL:
 			break;
-		case IOCTL:
+		case SYS_IOCTL:
 			break;
-		case FCNTL:
+		case SYS_FCNTL:
 			break;
-		case EXEC:
+		case SYS_EXEC:
 			break;
-		case UMASK:
+		case SYS_UMASK:
 			break;
-		case CHROOT:
+		case SYS_CHROOT:
 			break;
-		case SETSID:
+		case SYS_SETSID:
 			break;
-		case GETPGRP:
+		case SYS_GETPGRP:
 			break;
 	}
 }

@@ -32,12 +32,13 @@ int main(void)
 	timerDriver = DriverManagerGetDriver(DRIVER_ID_TIMER);
 	timerDriver->init(TIMER2);
 
-	systemCallMessage_t message;
-	message.messageArgs.args1.arg1 = 0x10;		// USER MODE
-	SystemCall(CHMOD, 0, message);
+	systemCallMessage_t * message = (systemCallMessage_t * )malloc(sizeof(systemCallMessage_t));
+	message->systemCallNumber = SYS_CHMOD;
+	message->messageArgs.arg1 = 0x10;		// USER MODE
+	SystemCall(message);
 
-	message.messageArgs.args1.arg1 = 0x1F;		// SYSTEM MODE
-	SystemCall(CHMOD, 0, message);
+	message->messageArgs.arg1 = 0x1F;		// SYSTEM MODE
+	SystemCall(message);
 
 
 	// ----- INTERRUPT settings -----

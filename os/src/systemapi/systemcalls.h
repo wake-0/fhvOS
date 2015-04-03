@@ -11,55 +11,55 @@
 #ifndef SYSTEMAPI_SYSTEMCALLS_H_
 #define SYSTEMAPI_SYSTEMCALLS_H_
 
-#define EXIT        		1
-#define FORK        		2
-#define READ        		3
-#define WRITE       		4
-#define OPEN        		5
-#define CLOSE       		6
-#define WAIT        		7
-#define CREAT       		8
-#define LINK        		9
-#define UNLINK     	 	  	10
-#define WAITPID           	11
-#define CHDIR             	12
-#define TIME              	13
-#define MKNOD             	14
-#define CHMOD             	15
-#define CHOWN             	16
-#define BRK               	17
-#define STAT              	18
-#define LSEEK             	19
-#define GETPID            	20
-#define MOUNT             	21
-#define UMOUNT            	22
-#define SETUID            	23
-#define GETUID            	24
-#define STIME             	25
-#define PTRACE            	26
-#define ALARM             	27
-#define FSTAT             	28
-#define PAUSE             	29
-#define UTIME             	30
-#define ACCESS            	33
-#define SYNC              	36
-#define KILL              	37
-#define RENAME            	38
-#define MKDIR             	39
-#define RMDIR             	40
-#define DUP               	41
-#define PIPE             	42
-#define TIMES             	43
-#define SETGID            	46
-#define GETGID            	47
-#define SIGNAL            	48
-#define IOCTL             	54
-#define FCNTL             	55
-#define EXEC              	59
-#define UMASK             	60
-#define CHROOT            	61
-#define SETSID            	62
-#define GETPGRP           	63
+#define SYS_EXIT        		1
+#define SYS_FORK        		2
+#define SYS_READ        		3
+#define SYS_WRITE       		4
+#define SYS_OPEN        		5
+#define SYS_CLOSE       		6
+#define SYS_WAIT        		7
+#define SYS_CREAT       		8
+#define SYS_LINK        		9
+#define SYS_UNLINK     	 	  	10
+#define SYS_WAITPID           	11
+#define SYS_CHDIR             	12
+#define SYS_TIME              	13
+#define SYS_MKNOD             	14
+#define SYS_CHMOD             	15
+#define SYS_CHOWN             	16
+#define SYS_BRK               	17
+#define SYS_STAT              	18
+#define SYS_LSEEK             	19
+#define SYS_GETPID            	20
+#define SYS_MOUNT             	21
+#define SYS_UMOUNT            	22
+#define SYS_SETUID            	23
+#define SYS_GETUID            	24
+#define SYS_STIME             	25
+#define SYS_PTRACE            	26
+#define SYS_ALARM             	27
+#define SYS_FSTAT             	28
+#define SYS_PAUSE             	29
+#define SYS_UTIME             	30
+#define SYS_ACCESS            	33
+#define SYS_SYNC              	36
+#define SYS_KILL              	37
+#define SYS_RENAME            	38
+#define SYS_MKDIR             	39
+#define SYS_RMDIR             	40
+#define SYS_DUP               	41
+#define SYS_PIPE             	42
+#define SYS_TIMES             	43
+#define SYS_SETGID            	46
+#define SYS_GETGID            	47
+#define SYS_SIGNAL            	48
+#define SYS_IOCTL             	54
+#define SYS_FCNTL             	55
+#define SYS_EXEC              	59
+#define SYS_UMASK             	60
+#define SYS_CHROOT            	61
+#define SYS_SETSID            	62
+#define SYS_GETPGRP           	63
 
  // The following are not system calls, but are processed like them.
 
@@ -91,67 +91,22 @@
 #define SETPRIORITY       	89    // to PM
 #define GETTIMEOFDAY      	90    // to PM
 
-typedef struct
-{
-	int arg1, arg2, arg3;
-	char * arg4, * arg5, * arg6;
-} messageArgsType1_t;
 
 typedef struct
 {
 	int arg1, arg2, arg3;
-	long arg4, arg5;
-	char * arg6;
-} messageArgsType2_t;
+	unsigned int arg4, arg5;
+	char * arg6, *arg7;
+} messageArgs_t;
+
 
 typedef struct
 {
-	int arg1, arg2;
-	char * arg3, * arg4;
-} messageArgsType3_t;
-
-typedef struct
-{
-	unsigned int arg1, arg2, arg3, arg4;
-	char * arg5;
-} messageArgsType4_t;
-
-typedef struct
-{
-	int arg1, arg2;
-	short arg3, arg4;
-	char * arg5;
-} messageArgsType5_t;
-
-typedef struct
-{
-	int arg1, arg2, arg3, arg4;
-	char * arg5, * arg6;
-} messageArgsType6_t;
-
-typedef struct
-{
-	int arg1, arg2;
-	char * arg3, * arg4, * arg5, * arg6;
-} messageArgsType7_t;
-
-typedef struct
-{
-	int messageSource;
+	int systemCallNumber;
 	int messageType;
-	union
-	{
-		messageArgsType1_t args1;
-		messageArgsType2_t args2;
-		messageArgsType3_t args3;
-		messageArgsType4_t args4;
-		messageArgsType5_t args5;
-		messageArgsType6_t args6;
-		messageArgsType7_t args7;
-	}
-	messageArgs;
+	messageArgs_t messageArgs;
 } systemCallMessage_t;
 
-extern void SystemCall(int systemCallNumber, int destination, systemCallMessage_t message);
+extern void SystemCall(systemCallMessage_t * message);
 
 #endif // SYSTEMAPI_SYSTEMCALLS_H_
