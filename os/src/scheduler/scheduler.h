@@ -13,14 +13,16 @@
 /*
  * Defines for better understanding
  */
-#define SCHEDULER_OK		0
-#define SCHEDULER_ERROR		-1
-#define PROCESSES_MAX		64
+#define SCHEDULER_OK		(0)
+#define SCHEDULER_ERROR		(-1)
+#define PROCESSES_MAX		(64)
+
+#define INVALID_PROCESS_ID	(-1)
 
 /*
  * Typedefs
  */
-typedef uint16_t processId_t;
+typedef int16_t processId_t;
 typedef void (*processFunc)();
 
 /*
@@ -29,7 +31,8 @@ typedef void (*processFunc)();
 typedef enum {
 	READY,
 	RUNNING,
-	BLOCKED
+	BLOCKED,
+	FINISHED
 } processState_t;
 
 typedef struct {
@@ -41,6 +44,7 @@ typedef struct {
 /*
  * Scheduler functions
  */
+extern int SchedulerInit(void);
 extern int SchedulerStartProcess(processFunc func);
 extern int SchedulerRunNextProcess();
 extern int SchedulerKillProcess(processId_t id);
