@@ -7,6 +7,7 @@
 
 #include "hal_timer.h"
 #include "../../hal/am335x/hw_cm_per.h"
+#include "../../hal/am335x/hw_cm_wkup.h"
 #include "../../hal/am335x/soc_AM335x.h"
 #include "../../hal/am335x/hw_timer.h"
 #include "../../hal/am335x/hw_types.h"
@@ -15,26 +16,33 @@
 
 #define DMTimerWaitForWrite(reg, baseAdd)   \
             if(HWREG(baseAdd + TSICR) & DMTIMER_TSICR_POSTED)\
-            while((reg & DMTimerWritePostedStatusGet(baseAdd)));	// When equal to 1, a write is pending to the controlRegister register
+            while((reg & TimerHalGetPostedStatus(baseAdd)));	// When equal to 1, a write is pending to the controlRegister register
+
+#define DMTimerWaitForWrite_1MS(reg, baseAdd)   \
+            if(HWREG(baseAdd + TSICR_1MS) & DMTIMER_TSICR_POSTED)\
+            while((reg & TimerHalGetPostedStatus(baseAdd)));	// When equal to 1, a write is pending to the controlRegister register
 
 
 
-void configureCyclicInterrupt(unsigned int baseRegister, intHandler_t intHandler, unsigned int timeInMilis)
-{
-
-}
-
-
-void setTimerControlRegisterField(unsigned int baseRegister, unsigned int controlSettings)
+static void TimerHalSetControlRegisterField(unsigned int baseRegister, unsigned int controlSettings)
 {
 	if(DMTIMER1_MS == baseRegister)
+	{
 		HWREG(baseRegister + TCLR_1MS) |= controlSettings;
+	}
 	else
+	{
 		HWREG(baseRegister + TCLR) |= controlSettings;
+	}
+}
+
+void TimerHalActivateTimerInPowerControl(unsigned int timer)
+{
+
 }
 
 
-void enableTimerInterrupts(unsigned int baseRegister, unsigned int timerIrq)
+void TimerHalEnableInterrupts(unsigned int baseRegister, unsigned int timerIrq)
 {
     HWREG(baseRegister + IRQENABLE_SET) = (timerIrq &
 	                                           (IRQ_CAPTURE_ENABLE |
@@ -43,7 +51,7 @@ void enableTimerInterrupts(unsigned int baseRegister, unsigned int timerIrq)
 }
 
 
-void disableTimerInterrupts(unsigned int baseRegister, unsigned int timerIrq)
+void TimerHalDisableInterrupts(unsigned int baseRegister, unsigned int timerIrq)
 {
 	HWREG(baseRegister + IRQENABLE_CLR) = (timerIrq &
 	                                           (IRQ_CAPTURE_ENABLE |
@@ -52,7 +60,7 @@ void disableTimerInterrupts(unsigned int baseRegister, unsigned int timerIrq)
 }
 
 
-void clearInterruptStatus(unsigned int baseRegister, unsigned int timerIrq)
+void TimerHalClearInterruptStatus(unsigned int baseRegister, unsigned int timerIrq)
 {
     /* Clear the interrupt status from IRQSTATUS register */
     HWREG(baseRegister + IRQSTATUS) = (timerIrq &
@@ -61,7 +69,7 @@ void clearInterruptStatus(unsigned int baseRegister, unsigned int timerIrq)
 										 IRQ_MATCH_ENABLE));
 }
 
-void writeIrqStatusRawRegister(unsigned int baseRegister, unsigned int timerIrq)
+void TimerHalWriteIrqStatusRawRegister(unsigned int baseRegister, unsigned int timerIrq)
 {
 	HWREG(baseRegister + IRQSTATUS_RAW) = (timerIrq &
 	                                         (IRQ_CAPTURE_ENABLE |
@@ -69,45 +77,40 @@ void writeIrqStatusRawRegister(unsigned int baseRegister, unsigned int timerIrq)
 											 IRQ_MATCH_ENABLE));
 }
 
-void setIntcMirRegister(unsigned int mask)
-{
-
-}
-
-void startTimer(unsigned int baseRegister)
+void TimerHalStart(unsigned int baseRegister)
 {
 	DMTimerWaitForWrite(WRITE_PEND_TCRR, baseRegister);
-
-	setTimerControlRegisterField(baseRegister, DMTIMER_TCLR_START);
+	TimerHalSetControlRegisterField(baseRegister, DMTIMER_TCLR_START);
 }
 
 
-void stopTimer(unsigned int baseRegister)
+void TimerHalStop(unsigned int baseRegister)
 {
 	DMTimerWaitForWrite(WRITE_PEND_TCRR, baseRegister);
 
 	if(DMTIMER1_MS == baseRegister)
+	{
 		HWREG(baseRegister + TCLR_1MS) &= DMTIMER_TCLR_STOP;
+	}
 	else
+	{
 		HWREG(baseRegister + TCLR) &= DMTIMER_TCLR_STOP;
+	}
 }
 
 
-void setTimerCounterValue(unsigned int baseRegister, unsigned int counterValue)
+void TimerHalSetCounterValue(unsigned int baseRegister, unsigned int counterValue)
 {
 	DMTimerWaitForWrite(WRITE_PEND_TCRR, baseRegister);
 
 	if(DMTIMER1_MS == baseRegister)
+	{
 		HWREG(baseRegister + TCRR_1MS) = counterValue;
+	}
 	else
+	{
 		HWREG(baseRegister + TCRR) = counterValue;
-}
-
-unsigned int getTimerCounterValue(unsigned int baseRegiser)
-{
-    DMTimerWaitForWrite(WRITE_PEND_TCRR, baseRegiser);
-
-    return (HWREG(baseRegiser + TCRR));
+	}
 }
 
 /*
@@ -115,12 +118,33 @@ unsigned int getTimerCounterValue(unsigned int baseRegiser)
  *	\param: 	baseRegister		base address of timer
  *	\return:	actual value of timer
  */
-unsigned int readTimerCounterValue(unsigned int baseRegister)
+unsigned int TimerHalGetCounterValue(unsigned int baseRegister)
 {
 	if(DMTIMER1_MS == baseRegister)
+	{
+		DMTimerWaitForWrite_1MS(WRITE_PEND_TCRR, baseRegister);
 		return HWREG(baseRegister + TCRR_1MS);
+	}
 	else
+	{
+		DMTimerWaitForWrite(WRITE_PEND_TCRR, baseRegister);
 		return HWREG(baseRegister + TCRR);
+	}
+}
+
+
+unsigned int TimerHalGetReloadValue(unsigned int baseRegister)
+{
+	if(DMTIMER1_MS == baseRegister)
+	{
+		DMTimerWaitForWrite_1MS(WRITE_PEND_TCRR, baseRegister);
+		return HWREG(baseRegister + TLDR_1MS);
+	}
+	else
+	{
+		DMTimerWaitForWrite(WRITE_PEND_TCRR, baseRegister);
+		return HWREG(baseRegister + TLDR);
+	}
 }
 
 /*
@@ -128,31 +152,28 @@ unsigned int readTimerCounterValue(unsigned int baseRegister)
  *	\param: 	baseRegister				base address of timer
  *	\param:		timerCounterReloadValue		reload value of specified timer
  */
-void setTimerCounterReloadValue(unsigned int baseRegister, unsigned int timerCounterReloadValue)
+void TimerHalSetCounterReloadValue(unsigned int baseRegister, unsigned int timerCounterReloadValue)
 {
-	DMTimerWaitForWrite(WRITE_PEND_TLDR, baseRegister);
-
 	if(DMTIMER1_MS == baseRegister)
+	{
+		DMTimerWaitForWrite_1MS(WRITE_PEND_TCRR, baseRegister);
 		HWREG(baseRegister + TLDR_1MS) = timerCounterReloadValue;
+	}
 	else
+	{
+		DMTimerWaitForWrite(WRITE_PEND_TLDR, baseRegister);
 		HWREG(baseRegister + TLDR) = timerCounterReloadValue;
+	}
 }
 
 
 
-void resetTimerCounterRegister(unsigned int baseRegister, unsigned int resetValue)
+void TimerHalResetCounterRegister(unsigned int baseRegister, unsigned int resetValue)
 {
 	HWREG(baseRegister + TIOCP_CFG) |= TIOCP_CFG_SOFTRESET;
 
 	while(TIOCP_CFG_SOFTRESET == (HWREG(baseRegister + TIOCP_CFG) & TIOCP_CFG_SOFTRESET))
 		;
-}
-
-
-void configureTimerMode(unsigned int baseRegister, unsigned int compareMode, unsigned int reloadMode)
-{
-	setTimerCounterCompareMode(baseRegister, compareMode);
-	setTimerCounterReloadMode(baseRegister, reloadMode);
 }
 
 /*
@@ -161,16 +182,11 @@ void configureTimerMode(unsigned int baseRegister, unsigned int compareMode, uns
  *	\param: reloadMode				0x00 one-shot timer
  *									0x02 auto-reload
  */
-void setTimerCounterReloadMode(unsigned int baseRegister, unsigned int reloadMode)
+static void TimerHalSetReloadMode(unsigned int baseRegister, unsigned int reloadMode)
 {
 	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseRegister);
-
 	unsigned int controlSetting = reloadMode & (ONE_SHOT_TIMER | AUTO_RELOAD);
-
-	if(!((controlSetting & ONE_SHOT_TIMER) | (controlSetting & AUTO_RELOAD)))
-		return;
-
-	setTimerControlRegisterField(baseRegister, controlSetting);
+	TimerHalSetControlRegisterField(baseRegister, controlSetting);
 }
 
 
@@ -180,16 +196,18 @@ void setTimerCounterReloadMode(unsigned int baseRegister, unsigned int reloadMod
  *	\param: mode				0x00 compare mode disabled
 *								0x20 compare mode enabled
  */
-void setTimerCounterCompareMode(unsigned int baseRegister, unsigned int compareMode)
+static void TimerHalSetCompareMode(unsigned int baseRegister, unsigned int compareMode)
 {
 	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseRegister);
-
 	unsigned int controlSetting = compareMode & (ENABLE_COMPARE | DISABLE_COMPARE);
+	TimerHalSetControlRegisterField(baseRegister, controlSetting);
+}
 
-	if(!((controlSetting & ENABLE_COMPARE) | (controlSetting & DISABLE_COMPARE)))
-			return;
 
-	setTimerControlRegisterField(baseRegister, controlSetting);
+void TimerHalConfigureMode(unsigned int baseRegister, unsigned int compareMode, unsigned int reloadMode)
+{
+	TimerHalSetCompareMode(baseRegister, compareMode);
+	TimerHalSetReloadMode(baseRegister, reloadMode);
 }
 
 /*
@@ -199,18 +217,14 @@ void setTimerCounterCompareMode(unsigned int baseRegister, unsigned int compareM
  *									0x400 trigger on overflow
  *									0x800 trigger on overflow and match
  */
-void setTimerCounterTriggerMode(unsigned int baseRegister, unsigned int triggerMode)
+void TimerHalSetTriggerMode(unsigned int baseRegister, unsigned int triggerMode)
 {
 	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseRegister);
 
 	unsigned int controlSetting = triggerMode & (NO_TRIGGER | OVERFLOW_TRIGGER
 			| OVERFLOW_MATCH_TRIGGER);
 
-	if(!((controlSetting & NO_TRIGGER) | (controlSetting & OVERFLOW_TRIGGER)
-			| (controlSetting & OVERFLOW_MATCH_TRIGGER)))
-				return;
-
-	setTimerControlRegisterField(baseRegister, controlSetting);
+	TimerHalSetControlRegisterField(baseRegister, controlSetting);
 }
 
 /*
@@ -219,16 +233,11 @@ void setTimerCounterTriggerMode(unsigned int baseRegister, unsigned int triggerM
  *	\param: captureMode				0x0000 single capture
  *									0x4000 capture on second event
  */
-void setTimerCounterCaptureMode(unsigned int baseRegister, unsigned int captureMode)
+void TimerHalSetCaptureMode(unsigned int baseRegister, unsigned int captureMode)
 {
 	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseRegister);
-
 	unsigned int controlSetting = captureMode & (SINGLE_CAPTURE | CAPTURE_ON_SECOND_EVENT);
-
-	if(!((controlSetting & SINGLE_CAPTURE) | (controlSetting & CAPTURE_ON_SECOND_EVENT)))
-		return;
-
-	setTimerControlRegisterField(baseRegister, controlSetting);
+	TimerHalSetControlRegisterField(baseRegister, controlSetting);
 }
 
 /*
@@ -237,16 +246,11 @@ void setTimerCounterCaptureMode(unsigned int baseRegister, unsigned int captureM
  *	\param: pinMode					0x0000 pulse
  *									0x1000 toggle
  */
-void setOutputPinMode(unsigned int baseRegister, unsigned int controlRegister, unsigned int pinMode)
+void TimerHalSetOutputPinMode(unsigned int baseRegister, unsigned int controlRegister, unsigned int pinMode)
 {
 	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseRegister);
-
 	unsigned int controlSetting = pinMode & (PINMODE_PULSE | PINMODE_TOGGLE);
-
-	if(!((controlSetting & PINMODE_PULSE) | (controlSetting & PINMODE_TOGGLE)))
-		return;
-
-	setTimerControlRegisterField(baseRegister, controlSetting);
+	TimerHalSetControlRegisterField(baseRegister, controlSetting);
 }
 
 /*
@@ -257,7 +261,7 @@ void setOutputPinMode(unsigned int baseRegister, unsigned int controlRegister, u
  *									0x200 capture on high to low transition
  *									0x300 capture on both edge transition
  */
-void setTransitionCaptureMode(unsigned int baseRegister, unsigned int transitionMode)
+void TimerHalSetTransitionCaptureMode(unsigned int baseRegister, unsigned int transitionMode)
 {
 	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseRegister);
 
@@ -266,23 +270,18 @@ void setTransitionCaptureMode(unsigned int baseRegister, unsigned int transition
 									| CAPTURE_ON_TRANSITION_HIGH_TO_LOW
 									| CAPTURE_ON_BOTH_EDGE_TRANSITION);
 
-	if(!((controlSetting & NO_CAPTURE) | (controlSetting & CAPTURE_ON_TRANSITION_LOW_TO_HIGH)
-			| (controlSetting & CAPTURE_ON_TRANSITION_HIGH_TO_LOW)
-			| (controlSetting & CAPTURE_ON_BOTH_EDGE_TRANSITION)))
-		return;
-
-	setTimerControlRegisterField(baseRegister, controlSetting);
+	TimerHalSetControlRegisterField(baseRegister, controlSetting);
 }
 
 
 
-unsigned int DMTimerWritePostedStatusGet(unsigned int baseRegister)
+unsigned int TimerHalGetPostedStatus(unsigned int baseRegister)
 {
     return (HWREG(baseRegister + TWPS));
 }
 
 
-void clearTimerIrqPendingFlag(unsigned int baseRegister, unsigned int timerIrq)
+void TimerHalClearIrqPendingFlag(unsigned int baseRegister, unsigned int timerIrq)
 {
 	HWREG(baseRegister + IRQSTATUS) = (timerIrq &
 	                                         (IRQ_CAPTURE_ENABLE |
@@ -291,7 +290,7 @@ void clearTimerIrqPendingFlag(unsigned int baseRegister, unsigned int timerIrq)
 }
 
 
-void enableClockPrescaler(unsigned int baseRegister, unsigned int prescalerValue)
+void TimerHalEnableClockPrescaler(unsigned int baseRegister, unsigned int prescalerValue)
 {
 	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseRegister);
 
@@ -299,7 +298,7 @@ void enableClockPrescaler(unsigned int baseRegister, unsigned int prescalerValue
 }
 
 
-void disableClockPrescaler(unsigned int baseRegister)
+void TimerHalDisableClockPrescaler(unsigned int baseRegister)
 {
     DMTimerWaitForWrite(WRITE_PEND_TCLR, baseRegister);
 
@@ -307,7 +306,7 @@ void disableClockPrescaler(unsigned int baseRegister)
 }
 
 
-static void moduleClockConfig(void)
+static void TimerHalModuleClockConfig(void)
 {
     HWREG(SOC_CM_PER_REGS + CM_PER_L3S_CLKSTCTRL) =
                              CM_PER_L3S_CLKSTCTRL_CLKTRCTRL_SW_WKUP;
@@ -354,7 +353,7 @@ static void moduleClockConfig(void)
       CM_PER_L4LS_CLKCTRL_MODULEMODE) != CM_PER_L4LS_CLKCTRL_MODULEMODE_ENABLE);
 }
 
-void setTimerClkSource(unsigned int timerMuxSelectionRegister, unsigned int clkSource)
+static void TimerHalSetTimerClkSource(unsigned int timerMuxSelectionRegister, unsigned int clkSource)
 {
 	HWREG(SOC_CM_DPLL_REGS + timerMuxSelectionRegister) &=
 	          ~(TIMER_CLK_SELECTION_RANGE);
@@ -368,7 +367,7 @@ void setTimerClkSource(unsigned int timerMuxSelectionRegister, unsigned int clkS
 			TIMER_CLK_SELECTION_RANGE) != controlSetting);
 }
 
-void enableSelectedClockSource(unsigned int timerClockControlRegister)
+static void TimerHalEnableSelectedClockSource(unsigned int timerClockControlRegister)
 {
 	HWREG(SOC_CM_PER_REGS + timerClockControlRegister) |= CLK_ENABLE;
 
@@ -376,62 +375,107 @@ void enableSelectedClockSource(unsigned int timerClockControlRegister)
 	CLK_MODULEMODE_RANGE) != CLK_ENABLE);
 }
 
-void waitForModuleBeingFullyFunctional(unsigned int timerClockControlRegister)
+static void TimerHalWaitForModuleBeingFullyFunctional(unsigned int timerClockControlRegister)
 {
 	while((HWREG(SOC_CM_PER_REGS + timerClockControlRegister) &
 			CLK_IDLE_STATUS_RANGE) != CLK_IDLE_STATUS_FULLY_FUNCTIONAL);
 }
 
-void waitForL3SClockBeingActive(void)
+static void TimerHalWaitForL3SClockBeingActive(void)
 {
 	while(!(HWREG(SOC_CM_PER_REGS + CM_PER_L3S_CLKSTCTRL) &
 			CM_PER_L3S_CLKSTCTRL_CLKACTIVITY_L3S_GCLK));
 }
 
-void waitForL3ClockBeingActive(void)
+static void TimerHalWaitForL3ClockBeingActive(void)
 {
 	while(!(HWREG(SOC_CM_PER_REGS + CM_PER_L3_CLKSTCTRL) &
 	            CM_PER_L3_CLKSTCTRL_CLKACTIVITY_L3_GCLK));
 }
 
-void waitForOcpwpClockBeingActive(void)
+static void TimerHalWaitForOcpwpClockBeingActive(void)
 {
 	while(!(HWREG(SOC_CM_PER_REGS + CM_PER_OCPWP_L3_CLKSTCTRL) &
 		   (CM_PER_OCPWP_L3_CLKSTCTRL_CLKACTIVITY_OCPWP_L3_GCLK |
 			CM_PER_OCPWP_L3_CLKSTCTRL_CLKACTIVITY_OCPWP_L4_GCLK)));
 }
 
+
+static void TimerHalActivateClockDomain(unsigned int baseRegister, unsigned int controlRegister, unsigned int settings)
+{
+	while(!(HWREG(baseRegister + controlRegister) & (settings)));
+}
+
+static void TimerHalActivateClock(unsigned int timer)
+{
+	switch(timer)
+	{
+		case TIMER0:
+			TimerHalActivateClockDomain(SOC_CM_WKUP_REGS, CM_WKUP_CLKSTCTRL, (CM_WKUP_CLKSTCTRL_CLKACTIVITY_L4_WKUP_GCLK
+					| CM_WKUP_CLKSTCTRL_CLKACTIVITY_TIMER0_GCLK));
+			break;
+		case TIMER1_MS:
+			TimerHalActivateClockDomain(SOC_CM_WKUP_REGS, CM_WKUP_CLKSTCTRL, (CM_WKUP_CLKSTCTRL_CLKACTIVITY_L4_WKUP_GCLK
+					| CM_WKUP_CLKSTCTRL_CLKACTIVITY_TIMER1_GCLK));
+			break;
+		case TIMER2:
+			TimerHalActivateClockDomain(SOC_CM_PER_REGS, CM_PER_L4LS_CLKSTCTRL, (CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_L4LS_GCLK
+					| CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_TIMER2_GCLK));
+			break;
+		case TIMER3:
+			TimerHalActivateClockDomain(SOC_CM_PER_REGS, CM_PER_L4LS_CLKSTCTRL, (CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_L4LS_GCLK
+					| CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_TIMER3_GCLK));
+			break;
+		case TIMER4:
+			TimerHalActivateClockDomain(SOC_CM_PER_REGS, CM_PER_L4LS_CLKSTCTRL, (CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_L4LS_GCLK
+					| CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_TIMER4_GCLK));
+			break;
+		case TIMER5:
+			TimerHalActivateClockDomain(SOC_CM_PER_REGS, CM_PER_L4LS_CLKSTCTRL, (CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_L4LS_GCLK
+					| CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_TIMER5_GCLK));
+			break;
+		case TIMER6:
+			TimerHalActivateClockDomain(SOC_CM_PER_REGS, CM_PER_L4LS_CLKSTCTRL, (CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_L4LS_GCLK
+					| CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_TIMER6_GCLK));
+			break;
+		case TIMER7:
+			TimerHalActivateClockDomain(SOC_CM_PER_REGS, CM_PER_L4LS_CLKSTCTRL, (CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_L4LS_GCLK
+					| CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_TIMER7_GCLK));
+			break;
+	}
+}
+
+/*
 // TODO: refactor function to activate all timers, not just timer2
-void setTimerClockActive(void)
+static void TimerHalSetTimerClockActive(void)
 {
 	while(!(HWREG(SOC_CM_PER_REGS + CM_PER_L4LS_CLKSTCTRL) &
 	           (CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_L4LS_GCLK |
 	            CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_TIMER2_GCLK)));
 }
+*/
 
-void selectClockSourceForTimer(unsigned int timerMuxSelectionRegister, unsigned int timerClockControlRegister, unsigned int clkSource)
+void TimerHalSetClockSettings(unsigned int timer, unsigned int timerMuxSelectionRegister, unsigned int timerClockControlRegister, unsigned int clkSource)
 {
-	moduleClockConfig();
+	TimerHalModuleClockConfig();
 
-    setTimerClkSource(timerMuxSelectionRegister, clkSource);   //TIMER_CLK_SELECT_TCLKIN, TIMER_CLK_SELECT_M_OSC, TIMER_CLK_SELECT_32KHZ
+    TimerHalSetTimerClkSource(timerMuxSelectionRegister, clkSource);   //TIMER_CLK_SELECT_TCLKIN, TIMER_CLK_SELECT_M_OSC, TIMER_CLK_SELECT_32KHZ
 
-    enableSelectedClockSource(timerClockControlRegister);
+    TimerHalEnableSelectedClockSource(timerClockControlRegister);
 
-    waitForModuleBeingFullyFunctional(timerClockControlRegister);
+    TimerHalWaitForModuleBeingFullyFunctional(timerClockControlRegister);
 
-    waitForL3SClockBeingActive();
+    TimerHalWaitForL3SClockBeingActive();
 
-    waitForL3ClockBeingActive();
+    TimerHalWaitForL3ClockBeingActive();
 
-    waitForOcpwpClockBeingActive(); // l4 ocpwp not active
+    TimerHalWaitForOcpwpClockBeingActive(); // l4 ocpwp not active
 
-    // TODO: refactor function to activate all timers, not just timer2
-    setTimerClockActive();
-
+    TimerHalActivateClock(timer);
 }
 
 
-unsigned int getTimerInterruptNumber(Timer_t timer)
+unsigned int TimerHalGetInterruptNumber(unsigned int timer)
 {
 	switch(timer)
 	{
@@ -451,11 +495,13 @@ unsigned int getTimerInterruptNumber(Timer_t timer)
 			return SYS_INT_TINT6;
 		case TIMER7:
 			return SYS_INT_TINT7;
+		default:
+			return 0;
 	}
 }
 
 
-unsigned int getTimerClockControlRegisterAddress(Timer_t timer)
+unsigned int TimerHalGetClockControlRegisterAddress(unsigned int timer)
 {
 	switch(timer)
 	{
@@ -475,10 +521,12 @@ unsigned int getTimerClockControlRegisterAddress(Timer_t timer)
 			return CM_PER_TIMER6_CLKCTRL;
 		case TIMER7:
 			return CM_PER_TIMER7_CLKCTRL;
+		default:
+			return 0;
 	}
 }
 
-unsigned int getTimerMuxSelectionRegisterAddress(Timer_t timer)
+unsigned int TimerHalGetMuxRegisterAddress(unsigned int timer)
 {
 	switch(timer)
 	{
@@ -498,6 +546,8 @@ unsigned int getTimerMuxSelectionRegisterAddress(Timer_t timer)
 			return CM_DPLL_CLKSEL_TIMER6_CLK;
 		case TIMER7:
 			return CM_DPLL_CLKSEL_TIMER7_CLK;
+		default:
+			return 0;
 	}
 }
 
@@ -507,25 +557,27 @@ unsigned int getTimerMuxSelectionRegisterAddress(Timer_t timer)
  *	\param: 	timer		number of used timer
 	\return: 	base register address of timer
  */
-unsigned int getTimerBaseRegisterAddress(Timer_t timer)
+unsigned int TimerHalGetTimerBaseAddress(unsigned int timer)
 {
 	switch(timer)
 	{
-		case TIMER0:
+		case 0:
 			return DMTIMER0;
-		case TIMER1_MS:
+		case 1:
 			return DMTIMER1_MS;
-		case TIMER2:
+		case 2:
 			return DMTIMER2;
-		case TIMER3:
+		case 3:
 			return DMTIMER3;
-		case TIMER4:
+		case 4:
 			return DMTIMER4;
-		case TIMER5:
+		case 5:
 			return DMTIMER5;
-		case TIMER6:
+		case 6:
 			return DMTIMER6;
-		case TIMER7:
+		case 7:
 			return DMTIMER7;
+		default:
+			return 0;
 	}
 }

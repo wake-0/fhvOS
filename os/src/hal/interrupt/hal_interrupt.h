@@ -1,11 +1,9 @@
-/**
- *  \file   interrupt.h
+/*
+ * hal_interrupt.h
  *
- *  \brief  Interrupt related API declarations.
- *
- *   This file contains the API prototypes for configuring INTC for 
- *   ARM Cortex-A8
-*/
+ *  Created on: 16.03.2015
+ *      Author: Marko Petrovic
+ */
 
 
 #ifndef INTERRUPT_H
@@ -138,57 +136,25 @@ extern "C" {
 typedef void (*intHandler_t)(void);
 typedef void (*intResetHandler_t)(void);
 
-/*****************************************************************************
-**                     API FUNCTION PROTOTYPES
-*****************************************************************************/
-extern void AintcInit (void);
-extern void IntIfClkFreeRunSet(void);
-extern void IntIfClkAutoGateSet(void);
-extern void IntProtectionEnable(void);
-extern void IntProtectionDisable(void);
-extern void IntSyncClkFreeRunSet(void);
-extern void IntSyncClkAutoGateSet(void);
-extern void IntFuncClkFreeRunSet(void);
-extern void IntFuncClkAutoGateSet(void);
-extern void IntPriorityThresholdSet(unsigned int threshold);
-extern void IntSoftwareIntSet(unsigned int intrNum);
-extern void IntSoftwareIntClear(unsigned int intrNum);
+
+extern void InterruptResetAINTC(void);
+extern void InterruptPrioritySet(unsigned int intrNum, unsigned int priority);
+extern void InterruptHandlerEnable(unsigned int intrNum);
+extern void InterruptHandlerDisable(unsigned int intrNum);
+extern void InterruptAllowNewIrqGeneration();
+extern void InterruptHandlerRegister(unsigned int interruptNumber, intHandler_t fnHandler);
+extern void InterruptUnRegister(unsigned int interruptNumber);
+extern void InterruptSetGlobalMaskRegister(unsigned int interruptMaskRegister, unsigned int mask);
+extern void InterruptClearGlobalMaskRegister(unsigned int interruptMaskRegister, unsigned int mask);
+extern unsigned int InterruptActiveIrqNumberGet(void);
+extern intHandler_t InterruptGetHandler(unsigned int interruptNumber);
+extern void InterruptSaveUserContext(void);
+extern void InterruptRestoreUserContext(void);
 extern void InterruptMasterIRQEnable(void);
-extern void IntMasterIRQDisable(void);
-extern void IntMasterFIQEnable(void);
-extern void IntMasterFIQDisable(void);
-extern void IntSystemEnable(unsigned int intrNum);
-extern void IntSystemDisable(unsigned int intrNum);
-extern void IntUnRegister(unsigned int intrNum);
-extern void IntEnable(unsigned char  status);
-extern void IntRegister(unsigned int intrNum, intHandler_t pfnHandler);
-extern void IntPrioritySet(unsigned int intrNum, unsigned int priority, unsigned int hostIntRoute);
-extern unsigned char IntDisable(void);
-extern unsigned int IntMasterStatusGet(void);
-extern unsigned int IntActiveIrqNumGet(void);
-extern unsigned int IntActiveFiqNumGet(void);
-extern unsigned int IntSpurIrqFlagGet(void);
-extern unsigned int IntSpurFiqFlagGet(void);
-extern unsigned int IntCurrIrqPriorityGet(void);
-extern unsigned int IntCurrFiqPriorityGet(void);
-extern unsigned int IntPriorityThresholdGet(void);
-extern unsigned int IntRawStatusGet(unsigned int intrNum);
-extern unsigned int IntPendingIrqMaskedStatusGet(unsigned int intrNum);
-extern unsigned int IntPendingFiqMaskedStatusGet(unsigned int intrNum);
+extern void InterruptMasterIRQDisable(void);
+extern void InterruptMasterFIQEnable(void);
+extern void InterruptMasterFIQDisable(void);
 
-
-extern void clearInterruptMask(unsigned int intcMirClearRegister);
-extern void setInterruptMask(unsigned int intcMirSetRegister);
-extern void setIntPriorityAndMode(int intcILR, unsigned int intPriority, unsigned int intMode);
-extern void intcIdleSettings(unsigned int idleMode);
-extern void setIntControllerAutoIdle();
-
-
-
-
-#ifdef __cplusplus
-}
-#endif
 #endif
 
 
