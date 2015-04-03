@@ -24,7 +24,7 @@ extern unsigned int TimerHalGetTimerBaseAddress(unsigned int timer);
 extern unsigned int TimerHalGetMuxRegisterAddress(unsigned int timer);
 extern unsigned int TimerHalGetClockControlRegisterAddress(unsigned int timer);
 extern unsigned int TimerHalGetInterruptNumber(unsigned int timer);
-extern void TimerHalSetClockSettings(unsigned int timerMuxSelectionRegister, unsigned int timerClockControlRegister, unsigned int clkSource);
+extern void TimerHalSetClockSettings(unsigned int timer, unsigned int timerMuxSelectionRegister, unsigned int timerClockControlRegister, unsigned int clkSource);
 extern void TimerHalEnableClockPrescaler(unsigned int baseRegister, unsigned int prescalerValue);
 extern void TimerHalDisableClockPrescaler(unsigned int baseRegister);
 extern void TimerHalClearIrqPendingFlag(unsigned int baseRegister, unsigned int timerIrq);

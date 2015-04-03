@@ -49,6 +49,7 @@ void DriverManagerInit()
 	timer->write = &TimerSetCounterValues;
 	timer->read = &TimerCurrentValueGet;
 	timer->ioctl = &TimerConfigureCyclicInterrupt;
+	drivers[DRIVER_ID_TIMER] = timer;
 }
 
 driver_t* DriverManagerGetDriver(driver_id_t driver_id)

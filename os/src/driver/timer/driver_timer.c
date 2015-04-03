@@ -6,7 +6,7 @@
  */
 
 #include "driver_timer.h"
-
+#include <stdlib.h>
 #define TIMER_RESET_VALUE 							0x00
 #define TIMER_DEFAULT_VALUE 						0xFF000000
 #define TIMER_COMPARE_MODE_DISABLED 				0x00
@@ -65,12 +65,56 @@ void TimerReloadValueSet(uint16_t timer, unsigned int timerCounterReloadValue)
 	TimerHalSetCounterReloadValue(timerBaseRegister, timerCounterReloadValue);
 }
 
-//int (*write)(uint16_t pin, char* buf, uint16_t length);
-
-int TimerSetCounterValues(uint16_t timer, char * notUsed, uint16_t timerCounterValue)
+void TimerInterruptEnable(uint16_t timer, uint8_t timerIrq)
 {
-	TimerCounterValueSet(timer, timerCounterValue);
-	TimerReloadValueSet(timer, timerCounterValue);
+	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
+	TimerHalEnableInterrupts(timerBaseRegister, timerIrq);
+}
+
+void TimerInterruptDisable(uint16_t timer, uint8_t timerIrq)
+{
+	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
+	TimerHalDisableInterrupts(timerBaseRegister, timerIrq);
+}
+
+void TimerInterruptStatusClear(uint16_t timer, uint8_t timerIrq)
+{
+	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
+	TimerHalClearInterruptStatus(timerBaseRegister, timerIrq);
+}
+
+int TimerSetCounterValues(uint16_t timer, char * command, uint16_t timerValue)
+{
+	if( strcmp(command, ENABLE_INTERRUPTS) == 0 )
+	{
+		TimerInterruptEnable(timer, timerValue);
+	}
+	else if( strcmp(command, DISABLE_INTERRUPTS) == 0 )
+	{
+		TimerInterruptDisable(timer, timerValue);
+	}
+	else if( strcmp(command, WRITE_COUNTER_REGISTER) == 0 )
+	{
+		TimerCounterValueSet(timer, timerValue);
+	}
+	else if( strcmp(command, WRITE_RELOAD_REGISTER) == 0 )
+	{
+		TimerReloadValueSet(timer, timerValue);
+	}
+	else if( strcmp(command, CLEAR_INTERRUPT_STATUS) == 0 )
+	{
+		TimerInterruptStatusClear(timer, timerValue);
+	}
+	else if( strcmp(command, RESET_TIMER) == 0 )
+	{
+		TimerReset(timer);
+	}
+	else
+	{
+		TimerCounterValueSet(timer, timerValue);
+		TimerReloadValueSet(timer, timerValue);
+	}
+
 	return DRIVER_OK;
 }
 
@@ -81,7 +125,8 @@ void TimerModeConfigure(Timer_t timer, unsigned int compareMode, unsigned int re
 }
 
 //(uint16_t pin, uint16_t cmd, h)
-int TimerConfigureCyclicInterrupt(uint16_t timer, uint16_t timeInMilis, uint8_t interruptMode, uint8_t priority, intHandler_t intHandler)
+//int (*ioctl)(uint16_t pin, uint16_t cmd, uint8_t mode, char* buf, uint16_t length);
+int TimerConfigureCyclicInterrupt(uint16_t timer, uint16_t timeInMilis, uint8_t interruptMode, char* buf, uint16_t priority)
 {
 	unsigned int timerBaseRegister 	= TimerHalGetTimerBaseAddress(timer);
 	unsigned int interruptNumber 	= TimerHalGetInterruptNumber(timer);
@@ -102,6 +147,7 @@ int TimerConfigureCyclicInterrupt(uint16_t timer, uint16_t timeInMilis, uint8_t 
 	TimerReloadValueSet(timer, timerCounterValue);
 
 	// register ISR to timer
+	intHandler_t intHandler = (void (*)(void))buf;
 	InterruptHandlerRegister(interruptNumber, intHandler);
 	InterruptPrioritySet(interruptNumber, 0);
 	InterruptHandlerEnable(interruptNumber);
@@ -123,25 +169,6 @@ int TimerSetUp(uint16_t timer)
 	return DRIVER_OK;
 }
 
-
-
-void TimerInterruptEnable(uint16_t timer, uint8_t timerIrq)
-{
-	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
-	TimerHalEnableInterrupts(timerBaseRegister, timerIrq);
-}
-
-void TimerInterruptDisable(Timer_t timer, unsigned int timerIrq)
-{
-	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
-	TimerHalDisableInterrupts(timerBaseRegister, timerIrq);
-}
-
-void TimerInterruptStatusClear(Timer_t timer, unsigned int timerIrq)
-{
-	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
-	TimerHalClearInterruptStatus(timerBaseRegister, timerIrq);
-}
 
 int TimerCurrentValueGet(uint16_t timer, char * notUsed, uint16_t timerRegister)
 {
@@ -168,11 +195,6 @@ void TimerIrqPendingClear(Timer_t timer, unsigned int timerIrq)
 	TimerHalClearIrqPendingFlag(timerBaseRegister, timerIrq);
 }
 
-void TimerConfigureCapture(Timer_t timer, unsigned int compareMode, unsigned int compareValue)
-{
-
-}
-
 
 void TimerClockConfig(uint16_t timer, uint16_t clkSource)
 {
@@ -180,16 +202,5 @@ void TimerClockConfig(uint16_t timer, uint16_t clkSource)
 	unsigned int timerMuxSelectionRegister 	= TimerHalGetMuxRegisterAddress(timer);
 	unsigned int timerClockControlRegister 	= TimerHalGetClockControlRegisterAddress(timerBaseRegister);
 
-	TimerHalSetClockSettings(timerMuxSelectionRegister, timerClockControlRegister, clkSource);
-}
-
-
-void TimerCountingHalt(Timer_t timer)
-{
-
-}
-
-void TimerCountingResume(Timer_t timer)
-{
-
+	TimerHalSetClockSettings(timer, timerMuxSelectionRegister, timerClockControlRegister, clkSource);
 }

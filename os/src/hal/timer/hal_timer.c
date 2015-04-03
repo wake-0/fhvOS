@@ -7,6 +7,7 @@
 
 #include "hal_timer.h"
 #include "../../hal/am335x/hw_cm_per.h"
+#include "../../hal/am335x/hw_cm_wkup.h"
 #include "../../hal/am335x/soc_AM335x.h"
 #include "../../hal/am335x/hw_timer.h"
 #include "../../hal/am335x/hw_types.h"
@@ -33,6 +34,11 @@ static void TimerHalSetControlRegisterField(unsigned int baseRegister, unsigned 
 	{
 		HWREG(baseRegister + TCLR) |= controlSettings;
 	}
+}
+
+void TimerHalActivateTimerInPowerControl(unsigned int timer)
+{
+
 }
 
 
@@ -394,6 +400,52 @@ static void TimerHalWaitForOcpwpClockBeingActive(void)
 			CM_PER_OCPWP_L3_CLKSTCTRL_CLKACTIVITY_OCPWP_L4_GCLK)));
 }
 
+
+static void TimerHalActivateClockDomain(unsigned int baseRegister, unsigned int controlRegister, unsigned int settings)
+{
+	while(!(HWREG(baseRegister + controlRegister) & (settings)));
+}
+
+static void TimerHalActivateClock(unsigned int timer)
+{
+	switch(timer)
+	{
+		case TIMER0:
+			TimerHalActivateClockDomain(SOC_CM_WKUP_REGS, CM_WKUP_CLKSTCTRL, (CM_WKUP_CLKSTCTRL_CLKACTIVITY_L4_WKUP_GCLK
+					| CM_WKUP_CLKSTCTRL_CLKACTIVITY_TIMER0_GCLK));
+			break;
+		case TIMER1_MS:
+			TimerHalActivateClockDomain(SOC_CM_WKUP_REGS, CM_WKUP_CLKSTCTRL, (CM_WKUP_CLKSTCTRL_CLKACTIVITY_L4_WKUP_GCLK
+					| CM_WKUP_CLKSTCTRL_CLKACTIVITY_TIMER1_GCLK));
+			break;
+		case TIMER2:
+			TimerHalActivateClockDomain(SOC_CM_PER_REGS, CM_PER_L4LS_CLKSTCTRL, (CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_L4LS_GCLK
+					| CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_TIMER2_GCLK));
+			break;
+		case TIMER3:
+			TimerHalActivateClockDomain(SOC_CM_PER_REGS, CM_PER_L4LS_CLKSTCTRL, (CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_L4LS_GCLK
+					| CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_TIMER3_GCLK));
+			break;
+		case TIMER4:
+			TimerHalActivateClockDomain(SOC_CM_PER_REGS, CM_PER_L4LS_CLKSTCTRL, (CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_L4LS_GCLK
+					| CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_TIMER4_GCLK));
+			break;
+		case TIMER5:
+			TimerHalActivateClockDomain(SOC_CM_PER_REGS, CM_PER_L4LS_CLKSTCTRL, (CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_L4LS_GCLK
+					| CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_TIMER5_GCLK));
+			break;
+		case TIMER6:
+			TimerHalActivateClockDomain(SOC_CM_PER_REGS, CM_PER_L4LS_CLKSTCTRL, (CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_L4LS_GCLK
+					| CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_TIMER6_GCLK));
+			break;
+		case TIMER7:
+			TimerHalActivateClockDomain(SOC_CM_PER_REGS, CM_PER_L4LS_CLKSTCTRL, (CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_L4LS_GCLK
+					| CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_TIMER7_GCLK));
+			break;
+	}
+}
+
+/*
 // TODO: refactor function to activate all timers, not just timer2
 static void TimerHalSetTimerClockActive(void)
 {
@@ -401,8 +453,9 @@ static void TimerHalSetTimerClockActive(void)
 	           (CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_L4LS_GCLK |
 	            CM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_TIMER2_GCLK)));
 }
+*/
 
-void TimerHalSetClockSettings(unsigned int timerMuxSelectionRegister, unsigned int timerClockControlRegister, unsigned int clkSource)
+void TimerHalSetClockSettings(unsigned int timer, unsigned int timerMuxSelectionRegister, unsigned int timerClockControlRegister, unsigned int clkSource)
 {
 	TimerHalModuleClockConfig();
 
@@ -418,9 +471,7 @@ void TimerHalSetClockSettings(unsigned int timerMuxSelectionRegister, unsigned i
 
     TimerHalWaitForOcpwpClockBeingActive(); // l4 ocpwp not active
 
-    // TODO: refactor function to activate all timers, not just timer2
-    TimerHalSetTimerClockActive();
-
+    TimerHalActivateClock(timer);
 }
 
 
