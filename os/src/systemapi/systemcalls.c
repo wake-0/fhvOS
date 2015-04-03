@@ -7,7 +7,7 @@
 
 
 #include "systemcalls.h"
-
+#include "systemcallFunctions.h"
 
 
 void SystemCall(int systemCallNumber, int destination, systemCallMessage_t message)
@@ -43,6 +43,7 @@ void SystemCall(int systemCallNumber, int destination, systemCallMessage_t messa
 		case MKNOD:
 			break;
 		case CHMOD:
+			SystemCallChangeMode(message.messageArgs.args1.arg1);
 			break;
 		case CHOWN:
 			break;

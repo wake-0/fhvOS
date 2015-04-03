@@ -152,4 +152,6 @@ typedef struct
 	messageArgs;
 } systemCallMessage_t;
 
+extern void SystemCall(int systemCallNumber, int destination, systemCallMessage_t message);
+
 #endif // SYSTEMAPI_SYSTEMCALLS_H_

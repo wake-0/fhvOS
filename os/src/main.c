@@ -11,7 +11,7 @@
 #include "hal/am335x/hw_types.h"
 #include "hal/am335x/hw_cm_dpll.h"
 #include "driver/manager/driver_manager.h"
-#include <time.h>
+#include "systemapi/systemcalls.h"
 
 
 extern void CPUSwitchToPrivilegedMode(void);
@@ -24,7 +24,6 @@ static volatile unsigned int cntValue = 10;
 static volatile unsigned int flagIsr = 0;
 
 driver_t* timerDriver;
-time_t seconds;
 uint16_t timeInMilis = 2000;
 
 int main(void)
@@ -33,8 +32,13 @@ int main(void)
 	timerDriver = DriverManagerGetDriver(DRIVER_ID_TIMER);
 	timerDriver->init(TIMER2);
 
-	CPUSwitchToUserMode();
-	CPUSwitchToPrivilegedMode();
+	systemCallMessage_t message;
+	message.messageArgs.args1.arg1 = 0x10;		// USER MODE
+	SystemCall(CHMOD, 0, message);
+
+	message.messageArgs.args1.arg1 = 0x1F;		// SYSTEM MODE
+	SystemCall(CHMOD, 0, message);
+
 
 	// ----- INTERRUPT settings -----
 	InterruptMasterIRQEnable();
