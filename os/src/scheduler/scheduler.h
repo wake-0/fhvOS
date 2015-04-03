@@ -15,18 +15,24 @@
  */
 #define SCHEDULER_OK		(0)
 #define SCHEDULER_ERROR		(-1)
+
 #define PROCESSES_MAX		(64)
+#define REGISTER_COUNT		(15)
 
 #define INVALID_PROCESS_ID	(-1)
 
 /*
- * Typedefs
+ * Typedefs for the process struct
  */
 typedef int16_t processId_t;
 typedef void (*processFunc)();
 
+typedef void* register_t;
+typedef uint32_t* pc_t;
+typedef uint32_t cpsr_t;
+
 /*
- * Enums
+ * Enums for the process struct
  */
 typedef enum {
 	READY,
@@ -39,6 +45,10 @@ typedef struct {
 	processId_t id;
 	processFunc func;
 	processState_t state;
+
+	register_t registers[REGISTER_COUNT];
+	pc_t pc;
+	cpsr_t cpsr;
 } process_t;
 
 /*
