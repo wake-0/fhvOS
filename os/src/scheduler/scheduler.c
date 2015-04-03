@@ -50,6 +50,7 @@ int SchedulerStartProcess(processFunc func) {
 	processes[freeProcess].id = freeProcess;
 	processes[freeProcess].state = READY;
 
+	atomicEnd();
 	return SCHEDULER_OK;
 }
 
@@ -69,6 +70,7 @@ int SchedulerRunNextProcess() {
 	runningProcess = nextProcess;
 	processes[runningProcess].state = RUNNING;
 
+	atomicEnd();
 	return SCHEDULER_OK;
 }
 
@@ -87,8 +89,16 @@ int SchedulerKillProcess(processId_t id) {
 	return SCHEDULER_OK;
 }
 
+*process_t SchedulerGetRunningProcess(void) {
+	if (runningProcess == INVALID_PROCESS_ID) {
+		// TODO: think about this error
+		// This error should normally not appear
+	}
+
+	return &processes[runningProcess];
+}
+
 /*
- *
  * Helper methods
  */
 processId_t getNextFreeProcessId(void) {
