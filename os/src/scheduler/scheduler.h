@@ -46,10 +46,15 @@ typedef struct {
 	processFunc func;
 	processState_t state;
 
+	context_t context;
+} process_t;
+
+// Process switch context
+typedef struct {
 	register_t registers[REGISTER_COUNT];
 	pc_t pc;
 	cpsr_t cpsr;
-} process_t;
+} context_t;
 
 /*
  * Scheduler functions
