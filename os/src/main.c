@@ -70,7 +70,6 @@ void timerISR(void)
 {
 	timerDriver->write(TIMER2, DISABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
 	timerDriver->write(TIMER2, CLEAR_INTERRUPT_STATUS, TIMER_IRQ_OVERFLOW);
-	//timerDriver->write(TIMER2, RESET_TIMER, timeInMilis);
 
 	flagIsr = 1;
 

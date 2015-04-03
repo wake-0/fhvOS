@@ -45,5 +45,7 @@ encoding//Debug__TI/src/scheduler/subdir_rules.mk=UTF-8
 encoding//Debug__TI/src/scheduler/subdir_vars.mk=UTF-8
 encoding//Debug__TI/src/subdir_rules.mk=UTF-8
 encoding//Debug__TI/src/subdir_vars.mk=UTF-8
+encoding//Debug__TI/src/systemapi/subdir_rules.mk=UTF-8
+encoding//Debug__TI/src/systemapi/subdir_vars.mk=UTF-8
 encoding//Debug__TI/subdir_rules.mk=UTF-8
 encoding//Debug__TI/subdir_vars.mk=UTF-8
