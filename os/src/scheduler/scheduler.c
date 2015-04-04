@@ -7,6 +7,17 @@
 #include "scheduler.h"
 
 /*
+ * Defines for the process stack start and size
+ */
+#define STACK_START		(0x40000000)
+#define STACK_SIZE		(0x00001000)
+
+/*
+ * Register defines
+ */
+#define R13			(13)
+
+/*
  * Global variables
  */
 static processId_t runningProcess;
@@ -50,6 +61,38 @@ int SchedulerStartProcess(processFunc func) {
 	processes[freeProcess].id = freeProcess;
 	processes[freeProcess].state = READY;
 
+	// IMPORTANT: when a task which was interrupted by SWI is scheduled by IRQ the
+	// PC must be incremented because PC will be changed by return through SUBS thus prevent to repeat last SWI instruction
+	// IMPORTANT: when a task which was interrupted by IRQ is scheduled by SWI the
+	// PC must be subtracted because PC was incremented but SWI will not repeat instruction thus decrement PC to repeat
+	// CONCLUSION: increment for SWI here and decrement according to systemstate in scheduleNextReady
+	processes[freeProcess].context->pc = ((pc_t) func) + 1;
+	// CPSR
+	// N|Z|C|V|Q|IT|J| DNM| GE | IT   |E|A|I|F|T|  M  |
+	// Code | Size | Description
+	// N 	| [1]  | Negative/Less than
+	// Z 	| [1]  | Zero
+	// C 	| [1]  | Carry/Borrow/Extend
+	// V 	| [1]  | Overflow
+	// Q 	| [1]  | Sticky Overflow
+	// IT   | [2]  | IT [1:0]
+	// J	| [1]  | Java state bit
+	// DNM  | [4]  | Do not modify
+	// GE	| [4]  | Greater than or equal to
+	// IT	| [6]  | IT [7:2]
+	// E	| [1]  | Data endianness bit
+	// A	| [1]  | Imprecise abort disable bit
+	// I	| [1]  | IRQ disable
+	// F	| [1]  | FIQ disable
+	// T	| [1]  | Thumb state bit
+	// M	| [1]  | M[4:0] Mode bits
+	int userMode = 0b10000;
+	processes[freeProcess].context->cpsr = userMode;
+	// Let R13 point to the PCB of the running process
+	processes[freeProcess].context->registers[R13] = (void*) (STACK_START + STACK_SIZE);
+
+
+	// TODO: check this atomic end needed
 	atomicEnd();
 	return SCHEDULER_OK;
 }
@@ -89,7 +132,7 @@ int SchedulerKillProcess(processId_t id) {
 	return SCHEDULER_OK;
 }
 
-*process_t SchedulerGetRunningProcess(void) {
+process_t* SchedulerGetRunningProcess(void) {
 	if (runningProcess == INVALID_PROCESS_ID) {
 		// TODO: think about this error
 		// This error should normally not appear
@@ -105,6 +148,7 @@ processId_t getNextFreeProcessId(void) {
 	return getNextProcessIdByState(FINISHED);
 }
 
+// Round Robin
 processId_t getNextReadyProcessId(void) {
 	int i;
 	for (i = (runningProcess + 1); i < PROCESSES_MAX; i++) {

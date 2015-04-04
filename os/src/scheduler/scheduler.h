@@ -41,20 +41,20 @@ typedef enum {
 	FINISHED
 } processState_t;
 
-typedef struct {
-	processId_t id;
-	processFunc func;
-	processState_t state;
-
-	context_t context;
-} process_t;
-
 // Process switch context
 typedef struct {
 	register_t registers[REGISTER_COUNT];
 	pc_t pc;
 	cpsr_t cpsr;
 } context_t;
+
+typedef struct {
+	processId_t id;
+	processFunc func;
+	processState_t state;
+
+	context_t* context;
+} process_t;
 
 /*
  * Scheduler functions
@@ -63,6 +63,6 @@ extern int SchedulerInit(void);
 extern int SchedulerStartProcess(processFunc func);
 extern int SchedulerRunNextProcess();
 extern int SchedulerKillProcess(processId_t id);
-extern *process_t SchedulerGetRunningProcess(void);
+extern process_t* SchedulerGetRunningProcess(void);
 
 #endif /* SCHEDULER_SCHEDULER_H_ */
