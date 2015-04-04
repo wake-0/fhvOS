@@ -9,8 +9,10 @@
 #include "systemcalls.h"
 #include "systemcallFunctions.h"
 
+#define SYSTEM_CALL_OK 1
+#define SYSTEM_CALL_FAILURE -1
 
-void SystemCall(systemCallMessage_t * message)
+int SystemCall(systemCallMessage_t * message)
 {
 	switch(message->systemCallNumber)
 	{
@@ -114,4 +116,6 @@ void SystemCall(systemCallMessage_t * message)
 		case SYS_GETPGRP:
 			break;
 	}
+
+	return SYSTEM_CALL_OK;
 }

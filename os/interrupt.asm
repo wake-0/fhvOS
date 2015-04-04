@@ -76,6 +76,7 @@ swi_handler:
     LDMFD    r13!, {r0-r1, pc}^       ; Restore registers from IRQ stack
 
 
+
 irq_handler1:
 	SUB      r14, r14, #4             ; Apply lr correction
     STMFD    r13!, {r0-r3, r12, r14}  ; Save context in IRQ stack

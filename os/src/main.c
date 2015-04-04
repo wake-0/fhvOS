@@ -12,7 +12,8 @@
 #include "hal/am335x/hw_cm_dpll.h"
 #include "driver/manager/driver_manager.h"
 #include "systemapi/systemcalls.h"
-
+#include <stdlib.h>
+#include "hal/cpu/coprocessor.h"
 
 extern void CPUSwitchToPrivilegedMode(void);
 extern void CPUSwitchToUserMode(void);
