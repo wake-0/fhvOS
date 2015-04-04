@@ -91,13 +91,12 @@ int SchedulerStartProcess(processFunc func) {
 	// Let R13 point to the PCB of the running process
 	processes[freeProcess].context->registers[R13] = (void*) (STACK_START + STACK_SIZE);
 
-
 	// TODO: check this atomic end needed
 	atomicEnd();
 	return SCHEDULER_OK;
 }
 
-int SchedulerRunNextProcess() {
+int SchedulerRunNextProcess(context_t* context) {
 	atomicStart();
 
 	processId_t nextProcess = getNextReadyProcessId();
@@ -106,12 +105,21 @@ int SchedulerRunNextProcess() {
 		return SCHEDULER_ERROR;
 	}
 
-	// Set the running process to ready
-	processes[runningProcess].state = READY;
+	// TODO: Decide what should be done with a running process
+	// which is finished or blocked
+	if (processes[runningProcess].state == RUNNING) {
+		// Set the running process to ready
+		processes[runningProcess].state = READY;
+		// Save the current context to the running process
+		// and then change the running process
+		memcpy(processes[runningProcess].context, context, sizeof(context_t));
+	}
 
-	// Set the new thread to running
+	// Set the next processes to running
 	runningProcess = nextProcess;
 	processes[runningProcess].state = RUNNING;
+	// Update the context for the next running process
+	memcpy(context, processes[runningProcess].context, sizeof(context_t));
 
 	atomicEnd();
 	return SCHEDULER_OK;
