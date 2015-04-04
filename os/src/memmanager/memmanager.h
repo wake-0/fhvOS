@@ -8,13 +8,12 @@
 #ifndef MEMMANAGER_MEMMANAGER_H_
 #define MEMMANAGER_MEMMANAGER_H_
 
-#include <stdlib.h>
+#include "../../../platform/platform.h"
 
 #define PAGE_SIZE_64KB						0x10000
 #define PAGE_SIZE_4KB						0x1000
 #define PAGE_SIZE							PAGE_SIZE_64KB
 #define MEMORY_REGIONS						5
-
 #define BOOT_ROM_START_ADDRESS				0x40000000
 #define BOOT_ROM_END_ADDRESS				0x4002BFFF
 #define MEMORY_MAPPED_IO_START_ADDRESS 		0x40300000
@@ -28,29 +27,33 @@
 #define PROCESS_PAGES_START_ADDRESS			0x81000000
 #define PROCESS_PAGES_END_ADDRESS			0xBFFFFFFF
 
-typedef enum { false, true } bool_t;
+#define MEMORY_OK							1
+#define MEMORY_NOT_OK						-1
 
 typedef struct
 {
-	bool_t reserved;
+	boolean_t reserved;
 	unsigned int processID;
 } pageStatus_t;
 
+typedef pageStatus_t * pageStatusPointer_t;
 
 // Data type for organizing the memory sections given in the ARM TRM.
 
 typedef struct region
 {
-	bool_t directAccess;
+	boolean_t directAccess;
     unsigned int startAddress;
     unsigned int endAddress;
     unsigned int length;
     unsigned int numberOfPages;
     unsigned int reservedPages;
-    pageStatus_t const * pageStatusLookup;
+    pageStatusPointer_t pageStatus;
 } memorySection_t;
 
+typedef memorySection_t * memorySectionPointer_t;
 
-extern void MemoryManagerInit();
+
+extern int MemoryManagerInit();
 
 #endif /* MEMMANAGER_MEMMANAGER_H_ */

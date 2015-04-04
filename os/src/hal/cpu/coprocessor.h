@@ -8,6 +8,11 @@
 
 extern void MMUEnable();
 extern void MMUDisable();
+extern void MMUFlushTLB();
+extern void MMUSetProcessTable();
+extern void MMUSetKernelTable();
+extern void MMUSetDomainAccess();
+extern void MMULoadDabtData();
 extern void InstructionCacheEnable();
 extern void InstructionCacheDisable();
 extern void InstructionCacheFlush();

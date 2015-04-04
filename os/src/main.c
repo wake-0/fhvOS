@@ -27,6 +27,7 @@ static volatile unsigned int flagIsr = 0;
 driver_t* timerDriver;
 uint16_t timeInMilis = 2000;
 
+
 int main(void)
 {
 	DriverManagerInit();

@@ -34,5 +34,4 @@ typedef unsigned char boolean_t;
 #define FALSE   0
 
 
-
 #endif /* HAL_PLATFORM_PLATFORM_H_ */

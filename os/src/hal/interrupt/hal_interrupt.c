@@ -12,6 +12,7 @@
 #include "../am335x/hw_types.h"
 #include "../am335x/soc_AM335x.h"
 #include "../cpu/hal_cpu.h"
+#include "stdio.h"
 
 
 #define REG_IDX_SHIFT                  	(0x05)
