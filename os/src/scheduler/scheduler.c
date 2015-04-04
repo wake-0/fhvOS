@@ -86,7 +86,7 @@ int SchedulerStartProcess(processFunc func) {
 	// F	| [1]  | FIQ disable
 	// T	| [1]  | Thumb state bit
 	// M	| [1]  | M[4:0] Mode bits
-	int userMode = 0b10000;
+	uint32_t userMode = 0b10000;
 	processes[freeProcess].context->cpsr = userMode;
 	// Let R13 point to the PCB of the running process
 	processes[freeProcess].context->registers[R13] = (void*) (STACK_START + STACK_SIZE);
