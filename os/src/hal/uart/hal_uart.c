@@ -264,6 +264,12 @@ int UARTHalFifoRead(uartPins_t uartPins, uint8_t* msg) {
 	return UART_HAL_OK;
 }
 
+boolean_t UARTHalIsFifoFull(uartPins_t uartPins)
+{
+	address_t baseAddress = getBaseAddressOfUART(uartPins);
+	return HWREG_CHECK(baseAddress + UART_SSR_OFF, UART_SSR_TXFIFOFULL);
+}
+
 /*
  * Helper methods
  */

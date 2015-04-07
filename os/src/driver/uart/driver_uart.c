@@ -16,7 +16,7 @@ int UARTDriverInit(uint16_t id) {
 	UARTHalSoftwareReset(pins);
 
 	configuration_t config;
-	config.baudRate = UART_BAUDRATE_9600;
+	config.baudRate = UART_BAUDRATE_115200;
 	config.parity =  UART_PARITY_NONE;
 	config.charLength = UART_CHARLENGTH_8;
 	config.stopBit = UART_STOPBIT_1;
@@ -44,6 +44,10 @@ int UARTDriverWrite(uint16_t id, char* buf, uint16_t len) {
 	for (i = 0; i < len; i++) {
 		msg = (uint8_t)*(buf+i);
 		UARTHalFifoWrite(pins, &msg);
+		while (UARTHalIsFifoFull(pins) == true)
+		{
+			// Busy waiting until fifo is not full
+		}
 	}
 
 	return DRIVER_OK;

@@ -31,6 +31,7 @@
 #define UART_FCR_OFF			(0x008)	// FIFO Control Register
 #define UART_TLR_OFF			(0x01C)	// Trigger Level Register
 #define UART_SCR_OFF			(0x040)	// Supplementary Control Register
+#define UART_SSR_OFF			(0x044)	// Supplementary Status Register
 #define UART_MDR1_OFF			(0x020)	// Mode Definition Register 1
 #define UART_IER_OFF			(0x004)	// Interrupt Enable Register
 #define UART_DLL_OFF			(0x000)	// Divisor Latches Low Register
@@ -53,6 +54,7 @@
 #define UART_SCR_DMA_MODE_0		(1 << 1)
 #define UART_SCR_DMA_MODE_1		(1 << 2)
 
+#define UART_SSR_TXFIFOFULL		(1 << 0)
 
 /*
  * Bits for the UART settings
