@@ -6,7 +6,6 @@
  */
 
 #include "driver_timer.h"
-#include <stdlib.h>
 #define TIMER_RESET_VALUE 							0x00
 #define TIMER_DEFAULT_VALUE 						0xFF000000
 #define TIMER_COMPARE_MODE_DISABLED 				0x00
