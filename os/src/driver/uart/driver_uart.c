@@ -60,6 +60,10 @@ int UARTDriverRead(uint16_t id, char* buf, uint16_t len) {
 	// Read chunks
 	int i;
 	for (i = 0; i < len; i++) {
+		while (UARTHalIsCharAvailable(pins) == FALSE)
+		{
+			// Wait until a char is available
+		}
 		UARTHalFifoRead(pins, (uint8_t*)(buf+i));
 	}
 

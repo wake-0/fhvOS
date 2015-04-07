@@ -26,6 +26,7 @@
 #define UART_SYSC_OFF 			(0x054)	// System Configuration Register
 #define UART_SYSS_OFF 			(0x058)	// System Status Register
 #define UART_LCR_OFF			(0x00C)	// Line Control Register
+#define UART_LSR_OFF			(0x014) // Line Status Register
 #define UART_LCR_EFR_OFF		(0x008)	// Enhanced Feature Register
 #define UART_MCR_OFF			(0x010)	// Modem Control Register
 #define UART_FCR_OFF			(0x008)	// FIFO Control Register
@@ -67,5 +68,7 @@
 #define UART_PARITY_TYPE_1				(1 << 4)
 #define UART_16X_MODE					(0x00)
 #define UART_DISABLE_MDOE				(0x07)
+
+#define UART_LSR_RX_FIFO_E   			(0x01)
 
 #endif /* HAL_AM335X_HW_UART_H_ */

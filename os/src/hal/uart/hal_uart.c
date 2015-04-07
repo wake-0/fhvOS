@@ -34,6 +34,7 @@ static uint32_t getBaudRateOfUART(baudrate_t baudRate);
 static void switchToConfModeA(address_t baseAddress);
 static void switchToConfModeB(address_t baseAddress);
 static void switchToConfModeOp(address_t baseAddress);
+static void switchToOperationalMode(address_t baseAddress);
 
 /*
  * Implementations of the functions from the h file
@@ -270,6 +271,27 @@ boolean_t UARTHalIsFifoFull(uartPins_t uartPins)
 	return HWREG_CHECK(baseAddress + UART_SSR_OFF, UART_SSR_TXFIFOFULL);
 }
 
+boolean_t UARTHalIsCharAvailable(uartPins_t uartPins)
+{
+	address_t baseAddress = getBaseAddressOfUART(uartPins);
+
+	unsigned int retVal = FALSE;
+	unsigned int lcrRegValue = 0;
+
+	lcrRegValue = HWREG(baseAddress + UART_LCR_OFF);
+
+	// Checking if the RHR(or RX FIFO) has atleast one byte to be read
+	if(HWREG(baseAddress + UART_LSR_OFF) & UART_LSR_RX_FIFO_E)
+	{
+		retVal = TRUE;
+	}
+
+	// Restoring the value of LCR
+	HWREG(baseAddress + UART_LCR_OFF) = lcrRegValue;
+
+	return retVal;
+}
+
 /*
  * Helper methods
  */
@@ -286,6 +308,10 @@ void switchToConfModeB(address_t baseAddress) {
 void switchToConfModeOp(address_t baseAddress) {
 	// Set the UARTi.UART_LCR register value to 0x0000.
 	HWREG_WRITE(baseAddress + UART_LCR_OFF, UART_LCR_MODE_OPERATIONAL);
+}
+
+void switchToOperationalMode(address_t baseAddress) {
+	HWREG(baseAddress + UART_LCR_OFF) &= 0x7F;
 }
 
 static address_t getBaseAddressOfUART(uartPins_t uartPins) {
