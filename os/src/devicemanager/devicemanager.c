@@ -32,13 +32,21 @@ static device_map_entry_t deviceMap[MAX_DEVICES] = {
 		{ "UART1", DRIVER_ID_UART, 1, false },
 		{ "UART2", DRIVER_ID_UART, 2, false },
 		{ "UART3", DRIVER_ID_UART, 4, false },
-		{ "UART4", DRIVER_ID_UART, 5, false }
+		{ "UART4", DRIVER_ID_UART, 5, false },
+		{ "TIMER2", DRIVER_ID_TIMER, 2, false }
 
 };
 
 void DeviceManagerInit()
 {
 	DriverManagerInit();
+}
+
+int DeviceManagerInitDevice(device_t device)
+{
+	driver_t* driver = DriverManagerGetDriver(device.driverId);
+	if (driver == NULL) return DEVICE_MANAGER_NO_DRIVER;
+	return driver->init(device.driverMsg);
 }
 
 device_t DeviceManagerGetDevice(char* name, int len)
