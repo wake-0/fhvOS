@@ -165,8 +165,8 @@ processId_t getNextReadyProcessId(void) {
 		}
 	}
 
-	// Allow to run the same process again, when no other process is ready
-	for (i = 0; i <= runningProcess; i++)  {
+	// Do not allow to run the same process again, because the running process is not READY
+	for (i = 0; i < runningProcess; i++)  {
 		if (processes[i].state == READY) {
 			return i;
 		}
