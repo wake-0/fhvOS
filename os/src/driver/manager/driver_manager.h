@@ -19,6 +19,7 @@ typedef uint16_t driver_id_t;
 /*
  * Abstract driver ids
  */
+#define DRIVER_ID_CPU   1
 #define DRIVER_ID_LED	123
 #define DRIVER_ID_UART	124
 #define DRIVER_ID_TIMER 125

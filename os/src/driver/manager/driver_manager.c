@@ -9,6 +9,7 @@
 
 #include <stdlib.h>
 
+#include "../cpu/driver_cpu.h"
 #include "../led/driver_led.h"
 #include "../uart/driver_uart.h"
 #include "../timer/driver_timer.h"
@@ -20,6 +21,16 @@ static driver_t* drivers[MAX_DRIVER];
 void DriverManagerInit()
 {
 	// Create all drivers
+
+	// CPU Driver
+	driver_t* cpu = malloc(sizeof(driver_t));
+	cpu->init = &CPUInit;
+	cpu->open = &CPUOpen;
+	cpu->close = &CPUClose;
+	cpu->read = &CPURead;
+	cpu->write = &CPUWrite;
+	cpu->ioctl = &CPUIoctl;
+	drivers[DRIVER_ID_CPU] = cpu;
 
 	// LED Driver
 	driver_t* led = malloc(sizeof(driver_t));

@@ -24,6 +24,7 @@ static boolean_t compareEntry(device_map_entry_t* entry, char* name, int len);
  * All device names have to be \0-terminated.
  */
 static device_map_entry_t deviceMap[MAX_DEVICES] = {
+		{ "CPU", DRIVER_ID_CPU, 0, false },
 		{ "LED0", DRIVER_ID_LED, 0, false },
 		{ "LED1", DRIVER_ID_LED, 1, false },
 		{ "LED2", DRIVER_ID_LED, 2, false },
