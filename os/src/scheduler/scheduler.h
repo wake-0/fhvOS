@@ -25,7 +25,7 @@
  * Typedefs for the process struct
  */
 typedef int8_t processId_t;
-typedef void (*processFunc)();
+typedef void (*processFunc)(void);
 
 typedef void* register_t;
 typedef uint32_t* pc_t;
@@ -38,7 +38,7 @@ typedef enum {
 	READY,
 	RUNNING,
 	BLOCKED,
-	FINISHED
+	FREE
 } processState_t;
 
 // Process switch context

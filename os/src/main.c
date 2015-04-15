@@ -14,22 +14,85 @@
 #include "systemapi/systemcalls.h"
 #include <stdlib.h>
 #include "hal/cpu/coprocessor.h"
+#include "devicemanager/devicemanager.h"
+#include "scheduler/scheduler.h"
+#include "driver/cpu/driver_cpu.h"
 
 extern void CPUSwitchToPrivilegedMode(void);
 extern void CPUSwitchToUserMode(void);
 extern void TimerInterruptStatusClear(Timer_t timer, unsigned int interruptNumber);
 void timerISR(void);
 
+void led1(void)
+{
+	device_t led = DeviceManagerGetDevice("LED0", 4);
+	volatile int i;
+	DeviceManagerOpen(led);
+
+	while(1)
+	{
+		DeviceManagerWrite(led, "1", 1);
+		for(i = 0; i < 0x0200000; i++);
+		DeviceManagerWrite(led, "0", 1);
+		for(i = 0; i < 0x0200000; i++);
+	}
+}
+
+void led2(void)
+{
+	device_t led = DeviceManagerGetDevice("LED1", 4);
+	volatile int i;
+	DeviceManagerOpen(led);
+
+	while(1)
+	{
+		DeviceManagerWrite(led, "1", 1);
+		for(i = 0; i < 0x0200000; i++);
+		DeviceManagerWrite(led, "0", 1);
+		for(i = 0; i < 0x0200000; i++);
+	}
+}
 
 static volatile unsigned int cntValue = 10;
 static volatile unsigned int flagIsr = 0;
 
-driver_t* timerDriver;
+device_t timer2;
 uint16_t timeInMilis = 2000;
 
 
 int main(void)
 {
+	DriverManagerInit();
+
+	SchedulerInit();
+	SchedulerStartProcess(&led1);
+	SchedulerStartProcess(&led2);
+
+
+	systemCallMessage_t * message = (systemCallMessage_t * )malloc(sizeof(systemCallMessage_t));
+	message->systemCallNumber = SYS_CHMOD;
+	message->messageArgs.arg1 = 0x10;		// USER MODE
+	SystemCall(message);
+
+	message->messageArgs.arg1 = 0x1F;		// SYSTEM MODE
+	SystemCall(message);
+
+	device_t cpu = DeviceManagerGetDevice("CPU", 3);
+	DeviceManagerIoctl(cpu, DRIVER_CPU_COMMAND_INTERRUPT_MASTER_IRQ_ENABLE, 0, NULL, 0);
+	DeviceManagerIoctl(cpu, DRIVER_CPU_COMMAND_INTERRUPT_RESET_AINTC, 0, NULL, 0);
+
+	timer2 = DeviceManagerGetDevice("TIMER2", 6);
+	DeviceManagerInitDevice(timer2);
+	uint16_t timeInMilis = 5000;
+	uint16_t interruptMode = 0x02; // overflow
+	uint16_t priority = 0x1;
+
+	DeviceManagerIoctl(timer2, timeInMilis, interruptMode, (char*) timerISR, priority);
+	DeviceManagerOpen(timer2);
+
+	while(1);
+
+	/*
 	DriverManagerInit();
 	timerDriver = DriverManagerGetDriver(DRIVER_ID_TIMER);
 	timerDriver->init(TIMER2);
@@ -70,16 +133,23 @@ int main(void)
 	}
 
 	while(1);
+	*/
 }
 
 
 void timerISR(void)
 {
-	timerDriver->write(TIMER2, DISABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
-	timerDriver->write(TIMER2, CLEAR_INTERRUPT_STATUS, TIMER_IRQ_OVERFLOW);
+	DeviceManagerWrite(timer2, DISABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
+	DeviceManagerWrite(timer2, CLEAR_INTERRUPT_STATUS, TIMER_IRQ_OVERFLOW);
+	//timerDriver->write(TIMER2, DISABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
+	//timerDriver->write(TIMER2, CLEAR_INTERRUPT_STATUS, TIMER_IRQ_OVERFLOW);
 
 	flagIsr = 1;
 
-	timerDriver->write(TIMER2, ENABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
-	timerDriver->open(TIMER2);
+	//SchedulerRunNextProcess();
+
+	DeviceManagerWrite(timer2, ENABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
+	DeviceManagerOpen(timer2);
+	//timerDriver->write(TIMER2, ENABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
+	//timerDriver->open(TIMER2);
 }

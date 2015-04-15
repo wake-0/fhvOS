@@ -69,6 +69,9 @@ swi_handler:
     LDR      r0, [r14, #-4]           ; R0 points to SWI instruction
     BIC      r0, r0, #MASK_SVC_NUM    ; Get the SWI number
     CMP      r0, #458752
+
+    ; swi handler
+
     MRSEQ    r1, spsr                 ; Copy SPSR
     ORREQ    r1, r1, #0x1F            ; Change the mode to System
     MSREQ    spsr_cf, r1              ; Restore SPSR

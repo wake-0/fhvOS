@@ -168,4 +168,14 @@ void CPUfiqe(void)
         "    msr     CPSR_c, r0");
 }
 
+
+void CPUAtomicStart(void) {
+	// TODO: stop interrupts
+	//CPUIrqEnable
+}
+
+void CPUAtomicEnd(void) {
+	// TODO: activate interrupts
+}
+
 /**************************** End Of File ************************************/

@@ -279,6 +279,7 @@ boolean_t UARTHalIsCharAvailable(uartPins_t uartPins)
 	unsigned int lcrRegValue = 0;
 
 	lcrRegValue = HWREG(baseAddress + UART_LCR_OFF);
+	switchToOperationalMode(baseAddress);
 
 	// Checking if the RHR(or RX FIFO) has atleast one byte to be read
 	if(HWREG(baseAddress + UART_LSR_OFF) & UART_LSR_RX_FIFO_E)

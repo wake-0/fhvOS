@@ -26,7 +26,7 @@
 #define KERNEL_END_ADDRESS					0x80FFFFFF
 #define PROCESS_PAGES_START_ADDRESS			0x81000000
 #define PROCESS_PAGES_END_ADDRESS			0xBFFFFFFF
-
+#define PAGES_IN_A_ROW_FOUND				0
 #define MEMORY_OK							1
 #define MEMORY_NOT_OK						-1
 
@@ -48,11 +48,13 @@ typedef struct region
     unsigned int length;
     unsigned int numberOfPages;
     unsigned int reservedPages;
+    unsigned int unreservedPages;
     pageStatusPointer_t pageStatus;
 } memorySection_t;
 
-typedef memorySection_t * memorySectionPointer_t;
+typedef memorySection_t* memorySectionPointer_t;
 
+typedef void* pageAddressPointer_t;
 
 extern int MemoryManagerInit();
 

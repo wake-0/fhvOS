@@ -5,6 +5,7 @@
  *      Author: Kevin
  */
 #include "scheduler.h"
+#include "../hal/cpu/hal_cpu.h"
 
 /*
  * Defines for the process stack start and size
@@ -26,13 +27,10 @@ static process_t processes[PROCESSES_MAX];
 /*
  * Internal functions
  */
-static processId_t getNextProcessIdByState(processState_t state);
+static processId_t getNextProcessIdByState(processState_t state, int startId);
 static processId_t getNextFreeProcessId(void);
 static processId_t getNextReadyProcessId(void);
 
-// Functions to stop and start the interrupts
-static void atomicStart(void);
-static void atomicEnd(void);
 
 /*
  * Functions from the .h file
@@ -40,7 +38,8 @@ static void atomicEnd(void);
 int SchedulerInit(void) {
 	int i;
 	for (i = 0; i < PROCESSES_MAX; i++) {
-		processes[i].state = FINISHED;
+		processes[i].state = FREE;
+		processes[i].context = (context_t*) malloc(sizeof(context_t));
 	}
 
 	// No process is running
@@ -49,11 +48,11 @@ int SchedulerInit(void) {
 }
 
 int SchedulerStartProcess(processFunc func) {
-	atomicStart();
+	CPUAtomicStart();
 
 	processId_t freeProcess = getNextFreeProcessId();
 	if (freeProcess == INVALID_PROCESS_ID) {
-		atomicEnd();
+		CPUAtomicEnd();
 		return SCHEDULER_ERROR;
 	}
 
@@ -92,16 +91,16 @@ int SchedulerStartProcess(processFunc func) {
 	processes[freeProcess].context->registers[R13] = (void*) (STACK_START + STACK_SIZE);
 
 	// TODO: check this atomic end needed
-	atomicEnd();
+	CPUAtomicEnd();
 	return SCHEDULER_OK;
 }
 
 int SchedulerRunNextProcess(context_t* context) {
-	atomicStart();
+	CPUAtomicStart();
 
 	processId_t nextProcess = getNextReadyProcessId();
 	if (nextProcess == INVALID_PROCESS_ID) {
-		atomicEnd();
+		CPUAtomicEnd();
 		return SCHEDULER_ERROR;
 	}
 
@@ -121,29 +120,29 @@ int SchedulerRunNextProcess(context_t* context) {
 	// Update the context for the next running process
 	memcpy(context, processes[runningProcess].context, sizeof(context_t));
 
-	atomicEnd();
+	CPUAtomicEnd();
 	return SCHEDULER_OK;
 }
 
 int SchedulerKillProcess(processId_t id) {
-	atomicStart();
+	CPUAtomicStart();
 	if (id < 0 || id >= PROCESSES_MAX) {
-		atomicEnd();
+		CPUAtomicEnd();
 		return SCHEDULER_ERROR;
 	}
 
 	// TODO: check the process to kill is running, when running change and then kill
-	processes[id].state = FINISHED;
+	processes[id].state = FREE;
 	processes[id].func = NULL;
 
-	atomicEnd();
+	CPUAtomicEnd();
 	return SCHEDULER_OK;
 }
 
 process_t* SchedulerGetRunningProcess(void) {
 	if (runningProcess == INVALID_PROCESS_ID) {
-		// TODO: think about this error
 		// This error should normally not appear
+		return NULL;
 	}
 
 	return &processes[runningProcess];
@@ -153,43 +152,29 @@ process_t* SchedulerGetRunningProcess(void) {
  * Helper methods
  */
 processId_t getNextFreeProcessId(void) {
-	return getNextProcessIdByState(FINISHED);
+	return getNextProcessIdByState(FREE, 0);
 }
 
 // Round Robin
 processId_t getNextReadyProcessId(void) {
-	int i;
-	for (i = (runningProcess + 1); i < PROCESSES_MAX; i++) {
-		if (processes[i].state == READY) {
-			return i;
-		}
-	}
-
-	// Do not allow to run the same process again, because the running process is not READY
-	for (i = 0; i < runningProcess; i++)  {
-		if (processes[i].state == READY) {
-			return i;
-		}
-	}
-
-	return INVALID_PROCESS_ID;
+	return getNextProcessIdByState(FREE, runningProcess + 1);
 }
 
-processId_t getNextProcessIdByState(processState_t state) {
+processId_t getNextProcessIdByState(processState_t state, int startId) {
 	int i;
+
+	if(startId < 0 || startId >= PROCESSES_MAX)
+	{
+		return INVALID_PROCESS_ID;
+	}
+
 	for (i = 0; i < PROCESSES_MAX; i++) {
-		if (processes[i].state == state) {
-			return i;
+		if (processes[(i + startId) % PROCESSES_MAX].state == state) {
+			return (i + startId) % PROCESSES_MAX;
 		}
 	}
 
 	return INVALID_PROCESS_ID;
 }
 
-void atomicStart(void) {
-	// TODO: stop interrupts
-}
 
-void atomicEnd(void) {
-	// TODO: activate interrupts
-}
