@@ -12,8 +12,10 @@
 #include <stdlib.h>
 
 
-static void MemoryManagerInitializeSection(memorySectionPointer_t, boolean_t, unsigned int, unsigned int );
-static boolean_t MemoryManagerSufficientSpace(memorySectionPointer_t section, unsigned int pagesToReserve);
+static void memoryManagerInitializeSection(memorySectionPointer_t, boolean_t, unsigned int, unsigned int );
+static boolean_t memoryManagerSufficientSpace(memorySectionPointer_t section, unsigned int pagesToReserve);
+static pageAddressPointer_t memoryManagerGetPageAddress(memorySectionPointer_t section, unsigned int pageNumber);
+static int memoryManagerLookupSectionForFreePagesInRow(memorySectionPointer_t section, unsigned int startingPageNumber, unsigned int pagesToReserve);
 
 memorySection_t memorySections[MEMORY_REGIONS];
 
@@ -26,11 +28,11 @@ memorySection_t memorySections[MEMORY_REGIONS];
  */
 int MemoryManagerInit()
 {
-	MemoryManagerInitializeSection(&memorySections[0], true, BOOT_ROM_START_ADDRESS, BOOT_ROM_END_ADDRESS);
-	MemoryManagerInitializeSection(&memorySections[1], true, INTERNAL_SRAM_START_ADDRESS, INTERNAL_SRAM_END_ADDRESS);
-	MemoryManagerInitializeSection(&memorySections[2], true, MEMORY_MAPPED_IO_START_ADDRESS, MEMORY_MAPPED_IO_END_ADDRESS);
-	MemoryManagerInitializeSection(&memorySections[3], true, KERNEL_START_ADDRESS, KERNEL_END_ADDRESS);
-	MemoryManagerInitializeSection(&memorySections[4], false, PROCESS_PAGES_START_ADDRESS, PROCESS_PAGES_END_ADDRESS);
+	memoryManagerInitializeSection(&memorySections[0], true, BOOT_ROM_START_ADDRESS, BOOT_ROM_END_ADDRESS);
+	memoryManagerInitializeSection(&memorySections[1], true, INTERNAL_SRAM_START_ADDRESS, INTERNAL_SRAM_END_ADDRESS);
+	memoryManagerInitializeSection(&memorySections[2], true, MEMORY_MAPPED_IO_START_ADDRESS, MEMORY_MAPPED_IO_END_ADDRESS);
+	memoryManagerInitializeSection(&memorySections[3], true, KERNEL_START_ADDRESS, KERNEL_END_ADDRESS);
+	memoryManagerInitializeSection(&memorySections[4], false, PROCESS_PAGES_START_ADDRESS, PROCESS_PAGES_END_ADDRESS);
 	return MEMORY_OK;
 }
 
@@ -41,7 +43,7 @@ int MemoryManagerInit()
  * \param  	access				- defines if accessed directly or over virtual memory management
  * \return 	None
  */
-static void MemoryManagerInitializeSection(memorySectionPointer_t memorySection, boolean_t access, unsigned int startAddress, unsigned int endAddress)
+static void memoryManagerInitializeSection(memorySectionPointer_t memorySection, boolean_t access, unsigned int startAddress, unsigned int endAddress)
 {
 	memorySection->startAddress 	= startAddress;
 	memorySection->endAddress 		= endAddress;
@@ -49,6 +51,7 @@ static void MemoryManagerInitializeSection(memorySectionPointer_t memorySection,
 	memorySection->directAccess 	= access;
 	memorySection->numberOfPages 	= (memorySection->length / PAGE_SIZE);
 	memorySection->reservedPages 	= 0;
+	memorySection->unreservedPages	= memorySection->numberOfPages;
 	memorySection->pageStatus	 	= (pageStatusPointer_t)malloc( sizeof(pageStatus_t) * memorySection->length );
 }
 
@@ -69,15 +72,14 @@ int MemoryManagerReserveSinglePage(memorySectionPointer_t section, unsigned int 
 {
 	section->pageStatus[pageNumber].reserved = true;
 	section->reservedPages++;
+	section->unreservedPages--;
 	return MEMORY_OK;
 }
 
 
-static boolean_t MemoryManagerSufficientSpace(memorySectionPointer_t section, unsigned int pagesToReserve)
+static boolean_t memoryManagerSufficientSpace(memorySectionPointer_t section, unsigned int pagesToReserve)
 {
-	unsigned int freePagesInSection = (section->numberOfPages - section->reservedPages);
-
-	if(freePagesInSection > pagesToReserve)
+	if(section->unreservedPages > pagesToReserve)
 	{
 		return true;
 	}
@@ -97,7 +99,7 @@ int MemoryManagerReserveMultiplePages(unsigned int memorySectionNumber, unsigned
 	memorySectionPointer_t section = MemoryManagerGetSection(memorySectionNumber);
 	unsigned int reservedPages = 0;
 
-	if(false == MemoryManagerSufficientSpace(section, pagesToReserve))
+	if(false == memoryManagerSufficientSpace(section, pagesToReserve))
 	{
 		return MEMORY_NOT_OK;
 	}
@@ -112,8 +114,82 @@ int MemoryManagerReserveMultiplePages(unsigned int memorySectionNumber, unsigned
 }
 
 
-void MemoryManagerGetFreePagesInSection()
+/**
+ * \brief	Finds a number of pages of a specified section in a row.
+ * \return	Address of first page in row if successfull, otherwise null.
+ */
+pageAddressPointer_t MemoryManagerGetFreePagesInSection(unsigned int memorySection, unsigned int pagesToReserve)
 {
+	memorySectionPointer_t section = MemoryManagerGetSection(memorySection);
 
+	if((pagesToReserve > section->numberOfPages) || (pagesToReserve > section->unreservedPages) || (pagesToReserve == 0))
+	{
+		return NULL;
+	}
+
+	unsigned int pageNumber;
+	int pagesLookupStatus = 0;
+
+	// look up all pages of specified section
+	for(pageNumber = 0; pageNumber <= section->numberOfPages; pageNumber++)
+	{
+		if((pageNumber + pagesToReserve) > section->numberOfPages)
+		{
+			return NULL;
+		}
+
+		if(section->pageStatus[pageNumber].reserved)
+		{
+			continue;
+		}
+		else
+		{
+			pagesLookupStatus = memoryManagerLookupSectionForFreePagesInRow(section, pageNumber, pagesToReserve);
+		}
+
+		if(PAGES_IN_A_ROW_FOUND == pagesLookupStatus)
+		{
+			break;
+		}
+		else
+		{
+			pageNumber += pagesLookupStatus;
+			pagesLookupStatus = -1;
+		}
+	}
+
+	return memoryManagerGetPageAddress(section, pageNumber);
+}
+
+
+static int memoryManagerLookupSectionForFreePagesInRow(memorySectionPointer_t section, unsigned int startingPageNumber, unsigned int pagesToReserve)
+{
+	int i = 0;
+
+	for(i = startingPageNumber; i < (startingPageNumber + pagesToReserve); i++)
+	{
+		if(true == section->pageStatus[i].reserved)
+		{
+			return i;
+		}
+	}
+
+	return 0;
+}
+
+
+/**
+ * \brief	Gets the address of a page if page is existing.
+ * \return	Pointer on Address of Page
+ */
+static pageAddressPointer_t memoryManagerGetPageAddress(memorySectionPointer_t section, unsigned int pageNumber)
+{
+	if(pageNumber > section->numberOfPages)
+	{
+		return NULL;
+	}
+
+	pageAddressPointer_t pageAddress = (pageAddressPointer_t)(section->startAddress + pageNumber * PAGE_SIZE);
+	return pageAddress;
 }
 

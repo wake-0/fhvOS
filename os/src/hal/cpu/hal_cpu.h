@@ -62,6 +62,8 @@ extern void CPUirqe(void);
 extern void CPUfiqd(void);
 extern void CPUfiqe(void);
 extern unsigned int CPUIntStatus(void);
+extern void CPUAtomicStart(void);
+extern void CPUAtomicEnd(void);
 
 #ifdef __cplusplus
 }
