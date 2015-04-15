@@ -24,7 +24,7 @@
 /*
  * Typedefs for the process struct
  */
-typedef int16_t processId_t;
+typedef int8_t processId_t;
 typedef void (*processFunc)();
 
 typedef void* register_t;
