@@ -7,17 +7,19 @@
 
 
 #include "mmu.h"
-#include "../scheduler/scheduler.h"
-#include "memmanager.h"
 
-static uint32_t* mmuCreateMasterPageTable();
+#define MMU_DOMAIN_FULL_ACCESS 0xFFFFFFFF
+
+
 static void mmuReserveAllDirectMappedRegions();
 static void mmuReserveDirectMappedRegion(unsigned int memoryRegion);
 static void mmuInitializeKernelMasterPageTable();
-static void mmuSetKernelMasterPageTable(uint32_t* table);
-static void mmuSetProcessPageTable(uint32_t* table);
+static void mmuSetKernelMasterPageTable(pageTablePointer_t table);
+static void mmuSetProcessPageTable(pageTablePointer_t table);
+static void mmuSetDomainToFullAccess(void);
 
-uint32_t * kernelMasterPageTable;
+pageTablePointer_t kernelMasterPageTable;
+
 
 void MMUInit()
 {
@@ -29,22 +31,25 @@ void MMUInit()
 	mmuReserveAllDirectMappedRegions();
 
 	// create master table
-	kernelMasterPageTable = mmuCreateMasterPageTable();
+	kernelMasterPageTable = MMUCreateMasterPageTable();
 
-	// initialize the kernel master table so the lookup works for the kernel
+	// TODO: initialize the kernel master table so the lookup works for the kernel
+	mmuInitializeKernelMasterPageTable();
 
+	// TODO: set kernel table
+	mmuSetKernelMasterPageTable(kernelMasterPageTable);
 
-	// set kernel table
-
-	// set process table
+	// TODO: set process table
+	mmuSetProcessPageTable(kernelMasterPageTable);
 
 	// set domain access
+	mmuSetDomainToFullAccess();
 
 	// enable mmu
 	MMUEnable();
 }
 
-static void mmuReserveAllDirectMappedRegions()
+static void mmuReserveAllDirectMappedRegions(void)
 {
 	unsigned int memoryRegion;
 
@@ -64,10 +69,10 @@ static void mmuReserveDirectMappedRegion(unsigned int memoryRegion)
 	}
 }
 
-static uint32_t* mmuCreateMasterPageTable()
+pageTablePointer_t MMUCreateMasterPageTable(void)
 {
 	// reserve a 16kB pagetable in any region
-	uint32_t* newTable;
+	pageTablePointer_t newTable;
 	unsigned int memoryRegion;
 
 	for(memoryRegion = 0; memoryRegion < MEMORY_REGIONS; memoryRegion++)
@@ -85,7 +90,6 @@ static uint32_t* mmuCreateMasterPageTable()
 		return NULL;
 	}
 
-
 	// set values of the regin to 0
 	memset(newTable, 0, PAGE_SIZE * MMU_MASTER_TABLE_PAGE_COUNT);
 
@@ -98,16 +102,23 @@ static void mmuInitializeKernelMasterPageTable()
 
 }
 
-static void mmuSetKernelMasterPageTable(uint32_t* table)
+static void mmuSetKernelMasterPageTable(pageTablePointer_t table)
 {
-
+	MMUFlushTLB();
+	//MMUSetProcessTable();
 }
 
-static void mmuSetProcessPageTable(uint32_t* table)
+static void mmuSetProcessPageTable(pageTablePointer_t table)
 {
-
+	MMUFlushTLB();
+	//MMUSetProcessTable();
 }
 
+
+static void mmuSetDomainToFullAccess(void)
+{
+	MMUSetDomainAccess(MMU_DOMAIN_FULL_ACCESS);
+}
 
 
 void MMUHandleDataAbortException()
