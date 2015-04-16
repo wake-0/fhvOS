@@ -14,6 +14,7 @@
 #define PAGE_SIZE_4KB						0x1000
 #define PAGE_SIZE							PAGE_SIZE_64KB
 #define MEMORY_REGIONS						5
+
 #define BOOT_ROM_START_ADDRESS				0x40000000
 #define BOOT_ROM_END_ADDRESS				0x4002BFFF
 #define MEMORY_MAPPED_IO_START_ADDRESS 		0x40300000
@@ -46,16 +47,21 @@ typedef struct region
     unsigned int startAddress;
     unsigned int endAddress;
     unsigned int length;
+    unsigned int accessPermission;
+    unsigned int cacheBufferAttributes;
     unsigned int numberOfPages;
     unsigned int reservedPages;
     unsigned int unreservedPages;
     pageStatusPointer_t pageStatus;
-} memorySection_t;
+} memoryRegion_t;
 
-typedef memorySection_t* memorySectionPointer_t;
+typedef memoryRegion_t* memoryRegionPointer_t;
 
 typedef void* pageAddressPointer_t;
 
 extern int MemoryManagerInit();
+extern pageAddressPointer_t MemoryManagerGetFreePagesInSection(unsigned int memoryRegion, unsigned int pagesToReserve);
+extern memoryRegionPointer_t MemoryManagerGetSection(unsigned int memoryRegionNumber);
+extern void MemoryManagerReserveAllPages(memoryRegionPointer_t region);
 
 #endif /* MEMMANAGER_MEMMANAGER_H_ */
