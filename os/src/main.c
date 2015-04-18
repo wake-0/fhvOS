@@ -1,6 +1,5 @@
 
-//#include <stdio.h>
-
+#include <stdio.h>
 #include "driver/uart/driver_uart.h"
 #include "driver/timer/driver_timer.h"
 #include "hal/interrupt/hal_interrupt.h"
@@ -18,10 +17,11 @@
 #include "scheduler/scheduler.h"
 #include "driver/cpu/driver_cpu.h"
 
+extern address_t GetContext(void);
 extern void CPUSwitchToPrivilegedMode(void);
 extern void CPUSwitchToUserMode(void);
 extern void TimerInterruptStatusClear(Timer_t timer, unsigned int interruptNumber);
-void timerISR(void);
+void timerISR(address_t context);
 
 void led1(void)
 {
@@ -58,87 +58,67 @@ static volatile unsigned int flagIsr = 0;
 
 device_t timer2;
 uint16_t timeInMilis = 2000;
+//static volatile driver_t* timerDriver;
 
+int foo(int value);
 
 int main(void)
 {
-	DriverManagerInit();
+	//DriverManagerInit();
+	DeviceManagerInit();
+
+	device_t led3 = DeviceManagerGetDevice("LED3", 4);
+	DeviceManagerOpen(led3);
+	DeviceManagerWrite(led3, "1", 1);
 
 	SchedulerInit();
 	SchedulerStartProcess(&led1);
 	SchedulerStartProcess(&led2);
 
-
-	systemCallMessage_t * message = (systemCallMessage_t * )malloc(sizeof(systemCallMessage_t));
-	message->systemCallNumber = SYS_CHMOD;
-	message->messageArgs.arg1 = 0x10;		// USER MODE
-	SystemCall(message);
-
-	message->messageArgs.arg1 = 0x1F;		// SYSTEM MODE
-	SystemCall(message);
+	timer2 = DeviceManagerGetDevice("TIMER2", 6);
+	DeviceManagerInitDevice(timer2);
 
 	device_t cpu = DeviceManagerGetDevice("CPU", 3);
 	DeviceManagerIoctl(cpu, DRIVER_CPU_COMMAND_INTERRUPT_MASTER_IRQ_ENABLE, 0, NULL, 0);
 	DeviceManagerIoctl(cpu, DRIVER_CPU_COMMAND_INTERRUPT_RESET_AINTC, 0, NULL, 0);
 
-	timer2 = DeviceManagerGetDevice("TIMER2", 6);
-	DeviceManagerInitDevice(timer2);
-	uint16_t timeInMilis = 5000;
+	uint16_t timeInMilis = 10;
 	uint16_t interruptMode = 0x02; // overflow
 	uint16_t priority = 0x1;
 
 	DeviceManagerIoctl(timer2, timeInMilis, interruptMode, (char*) timerISR, priority);
 	DeviceManagerOpen(timer2);
 
-	while(1);
-
-	/*
-	DriverManagerInit();
-	timerDriver = DriverManagerGetDriver(DRIVER_ID_TIMER);
-	timerDriver->init(TIMER2);
-
-	systemCallMessage_t * message = (systemCallMessage_t * )malloc(sizeof(systemCallMessage_t));
-	message->systemCallNumber = SYS_CHMOD;
-	message->messageArgs.arg1 = 0x10;		// USER MODE
-	SystemCall(message);
-
-	message->messageArgs.arg1 = 0x1F;		// SYSTEM MODE
-	SystemCall(message);
-
-
-	// ----- INTERRUPT settings -----
-	InterruptMasterIRQEnable();
-	InterruptResetAINTC();
-
-	// ----- TIMER settings -----
-	uint16_t timeInMilis = 5000;
-	uint16_t interruptMode = 0x02; // overflow
-	uint16_t priority = 0x1;
-	timerDriver->ioctl(TIMER2, timeInMilis, interruptMode, (char*) timerISR, priority);
-
-	// ----- TIMER start -----
-	timerDriver->open(TIMER2);
-
-	volatile int counter = 0;
-	while(cntValue)
+	while(1)
 	{
-		counter++;
-		if(flagIsr == 1)
+		volatile int i = 0;
+		volatile int j = 0;
+
+		for(i = 0; i < 1000; i++)
 		{
-			counter = 0;
-			//printf("\nOverflow\n");
-			cntValue--;
-			flagIsr = 0;
+			for (j = 0; j < 10000; j++)
+			{
+				volatile int k = 0;
+				k++;
+			}
 		}
 	}
 
-	while(1);
-	*/
 }
 
+int foo(int value) {
+	volatile int j = HWREG_SET(0x60000000, 0x1);
+	volatile int i = 5;
+	return i;
+}
 
-void timerISR(void)
+void timerISR(address_t context)
 {
+	// volatile address_t spa = GetContext();
+	volatile context_t* spaContext = (context_t*) context;
+
+	printf("Timer ISR\n");
+
 	DeviceManagerWrite(timer2, DISABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
 	DeviceManagerWrite(timer2, CLEAR_INTERRUPT_STATUS, TIMER_IRQ_OVERFLOW);
 	//timerDriver->write(TIMER2, DISABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
@@ -146,7 +126,8 @@ void timerISR(void)
 
 	flagIsr = 1;
 
-	//SchedulerRunNextProcess();
+
+	//SchedulerRunNextProcess((context_t*) spa);
 
 	DeviceManagerWrite(timer2, ENABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
 	DeviceManagerOpen(timer2);

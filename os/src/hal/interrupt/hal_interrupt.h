@@ -11,6 +11,7 @@
 
 #include "../am335x/hw_intc.h"
 #include "../am335x/hw_types.h"
+#include "../../platform/platform.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -133,7 +134,7 @@ extern "C" {
 
 
 
-typedef void (*intHandler_t)(void);
+typedef void (*intHandler_t)(void*);
 typedef void (*intResetHandler_t)(void);
 
 

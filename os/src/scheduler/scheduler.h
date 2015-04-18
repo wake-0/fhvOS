@@ -17,7 +17,7 @@
 #define SCHEDULER_ERROR		(-1)
 
 #define PROCESSES_MAX		(64)
-#define REGISTER_COUNT		(15)
+#define REGISTER_COUNT		(14)
 
 #define INVALID_PROCESS_ID	(-1)
 
@@ -27,9 +27,7 @@
 typedef int8_t processId_t;
 typedef void (*processFunc)(void);
 
-typedef void* register_t;
-typedef uint32_t* pc_t;
-typedef uint32_t cpsr_t;
+typedef address_t* register_t;
 
 /*
  * Enums for the process struct
@@ -42,11 +40,14 @@ typedef enum {
 } processState_t;
 
 // Process switch context
+#pragma pack(push,1)
 typedef struct {
 	register_t registers[REGISTER_COUNT];
-	pc_t pc;
-	cpsr_t cpsr;
+	address_t* lr;
+	address_t* pc;
+	address_t* cpsr;
 } context_t;
+#pragma pack(pop)
 
 typedef struct {
 	processId_t id;

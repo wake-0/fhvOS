@@ -8,7 +8,7 @@
  */
 
 
--stack  0x0008                             /* SOFTWARE STACK SIZE           */
+-stack  0x2000                             /* SOFTWARE STACK SIZE           */
 -heap   0x2000                             /* HEAP AREA SIZE                */
 
 

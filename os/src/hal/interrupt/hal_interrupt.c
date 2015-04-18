@@ -203,13 +203,15 @@ static void InterruptDefaultHandler(void)
 }
 
 
-#pragma INTERRUPT(irq_handler, IRQ)
-interrupt void irq_handler()
+#pragma INTERRUPT(irq_handler1, IRQ)
+interrupt void irq_handler1()
 {
+	volatile address_t context = GetContext();
+
 	unsigned int activeIrq = InterruptActiveIrqNumberGet();
 
 	intHandler_t interruptHandler = InterruptGetHandler(activeIrq);
-	interruptHandler();
+	interruptHandler(context);
 
 	InterruptAllowNewIrqGeneration();
 }

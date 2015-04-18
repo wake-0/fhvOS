@@ -43,8 +43,10 @@ I_BIT             .set   0x80
 ;
 	.global irq_handler
 	.global swi_handler
+	.global GetContext
 	.ref interruptRamVectors
 	.ref interruptIrqResetHandlers
+	.ref irq_handler1
 	;.ref SwiHandler
 
 ;
@@ -80,64 +82,24 @@ swi_handler:
 
 
 
-irq_handler1:
-	SUB      r14, r14, #4             ; Apply lr correction
-    STMFD    r13!, {r0-r3, r12, r14}  ; Save context in IRQ stack
-    MRS      r12, spsr                ; Copy spsr
-    ;VMRS     r1,  fpscr               ; Copy fpscr
-    STMFD    r13!, {r12}          ; {r1, r12} Save fpscr and spsr
-    ;VSTMDB   r13!, {d0-d7}            ; Save D0-D7 NEON/VFP registers
+irq_handler:
+	SUB      LR, LR, #4               ; Apply lr correction
+    STMFD    SP, {R0-R13, LR, PC}^    ; Save context in IRQ stack
+    SUB 	 SP, SP, #64				  ; SP correction
+    MRS      R12, cpsr                ; Copy cpsr
+    STMFD    SP, {R12}^          	  ; {r1, r12} Save fpscr and spsr
+    SUB		 SP, SP, #4			      ; SP correction
+    B        irq_handler1
 
-    LDR      r0, ADDR_THRESHOLD       ; Get the IRQ Threshold
-    LDR      r1, [r0, #0]
-    STMFD    r13!, {r1}               ; Save the threshold value
+	;ADD      SP, SP, #40
 
-    LDR      r2, ADDR_IRQ_PRIORITY   ; Get the active IRQ priority
-    LDR      r3, [r2, #0]
-    STR      r3, [r0, #0]             ; Set the priority as threshold
-    LDR      r1, ADDR_SIR_IRQ         ; Get the Active IRQ
-    LDR      r2, [r1]
-    AND      r2, r2, #MASK_ACTIVE_IRQ ; Mask the Active IRQ number
 
-    MOV      r0, #NEWIRQAGR           ; To enable new IRQ Generation
-    LDR      r1, ADDR_CONTROL
+GetContext:
+	ADD    R0, SP, #108
+	;SUB    R0, SP, #64	; GetContext stack pointer overhead
+	MOV    PC, LR
 
-    CMP      r3, #0                   ; Check if non-maskable priority 0
-    STRNE    r0, [r1]                 ; if > 0 priority, acknowledge INTC
-    DSB                               ; Make sure acknowledgement is completed
-
-    ;
-    ; Enable IRQ and switch to system mode. But IRQ shall be enabled
-    ; only if priority level is > 0. Note that priority 0 is non maskable.
-    ; Interrupt Service Routines will execute in System Mode.
-    ;
-    MRS      r14, cpsr                ; Read cpsr
-    ORR      r14, r14, #MODE_SYS
-    BICNE    r14, r14, #I_BIT         ; Enable IRQ if priority > 0
-    MSR      cpsr_cxsf, r14
-
-    STMFD    r13!, {r14}              ; Save lr_usr
-    LDR      r0, _intIrqHandlers        ; Load the base of the vector table
-    ADD      r14, pc, #0              ; Save return address in LR
-    LDR      pc, [r0, r2, lsl #2]     ; Jump to the ISR
-
-    LDMFD    r13!, {r14}              ; Restore lr_usr
-    ;
-    ; Disable IRQ and change back to IRQ mode
-    ;
-    CPSID    i, #MODE_IRQ
-
-    LDR      r0, ADDR_THRESHOLD      ; Get the IRQ Threshold
-    LDR      r1, [r0, #0]
-    CMP      r1, #0                   ; If priority 0
-    MOVEQ    r2, #NEWIRQAGR           ; Enable new IRQ Generation
-    LDREQ    r1, ADDR_CONTROL
-    STREQ    r2, [r1]
-    LDMFD    r13!, {r1}
-    STR      r1, [r0, #0]             ; Restore the threshold value
-    ;VLDMIA   r13!, {d0-d7}            ; Restore D0-D7 Neon/VFP registers
-    LDMFD    r13!, {r1, r12}          ; Get fpscr and spsr
-    MSR      spsr_cxsf, r12           ; Restore spsr
-    ;VMSR     fpscr, r1                ; Restore fpscr
-    LDMFD    r13!, {r0-r3, r12, pc}^  ; Restore the context and return
+	;SUB    R0, R0, #0x68  ; Context stack pointer overhead
+	; STR    R12, [R13, #4]
+	; LDR    R0, [R13, #4]
 .end

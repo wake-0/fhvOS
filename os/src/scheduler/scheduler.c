@@ -11,7 +11,8 @@
  * Defines for the process stack start and size
  */
 #define STACK_START		(0x40000000)
-#define STACK_SIZE		(0x00001000)
+// 3840 Byte
+#define STACK_SIZE		(0x00000F00)
 
 /*
  * Register defines
@@ -65,7 +66,7 @@ int SchedulerStartProcess(processFunc func) {
 	// IMPORTANT: when a task which was interrupted by IRQ is scheduled by SWI the
 	// PC must be subtracted because PC was incremented but SWI will not repeat instruction thus decrement PC to repeat
 	// CONCLUSION: increment for SWI here and decrement according to systemstate in scheduleNextReady
-	processes[freeProcess].context->pc = ((pc_t) func) + 1;
+	processes[freeProcess].context->pc = ((address_t*) func) + 1;
 	// CPSR
 	// N|Z|C|V|Q|IT|J| DNM| GE | IT   |E|A|I|F|T|  M  |
 	// Code | Size | Description
@@ -88,8 +89,8 @@ int SchedulerStartProcess(processFunc func) {
 	uint32_t userMode = 0b10000;
 	processes[freeProcess].context->cpsr = userMode;
 	// Let R13 point to the PCB of the running process
-	processes[freeProcess].context->registers[R13] = (void*) (STACK_START + STACK_SIZE);
-
+	// processes[freeProcess].context->registers[R13] = (void*) (STACK_START + STACK_SIZE);
+	processes[freeProcess].context->registers[R13] = (void*) (STACK_START + freeProcess * STACK_SIZE);
 	// TODO: check this atomic end needed
 	CPUAtomicEnd();
 	return SCHEDULER_OK;

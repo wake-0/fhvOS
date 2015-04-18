@@ -10,11 +10,6 @@
 #include "../am335x/hw_uart.h"
 
 /*
- * Typedefs for better understanding
- */
-typedef uint32_t address_t;
-
-/*
  * General defines
  */
 #define UART_BASE_ADR_NOT_FOUND 0x00
