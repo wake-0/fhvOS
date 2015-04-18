@@ -12,12 +12,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-//*****************************************************************************
-//
-// Define a boolean type, and values for true and false.
-//
-//*****************************************************************************
 typedef unsigned char boolean_t;
+typedef uint32_t address_t;
 
 #ifndef true
 #define true 1
