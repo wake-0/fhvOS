@@ -134,7 +134,7 @@ extern "C" {
 
 
 
-typedef void (*intHandler_t)(void*);
+typedef boolean_t (*intHandler_t)(void*);
 typedef void (*intResetHandler_t)(void);
 
 

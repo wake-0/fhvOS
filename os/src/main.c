@@ -21,7 +21,7 @@ extern address_t GetContext(void);
 extern void CPUSwitchToPrivilegedMode(void);
 extern void CPUSwitchToUserMode(void);
 extern void TimerInterruptStatusClear(Timer_t timer, unsigned int interruptNumber);
-void timerISR(address_t context);
+boolean_t timerISR(address_t context);
 
 void led1(void)
 {
@@ -57,7 +57,7 @@ static volatile unsigned int cntValue = 10;
 static volatile unsigned int flagIsr = 0;
 
 device_t timer2;
-uint16_t timeInMilis = 2000;
+uint16_t timeInMilis = 1000;
 //static volatile driver_t* timerDriver;
 
 int foo(int value);
@@ -82,13 +82,15 @@ int main(void)
 	DeviceManagerIoctl(cpu, DRIVER_CPU_COMMAND_INTERRUPT_MASTER_IRQ_ENABLE, 0, NULL, 0);
 	DeviceManagerIoctl(cpu, DRIVER_CPU_COMMAND_INTERRUPT_RESET_AINTC, 0, NULL, 0);
 
-	uint16_t timeInMilis = 10;
+	uint16_t timeInMilis = 1000; // VALUE WAS 10
 	uint16_t interruptMode = 0x02; // overflow
 	uint16_t priority = 0x1;
 
 	DeviceManagerIoctl(timer2, timeInMilis, interruptMode, (char*) timerISR, priority);
 	DeviceManagerOpen(timer2);
 
+	led1();
+/*
 	while(1)
 	{
 		volatile int i = 0;
@@ -102,7 +104,7 @@ int main(void)
 				k++;
 			}
 		}
-	}
+	} */
 
 }
 
@@ -112,7 +114,7 @@ int foo(int value) {
 	return i;
 }
 
-void timerISR(address_t context)
+boolean_t timerISR(address_t context)
 {
 	// volatile address_t spa = GetContext();
 	volatile context_t* spaContext = (context_t*) context;
@@ -133,4 +135,6 @@ void timerISR(address_t context)
 	DeviceManagerOpen(timer2);
 	//timerDriver->write(TIMER2, ENABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
 	//timerDriver->open(TIMER2);
+
+	return FALSE;
 }

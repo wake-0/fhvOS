@@ -25,7 +25,7 @@
 intHandler_t interruptRamVectors[NUMBER_OF_INTERRUPTS];
 intHandler_t interruptIrqResetHandlers[NUMBER_OF_INTERRUPTS];
 
-static void InterruptDefaultHandler(void);
+static boolean_t InterruptDefaultHandler(void);
 
 
 static void InterruptResetController(void)
@@ -197,9 +197,9 @@ void InterruptMasterFIQDisable(void)
     CPUfiqd();
 }
 
-static void InterruptDefaultHandler(void)
+static boolean_t InterruptDefaultHandler(void)
 {
-    ;
+    return FALSE;
 }
 
 
@@ -211,7 +211,11 @@ interrupt void irq_handler1()
 	unsigned int activeIrq = InterruptActiveIrqNumberGet();
 
 	intHandler_t interruptHandler = InterruptGetHandler(activeIrq);
-	interruptHandler(context);
+	if(FALSE == interruptHandler(context))
+	{
+		// revert stack pointer
+		RevertStackPointer();
+	}
 
 	InterruptAllowNewIrqGeneration();
 }

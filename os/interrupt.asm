@@ -44,6 +44,7 @@ I_BIT             .set   0x80
 	.global irq_handler
 	.global swi_handler
 	.global GetContext
+	.global RevertStackPointer
 	.ref interruptRamVectors
 	.ref interruptIrqResetHandlers
 	.ref irq_handler1
@@ -93,17 +94,21 @@ irq_handler:
 ;    B        irq_handler1
 
 	STMFD	 SP!, {LR}				  ; LR becomes PC in context struct
-	SUB      LR, LR, #4               ; Apply lr correction
+	;SUB      LR, LR, #4               ; Apply lr correction
 
     STMFD    SP, {R0-R12}^    ; Save context in IRQ stack
     SUB 	 SP, SP, #52				  ; SP correction
     ;STMFD	 SP!, {SP}
-    STMFD	 SP!, {LR}
+    SUB		 R12, LR, #4
+    STMFD	 SP!, {R12}
     MRS      R12, cpsr                ; Copy cpsr
     STMFD    SP, {R12}^          	  ; {r1, r12} Save fpscr and spsr
     SUB		 SP, SP, #4			      ; SP correction
     B        irq_handler1
 
+RevertStackPointer:
+	ADD 	 SP, SP, #64
+	MOV 	 PC, LR
 
 GetContext:
 	ADD    R0, SP, #40
