@@ -82,15 +82,14 @@ int main(void)
 	DeviceManagerIoctl(cpu, DRIVER_CPU_COMMAND_INTERRUPT_MASTER_IRQ_ENABLE, 0, NULL, 0);
 	DeviceManagerIoctl(cpu, DRIVER_CPU_COMMAND_INTERRUPT_RESET_AINTC, 0, NULL, 0);
 
-	uint16_t timeInMilis = 1000; // VALUE WAS 10
+	uint16_t timeInMilis = 5000; // VALUE WAS 10
 	uint16_t interruptMode = 0x02; // overflow
 	uint16_t priority = 0x1;
 
 	DeviceManagerIoctl(timer2, timeInMilis, interruptMode, (char*) timerISR, priority);
 	DeviceManagerOpen(timer2);
 
-	led1();
-/*
+	//led1();
 	while(1)
 	{
 		volatile int i = 0;
@@ -104,7 +103,7 @@ int main(void)
 				k++;
 			}
 		}
-	} */
+	}
 
 }
 
@@ -129,7 +128,7 @@ boolean_t timerISR(address_t context)
 	flagIsr = 1;
 
 
-	//SchedulerRunNextProcess((context_t*) spa);
+	SchedulerRunNextProcess(spaContext);
 
 	DeviceManagerWrite(timer2, ENABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
 	DeviceManagerOpen(timer2);

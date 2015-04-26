@@ -211,13 +211,18 @@ interrupt void irq_handler1()
 	unsigned int activeIrq = InterruptActiveIrqNumberGet();
 
 	intHandler_t interruptHandler = InterruptGetHandler(activeIrq);
-	if(FALSE == interruptHandler(context))
+	boolean_t restoreRegisters = interruptHandler(context);
+
+
+	if(FALSE == restoreRegisters)
 	{
+		InterruptAllowNewIrqGeneration();
+		RestoreRegisters();
+	} else {
 		// revert stack pointer
 		RevertStackPointer();
-	}
 
-	InterruptAllowNewIrqGeneration();
+	}
 }
 
 #pragma INTERRUPT(udef_handler, UDEF)

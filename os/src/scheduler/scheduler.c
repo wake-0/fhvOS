@@ -41,6 +41,7 @@ int SchedulerInit(void) {
 	for (i = 0; i < PROCESSES_MAX; i++) {
 		processes[i].state = FREE;
 		processes[i].context = (context_t*) malloc(sizeof(context_t));
+		memset(processes[i].context, 0, sizeof(context_t));
 	}
 
 	// No process is running
@@ -66,7 +67,8 @@ int SchedulerStartProcess(processFunc func) {
 	// IMPORTANT: when a task which was interrupted by IRQ is scheduled by SWI the
 	// PC must be subtracted because PC was incremented but SWI will not repeat instruction thus decrement PC to repeat
 	// CONCLUSION: increment for SWI here and decrement according to systemstate in scheduleNextReady
-	processes[freeProcess].context->pc = ((address_t*) func) + 1;
+	processes[freeProcess].context->pc = (register_t*)func;
+
 	// CPSR
 	// N|Z|C|V|Q|IT|J| DNM| GE | IT   |E|A|I|F|T|  M  |
 	// Code | Size | Description
@@ -90,7 +92,7 @@ int SchedulerStartProcess(processFunc func) {
 	processes[freeProcess].context->cpsr = userMode;
 	// Let R13 point to the PCB of the running process
 	// processes[freeProcess].context->registers[R13] = (void*) (STACK_START + STACK_SIZE);
-	processes[freeProcess].context->registers[R13] = (void*) (STACK_START + freeProcess * STACK_SIZE);
+	// processes[freeProcess].context->registers[R13] = (void*) (STACK_START + freeProcess * STACK_SIZE);
 	// TODO: check this atomic end needed
 	CPUAtomicEnd();
 	return SCHEDULER_OK;
@@ -118,6 +120,7 @@ int SchedulerRunNextProcess(context_t* context) {
 	// Set the next processes to running
 	runningProcess = nextProcess;
 	processes[runningProcess].state = RUNNING;
+
 	// Update the context for the next running process
 	memcpy(context, processes[runningProcess].context, sizeof(context_t));
 
@@ -158,7 +161,7 @@ processId_t getNextFreeProcessId(void) {
 
 // Round Robin
 processId_t getNextReadyProcessId(void) {
-	return getNextProcessIdByState(FREE, runningProcess + 1);
+	return getNextProcessIdByState(READY, runningProcess + 1);
 }
 
 processId_t getNextProcessIdByState(processState_t state, int startId) {
