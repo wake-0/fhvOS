@@ -92,10 +92,12 @@ irq_handler:
 ;    SUB		 SP, SP, #4			      ; SP correction
 ;    B        irq_handler1
 
+	STMFD	 SP!, {LR}				  ; LR becomes PC in context struct
 	SUB      LR, LR, #4               ; Apply lr correction
+
     STMFD    SP, {R0-R12}^    ; Save context in IRQ stack
     SUB 	 SP, SP, #52				  ; SP correction
-    STMFD	 SP!, {SP}
+    ;STMFD	 SP!, {SP}
     STMFD	 SP!, {LR}
     MRS      R12, cpsr                ; Copy cpsr
     STMFD    SP, {R12}^          	  ; {r1, r12} Save fpscr and spsr
