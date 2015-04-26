@@ -83,19 +83,28 @@ swi_handler:
 
 
 irq_handler:
+;	SUB      LR, LR, #4               ; Apply lr correction
+;    STMFD    SP, {R0-R13, LR, PC}^    ; Save context in IRQ stack
+;
+;    SUB 	 SP, SP, #64				  ; SP correction
+;    MRS      R12, cpsr                ; Copy cpsr
+;    STMFD    SP, {R12}^          	  ; {r1, r12} Save fpscr and spsr
+;    SUB		 SP, SP, #4			      ; SP correction
+;    B        irq_handler1
+
 	SUB      LR, LR, #4               ; Apply lr correction
-    STMFD    SP, {R0-R13, LR, PC}^    ; Save context in IRQ stack
-    SUB 	 SP, SP, #64				  ; SP correction
+    STMFD    SP, {R0-R12}^    ; Save context in IRQ stack
+    SUB 	 SP, SP, #52				  ; SP correction
+    STMFD	 SP!, {SP}
+    STMFD	 SP!, {LR}
     MRS      R12, cpsr                ; Copy cpsr
     STMFD    SP, {R12}^          	  ; {r1, r12} Save fpscr and spsr
     SUB		 SP, SP, #4			      ; SP correction
     B        irq_handler1
 
-	;ADD      SP, SP, #40
-
 
 GetContext:
-	ADD    R0, SP, #108
+	ADD    R0, SP, #40
 	;SUB    R0, SP, #64	; GetContext stack pointer overhead
 	MOV    PC, LR
 

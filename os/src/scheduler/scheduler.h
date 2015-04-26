@@ -17,7 +17,7 @@
 #define SCHEDULER_ERROR		(-1)
 
 #define PROCESSES_MAX		(64)
-#define REGISTER_COUNT		(14)
+#define REGISTER_COUNT		(13)
 
 #define INVALID_PROCESS_ID	(-1)
 
@@ -42,10 +42,10 @@ typedef enum {
 // Process switch context
 #pragma pack(push,1)
 typedef struct {
-	register_t registers[REGISTER_COUNT];
-	address_t* lr;
-	address_t* pc;
 	address_t* cpsr;
+	address_t* pc;
+	address_t* lr;
+	register_t registers[REGISTER_COUNT];
 } context_t;
 #pragma pack(pop)
 
