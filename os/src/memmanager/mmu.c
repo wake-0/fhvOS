@@ -21,7 +21,7 @@ static void mmuSetDomainToFullAccess(void);
 pageTablePointer_t kernelMasterPageTable;
 
 
-void MMUInit()
+int MMUInit()
 {
 	MemoryManagerInit();
 
@@ -47,6 +47,8 @@ void MMUInit()
 
 	// enable mmu
 	MMUEnable();
+
+	return MMU_OK;
 }
 
 static void mmuReserveAllDirectMappedRegions(void)
@@ -97,17 +99,20 @@ pageTablePointer_t MMUCreateMasterPageTable(void)
 }
 
 
+// TODO
 static void mmuInitializeKernelMasterPageTable()
 {
 
 }
 
+// TODO
 static void mmuSetKernelMasterPageTable(pageTablePointer_t table)
 {
 	MMUFlushTLB();
 	//MMUSetProcessTable();
 }
 
+// TODO
 static void mmuSetProcessPageTable(pageTablePointer_t table)
 {
 	MMUFlushTLB();
@@ -127,13 +132,26 @@ void MMUHandleDataAbortException()
 }
 
 
-void MMUSwitchToProcess(process_t process)
+/**
+ * \brief	Switch process by setting new L1 page table to ttbr0.
+ * 			Cache and TLB will be flushed.
+ * \return 	OK if successful, NOT OK else.
+ */
+int MMUSwitchToProcess(process_t* process)
 {
+	if(NULL == process->pageTableL1)
+	{
+		return MMU_NOT_OK;
+	}
 
+	// flush TLB and cache, load new process table to ttbr0
+	mmuSetProcessPageTable(process->pageTableL1);
+
+	return MMU_OK;
 }
 
 
-void MMUInitProcess(process_t process)
+int MMUInitProcess(process_t* process)
 {
-
+	return MMU_OK;
 }

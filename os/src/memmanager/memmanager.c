@@ -47,12 +47,11 @@ static void memoryManagerInitializeSection(memoryRegionPointer_t memoryRegion, b
 {
 	memoryRegion->startAddress 		= startAddress;
 	memoryRegion->endAddress 		= endAddress;
-	memoryRegion->length 			= endAddress - startAddress;
 	memoryRegion->directAccess 		= access;
-	memoryRegion->numberOfPages 	= (memoryRegion->length / PAGE_SIZE);
+	int length 						= endAddress - startAddress;
+	memoryRegion->numberOfPages 	= (length / PAGE_SIZE_64KB);
 	memoryRegion->reservedPages 	= 0;
-	memoryRegion->unreservedPages	= memoryRegion->numberOfPages;
-	memoryRegion->pageStatus	 	= (pageStatusPointer_t)malloc( sizeof(pageStatus_t) * memoryRegion->length );
+	memoryRegion->pageStatus	 	= (pageStatusPointer_t)malloc( sizeof(pageStatus_t) * length);
 }
 
 
@@ -77,7 +76,6 @@ int MemoryManagerReserveSinglePage(memoryRegionPointer_t region, unsigned int pa
 
 	region->pageStatus[pageNumber].reserved = true;
 	region->reservedPages++;
-	region->unreservedPages--;
 	return MEMORY_OK;
 }
 
@@ -88,7 +86,8 @@ int MemoryManagerReserveSinglePage(memoryRegionPointer_t region, unsigned int pa
  */
 static boolean_t memoryManagerSufficientSpace(memoryRegionPointer_t region, unsigned int pagesToReserve)
 {
-	if(region->unreservedPages > pagesToReserve)
+	int unreservedPages = region->numberOfPages - region->reservedPages;
+	if(unreservedPages > pagesToReserve)
 	{
 		return true;
 	}
@@ -145,8 +144,9 @@ void MemoryManagerReserveAllPages(memoryRegionPointer_t region)
 pageAddressPointer_t MemoryManagerGetFreePagesInSection(unsigned int memoryRegion, unsigned int pagesToReserve)
 {
 	memoryRegionPointer_t region = MemoryManagerGetSection(memoryRegion);
+	int unreservedPages = region->numberOfPages - region->reservedPages;
 
-	if((pagesToReserve > region->numberOfPages) || (pagesToReserve > region->unreservedPages) || (pagesToReserve == 0))
+	if((pagesToReserve > region->numberOfPages) || (pagesToReserve > unreservedPages) || (pagesToReserve == 0))
 	{
 		return NULL;
 	}
@@ -183,6 +183,35 @@ pageAddressPointer_t MemoryManagerGetFreePagesInSection(unsigned int memoryRegio
 	}
 
 	return memoryManagerGetPageAddress(region, pageNumber);
+}
+
+
+/**
+ * \brief	Reserves a table of pagesToReserve count pages of pageSize size.
+ * \return	Starting ddress of table if successfull, otherwise null.
+ */
+pageAddressPointer_t MemoryManagerCreateTable(unsigned int pageSize, unsigned int pagesToReserve)
+{
+	pageAddressPointer_t tableStartAddress = 0;
+	int region = 0;
+
+	for(; region < MEMORY_REGIONS-1; region++)
+	{
+		tableStartAddress = MemoryManagerGetFreePagesInSection(region, pagesToReserve);
+
+		if(NULL != tableStartAddress)
+		{
+			break;
+		}
+	}
+
+	if(NULL == tableStartAddress)
+	{
+		return NULL;
+	}
+
+	memset(tableStartAddress, 0, pageSize*pagesToReserve);
+	return tableStartAddress;
 }
 
 

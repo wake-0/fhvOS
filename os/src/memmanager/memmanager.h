@@ -39,25 +39,32 @@ typedef struct
 
 typedef pageStatus_t * pageStatusPointer_t;
 
-// Data type for organizing the memory sections given in the ARM TRM.
+typedef struct
+{
+	unsigned int ptAddress;						// address of the page table location in virtual memory
+	unsigned int virtualAddress;				// starting address of 1MB section of virtual memory controlled ether by a section entry or a L2 page table
+	unsigned int pageTableType;					// master or coarse
+	unsigned int masterPageTableAddress;		// address of parent master L1 page table. if table is L1 table, this is the same as ptAddress
+	unsigned int domain;						// sets the domain assigned to the 1MB blocks of a L1 PTE
+} pageTable_t;
 
+// Data type for organizing the memory regions given in the ARM TRM.
 typedef struct region
 {
 	boolean_t directAccess;
     unsigned int startAddress;
     unsigned int endAddress;
-    unsigned int length;
+    unsigned int pageSize;
     unsigned int accessPermission;
     unsigned int cacheBufferAttributes;
     unsigned int numberOfPages;
     unsigned int reservedPages;
-    unsigned int unreservedPages;
     pageStatusPointer_t pageStatus;
 } memoryRegion_t;
 
 typedef memoryRegion_t* memoryRegionPointer_t;
 
-typedef void* pageAddressPointer_t;
+typedef uint32_t* pageAddressPointer_t;
 
 extern int MemoryManagerInit();
 extern pageAddressPointer_t MemoryManagerGetFreePagesInSection(unsigned int memoryRegion, unsigned int pagesToReserve);
