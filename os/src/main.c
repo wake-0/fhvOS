@@ -72,8 +72,8 @@ int main(void)
 	DeviceManagerWrite(led3, "1", 1);
 
 	SchedulerInit();
-	SchedulerStartProcess(&led1);
 	SchedulerStartProcess(&led2);
+	SchedulerStartProcess(&led1);
 
 	timer2 = DeviceManagerGetDevice("TIMER2", 6);
 	DeviceManagerInitDevice(timer2);

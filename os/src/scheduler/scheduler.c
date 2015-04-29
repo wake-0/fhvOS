@@ -121,6 +121,8 @@ int SchedulerRunNextProcess(context_t* context) {
 	runningProcess = nextProcess;
 	processes[runningProcess].state = RUNNING;
 
+	printf("running process with ID %d\n", nextProcess);
+
 	// Update the context for the next running process
 	memcpy(context, processes[runningProcess].context, sizeof(context_t));
 

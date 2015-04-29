@@ -128,7 +128,7 @@ static void mmuSetDomainToFullAccess(void)
 
 void MMUHandleDataAbortException()
 {
-
+	// switch to kernel mode is needed
 }
 
 
