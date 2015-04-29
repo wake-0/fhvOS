@@ -92,8 +92,8 @@ irq_handler:
     STMFD    SP, {R0-R12}^    ; Save context in IRQ stack
     SUB 	 SP, SP, #52				  ; SP correction
     ;STMFD	 SP!, {SP}
-    SUB		 R12, LR, #4
-    STMFD	 SP!, {R12}
+    ;SUB		 R12, LR, #4
+    ;STMFD	 SP!, {R12}
     MRS      R12, cpsr                ; Copy cpsr
     STMFD    SP, {R12}^          	  ; {r1, r12} Save fpscr and spsr
     SUB		 SP, SP, #4			      ; SP correction
@@ -106,7 +106,7 @@ RevertStackPointer:
 RestoreRegisters:
 	ADD		 SP, SP, #40
 	LDMFD	 SP!, {CPSR}
-	LDMFD  	 SP!, {LR}
+	;LDMFD  	 SP!, {LR}
 	LDMFD  	 SP, {R0-R12, PC}^
 	;ADD		 SP, SP, #56
 	;MOV		 PC, SP

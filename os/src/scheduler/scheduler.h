@@ -43,7 +43,7 @@ typedef enum {
 #pragma pack(push,1)
 typedef struct {
 	address_t* cpsr;
-	address_t* lr;
+	//address_t* lr;
 	//address_t* sp;
 	register_t registers[REGISTER_COUNT];
 	register_t* pc;

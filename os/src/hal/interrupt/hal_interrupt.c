@@ -221,7 +221,6 @@ interrupt void irq_handler1()
 	} else {
 		// revert stack pointer
 		RevertStackPointer();
-
 	}
 }
 
