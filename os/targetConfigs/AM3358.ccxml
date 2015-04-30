@@ -12,7 +12,22 @@
             <instance XML_version="1.2" href="drivers/tixds100v2etbcs.xml" id="drivers" xml="tixds100v2etbcs.xml" xmlpath="drivers"/>
             <instance XML_version="1.2" href="drivers/tixds100v2pru.xml" id="drivers" xml="tixds100v2pru.xml" xmlpath="drivers"/>
             <platform XML_version="1.2" id="platform_0">
-                <instance XML_version="1.2" desc="AM3358" href="devices/AM3358.xml" id="AM3358" xml="AM3358.xml" xmlpath="devices"/>
+                <instance XML_version="1.2" desc="BeagleBone" href="boards/beaglebone.xml" id="BeagleBone" xml="beaglebone.xml" xmlpath="boards"/>
+            <board XML_version="1.2" description="BeagleBone AM3359 Board" id="BeagleBone">
+                    <device HW_revision="1" XML_version="1.2" description="AM33x - Cortex A8 Embedded Processor" id="AM3359_0" partnum="AM3359">
+                        <router HW_revision="1.0" XML_version="1.2" description="ICEPick_D Router" id="IcePick_D_0" isa="ICEPICK_D">
+                            <subpath id="subpath_11">
+                                <router HW_revision="1.0" XML_version="1.2" description="CS_DAP Router" id="CS_DAP_M3" isa="CS_DAP">
+                                    <subpath id="M3_wakeupSS_sp">
+                                        <cpu HW_revision="1.0" XML_version="1.2" description="Cortex_M3 CPU" id="M3_wakeupSS" isa="Cortex_M3">
+                                            <property Type="choicelist" Value="1" id="bypass"/>
+                                        </cpu>
+                                    </subpath>
+                                </router>
+                            </subpath>
+                        </router>
+                    </device>
+                </board>
             </platform>
         </connection>
     </configuration>

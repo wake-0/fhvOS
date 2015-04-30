@@ -8,7 +8,7 @@
  */
 
 
--stack  0x2000                             /* SOFTWARE STACK SIZE           */
+-stack  0xFFFFFF                             /* SOFTWARE STACK SIZE           */
 -heap   0x2000                             /* HEAP AREA SIZE                */
 
 
@@ -26,9 +26,8 @@ MEMORY
 	bootROM128:				o = 0x40000000	l = 0x1FFFF			// 128kB BOOT ROM
 	bootROM48:				o = 0x40020000	l = 0xBFFF			// 48kB BOOT ROM
     internalSRAM:     		o = 0x402F0400  l = 0x0000FC00  	// 64kB internal SRAM
-    //L3OCMC0:  				o = 0x40300000  l = 0x00010000  	// 64kB L3 OCMC SRAM
-    externalSDRAM:     		o = 0x80000000  l = 0x40000000  	// 1GB external DDR Bank 0
-    exceptions:				o = 0x4030CE04	l = 0x38
+    externalSDRAM:   		o = 0x80000000  l = 0x40000000		// 1GB external DDR Bank 0 // TODO This should be 0x4..
+    exceptions:				o = 0x4030CE04	l = 0xC4
 }
 
 
@@ -42,17 +41,17 @@ SECTIONS
 
 	.interrupts	> internalSRAM
 
-    .text          >  internalSRAM
-    .stack         >  internalSRAM
-    .bss           >  internalSRAM
+    .text          >  externalSDRAM
+    .stack         >  externalSDRAM
+    .bss           >  externalSDRAM
                     RUN_START(bss_start)
                     RUN_END(bss_end)
-    .cio           >  internalSRAM
-    .const         >  internalSRAM
-    .data          >  internalSRAM
-    .switch        >  internalSRAM
-    .sysmem        >  internalSRAM
-    .far           >  internalSRAM
+    .cio           >  externalSDRAM
+    .const         >  externalSDRAM
+    .data          >  externalSDRAM
+    .switch        >  externalSDRAM
+    .sysmem        >  externalSDRAM
+    .far           >  externalSDRAM
     .args          >  internalSRAM
     .ppinfo        >  internalSRAM
     .ppdata        >  internalSRAM
