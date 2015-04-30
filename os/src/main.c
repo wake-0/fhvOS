@@ -3,12 +3,7 @@
 #include "driver/uart/driver_uart.h"
 #include "driver/timer/driver_timer.h"
 #include "hal/interrupt/hal_interrupt.h"
-#include "hal/am335x/hw_cm_dpll.h"
-#include "hal/am335x/hw_cm_per.h"
-#include "hal/am335x/soc_AM335x.h"
-#include "hal/am335x/hw_timer.h"
-#include "hal/am335x/hw_types.h"
-#include "hal/am335x/hw_cm_dpll.h"
+
 #include "driver/manager/driver_manager.h"
 #include "systemapi/systemcalls.h"
 #include <stdlib.h>
@@ -31,9 +26,11 @@ void led1(void)
 
 	while(1)
 	{
+		//printf("ON\n");
 		DeviceManagerWrite(led, "1", 1);
 		for(i = 0; i < 0x0200000; i++);
 		DeviceManagerWrite(led, "0", 1);
+		//printf("OFF\n");
 		for(i = 0; i < 0x0200000; i++);
 	}
 }
@@ -95,22 +92,8 @@ int main(void)
 		volatile int i = 0;
 		volatile int j = 0;
 
-		for(i = 0; i < 1000; i++)
-		{
-			for (j = 0; j < 10000; j++)
-			{
-				volatile int k = 0;
-				k++;
-			}
-		}
 	}
 
-}
-
-int foo(int value) {
-	volatile int j = HWREG_SET(0x60000000, 0x1);
-	volatile int i = 5;
-	return i;
 }
 
 boolean_t timerISR(address_t context)
@@ -118,7 +101,7 @@ boolean_t timerISR(address_t context)
 	// volatile address_t spa = GetContext();
 	volatile context_t* spaContext = (context_t*) context;
 
-	printf("Timer ISR\n");
+	//printf("Timer ISR\n");
 
 	DeviceManagerWrite(timer2, DISABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
 	DeviceManagerWrite(timer2, CLEAR_INTERRUPT_STATUS, TIMER_IRQ_OVERFLOW);

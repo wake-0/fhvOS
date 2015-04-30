@@ -85,17 +85,28 @@ swi_handler:
 
 
 irq_handler:
-	SUB      LR, LR, #4               ; Apply lr correction
+	;SUB      LR, LR, #4               ; Apply lr correction
 	STMFD	 SP!, {LR}				  ; LR becomes PC in context struct
 
 
-    STMFD    SP, {R0-R12}^    ; Save context in IRQ stack
-    SUB 	 SP, SP, #52				  ; SP correction
+    STMFD    SP, {R0-R12}^    			; Save context in IRQ stack
+    NOP
+    SUB 	 SP, SP, #52				; SP correction
     ;STMFD	 SP!, {SP}
     ;SUB		 R12, LR, #4
-    ;STMFD	 SP!, {R12}
+
+	STMFD 	 SP, {R13}^ 				;store r13 and r14 usermode
+	NOP
+	SUB		 SP, SP, #4
+
+	STMFD 	 SP, {R14}^ 				; Store LR user mode
+	NOP
+	SUB		 SP, SP, #4
+	;sub 	 r13, r13, #8      ;update stack pointer
+	;STMFD	 SP!, {R13}
     MRS      R12, cpsr                ; Copy cpsr
     STMFD    SP, {R12}^          	  ; {r1, r12} Save fpscr and spsr
+    NOP
     SUB		 SP, SP, #4			      ; SP correction
     B        irq_handler1
 
@@ -106,7 +117,13 @@ RevertStackPointer:
 RestoreRegisters:
 	ADD		 SP, SP, #40
 	LDMFD	 SP!, {CPSR}
-	;LDMFD  	 SP!, {LR}
+	LDMFD  	 SP, {LR}^
+	NOP
+	ADD		 SP, SP, #4
+	LDMFD  	 SP, {R13}^
+	NOP
+	ADD		 SP, SP, #4
+	;LDMFD	 SP!, {SP}
 	LDMFD  	 SP, {R0-R12, PC}^
 	;ADD		 SP, SP, #56
 	;MOV		 PC, SP

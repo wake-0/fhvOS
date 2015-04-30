@@ -32,6 +32,12 @@ static processId_t getNextProcessIdByState(processState_t state, int startId);
 static processId_t getNextFreeProcessId(void);
 static processId_t getNextReadyProcessId(void);
 
+void dummyEnd() {
+	while(1) {
+		;
+	}
+}
+
 
 /*
  * Functions from the .h file
@@ -68,7 +74,8 @@ int SchedulerStartProcess(processFunc func) {
 	// PC must be subtracted because PC was incremented but SWI will not repeat instruction thus decrement PC to repeat
 	// CONCLUSION: increment for SWI here and decrement according to systemstate in scheduleNextReady
 	processes[freeProcess].context->pc = (register_t*)func;
-
+	processes[freeProcess].context->lr = &dummyEnd;
+	processes[freeProcess].context->sp = (address_t*) (0x402FBAD0 + (freeProcess * 2048));
 	// CPSR
 	// N|Z|C|V|Q|IT|J| DNM| GE | IT   |E|A|I|F|T|  M  |
 	// Code | Size | Description
@@ -121,7 +128,7 @@ int SchedulerRunNextProcess(context_t* context) {
 	runningProcess = nextProcess;
 	processes[runningProcess].state = RUNNING;
 
-	printf("running process with ID %d\n", nextProcess);
+	//printf("running process with ID %d\n", nextProcess);
 
 	// Update the context for the next running process
 	memcpy(context, processes[runningProcess].context, sizeof(context_t));
