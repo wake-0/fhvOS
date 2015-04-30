@@ -10,9 +10,9 @@
 /*
  * Defines for the process stack start and size
  */
-#define STACK_START		(0x40000000)
+#define STACK_START		(0x800FFFFC)
 // 3840 Byte
-#define STACK_SIZE		(0x00000F00)
+#define STACK_SIZE		(10000)
 
 /*
  * Register defines
@@ -43,6 +43,8 @@ void dummyEnd() {
  * Functions from the .h file
  */
 int SchedulerInit(void) {
+	memset((void*)STACK_START, 0, STACK_SIZE * 3);
+
 	int i;
 	for (i = 0; i < PROCESSES_MAX; i++) {
 		processes[i].state = FREE;
@@ -75,7 +77,7 @@ int SchedulerStartProcess(processFunc func) {
 	// CONCLUSION: increment for SWI here and decrement according to systemstate in scheduleNextReady
 	processes[freeProcess].context->pc = (register_t*)func;
 	processes[freeProcess].context->lr = &dummyEnd;
-	processes[freeProcess].context->sp = (address_t*) (0x402FBAD0 + (freeProcess * 2048));
+	processes[freeProcess].context->sp = (address_t*) (STACK_START + (freeProcess * STACK_SIZE));
 	// CPSR
 	// N|Z|C|V|Q|IT|J| DNM| GE | IT   |E|A|I|F|T|  M  |
 	// Code | Size | Description

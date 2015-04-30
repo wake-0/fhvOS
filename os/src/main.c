@@ -26,11 +26,12 @@ void led1(void)
 
 	while(1)
 	{
-		//printf("ON\n");
+		printf("ON\n");
 		DeviceManagerWrite(led, "1", 1);
 		for(i = 0; i < 0x0200000; i++);
+		//printf("%i\n", i);
 		DeviceManagerWrite(led, "0", 1);
-		//printf("OFF\n");
+		printf("OFF\n");
 		for(i = 0; i < 0x0200000; i++);
 	}
 }
@@ -79,7 +80,7 @@ int main(void)
 	DeviceManagerIoctl(cpu, DRIVER_CPU_COMMAND_INTERRUPT_MASTER_IRQ_ENABLE, 0, NULL, 0);
 	DeviceManagerIoctl(cpu, DRIVER_CPU_COMMAND_INTERRUPT_RESET_AINTC, 0, NULL, 0);
 
-	uint16_t timeInMilis = 5000; // VALUE WAS 10
+	uint16_t timeInMilis = 10; // VALUE WAS 10
 	uint16_t interruptMode = 0x02; // overflow
 	uint16_t priority = 0x1;
 

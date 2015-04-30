@@ -85,7 +85,7 @@ swi_handler:
 
 
 irq_handler:
-	;SUB      LR, LR, #4               ; Apply lr correction
+	SUB      LR, LR, #4               ; Apply lr correction
 	STMFD	 SP!, {LR}				  ; LR becomes PC in context struct
 
 
