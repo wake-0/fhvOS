@@ -156,6 +156,11 @@ extern void InterruptMasterIRQDisable(void);
 extern void InterruptMasterFIQEnable(void);
 extern void InterruptMasterFIQDisable(void);
 
+/* Functions which are defined in interrupt.asm */
+extern address_t GetContext(void);
+extern void RestoreRegisters(void);
+extern void RevertStackPointer(void);
+
 #endif
 
 

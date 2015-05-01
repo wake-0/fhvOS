@@ -100,7 +100,7 @@ int SchedulerStartProcess(processFunc func) {
 	// PC must be subtracted because PC was incremented but SWI will not repeat instruction thus decrement PC to repeat
 	// CONCLUSION: increment for SWI here and decrement according to systemstate in scheduleNextReady
 	processes[freeProcess].context->pc = (register_t*)func;
-	processes[freeProcess].context->lr = &dummyEnd;
+	processes[freeProcess].context->lr = (address_t*)&dummyEnd;
 	processes[freeProcess].context->sp = (address_t*) (STACK_START + (freeProcess * STACK_SIZE));
 	// CPSR
 	// N|Z|C|V|Q|IT|J| DNM| GE | IT   |E|A|I|F|T|  M  |
@@ -122,7 +122,7 @@ int SchedulerStartProcess(processFunc func) {
 	// T	| [1]  | Thumb state bit
 	// M	| [1]  | M[4:0] Mode bits
 	uint32_t userMode = 0b10000;
-	processes[freeProcess].context->cpsr = userMode;
+	processes[freeProcess].context->cpsr = (address_t*) userMode;
 	// Let R13 point to the PCB of the running process
 	// processes[freeProcess].context->registers[R13] = (void*) (STACK_START + STACK_SIZE);
 	// processes[freeProcess].context->registers[R13] = (void*) (STACK_START + freeProcess * STACK_SIZE);
@@ -219,7 +219,7 @@ processId_t getNextProcessIdByState(processState_t state, int startId) {
 boolean_t timerISR(address_t context)
 {
 	// volatile address_t spa = GetContext();
-	volatile context_t* spaContext = (context_t*) context;
+	context_t* spaContext = (context_t*) context;
 
 	DeviceManagerWrite(timer, DISABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
 	DeviceManagerWrite(timer, CLEAR_INTERRUPT_STATUS, TIMER_IRQ_OVERFLOW);

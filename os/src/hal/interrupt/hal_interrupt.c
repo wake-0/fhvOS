@@ -211,7 +211,7 @@ interrupt void irq_handler1()
 	unsigned int activeIrq = InterruptActiveIrqNumberGet();
 
 	intHandler_t interruptHandler = InterruptGetHandler(activeIrq);
-	boolean_t restoreRegisters = interruptHandler(context);
+	boolean_t restoreRegisters = interruptHandler((void*)context);
 
 
 	if(FALSE == restoreRegisters)

@@ -126,8 +126,6 @@ int main(void)
 
 	SchedulerStart(timer);
 
-	printf("This should not be printed as the above function is never returning\n");
-
 	//led1();
 	while(1)
 	{
