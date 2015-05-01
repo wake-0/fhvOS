@@ -37,7 +37,7 @@ int MMUInit()
 	// master page table for kernel region must be created statically and before MMU is enabled
 	kernelMasterPageTable = mmuCreateMasterPageTable(KERNEL_START_ADDRESS, KERNEL_END_ADDRESS);
 
-	// TODO: set kernel table
+	// TODO: set kernel table to ttbr1
 	mmuSetKernelMasterPageTable(kernelMasterPageTable);
 
 	// TODO: set process table
@@ -54,6 +54,7 @@ int MMUInit()
 
 void MMUHandleDataAbortException()
 {
+	;
 	// switch to kernel mode is needed
 
 	// TODO: get mmu data function

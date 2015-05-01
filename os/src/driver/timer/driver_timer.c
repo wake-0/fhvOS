@@ -18,7 +18,7 @@
  *	\brief:		Driver-Function for starting the counting of the specified timer
  *	\param: 	timer				specified timer
  */
-int TimerStart(uint16_t timer)
+int TimerDriverOpen(uint16_t timer)
 {
 	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
 	TimerHalStart(timerBaseRegister);
@@ -29,7 +29,7 @@ int TimerStart(uint16_t timer)
  *	\brief:		Driver-Function for stopping the counting of the specified timer
  *	\param: 	timer				specified timer
  */
-int TimerStop(uint16_t timer)
+int TimerDriverClose(uint16_t timer)
 {
 	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
 	TimerHalStop(timerBaseRegister);
@@ -82,7 +82,7 @@ void TimerInterruptStatusClear(uint16_t timer, uint8_t timerIrq)
 	TimerHalClearInterruptStatus(timerBaseRegister, timerIrq);
 }
 
-int TimerSetCounterValues(uint16_t timer, char * command, uint16_t timerValue)
+int TimerDriverWrite(uint16_t timer, char * command, uint16_t timerValue)
 {
 	if( strcmp(command, ENABLE_INTERRUPTS) == 0 )
 	{
@@ -123,9 +123,8 @@ void TimerModeConfigure(Timer_t timer, unsigned int compareMode, unsigned int re
 	TimerHalConfigureMode(timerBaseRegister, compareMode, reloadMode);
 }
 
-//(uint16_t pin, uint16_t cmd, h)
-//int (*ioctl)(uint16_t pin, uint16_t cmd, uint8_t mode, char* buf, uint16_t length);
-int TimerConfigureCyclicInterrupt(uint16_t timer, uint16_t timeInMilis, uint8_t interruptMode, char* buf, uint16_t priority)
+
+int TimerDriverIoctl(uint16_t timer, uint16_t timeInMilis, uint8_t interruptMode, char* buf, uint16_t priority)
 {
 	unsigned int timerBaseRegister 	= TimerHalGetTimerBaseAddress(timer);
 	unsigned int interruptNumber 	= TimerHalGetInterruptNumber(timer);
@@ -157,7 +156,7 @@ int TimerConfigureCyclicInterrupt(uint16_t timer, uint16_t timeInMilis, uint8_t 
 	return DRIVER_OK;
 }
 
-int TimerSetUp(uint16_t timer)
+int TimerDriverInit(uint16_t timer)
 {
 	TimerReset(timer);
 	TimerClockConfig(timer, TIMER_CLK_SELECT_M_OSC);
@@ -169,7 +168,7 @@ int TimerSetUp(uint16_t timer)
 }
 
 
-int TimerCurrentValueGet(uint16_t timer, char * notUsed, uint16_t timerRegister)
+int TimerDriverRead(uint16_t timer, char * notUsed, uint16_t timerRegister)
 {
 	unsigned int timerBaseRegister = TimerHalGetTimerBaseAddress(timer);
 
