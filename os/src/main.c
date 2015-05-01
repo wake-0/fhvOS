@@ -16,7 +16,6 @@ extern address_t GetContext(void);
 extern void CPUSwitchToPrivilegedMode(void);
 extern void CPUSwitchToUserMode(void);
 extern void TimerInterruptStatusClear(Timer_t timer, unsigned int interruptNumber);
-boolean_t timerISR(address_t context);
 
 void led1(void)
 {
@@ -27,12 +26,26 @@ void led1(void)
 	while(1)
 	{
 		printf("ON\n");
+
+
+		for(i = 0; i < 10; i++) {
+			printf("led1: i=%i\n", i);
+		}
+
 		DeviceManagerWrite(led, "1", 1);
 		for(i = 0; i < 0x0200000; i++);
 		//printf("%i\n", i);
 		DeviceManagerWrite(led, "0", 1);
+		for(i = 0; i < 10; i++) {
+			printf("led1: i=%i\n", i);
+		}
+
 		printf("OFF\n");
 		for(i = 0; i < 0x0200000; i++);
+
+		for(i = 0; i < 10; i++) {
+			printf("led1: i=%i\n", i);
+		}
 	}
 }
 
@@ -45,10 +58,37 @@ void led2(void)
 	while(1)
 	{
 		DeviceManagerWrite(led, "1", 1);
+
+		for(i = 0; i < 10; i++) {
+			printf("led2: i=%i\n", i);
+		}
+
 		for(i = 0; i < 0x0200000; i++);
 		DeviceManagerWrite(led, "0", 1);
+
+
+		for(i = 0; i < 10; i++) {
+			printf("led2: i=%i\n", i);
+		}
+
 		for(i = 0; i < 0x0200000; i++);
+
+		for(i = 0; i < 10; i++) {
+			printf("led2: i=%i\n", i);
+		}
 	}
+}
+
+void process3(void)
+{
+	volatile int i = 0;
+	for(i = 0; i < 10; i++) {
+		printf("process3: i=%i\n", i);
+	}
+
+	for(i = 0; i < 0x0200000; i++);
+
+	printf("Process 3 is ending now...\n");
 }
 
 static volatile unsigned int cntValue = 10;
@@ -72,20 +112,21 @@ int main(void)
 	SchedulerInit();
 	SchedulerStartProcess(&led2);
 	SchedulerStartProcess(&led1);
+	SchedulerStartProcess(&process3);
 
-	timer2 = DeviceManagerGetDevice("TIMER2", 6);
-	DeviceManagerInitDevice(timer2);
+
+	device_t timer = DeviceManagerGetDevice("TIMER2", 6);
+
+	// Set up the timer
+	DeviceManagerInitDevice(timer);
 
 	device_t cpu = DeviceManagerGetDevice("CPU", 3);
 	DeviceManagerIoctl(cpu, DRIVER_CPU_COMMAND_INTERRUPT_MASTER_IRQ_ENABLE, 0, NULL, 0);
 	DeviceManagerIoctl(cpu, DRIVER_CPU_COMMAND_INTERRUPT_RESET_AINTC, 0, NULL, 0);
 
-	uint16_t timeInMilis = 10; // VALUE WAS 10
-	uint16_t interruptMode = 0x02; // overflow
-	uint16_t priority = 0x1;
+	SchedulerStart(timer);
 
-	DeviceManagerIoctl(timer2, timeInMilis, interruptMode, (char*) timerISR, priority);
-	DeviceManagerOpen(timer2);
+	printf("This should not be printed as the above function is never returning\n");
 
 	//led1();
 	while(1)
@@ -95,29 +136,4 @@ int main(void)
 
 	}
 
-}
-
-boolean_t timerISR(address_t context)
-{
-	// volatile address_t spa = GetContext();
-	volatile context_t* spaContext = (context_t*) context;
-
-	//printf("Timer ISR\n");
-
-	DeviceManagerWrite(timer2, DISABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
-	DeviceManagerWrite(timer2, CLEAR_INTERRUPT_STATUS, TIMER_IRQ_OVERFLOW);
-	//timerDriver->write(TIMER2, DISABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
-	//timerDriver->write(TIMER2, CLEAR_INTERRUPT_STATUS, TIMER_IRQ_OVERFLOW);
-
-	flagIsr = 1;
-
-
-	SchedulerRunNextProcess(spaContext);
-
-	DeviceManagerWrite(timer2, ENABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
-	DeviceManagerOpen(timer2);
-	//timerDriver->write(TIMER2, ENABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
-	//timerDriver->open(TIMER2);
-
-	return FALSE;
 }

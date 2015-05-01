@@ -6,6 +6,7 @@
  */
 #include "scheduler.h"
 #include "../hal/cpu/hal_cpu.h"
+#include "../driver/timer/driver_timer.h"
 
 /*
  * Defines for the process stack start and size
@@ -24,6 +25,7 @@
  */
 static processId_t runningProcess;
 static process_t processes[PROCESSES_MAX];
+static device_t timer;
 
 /*
  * Internal functions
@@ -32,8 +34,14 @@ static processId_t getNextProcessIdByState(processState_t state, int startId);
 static processId_t getNextFreeProcessId(void);
 static processId_t getNextReadyProcessId(void);
 
+static boolean_t timerISR(address_t context);
+
 void dummyEnd() {
-	while(1) {
+	// End process properly
+	SchedulerKillProcess(runningProcess);
+
+	while(1)
+	{
 		;
 	}
 }
@@ -55,6 +63,22 @@ int SchedulerInit(void) {
 	// No process is running
 	runningProcess = INVALID_PROCESS_ID;
 	return SCHEDULER_OK;
+}
+
+int SchedulerStart(device_t initializedTimerDevice)
+{
+	timer = initializedTimerDevice;
+
+	uint16_t timeInMilis = 10;
+	uint16_t interruptMode = 0x02; // overflow
+	uint16_t priority = 0x1;
+
+	DeviceManagerIoctl(timer, timeInMilis, interruptMode, (char*) timerISR, priority);
+	DeviceManagerOpen(timer);
+
+	//SchedulerRunNextProcess(NULL);
+
+	return 0;
 }
 
 int SchedulerStartProcess(processFunc func) {
@@ -192,4 +216,18 @@ processId_t getNextProcessIdByState(processState_t state, int startId) {
 	return INVALID_PROCESS_ID;
 }
 
+boolean_t timerISR(address_t context)
+{
+	// volatile address_t spa = GetContext();
+	volatile context_t* spaContext = (context_t*) context;
 
+	DeviceManagerWrite(timer, DISABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
+	DeviceManagerWrite(timer, CLEAR_INTERRUPT_STATUS, TIMER_IRQ_OVERFLOW);
+
+	SchedulerRunNextProcess(spaContext);
+
+	DeviceManagerWrite(timer, ENABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
+	DeviceManagerOpen(timer);
+
+	return FALSE;
+}

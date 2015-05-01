@@ -9,6 +9,7 @@
 #define SCHEDULER_SCHEDULER_H_
 
 #include "../platform/platform.h"
+#include "../devicemanager/devicemanager.h"
 
 /*
  * Defines for better understanding
@@ -63,6 +64,7 @@ typedef struct {
  * Scheduler functions
  */
 extern int SchedulerInit(void);
+extern int SchedulerStart(device_t timerDevice);
 extern int SchedulerStartProcess(processFunc func);
 extern int SchedulerRunNextProcess(context_t* context);
 extern int SchedulerKillProcess(processId_t id);
