@@ -10,6 +10,8 @@
 
 #define MMU_DOMAIN_FULL_ACCESS 0xFFFFFFFF
 
+#define MASTER_PAGE_TABLE_SECTION_FULL_ACCESS	0xC02		// AP = 0b11, first two bits are 0b10 for section entry
+#define UPPER_12_BITS_MASK						0xFFF00000
 
 static void mmuReserveAllDirectMappedRegions();
 static void mmuReserveDirectMappedRegion(unsigned int memoryRegion);
@@ -119,17 +121,32 @@ static pageTablePointer_t mmuCreateMasterPageTable(uint32_t virtualStartAddress,
 {
 	pageTablePointer_t masterTable = MemoryManagerCreatePageTable(L1_PAGE_TABLE);
 
-	// TODO: fill page tables with entries so that the lookup works for the kernel
 	mmuInitializeKernelMasterPageTable(masterTable);
 
 	return masterTable;
 }
 
 
-// TODO: fill page tables with entries so that the lookup works for the kernel
+/**
+ * \brief	This function fills the master page table which contains the entries for the kernel region.
+ * 			It is statically mapped to the addresses 0x80000000 to 0x81000000. For the corret page table entry
+ * 			format see ARM Architecture Reference Manual -> "first level descriptor"
+ * \return 	none
+ */
 static void mmuInitializeKernelMasterPageTable(pageTablePointer_t masterPageTable)
 {
+	unsigned int physicalAddress;
+	unsigned int pageTableEntry = 0;
+	unsigned int baseAddress = 0;
+	pageTablePointer_t table = masterPageTable;
 
+	for(physicalAddress = KERNEL_START_ADDRESS; physicalAddress < KERNEL_END_ADDRESS; physicalAddress += L1_PAGE_TABLE_SIZE_16KB)
+	{
+		baseAddress = physicalAddress & UPPER_12_BITS_MASK;
+		pageTableEntry = baseAddress | MASTER_PAGE_TABLE_SECTION_FULL_ACCESS;
+		*table = pageTableEntry;
+		table++;
+	}
 }
 
 // TODO
