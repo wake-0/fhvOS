@@ -46,10 +46,10 @@ I_BIT             .set   0x80
 	.global GetContext
 	.global RevertStackPointer
 	.global RestoreRegisters
+	.global MMUHandleDataAbortException
 	.ref interruptRamVectors
 	.ref interruptIrqResetHandlers
 	.ref irq_handler1
-	;.ref SwiHandler
 
 ;
 ; definition of irq handlers
@@ -117,9 +117,7 @@ RevertStackPointer:
 RestoreRegisters:
 	ADD		 SP, SP, #40
 	LDMFD	 SP!, {CPSR}
-	LDMFD  	 SP, {LR}^
-	NOP
-	ADD		 SP, SP, #4
+
 	LDMFD  	 SP, {R13}^
 	NOP
 	ADD		 SP, SP, #4
@@ -136,4 +134,32 @@ GetContext:
 	;SUB    R0, R0, #0x68  ; Context stack pointer overhead
 	; STR    R12, [R13, #4]
 	; LDR    R0, [R13, #4]
+
+
+dabt_handler1:
+	; save context
+	STMFD    SP, {R0-R12}^
+	NOP
+    SUB 	 SP, SP, #52
+	STMFD 	 SP, {LR}^ 					; Store LR user mode
+	NOP
+	SUB		 SP, SP, #4
+	MRS      R12, CPSR               	; Copy cpsr
+    STMFD    SP, {R12}^          	 	; {r1, r12} Save fpscr and spsr
+    NOP
+
+	; handle mmu data abort
+	BL		MMUHandleDataAbortException
+
+	; restore context
+	LDMFD	 SP!, {R12}
+	MSR		 SPSR_cxsf, R12
+	LDMFD  	 SP, {LR}^
+	NOP
+	ADD		 SP, SP, #4
+	LDMFD	SP, { R0 - R12 }^			; restore user-registers, if changed by scheduler
+	ADD		SP, SP, #52
+
+	; return
+	SUBS	PC, LR, #4
 .end
