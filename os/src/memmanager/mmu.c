@@ -10,13 +10,17 @@
 
 #define MMU_DOMAIN_FULL_ACCESS 0xFFFFFFFF
 
+#define MASTER_PAGE_TABLE_SECTION_FULL_ACCESS	0xC02		// AP = 0b11, first two bits are 0b10 for section entry
+#define UPPER_12_BITS_MASK						0xFFF00000
 
 static void mmuReserveAllDirectMappedRegions();
 static void mmuReserveDirectMappedRegion(unsigned int memoryRegion);
-static void mmuInitializeKernelMasterPageTable();
+static void mmuInitializeKernelMasterPageTable(pageTablePointer_t masterPageTable);
 static void mmuSetKernelMasterPageTable(pageTablePointer_t table);
 static void mmuSetProcessPageTable(pageTablePointer_t table);
 static void mmuSetDomainToFullAccess(void);
+static pageTablePointer_t mmuCreateMasterPageTable(uint32_t virtualStartAddress, uint32_t virtualEndAddress);
+
 
 pageTablePointer_t kernelMasterPageTable;
 
@@ -30,13 +34,10 @@ int MMUInit()
 	// reserve direct mapped regions
 	mmuReserveAllDirectMappedRegions();
 
-	// create master table
-	kernelMasterPageTable = MMUCreateMasterPageTable();
+	// master page table for kernel region must be created statically and before MMU is enabled
+	kernelMasterPageTable = mmuCreateMasterPageTable(KERNEL_START_ADDRESS, KERNEL_END_ADDRESS);
 
-	// TODO: initialize the kernel master table so the lookup works for the kernel
-	mmuInitializeKernelMasterPageTable();
-
-	// TODO: set kernel table
+	// TODO: set kernel table to ttbr1
 	mmuSetKernelMasterPageTable(kernelMasterPageTable);
 
 	// TODO: set process table
@@ -51,6 +52,46 @@ int MMUInit()
 	return MMU_OK;
 }
 
+void MMUHandleDataAbortException()
+{
+	;
+	// switch to kernel mode is needed
+
+	// TODO: get mmu data function
+
+	// check if L1 page table exists
+
+	// check if L2 page table exists
+
+	// if no L2 page table exists, create one
+}
+
+/**
+ * \brief	Switch process by setting new L1 page table to ttbr0.
+ * 			Cache and TLB will be flushed.
+ * \return 	OK if successful, NOT OK else.
+ */
+int MMUSwitchToProcess(process_t* process)
+{
+	if(NULL == process->pageTableL1)
+	{
+		return MMU_NOT_OK;
+	}
+
+	// flush TLB and cache, load new process table to ttbr0
+	mmuSetProcessPageTable(process->pageTableL1);
+
+	return MMU_OK;
+}
+
+// TODO: reconsider principle!
+int MMUInitProcess(process_t* process)
+{
+	// create L1 page table for process
+	return MMU_OK;
+}
+
+
 static void mmuReserveAllDirectMappedRegions(void)
 {
 	unsigned int memoryRegion;
@@ -63,7 +104,7 @@ static void mmuReserveAllDirectMappedRegions(void)
 
 static void mmuReserveDirectMappedRegion(unsigned int memoryRegion)
 {
-	memoryRegionPointer_t region = MemoryManagerGetSection(memoryRegion);
+	memoryRegionPointer_t region = MemoryManagerGetRegion(memoryRegion);
 
 	if(TRUE == region->directAccess)
 	{
@@ -71,38 +112,42 @@ static void mmuReserveDirectMappedRegion(unsigned int memoryRegion)
 	}
 }
 
-pageTablePointer_t MMUCreateMasterPageTable(void)
+
+/**
+ * \brief	Creates a master page table for the kernel region.
+ * 			Maps statically physical and virtual addresses
+ * \return 	Address of page table if successful.
+ */
+static pageTablePointer_t mmuCreateMasterPageTable(uint32_t virtualStartAddress, uint32_t virtualEndAddress)
 {
-	// reserve a 16kB pagetable in any region
-	pageTablePointer_t newTable;
-	unsigned int memoryRegion;
+	pageTablePointer_t masterTable = MemoryManagerCreatePageTable(L1_PAGE_TABLE);
 
-	for(memoryRegion = 0; memoryRegion < MEMORY_REGIONS; memoryRegion++)
-	{
-		newTable = (uint32_t*)MemoryManagerGetFreePagesInSection(memoryRegion, MMU_MASTER_TABLE_PAGE_COUNT);
+	mmuInitializeKernelMasterPageTable(masterTable);
 
-		if(NULL != newTable)
-		{
-			break;
-		}
-	}
-
-	if(NULL == newTable)
-	{
-		return NULL;
-	}
-
-	// set values of the regin to 0
-	memset(newTable, 0, PAGE_SIZE * MMU_MASTER_TABLE_PAGE_COUNT);
-
-	return newTable;
+	return masterTable;
 }
 
 
-// TODO
-static void mmuInitializeKernelMasterPageTable()
+/**
+ * \brief	This function fills the master page table which contains the entries for the kernel region.
+ * 			It is statically mapped to the addresses 0x80000000 to 0x81000000. For the corret page table entry
+ * 			format see ARM Architecture Reference Manual -> "first level descriptor"
+ * \return 	none
+ */
+static void mmuInitializeKernelMasterPageTable(pageTablePointer_t masterPageTable)
 {
+	unsigned int physicalAddress;
+	unsigned int pageTableEntry = 0;
+	unsigned int baseAddress = 0;
+	pageTablePointer_t table = masterPageTable;
 
+	for(physicalAddress = KERNEL_START_ADDRESS; physicalAddress < KERNEL_END_ADDRESS; physicalAddress += L1_PAGE_TABLE_SIZE_16KB)
+	{
+		baseAddress = physicalAddress & UPPER_12_BITS_MASK;
+		pageTableEntry = baseAddress | MASTER_PAGE_TABLE_SECTION_FULL_ACCESS;
+		*table = pageTableEntry;
+		table++;
+	}
 }
 
 // TODO
@@ -123,35 +168,4 @@ static void mmuSetProcessPageTable(pageTablePointer_t table)
 static void mmuSetDomainToFullAccess(void)
 {
 	MMUSetDomainAccess(MMU_DOMAIN_FULL_ACCESS);
-}
-
-
-void MMUHandleDataAbortException()
-{
-	// switch to kernel mode is needed
-}
-
-
-/**
- * \brief	Switch process by setting new L1 page table to ttbr0.
- * 			Cache and TLB will be flushed.
- * \return 	OK if successful, NOT OK else.
- */
-int MMUSwitchToProcess(process_t* process)
-{
-	if(NULL == process->pageTableL1)
-	{
-		return MMU_NOT_OK;
-	}
-
-	// flush TLB and cache, load new process table to ttbr0
-	mmuSetProcessPageTable(process->pageTableL1);
-
-	return MMU_OK;
-}
-
-
-int MMUInitProcess(process_t* process)
-{
-	return MMU_OK;
 }

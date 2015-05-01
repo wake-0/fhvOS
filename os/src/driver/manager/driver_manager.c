@@ -54,12 +54,12 @@ void DriverManagerInit()
 
 	// TIMER Driver
 	driver_t* timer = malloc(sizeof(driver_t));
-	timer->init = &TimerSetUp;
-	timer->open = &TimerStart;
-	timer->close = &TimerStop;
-	timer->write = &TimerSetCounterValues;
-	timer->read = &TimerCurrentValueGet;
-	timer->ioctl = &TimerConfigureCyclicInterrupt;
+	timer->init = &TimerDriverInit;
+	timer->open = &TimerDriverOpen;
+	timer->close = &TimerDriverClose;
+	timer->write = &TimerDriverWrite;
+	timer->read = &TimerDriverRead;
+	timer->ioctl = &TimerDriverIoctl;
 	drivers[DRIVER_ID_TIMER] = timer;
 }
 

@@ -23,10 +23,10 @@ typedef void (*ISR)(void);
 
 // functions for timer access
 
-extern int TimerStart(uint16_t timer);
-extern int TimerStop(uint16_t timer);
+extern int TimerDriverOpen(uint16_t timer);
+extern int TimerDriverClose(uint16_t timer);
 extern void TimerReset(uint16_t timer);
-extern int TimerSetUp(uint16_t timer);
+extern int TimerDriverInit(uint16_t timer);
 extern void TimerCountingHalt(Timer_t timer);
 extern void TimerCountingResume(Timer_t timer);
 extern void TimerValueLoad(Timer_t timer, unsigned int value);
@@ -34,8 +34,8 @@ extern void TimerModeConfigure(Timer_t timer, unsigned int compareMode, unsigned
 extern void TimerInterruptEnable(uint16_t timer, uint8_t timerIrq);
 extern void TimerInterruptDisable(uint16_t timer, uint8_t timerIrq);
 extern void TimerConfigureInterrupt(Timer_t timer, ISR intHandler, unsigned int timeInMilis);
-extern int TimerSetCounterValues(uint16_t timer, char * notUsed, uint16_t timerCounterValue);
-extern int TimerCurrentValueGet(uint16_t timer, char * notUsed, uint16_t timerRegister);
-extern int TimerConfigureCyclicInterrupt(uint16_t timer, uint16_t timeInMilis, uint8_t interruptMode, char* buf, uint16_t priority);
+extern int TimerDriverWrite(uint16_t timer, char * notUsed, uint16_t timerCounterValue);
+extern int TimerDriverRead(uint16_t timer, char * notUsed, uint16_t timerRegister);
+extern int TimerDriverIoctl(uint16_t timer, uint16_t timeInMilis, uint8_t interruptMode, char* buf, uint16_t priority);
 
 extern void TimerClockConfig(uint16_t timer, uint16_t clkSource);
