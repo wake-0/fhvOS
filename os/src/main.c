@@ -102,7 +102,6 @@ int foo(int value);
 
 int main(void)
 {
-	//DriverManagerInit();
 	DeviceManagerInit();
 
 	device_t led3 = DeviceManagerGetDevice("LED3", 4);
@@ -124,8 +123,7 @@ int main(void)
 	DeviceManagerIoctl(cpu, DRIVER_CPU_COMMAND_INTERRUPT_MASTER_IRQ_ENABLE, 0, NULL, 0);
 	DeviceManagerIoctl(cpu, DRIVER_CPU_COMMAND_INTERRUPT_RESET_AINTC, 0, NULL, 0);
 
-	SchedulerStart(timer);
-
+	//SchedulerStart(timer);
 	//led1();
 	while(1)
 	{

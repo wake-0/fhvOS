@@ -54,7 +54,7 @@ int MMUInit()
 
 void MMUHandleDataAbortException()
 {
-	;
+	printf("dabt interrupt\n");
 	// switch to kernel mode is needed
 
 	// TODO: get mmu data function

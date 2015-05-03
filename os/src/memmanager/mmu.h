@@ -10,6 +10,7 @@
 
 #include "../hal/cpu/coprocessor.h"
 #include "../scheduler/scheduler.h"
+#include <stdio.h>
 #include "memmanager.h"
 
 
