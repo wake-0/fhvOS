@@ -143,7 +143,7 @@ dabt_handler1:
 	NOP
 	SUB		 SP, SP, #4
 	MRS      R12, CPSR               	; Copy cpsr
-    STMFD    SP, {R12}^          	 	; {r1, r12} Save fpscr and spsr
+    STMFD    SP!, {R12}^          	 	; {r1, r12} Save fpscr and spsr
     NOP
 
 	; handle mmu data abort
