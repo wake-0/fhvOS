@@ -20,16 +20,21 @@ extern void TimerInterruptStatusClear(Timer_t timer, unsigned int interruptNumbe
 void led1(void)
 {
 	device_t led = DeviceManagerGetDevice("LED0", 4);
+	device_t uart = DeviceManagerGetDevice("UART0", 5);
+
+	DeviceManagerOpen(uart);
+
 	volatile int i;
 	DeviceManagerOpen(led);
 
 	while(1)
 	{
-		printf("ON\n");
-
-
+		//printf("ON\n");
+		char buf[12];
 		for(i = 0; i < 10; i++) {
-			printf("led1: i=%i\n", i);
+			//printf("led1: i=%i\n", i);
+			sprintf(buf, "led1: i=%d\r\n", i);
+			DeviceManagerWrite(uart, buf, 12);
 		}
 
 		DeviceManagerWrite(led, "1", 1);
@@ -37,14 +42,14 @@ void led1(void)
 		//printf("%i\n", i);
 		DeviceManagerWrite(led, "0", 1);
 		for(i = 0; i < 10; i++) {
-			printf("led1: i=%i\n", i);
+			//printf("led1: i=%i\n", i);
 		}
 
-		printf("OFF\n");
+		//printf("OFF\n");
 		for(i = 0; i < 0x0200000; i++);
 
 		for(i = 0; i < 10; i++) {
-			printf("led1: i=%i\n", i);
+			//printf("led1: i=%i\n", i);
 		}
 	}
 }

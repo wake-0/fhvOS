@@ -85,56 +85,54 @@ swi_handler:
 
 
 irq_handler:
-	SUB      LR, LR, #4               ; Apply lr correction
+	SUB      LR, LR, #4               ; Apply lr correction (DO NOT CHANGE)
 	STMFD	 SP!, {LR}				  ; LR becomes PC in context struct
 
+    STMFD    SP, {R0-R12}^    		  ; Save R0-R12
+    NOP								  ; See http://stackoverflow.com/questions/324704/arm-access-user-r13-and-r14-from-supervisor-mode
+    SUB 	 SP, SP, #52			  ; SP correction
 
-    STMFD    SP, {R0-R12}^    			; Save context in IRQ stack
-    NOP
-    SUB 	 SP, SP, #52				; SP correction
-    ;STMFD	 SP!, {SP}
-    ;SUB		 R12, LR, #4
-
-	STMFD 	 SP, {R13}^ 				;store r13 and r14 usermode
+	STMFD 	 SP, {R13}^ 			  ; Store user SP
 	NOP
 	SUB		 SP, SP, #4
 
-	STMFD 	 SP, {R14}^ 				; Store LR user mode
+	STMFD 	 SP, {R14}^ 			  ; Store user LR
 	NOP
 	SUB		 SP, SP, #4
-	;sub 	 r13, r13, #8      ;update stack pointer
-	;STMFD	 SP!, {R13}
-    MRS      R12, cpsr                ; Copy cpsr
-    STMFD    SP, {R12}^          	  ; {r1, r12} Save fpscr and spsr
+
+    MRS      R12, CPSR                ; Copy cpsr
+    STMFD    SP, {R12}^          	  ; Save cpsr
     NOP
     SUB		 SP, SP, #4			      ; SP correction
-    B        irq_handler1
+
+    B        irq_handler1			  ; Branch to code
 
 RevertStackPointer:
-	ADD 	 SP, SP, #64
-	MOV 	 PC, LR
+	ADD 	 SP, SP, #64			  ; Restore initial SP
+	MOV 	 PC, LR					  ; Return TODO Is there no return command for asm?
 
 RestoreRegisters:
-	ADD		 SP, SP, #40
-	LDMFD	 SP!, {CPSR}
+	ADD		 SP, SP, #40			  ; Those 40 bytes are still not clear to us ;)
+	LDMFD	 SP!, {CPSR}			  ; Restore CPSR
 
-	LDMFD  	 SP, {R13}^
+	LDMFD  	 SP, {LR}^				  ; Restore user LR
 	NOP
 	ADD		 SP, SP, #4
-	;LDMFD	 SP!, {SP}
-	LDMFD  	 SP, {R0-R12, PC}^
-	;ADD		 SP, SP, #56
-	;MOV		 PC, SP
+
+	LDMFD  	 SP, {R13}^				  ; Restore user SP
+	NOP
+	ADD		 SP, SP, #4
+
+	;LDMFD  	 SP, {R0-R12, PC}^	  ; Restore user R0-R12 and PC
+									  ; As we override PC we instantly jump to that code
+
+	LDMFD    SP, {R0-R12}^
+	ADD      SP, SP, #52
+	LDMFD	 SP!, {PC}^
 
 GetContext:
-	ADD    R0, SP, #40
-	;SUB    R0, SP, #64	; GetContext stack pointer overhead
-	MOV    PC, LR
-
-	;SUB    R0, R0, #0x68  ; Context stack pointer overhead
-	; STR    R12, [R13, #4]
-	; LDR    R0, [R13, #4]
-
+	ADD    R0, SP, #40				  ; Add SP to return register
+	MOV    PC, LR					  ; Return to code
 
 dabt_handler1:
 	; save context
@@ -147,6 +145,7 @@ dabt_handler1:
 	MRS      R12, CPSR               	; Copy cpsr
     STMFD    SP, {R12}^          	 	; {r1, r12} Save fpscr and spsr
     NOP
+    SUB		 SP, SP, #4
 
 	; handle mmu data abort
 	BL		MMUHandleDataAbortException

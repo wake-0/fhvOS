@@ -32,7 +32,7 @@ int MMUInit()
 	MMUDisable();
 
 	// reserve direct mapped regions
-	mmuReserveAllDirectMappedRegions();
+	//mmuReserveAllDirectMappedRegions();
 
 	// master page table for kernel region must be created statically and before MMU is enabled
 	kernelMasterPageTable = mmuCreateMasterPageTable(KERNEL_START_ADDRESS, KERNEL_END_ADDRESS);
@@ -150,18 +150,20 @@ static void mmuInitializeKernelMasterPageTable(pageTablePointer_t masterPageTabl
 	}
 }
 
-// TODO
+
 static void mmuSetKernelMasterPageTable(pageTablePointer_t table)
 {
 	MMUFlushTLB();
-	//MMUSetProcessTable();
+	//TODO flush cache
+	//TODO Write to TTBR1
 }
 
-// TODO
+
 static void mmuSetProcessPageTable(pageTablePointer_t table)
 {
 	MMUFlushTLB();
-	//MMUSetProcessTable();
+	//TODO flush cache
+	//TODO Write to TTBR0
 }
 
 

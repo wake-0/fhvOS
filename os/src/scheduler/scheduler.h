@@ -57,7 +57,7 @@ typedef struct {
 	processState_t state;
 
 	context_t* context;
-	uint32_t* pageTableL1;
+	address_t* pageTableL1;
 } process_t;
 
 /*
