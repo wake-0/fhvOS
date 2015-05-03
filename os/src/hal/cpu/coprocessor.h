@@ -10,7 +10,7 @@ extern void MMUEnable(void);
 extern void MMUDisable(void);
 extern void MMUFlushTLB(void);
 extern void MMUSetProcessTable(unsigned int processTable);
-extern void MMUSeMMUSetKernelTabletKernelTable(unsigned int kernelTable);
+extern void MMUSetKernelTable(unsigned int kernelTable);
 extern void MMUSetDomainAccess(unsigned int domainAccessPermission);
 extern void MMULoadDabtData(void);
 extern void InstructionCacheEnable();

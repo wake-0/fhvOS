@@ -54,6 +54,7 @@ static void memoryManagerInitializeRegion(memoryRegionPointer_t memoryRegion, bo
 	memoryRegion->numberOfPages 	= (length / PAGE_SIZE_4KB);
 	memoryRegion->reservedPages 	= 0;
 	memoryRegion->pageStatus	 	= (pageStatusPointer_t)malloc( sizeof(pageStatus_t) * memoryRegion->numberOfPages);
+	memset(memoryRegion->pageStatus,0, sizeof(pageStatus_t) * memoryRegion->numberOfPages);
 	// TODO Handle case (pageStatus == 0)
 }
 

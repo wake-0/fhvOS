@@ -156,6 +156,7 @@ static void mmuSetKernelMasterPageTable(pageTablePointer_t table)
 	MMUFlushTLB();
 	//TODO flush cache
 	//TODO Write to TTBR1
+	MMUSetKernelTable(table);
 }
 
 
@@ -164,6 +165,7 @@ static void mmuSetProcessPageTable(pageTablePointer_t table)
 	MMUFlushTLB();
 	//TODO flush cache
 	//TODO Write to TTBR0
+	MMUSetProcessTable(table);
 }
 
 

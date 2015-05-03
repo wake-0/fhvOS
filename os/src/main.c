@@ -7,7 +7,6 @@
 #include "driver/manager/driver_manager.h"
 #include "systemapi/systemcalls.h"
 #include <stdlib.h>
-#include "hal/cpu/coprocessor.h"
 #include "devicemanager/devicemanager.h"
 #include "scheduler/scheduler.h"
 #include "driver/cpu/driver_cpu.h"
@@ -107,6 +106,8 @@ int foo(int value);
 
 int main(void)
 {
+	MMUInit();
+	/*
 	DeviceManagerInit();
 
 	device_t led3 = DeviceManagerGetDevice("LED3", 4);
@@ -128,8 +129,9 @@ int main(void)
 	DeviceManagerIoctl(cpu, DRIVER_CPU_COMMAND_INTERRUPT_MASTER_IRQ_ENABLE, 0, NULL, 0);
 	DeviceManagerIoctl(cpu, DRIVER_CPU_COMMAND_INTERRUPT_RESET_AINTC, 0, NULL, 0);
 
-	//SchedulerStart(timer);
+	SchedulerStart(timer);
 	//led1();
+	*/
 	while(1)
 	{
 		volatile int i = 0;
