@@ -15,6 +15,8 @@
 // 3840 Byte
 #define STACK_SIZE		(10000)
 
+#define TIME_SLICE		(10)
+
 /*
  * Register defines
  */
@@ -69,7 +71,7 @@ int SchedulerStart(device_t initializedTimerDevice)
 {
 	timer = initializedTimerDevice;
 
-	uint16_t timeInMilis = 10;
+	uint16_t timeInMilis = TIME_SLICE;
 	uint16_t interruptMode = 0x02; // overflow
 	uint16_t priority = 0x1;
 

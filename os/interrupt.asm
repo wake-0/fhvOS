@@ -85,7 +85,7 @@ swi_handler:
 
 
 irq_handler:
-	SUB      LR, LR, #4               ; Apply lr correction
+	SUB      LR, LR, #4               ; Apply lr correction (DO NOT CHANGE)
 	STMFD	 SP!, {LR}				  ; LR becomes PC in context struct
 
     STMFD    SP, {R0-R12}^    		  ; Save R0-R12
@@ -100,7 +100,7 @@ irq_handler:
 	NOP
 	SUB		 SP, SP, #4
 
-    MRS      R12, cpsr                ; Copy cpsr
+    MRS      R12, CPSR                ; Copy cpsr
     STMFD    SP, {R12}^          	  ; Save cpsr
     NOP
     SUB		 SP, SP, #4			      ; SP correction
@@ -123,8 +123,12 @@ RestoreRegisters:
 	NOP
 	ADD		 SP, SP, #4
 
-	LDMFD  	 SP, {R0-R12, PC}^		  ; Restore user R0-R12 and PC
+	;LDMFD  	 SP, {R0-R12, PC}^	  ; Restore user R0-R12 and PC
 									  ; As we override PC we instantly jump to that code
+
+	LDMFD    SP, {R0-R12}^
+	ADD      SP, SP, #52
+	LDMFD	 SP!, {PC}^
 
 GetContext:
 	ADD    R0, SP, #40				  ; Add SP to return register
