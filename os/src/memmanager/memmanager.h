@@ -85,5 +85,6 @@ extern memoryRegionPointer_t MemoryManagerGetRegion(unsigned int memoryRegionNum
 extern void MemoryManagerReserveAllPages(memoryRegionPointer_t region);
 extern pageAddressPointer_t MemoryManagerGetFreePagesInRegion(unsigned int memoryRegion, unsigned int pagesToReserve);
 extern pageAddressPointer_t MemoryManagerCreatePageTable(unsigned int pageTableType);
+extern int MemoryManagerReserveAllDirectMappedRegions(void);
 
 #endif /* MEMMANAGER_MEMMANAGER_H_ */

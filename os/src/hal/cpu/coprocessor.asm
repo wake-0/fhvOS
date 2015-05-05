@@ -23,19 +23,22 @@
 	.global MMUSetDomainAccess
 	.global MMULoadDabtData
 	.global MMUSetTranslationTableControlRegister
+	.global MMUReadSystemControlRegister
 	.global InstructionCacheEnable
 	.global InstructionCacheDisable
 	.global InstructionCacheFlush
 	.global DataCacheEnable
-	.global dabtAccessedAddress
-	.global dabtFaultState
+	.global dabtAccessedVirtualAddress
+	.global dabtFaultStatusRegisterValue
 	.global currentAddressInTTBR0
 	.global currentAddressInTTBR1
+	.global currentStatusInSCTLR
 
-accessedAddress: .field dabtAccessedAddress, 32
-faultState: .field dabtFaultState, 32
+accessedAddress: .field dabtAccessedVirtualAddress, 32
+faultState: .field dabtFaultStatusRegisterValue, 32
 processTableAddress: .field currentAddressInTTBR0, 32
 kernelTableAddress: .field currentAddressInTTBR1, 32
+currentStatus: .field currentStatusInSCTLR, 32
 
 
 ;	List of coprocessor instructions:
@@ -72,9 +75,44 @@ kernelTableAddress: .field currentAddressInTTBR1, 32
 ;13 		Process ID 						Process ID 														Register 13: Process ID on page B4-52,
 ;																										and Register 13: FCSE PID onpage B8-7
 
+;
+; SCTLR Settings:
+;
+; FLAG			Bit		Value				Meaning
+; 				31		0					should be zero
+; TE			30		0					Exceptions are taken in ARM state, not in Thumb state
+; AFE			29		0					disable access flags
+; TRE			28		0					C and B bits describe memory regions
+; NMFI			27		0					Software can mask FIQ's by setting CPSR
+; EE			26		0					reserved
+; 				25		0					little endian
+; VE			24		0					use FIQ und IRQ vectors from table
+; 				23		1					reserved
+; U				22		1					use of alignment model described on p. A3-108
+; FI			21		0					all performance features enabled
+; UWXN			20		0					regions with unprivileged access are not forced to XN, see p. B3-1361
+; WXN			19		0					regions with write permission are not froced to XN
+; 				18		1					reserved
+; HA			17		0					Hardware management of access flag is disabled
+; 				16		1					reserved
+; 				15		0					reserved
+; RR			14		0					normal replacement strategy
+; V				13		0					low exception vectors, base address is 0x00000000
+; I				12		0					instruction caches disabled
+; Z				11		1					program flow prediction enabled
+; SW			10		0					SWP and SWBP undefined
+; 				9		0					reserved
+; 				8		0					reserved
+; B				7		0					should be zero
+; 				6		1					reserved
+; CP15BEN		5		1					CP15 barrier operations enabled
+; 				4		1					reserved
+; 				3		1					reserved
+; C				2		0					data and unified caches disabled
+; A				1		0					alignment fault checking disabled
+; M				0		0					Pl1&0 stage 1 MMU disabled
 
-
-
+; see p. B4-1711, accessing SCTLR register
 MMUEnable:
     STMFD	SP!, {R0,R1}
 	MRC 	p15, #0, R0, C1, C0, #0
@@ -86,6 +124,7 @@ MMUEnable:
    	MOV 	PC, LR
 
 
+; see p. B4-1711, accessing SCTLR register
 MMUDisable:
     STMFD 	SP!, {R0, R1}
 	MRC 	P15, #0, R0, C1, C0, #0
@@ -97,6 +136,15 @@ MMUDisable:
 	MCR 	p15, #0, R0, C1, C0, #0
   	LDMFD 	SP!, {R0, R1}
    	MOV 	PC, LR
+
+
+; see p. B4-1711, accessing SCTLR register
+MMUReadSystemControlRegister:
+	MOV		R0, #0
+	MRC 	p15, #0, R0, C1, C0, #0
+	LDR		R1, currentStatus
+	STR 	R0, [R1]
+	MOV		PC, LR
 
 
 MMUFlushTLB:

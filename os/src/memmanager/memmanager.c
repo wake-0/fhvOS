@@ -17,6 +17,7 @@ static boolean_t memoryManagerSufficientSpace(memoryRegionPointer_t region, unsi
 static pageAddressPointer_t memoryManagerGetPageAddress(memoryRegionPointer_t region, unsigned int pageNumber);
 static int memoryManagerLookupSectionForFreePagesInRow(memoryRegionPointer_t region, unsigned int startingPageNumber, unsigned int pagesToReserve);
 static void memoryManagerReservePagesInARow(memoryRegionPointer_t region, unsigned int pageNumber, unsigned int pagesToReserve);
+static void memoryManagerReserveDirectMappedRegion(unsigned int memoryRegion);
 
 memoryRegion_t memorySections[MEMORY_REGIONS];
 
@@ -274,3 +275,28 @@ static pageAddressPointer_t memoryManagerGetPageAddress(memoryRegionPointer_t re
 	return pageAddress;
 }
 
+
+/**
+ * \brief	Reserves all pages of all regions except page table and process region.
+ */
+int MemoryManagerReserveAllDirectMappedRegions(void)
+{
+	unsigned int memoryRegion;
+
+	for(memoryRegion = 0; memoryRegion < MEMORY_REGIONS - 2; memoryRegion++)
+	{
+		memoryManagerReserveDirectMappedRegion(memoryRegion);
+	}
+
+	return MEMORY_OK;
+}
+
+static void memoryManagerReserveDirectMappedRegion(unsigned int memoryRegion)
+{
+	memoryRegionPointer_t region = MemoryManagerGetRegion(memoryRegion);
+
+	if(TRUE == region->directAccess)
+	{
+		MemoryManagerReserveAllPages(region);
+	}
+}

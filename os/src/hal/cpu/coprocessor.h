@@ -9,8 +9,8 @@
 extern void MMUEnable(void);
 extern void MMUDisable(void);
 extern void MMUFlushTLB(void);
-extern void MMUSetProcessTableAddress(unsigned int processTable);
-extern void MMUSetKernelTableAddress(unsigned int kernelTable);
+extern void MMUSetProcessTable(unsigned int processTable);
+extern void MMUSetKernelTable(unsigned int kernelTable);
 extern void MMUSetDomainAccess(unsigned int domainAccessPermission);
 extern void MMULoadDabtData(void);
 extern void InstructionCacheEnable(void);
@@ -20,3 +20,4 @@ extern void DataCacheEnable(void);
 extern void MMUSetTranslationTableControlRegister(unsigned int translationTableControlRegisterSettings);
 extern void MMUReadProcessTableAddress(void);
 extern void MMUReadKernelTableAddress(void);
+extern void MMUReadSystemControlRegister(void);

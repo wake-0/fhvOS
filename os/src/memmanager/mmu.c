@@ -12,11 +12,29 @@
 
 #define MASTER_PAGE_TABLE_SECTION_FULL_ACCESS	0xC02		// AP = 0b11, first two bits are 0b10 for section entry
 #define UPPER_12_BITS_MASK						0xFFF00000
-#define BOUNDARY_SELECTION_RANGE				0x7
+#define BOUNDARY_SELECTION_MASK					0x7
 #define BOUNDARY_AT_HALF_OF_VIRTUAL_MEMORY		0x1
+#define TTBRC_N									BOUNDARY_AT_HALF_OF_VIRTUAL_MEMORY
+#define FAULT_STATUS_MASK_BITS_0_TO_3			0xF
+#define FAULT_STATUS_MASK_BIT_4					0x400
+#define L1_INDEX_POSITION_IN_VIRTUAL_ADDRESS	20
+#define L2_INDEX_POSITION_IN_VIRTUAL_ADDRESS	12
+#define TTBR1_BASE_ADDRESS_MASK					0xFFFFC000
+#define TTBR0_BASE_ADDRESS_MASK					(0xFFFFC000 >> TTBRC_N) | 0xFFFFC000
 
-static void mmuReserveAllDirectMappedRegions();
-static void mmuReserveDirectMappedRegion(unsigned int memoryRegion);
+// MMU FAULT STATUS VALUES
+#define ALIGNMENT_FAULT							0x1
+#define FIRST_LEVEL_TRANSLATION_FAULT			0x5
+#define SECOND_LEVEL_TRANSLATION_FAULT			0x7
+#define FIRST_LEVEL_PERMISSION_FAULT			0xD
+#define SECOND_LEVEL_PERMISSION_FAULT			0xF
+#define FIRST_LEVEL_DOMAIN_FAULT				0x9
+#define SECOND_LEVEL_DOMAIN_FAULT				0xB
+#define TLB_CONFLICT_ABORT						0x10
+#define DEBUG_EVENT								0x2
+#define	SYNCHRONOUS_EXTERNAL_ABORT				0x8
+
+
 static void mmuInitializeKernelMasterPageTable(pageTablePointer_t masterPageTable);
 static void mmuSetKernelMasterPageTable(pageTablePointer_t table);
 static void mmuSetProcessPageTable(pageTablePointer_t table);
@@ -25,15 +43,20 @@ static pageTablePointer_t mmuCreateMasterPageTable(uint32_t virtualStartAddress,
 static int mmuGetTableIndex(unsigned int virtualAddress, unsigned int indexType);
 static pageTablePointer_t mmuGetL2PageTable(pageTablePointer_t pageTableL1, unsigned int virtualAddress);
 static void mmuSetTranslationTableSelectionBoundary(unsigned int selectionBoundary);
+static unsigned int mmuGetFaultStatus(void);
+static address_t mmuGetFreePageFrame(void);
+static void mmuCreateAndFillL2PageTable(unsigned int virtualAddress, process_t* runningProcess);
+static void mmuMapFreePageFrameIntoL2PageTable(unsigned int virtualAddress, pageTablePointer_t l2PageTable);
 
 // accessed by MMULoadDabtData in coprocessor.asm
-volatile uint32_t dabtAccessedAddress;
-volatile uint32_t dabtFaultState;
+volatile uint32_t dabtAccessedVirtualAddress;
+volatile uint32_t dabtFaultStatusRegisterValue;
 
 // for testing purposes
 // TODO: delete after testing
 volatile uint32_t currentAddressInTTBR0;
 volatile uint32_t currentAddressInTTBR1;
+volatile uint32_t currentStatusInSCTLR;
 
 
 pageTablePointer_t kernelMasterPageTable;
@@ -43,61 +66,115 @@ int MMUInit()
 {
 	MemoryManagerInit();
 
-	MMUDisable();
+	//MMUDisable();
 
 	// reserve direct mapped regions
-	mmuReserveAllDirectMappedRegions();
+	MemoryManagerReserveAllDirectMappedRegions();
 
 	// master page table for kernel region must be created statically and before MMU is enabled
 	kernelMasterPageTable = mmuCreateMasterPageTable(KERNEL_START_ADDRESS, KERNEL_END_ADDRESS);
-
-	MMUReadKernelTableAddress();
-	currentAddressInTTBR1 = 0;
-
 	mmuSetKernelMasterPageTable(kernelMasterPageTable);
-
-	MMUReadKernelTableAddress();
-
 	mmuSetProcessPageTable(kernelMasterPageTable);
 
-	// set domain access
+	// MMU Settings
+	mmuSetTranslationTableSelectionBoundary(BOUNDARY_AT_HALF_OF_VIRTUAL_MEMORY);
 	mmuSetDomainToFullAccess();
 
-	mmuSetTranslationTableSelectionBoundary(BOUNDARY_AT_HALF_OF_VIRTUAL_MEMORY);
-
-	mmuSetTranslationTableSelectionBoundary(BOUNDARY_AT_HALF_OF_VIRTUAL_MEMORY);
-
-	// TODO: enabling mmu still causes great problems <= son of a bitch
-	MMUEnable();
+	MMUEnable(); 	// TODO: enabling mmu still causes great problems <= son of a bitch
 
 	return MMU_OK;
 }
 
-void MMUHandleDataAbortException()
+void MMUHandleDataAbortException(context_t* context)
 {
 	printf("dabt interrupt\n");
 
 	// get mmu data abort details
-	dabtAccessedAddress = 0;
-	dabtFaultState		= 0;
+	dabtAccessedVirtualAddress 		= 0;
+	dabtFaultStatusRegisterValue	= 0;
 	MMULoadDabtData();
 
-	// TODO: switch to kernel mode is maybe needed
-
-	// get current process
 	process_t* runningProcess = SchedulerGetRunningProcess();
 
-	if(NULL == runningProcess->pageTableL1)
+	if(NULL == runningProcess)
+	{
+		// TODO: define where the context is located on the stack and put starting address into R0
+		SchedulerRunNextProcess(context);
+		return;
+	}
+	else if(NULL == runningProcess->pageTableL1)
 	{
 		SchedulerKillProcess(runningProcess->id);
+		// TODO: what happens after killing a process? which process is next?
+		return;
 	}
 
-	// TODO: check dabt details
+	unsigned int faultState = mmuGetFaultStatus();
 
-	// check if L2 page table exists
-
-	// if no L2 page table exists, create one
+	switch(faultState)
+	{
+		case ALIGNMENT_FAULT:
+			printf("Alignment fault! \n");
+			break;
+		case FIRST_LEVEL_TRANSLATION_FAULT:
+			// no L2 page table
+			mmuCreateAndFillL2PageTable(dabtAccessedVirtualAddress, runningProcess);
+			break;
+		case SECOND_LEVEL_TRANSLATION_FAULT:
+			// no page frame
+			//pageTablePointer_t l2PageTable = mmuGetL2PageTable(runningProcess->pageTableL1, dabtAccessedVirtualAddress);
+			mmuMapFreePageFrameIntoL2PageTable(dabtAccessedVirtualAddress, mmuGetL2PageTable(runningProcess->pageTableL1, dabtAccessedVirtualAddress));
+			break;
+		case FIRST_LEVEL_PERMISSION_FAULT:
+			SchedulerKillProcess(runningProcess->id);
+			break;
+		case SECOND_LEVEL_PERMISSION_FAULT:
+			SchedulerKillProcess(runningProcess->id);
+			break;
+		case DEBUG_EVENT:
+			break;
+		default:
+			break;
+	}
 }
+
+
+/**
+ * \brief	Returns the current fault state out of the DFSR register value. see p. B4-1561
+ */
+static unsigned int mmuGetFaultStatus(void)
+{
+	return ((dabtFaultStatusRegisterValue & FAULT_STATUS_MASK_BIT_4) >> 6)
+			| (dabtFaultStatusRegisterValue & FAULT_STATUS_MASK_BITS_0_TO_3);
+}
+
+
+/**
+ * \brief	Creates a L2 page table and writes it into the L1 page table of the process.
+ *			It finds a free page frame and writes it into the new L2 page table.
+ */
+static void mmuCreateAndFillL2PageTable(unsigned int virtualAddress, process_t* runningProcess)
+{
+	// create a L2 page table and write it into L1 page table
+	pageTablePointer_t newL2PageTable = MemoryManagerCreatePageTable(L2_PAGE_TABLE);
+	unsigned int tableIndex = mmuGetTableIndex(virtualAddress, INDEX_OF_L1_PAGE_TABLE);
+	*(runningProcess->pageTableL1 + tableIndex) = newL2PageTable;
+
+	mmuMapFreePageFrameIntoL2PageTable(virtualAddress, newL2PageTable);
+}
+
+
+/**
+ * \brief	Function finds a free page frame and writes it into the new L2 page table.
+ */
+static void mmuMapFreePageFrameIntoL2PageTable(unsigned int virtualAddress, pageTablePointer_t l2PageTable)
+{
+	// TODO: handle the case no free page frames are left
+	address_t freePageFrame = mmuGetFreePageFrame();
+	unsigned int tableIndex = mmuGetTableIndex(virtualAddress, INDEX_OF_L2_PAGE_TABLE);
+	*(l2PageTable + tableIndex) = freePageFrame;
+}
+
 
 /**
  * \brief	Switch process by setting new L1 page table to ttbr0.
@@ -113,39 +190,19 @@ int MMUSwitchToProcess(process_t* process)
 
 	// flush TLB and cache, load new process table to ttbr0
 	mmuSetProcessPageTable(process->pageTableL1);
-
-	return MMU_OK;
-}
-
-// TODO: reconsider principle!
-int MMUInitProcess(process_t* process)
-{
-	// create L1 page table for process
 	return MMU_OK;
 }
 
 
 /**
- * \brief	Reserves all pages of all regions except page table and process region.
+ * \brief	Initializes a process by creating and assigning a L1 page table to it.
+ * \return 	OK if successful
  */
-static void mmuReserveAllDirectMappedRegions(void)
+int MMUInitProcess(process_t* process)
 {
-	unsigned int memoryRegion;
-
-	for(memoryRegion = 0; memoryRegion < MEMORY_REGIONS - 2; memoryRegion++)
-	{
-		mmuReserveDirectMappedRegion(memoryRegion);
-	}
-}
-
-static void mmuReserveDirectMappedRegion(unsigned int memoryRegion)
-{
-	memoryRegionPointer_t region = MemoryManagerGetRegion(memoryRegion);
-
-	if(TRUE == region->directAccess)
-	{
-		MemoryManagerReserveAllPages(region);
-	}
+	pageTablePointer_t l1PageTable = MemoryManagerCreatePageTable(L1_PAGE_TABLE);
+	process->pageTableL1 = l1PageTable;
+	return MMU_OK;
 }
 
 
@@ -157,9 +214,7 @@ static void mmuReserveDirectMappedRegion(unsigned int memoryRegion)
 static pageTablePointer_t mmuCreateMasterPageTable(uint32_t virtualStartAddress, uint32_t virtualEndAddress)
 {
 	pageTablePointer_t masterTable = MemoryManagerCreatePageTable(L1_PAGE_TABLE);
-
 	mmuInitializeKernelMasterPageTable(masterTable);
-
 	return masterTable;
 }
 
@@ -186,7 +241,16 @@ static void mmuInitializeKernelMasterPageTable(pageTablePointer_t masterPageTabl
 	}
 }
 
+
+// TODO: implement
 static void mmuWritePageTableEntryL2(address_t physicalAddress)
+{
+
+}
+
+
+// TODO: implement, bitmap for free page frames needed
+static address_t mmuGetFreePageFrame(void)
 {
 
 }
@@ -223,9 +287,11 @@ static void mmuSetDomainToFullAccess(void)
  */
 static void mmuSetTranslationTableSelectionBoundary(unsigned int selectionBoundary)
 {
-	selectionBoundary &= BOUNDARY_SELECTION_RANGE;
+	selectionBoundary &= BOUNDARY_SELECTION_MASK;
 	MMUSetTranslationTableControlRegister(selectionBoundary);
 }
+
+
 
 static pageTablePointer_t mmuGetL2PageTable(pageTablePointer_t pageTableL1, unsigned int virtualAddress)
 {
@@ -244,14 +310,18 @@ static pageTablePointer_t mmuGetL2PageTable(pageTablePointer_t pageTableL1, unsi
 	}
 }
 
+
+/**
+ * \brief	Gets the L1, L2 or page frame index out of a virtual address.
+ */
 static int mmuGetTableIndex(unsigned int virtualAddress, unsigned int indexType)
 {
 	switch(indexType)
 	{
 		case INDEX_OF_L1_PAGE_TABLE:
-			return (virtualAddress & L1_PAGE_TABLE_INDEX_MASK) >> (L2_PAGE_TABLE_INDEX_MASK | PAGE_FRAME_INDEX_MASK);
+			return ((virtualAddress & L1_PAGE_TABLE_INDEX_MASK) >> L1_INDEX_POSITION_IN_VIRTUAL_ADDRESS);
 		case INDEX_OF_L2_PAGE_TABLE:
-			return (virtualAddress & L2_PAGE_TABLE_INDEX_MASK) >> PAGE_FRAME_INDEX_MASK;
+			return ((virtualAddress & L2_PAGE_TABLE_INDEX_MASK) >> L2_INDEX_POSITION_IN_VIRTUAL_ADDRESS);
 		case INDEX_OF_PAGE_FRAME:
 			return (virtualAddress & PAGE_FRAME_INDEX_MASK);
 		default:
