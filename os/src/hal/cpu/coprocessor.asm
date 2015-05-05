@@ -27,9 +27,13 @@
 	.global DataCacheEnable
 	.global dabtAccessedAddress
 	.global dabtFaultState
+	.global currentAddressInTTBR0
+	.global currentAddressInTTBR1
 
 accessedAddress: .field dabtAccessedAddress, 32
 faultState: .field dabtFaultState, 32
+processTableAddress: .field currentAddressInTTBR0, 32
+kernelTableAddress: .field currentAddressInTTBR1, 32
 
 
 ;	List of coprocessor instructions:
@@ -101,13 +105,27 @@ MMUFlushTLB:
    	MOV 	PC, LR
 
 
+; see p. B4-1729
 MMUSetProcessTable:
 	MCR 	p15, #0, R0, C2, C0, #0
    	MOV 	PC, LR
 
 
+; see p. B4-1729
+MMUReadProcessTableAddress:
+	MRC 	p15, #0, R0, C2, C0, #0
+	LDR		R0, processTableAddress
+   	MOV 	PC, LR
+
+
 MMUSetKernelTable:
 	MCR 	p15, #0, R0, C2, C0, #1
+   	MOV 	PC, LR
+
+
+MMUReadKernelTableAddress:
+	MRC 	p15, #0, R0, C2, C0, #0
+	LDR		R0, kernelTableAddress
    	MOV 	PC, LR
 
 
@@ -128,9 +146,9 @@ MMULoadDabtData:
 
 ; see p. B4-1725
 MMUSetTranslationTableControlRegister:
-	MCR		p15, 0, R1, c2, c0, 2
+	MCR		p15, #0, R1, c2, c0, #2
 	ORR 	R0, R0, R1
-	MRC		p15, 0, R0, c2, c0, 2
+	MRC		p15, #0, R0, c2, c0, #2
 	MOV 	PC, LR
 
 

@@ -18,3 +18,5 @@ extern void InstructionCacheDisable(void);
 extern void InstructionCacheFlush(void);
 extern void DataCacheEnable(void);
 extern void MMUSetTranslationTableControlRegister(unsigned int translationTableControlRegisterSettings);
+extern void MMUReadProcessTableAddress(void);
+extern void MMUReadKernelTableAddress(void);

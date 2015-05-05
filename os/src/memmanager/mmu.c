@@ -30,6 +30,11 @@ static void mmuSetTranslationTableSelectionBoundary(unsigned int selectionBounda
 volatile uint32_t dabtAccessedAddress;
 volatile uint32_t dabtFaultState;
 
+// for testing purposes
+// TODO: delete after testing
+volatile uint32_t currentAddressInTTBR0;
+volatile uint32_t currentAddressInTTBR1;
+
 
 pageTablePointer_t kernelMasterPageTable;
 
@@ -46,10 +51,8 @@ int MMUInit()
 	// master page table for kernel region must be created statically and before MMU is enabled
 	kernelMasterPageTable = mmuCreateMasterPageTable(KERNEL_START_ADDRESS, KERNEL_END_ADDRESS);
 
-	// TODO: set kernel table to ttbr1
 	mmuSetKernelMasterPageTable(kernelMasterPageTable);
 
-	// TODO: set process table
 	mmuSetProcessPageTable(kernelMasterPageTable);
 
 	// set domain access
@@ -57,7 +60,9 @@ int MMUInit()
 
 	mmuSetTranslationTableSelectionBoundary(BOUNDARY_AT_HALF_OF_VIRTUAL_MEMORY);
 
-	// enable mmu
+	mmuSetTranslationTableSelectionBoundary(BOUNDARY_AT_HALF_OF_VIRTUAL_MEMORY);
+
+	// TODO: enabling mmu still causes great problems <= son of a bitch
 	MMUEnable();
 
 	return MMU_OK;
@@ -240,15 +245,11 @@ static int mmuGetTableIndex(unsigned int virtualAddress, unsigned int indexType)
 	{
 		case INDEX_OF_L1_PAGE_TABLE:
 			return (virtualAddress & L1_PAGE_TABLE_INDEX_MASK) >> (L2_PAGE_TABLE_INDEX_MASK | PAGE_FRAME_INDEX_MASK);
-			break;
 		case INDEX_OF_L2_PAGE_TABLE:
 			return (virtualAddress & L2_PAGE_TABLE_INDEX_MASK) >> PAGE_FRAME_INDEX_MASK;
-			break;
 		case INDEX_OF_PAGE_FRAME:
 			return (virtualAddress & PAGE_FRAME_INDEX_MASK);
-			break;
 		default:
 			return -1;
-			break;
 	}
 }
