@@ -14,10 +14,26 @@
 #include "memmanager.h"
 
 
-#define MMU_OK 		0x1;
-#define MMU_NOT_OK 	0x0;
+#define MMU_OK 							0x1
+#define MMU_NOT_OK 						0x0
+#define DESCRIPTOR_TYPE_SECTION 		0x2
+#define DESCRIPTOR_TYPE_PAGE_TABLE 		0x1
+#define DESCRIPTOR_TYPE_SMALL_PAGE		0x2
+#define FULL_ACCESS						0x3
+#define INDEX_OF_L1_PAGE_TABLE 			0x0
+#define INDEX_OF_L2_PAGE_TABLE 			0x1
+#define INDEX_OF_PAGE_FRAME				0x2
+
+#define VALID_PAGE_TABLE_OFFSET			0x0
+
+#define N 0x1
+#define L1_PAGE_TABLE_INDEX_NATIVE_MASK 0xFFF00000
+#define L1_PAGE_TABLE_INDEX_MASK (L1_PAGE_TABLE_INDEX_NATIVE_MASK >> N) & L1_PAGE_TABLE_INDEX_NATIVE_MASK
+#define L2_PAGE_TABLE_INDEX_MASK 	0xFF000
+#define PAGE_FRAME_INDEX_MASK		0xFFF
 
 typedef uint32_t* pageTablePointer_t;
+
 
 extern int MMUInit(void);
 extern int MMUSwitchToProcess(process_t* process);

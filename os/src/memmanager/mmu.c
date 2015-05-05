@@ -12,6 +12,8 @@
 
 #define MASTER_PAGE_TABLE_SECTION_FULL_ACCESS	0xC02		// AP = 0b11, first two bits are 0b10 for section entry
 #define UPPER_12_BITS_MASK						0xFFF00000
+#define BOUNDARY_SELECTION_RANGE				0x7
+#define BOUNDARY_AT_HALF_OF_VIRTUAL_MEMORY		0x1
 
 static void mmuReserveAllDirectMappedRegions();
 static void mmuReserveDirectMappedRegion(unsigned int memoryRegion);
@@ -20,6 +22,13 @@ static void mmuSetKernelMasterPageTable(pageTablePointer_t table);
 static void mmuSetProcessPageTable(pageTablePointer_t table);
 static void mmuSetDomainToFullAccess(void);
 static pageTablePointer_t mmuCreateMasterPageTable(uint32_t virtualStartAddress, uint32_t virtualEndAddress);
+static int mmuGetTableIndex(unsigned int virtualAddress, unsigned int indexType);
+static pageTablePointer_t mmuGetL2PageTable(pageTablePointer_t pageTableL1, unsigned int virtualAddress);
+static void mmuSetTranslationTableSelectionBoundary(unsigned int selectionBoundary);
+
+// accessed by MMULoadDabtData in coprocessor.asm
+volatile uint32_t dabtAccessedAddress;
+volatile uint32_t dabtFaultState;
 
 
 pageTablePointer_t kernelMasterPageTable;
@@ -32,7 +41,7 @@ int MMUInit()
 	MMUDisable();
 
 	// reserve direct mapped regions
-	//mmuReserveAllDirectMappedRegions();
+	mmuReserveAllDirectMappedRegions();
 
 	// master page table for kernel region must be created statically and before MMU is enabled
 	kernelMasterPageTable = mmuCreateMasterPageTable(KERNEL_START_ADDRESS, KERNEL_END_ADDRESS);
@@ -46,6 +55,8 @@ int MMUInit()
 	// set domain access
 	mmuSetDomainToFullAccess();
 
+	mmuSetTranslationTableSelectionBoundary(BOUNDARY_AT_HALF_OF_VIRTUAL_MEMORY);
+
 	// enable mmu
 	MMUEnable();
 
@@ -55,11 +66,23 @@ int MMUInit()
 void MMUHandleDataAbortException()
 {
 	printf("dabt interrupt\n");
-	// switch to kernel mode is needed
 
-	// TODO: get mmu data function
+	// get mmu data abort details
+	dabtAccessedAddress = 0;
+	dabtFaultState		= 0;
+	MMULoadDabtData();
 
-	// check if L1 page table exists
+	// TODO: switch to kernel mode is maybe needed
+
+	// get current process
+	process_t* runningProcess = SchedulerGetRunningProcess();
+
+	if(NULL == runningProcess->pageTableL1)
+	{
+		SchedulerKillProcess(runningProcess->id);
+	}
+
+	// TODO: check dabt details
 
 	// check if L2 page table exists
 
@@ -92,11 +115,14 @@ int MMUInitProcess(process_t* process)
 }
 
 
+/**
+ * \brief	Reserves all pages of all regions except page table and process region.
+ */
 static void mmuReserveAllDirectMappedRegions(void)
 {
 	unsigned int memoryRegion;
 
-	for(memoryRegion = 0; memoryRegion < MEMORY_REGIONS; memoryRegion++)
+	for(memoryRegion = 0; memoryRegion < MEMORY_REGIONS - 2; memoryRegion++)
 	{
 		mmuReserveDirectMappedRegion(memoryRegion);
 	}
@@ -150,21 +176,28 @@ static void mmuInitializeKernelMasterPageTable(pageTablePointer_t masterPageTabl
 	}
 }
 
+static void mmuWritePageTableEntryL2(address_t physicalAddress)
+{
 
+}
+
+
+/**
+ * \brief	Sets the address of a L1 page table to TTBR1.
+ */
 static void mmuSetKernelMasterPageTable(pageTablePointer_t table)
 {
 	MMUFlushTLB();
-	//TODO flush cache
-	//TODO Write to TTBR1
 	MMUSetKernelTable(table);
 }
 
 
+/**
+ * \brief	Sets the address of a L1 page table to TTBR0.
+ */
 static void mmuSetProcessPageTable(pageTablePointer_t table)
 {
 	MMUFlushTLB();
-	//TODO flush cache
-	//TODO Write to TTBR0
 	MMUSetProcessTable(table);
 }
 
@@ -172,4 +205,50 @@ static void mmuSetProcessPageTable(pageTablePointer_t table)
 static void mmuSetDomainToFullAccess(void)
 {
 	MMUSetDomainAccess(MMU_DOMAIN_FULL_ACCESS);
+}
+
+
+/**
+ * \brief	Writes to TTBCR.N and sets the selection boundary between TTBR0 and TTBR1.
+ */
+static void mmuSetTranslationTableSelectionBoundary(unsigned int selectionBoundary)
+{
+	selectionBoundary &= BOUNDARY_SELECTION_RANGE;
+	MMUSetTranslationTableControlRegister(selectionBoundary);
+}
+
+static pageTablePointer_t mmuGetL2PageTable(pageTablePointer_t pageTableL1, unsigned int virtualAddress)
+{
+	int tableOffset = mmuGetTableIndex(virtualAddress, INDEX_OF_L2_PAGE_TABLE);
+
+	if(tableOffset < VALID_PAGE_TABLE_OFFSET)
+	{
+		// no existing L2 page table, create one
+		return MemoryManagerCreatePageTable(L2_PAGE_TABLE);
+	}
+	else
+	{
+		// L2 page table exists
+		pageTablePointer_t l2PageTable = (pageTableL1 + tableOffset);
+		return l2PageTable;
+	}
+}
+
+static int mmuGetTableIndex(unsigned int virtualAddress, unsigned int indexType)
+{
+	switch(indexType)
+	{
+		case INDEX_OF_L1_PAGE_TABLE:
+			return (virtualAddress & L1_PAGE_TABLE_INDEX_MASK) >> (L2_PAGE_TABLE_INDEX_MASK | PAGE_FRAME_INDEX_MASK);
+			break;
+		case INDEX_OF_L2_PAGE_TABLE:
+			return (virtualAddress & L2_PAGE_TABLE_INDEX_MASK) >> PAGE_FRAME_INDEX_MASK;
+			break;
+		case INDEX_OF_PAGE_FRAME:
+			return (virtualAddress & PAGE_FRAME_INDEX_MASK);
+			break;
+		default:
+			return -1;
+			break;
+	}
 }

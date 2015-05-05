@@ -6,6 +6,9 @@
 ;	NOTE: all of these functions require access to the coprocessor
 ;	register CP15.
 ;
+;	All documentation hints refer to the ARM Architecture Reference Manual
+;	ARMv7-A and ARMv7-R edition, rev.: ARM DDI 0406C.b (ID072512)
+;
 ;  Created on: 04.04.2015
 ;      Author: Marko Petrovic
 ;
@@ -17,10 +20,16 @@
 	.global MMUSetKernelTable
 	.global MMUSetDomainAccess
 	.global MMULoadDabtData
+	.global MMUSetTranslationTableControlRegister
 	.global InstructionCacheEnable
 	.global InstructionCacheDisable
 	.global InstructionCacheFlush
 	.global DataCacheEnable
+	.global dabtAccessedAddress
+	.global dabtFaultState
+
+accessedAddress: .field dabtAccessedAddress, 32
+faultState: .field dabtFaultState, 32
 
 
 ;	List of coprocessor instructions:
@@ -61,60 +70,68 @@
 
 
 MMUEnable:
-    STMFD R13!, {R0,R1}
-	MRC P15, #0, R0, C1, C0, #0
+    STMFD	SP!, {R0,R1}
+	MRC 	p15, #0, R0, C1, C0, #0
 	; add SCTLR_ICACHE | SCTLR_DCACHE | SCTLR_PREDICT | SCTLR_MMUEN = 0x1805
-	MOV R1, #0x01
-	ORR R0, R0, R1
-	MCR P15, #0, R0, C1, C0, #0
-   	LDMFD R13!, {R0,R1}
-   	MOV PC, R14
+	MOV 	R1, #0x01
+	ORR 	R0, R0, R1
+	MCR		p15, #0, R0, C1, C0, #0
+   	LDMFD 	SP!, {R0,R1}
+   	MOV 	PC, LR
 
 
 MMUDisable:
-    STMFD R13!, {R0, R1}
-	MRC P15, #0, R0, C1, C0, #0
+    STMFD 	SP!, {R0, R1}
+	MRC 	P15, #0, R0, C1, C0, #0
 	; clearup flags ~( SCTLR_TRE | SCTLR_AFE |  SCTLR_ICACHE | SCTLR_DCACHE | SCTLR_MMUEN) = ~(0x30001005)
 	; = 0xCFFFEFFA
-	MOV R1, #0xCFFF
-	MOVT R1, #0xEFFA
-	AND R0, R0, R1
-	MCR P15, #0, R0, C1, C0, #0
-  	LDMFD R13!, {R0, R1}
-   	MOV PC, R14
+	MOV 	R1, #0xCFFF
+	MOVT 	R1, #0xEFFA
+	AND 	R0, R0, R1
+	MCR 	p15, #0, R0, C1, C0, #0
+  	LDMFD 	SP!, {R0, R1}
+   	MOV 	PC, LR
 
 
 MMUFlushTLB:
-	STMFD R13!, {R0, R1}
-	MOV R0, #0
-	MCR P15, #0, R0, C8, C7, #0
-  	LDMFD R13!, {R0, R1}
-   	MOV PC, R14
+	STMFD 	SP!, {R0, R1}
+	MOV 	R0, #0
+	MCR 	p15, #0, R0, C8, C7, #0
+  	LDMFD 	SP!, {R0, R1}
+   	MOV 	PC, LR
 
 
 MMUSetProcessTable:
-	MCR P15, #0, R0, C2, C0, #0
-   	MOV PC, R14
+	MCR 	p15, #0, R0, C2, C0, #0
+   	MOV 	PC, LR
 
 
 MMUSetKernelTable:
-	MCR P15, #0, R0, C2, C0, #1
-   	MOV PC, R14
+	MCR 	p15, #0, R0, C2, C0, #1
+   	MOV 	PC, LR
 
 
 MMUSetDomainAccess:
-	MCR P15, #0, R0, C3, C0, #0
-	MOV PC, R14
+	MCR 	P15, #0, R0, C3, C0, #0
+	MOV 	PC, LR
 
 
 MMULoadDabtData:
-	MRC   P15, #0, R0, C6, C0, #0
-	;LDR   R1, _mmu_accessed_address
-	STR   R0, [R1]
-	MRC p15, #0, r0, c5, c0, #0
-	;LDR r1, _mmu_fault_state
-	STR r0, [r1]
-	MOV PC, R14
+	MRC		p15, #0, R0, C6, C0, #0
+	LDR 	R1, accessedAddress
+	STR 	R0, [R1]
+	MRC 	p15, #0, R0, c5, c0, #0
+	LDR 	R1, faultState
+	STR 	R0, [R1]
+	MOV 	PC, LR
+
+
+; see p. B4-1725
+MMUSetTranslationTableControlRegister:
+	MCR		p15, 0, R1, c2, c0, 2
+	ORR 	R0, R0, R1
+	MRC		p15, 0, R0, c2, c0, 2
+	MOV 	PC, LR
 
 
 InstructionCacheEnable:
