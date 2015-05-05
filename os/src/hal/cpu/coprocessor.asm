@@ -18,6 +18,8 @@
 	.global MMUFlushTLB
 	.global MMUSetProcessTable
 	.global MMUSetKernelTable
+	.global MMUReadProcessTableAddress
+	.global MMUReadKernelTableAddress
 	.global MMUSetDomainAccess
 	.global MMULoadDabtData
 	.global MMUSetTranslationTableControlRegister
@@ -113,19 +115,27 @@ MMUSetProcessTable:
 
 ; see p. B4-1729
 MMUReadProcessTableAddress:
+	MOV 	R0, #0
 	MRC 	p15, #0, R0, C2, C0, #0
-	LDR		R0, processTableAddress
+	MOV 	R1, #0
+	LDR		R1, processTableAddress
+	STR 	R0, [R1]
    	MOV 	PC, LR
 
 
+; see p. B4-1731
 MMUSetKernelTable:
 	MCR 	p15, #0, R0, C2, C0, #1
    	MOV 	PC, LR
 
 
+; see p. B4-1731
 MMUReadKernelTableAddress:
-	MRC 	p15, #0, R0, C2, C0, #0
-	LDR		R0, kernelTableAddress
+	MOV 	R0, #0
+	MRC 	p15, #0, R0, C2, C0, #1
+	MOV 	R1, #0
+	LDR 	R1, kernelTableAddress
+	STR 	R0, [R1]
    	MOV 	PC, LR
 
 

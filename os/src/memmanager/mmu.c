@@ -51,7 +51,12 @@ int MMUInit()
 	// master page table for kernel region must be created statically and before MMU is enabled
 	kernelMasterPageTable = mmuCreateMasterPageTable(KERNEL_START_ADDRESS, KERNEL_END_ADDRESS);
 
+	MMUReadKernelTableAddress();
+	currentAddressInTTBR1 = 0;
+
 	mmuSetKernelMasterPageTable(kernelMasterPageTable);
+
+	MMUReadKernelTableAddress();
 
 	mmuSetProcessPageTable(kernelMasterPageTable);
 
