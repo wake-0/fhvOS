@@ -58,6 +58,7 @@ static int mmuGetFreePageFrameNumber(void);
 static void mmuSetPageFrameUsageStatus(unsigned int pageFrameNumber, unsigned int pageFrameStatus);
 static address_t mmuGetAddressOfPageFrameNumber(unsigned int pageFrameNumber);
 static void freeAllPageFramesOfL2PageTable(pageTablePointer_t l2PageTable);
+static void mmuMapDirectRegionToKernelMasterPageTable(memoryRegionPointer_t memoryRegion, pageTablePointer_t table);
 
 // accessed by MMULoadDabtData in coprocessor.asm
 volatile uint32_t dabtAccessedVirtualAddress;
@@ -72,7 +73,7 @@ volatile uint32_t currentAddressInTTBR0;
 volatile uint32_t currentAddressInTTBR1;
 volatile uint32_t currentStatusInSCTLR;
 
-
+// master L1 page table for statical mapping of kernel, I/O and boot rom
 pageTablePointer_t kernelMasterPageTable;
 
 
@@ -86,7 +87,6 @@ int MMUInit()
 	MemoryManagerReserveAllDirectMappedRegions();
 
 	// master page table for kernel region must be created statically and before MMU is enabled
-	// TODO: update kernel page table to hold actual mapping
 	kernelMasterPageTable = mmuCreateMasterPageTable(KERNEL_START_ADDRESS, KERNEL_END_ADDRESS);
 	mmuSetKernelMasterPageTable(kernelMasterPageTable);
 	mmuSetProcessPageTable(kernelMasterPageTable);
@@ -261,6 +261,11 @@ static void freeAllPageFramesOfL2PageTable(pageTablePointer_t l2PageTable)
  */
 static pageTablePointer_t mmuCreateMasterPageTable(uint32_t virtualStartAddress, uint32_t virtualEndAddress)
 {
+	if(NULL != kernelMasterPageTable)
+	{
+		return kernelMasterPageTable;
+	}
+
 	pageTablePointer_t masterTable = MemoryManagerCreatePageTable(L1_PAGE_TABLE);
 	mmuInitializeKernelMasterPageTable(masterTable);
 	return masterTable;
@@ -268,19 +273,34 @@ static pageTablePointer_t mmuCreateMasterPageTable(uint32_t virtualStartAddress,
 
 
 /**
- * \brief	This function fills the master page table which contains the entries for the kernel region.
- * 			It is statically mapped to the addresses 0x80000000 to 0x81000000. For the corret page table entry
+ * \brief	This function fills the master page table which contains the entries for the kernel, boot and I/O region.
+ * 			It is statically mapped to the addresses 0x40310000 to 0x81000000. For the corret page table entry
  * 			format see ARM Architecture Reference Manual -> "first level descriptor"
  * \return 	none
  */
 static void mmuInitializeKernelMasterPageTable(pageTablePointer_t masterPageTable)
 {
+	unsigned int region;
+	pageTablePointer_t table = masterPageTable;
+
+	for(region = 0; region < MEMORY_REGIONS-2; region++)
+	{
+		memoryRegionPointer_t memoryRegion = MemoryManagerGetRegion(region);
+		mmuMapDirectRegionToKernelMasterPageTable(memoryRegion, table);
+	}
+}
+
+
+/**
+ * \brief	This function maps one region directly into the master L1 page table.
+ */
+static void mmuMapDirectRegionToKernelMasterPageTable(memoryRegionPointer_t memoryRegion, pageTablePointer_t table)
+{
 	unsigned int physicalAddress;
 	unsigned int pageTableEntry = 0;
 	unsigned int baseAddress = 0;
-	pageTablePointer_t table = masterPageTable;
 
-	for(physicalAddress = KERNEL_START_ADDRESS; physicalAddress < KERNEL_END_ADDRESS; physicalAddress += L1_PAGE_TABLE_SIZE_16KB)
+	for(physicalAddress = memoryRegion->startAddress; physicalAddress < memoryRegion->endAddress; physicalAddress += L1_PAGE_TABLE_SIZE_16KB)
 	{
 		baseAddress = physicalAddress & UPPER_12_BITS_MASK;
 		pageTableEntry = baseAddress | MASTER_PAGE_TABLE_SECTION_FULL_ACCESS;
