@@ -21,6 +21,11 @@
 #define L2_INDEX_POSITION_IN_VIRTUAL_ADDRESS	12
 #define TTBR1_BASE_ADDRESS_MASK					0xFFFFC000
 #define TTBR0_BASE_ADDRESS_MASK					(0xFFFFC000 >> TTBRC_N) | 0xFFFFC000
+#define BIT_MAP_LENGTH							(PROCESS_PAGES_END_ADDRESS - PROCESS_PAGES_START_ADDRESS) / PAGE_SIZE_4KB
+#define PAGE_FRAME_NOT_FOUND					-1
+#define PAGE_FRAME_STATUS_MASK					1
+#define SET_PAGE_FRAME_IS_FREE						0
+#define SET_PAGE_FRAME_IS_USED						1
 
 // MMU FAULT STATUS VALUES
 #define ALIGNMENT_FAULT							0x1
@@ -47,10 +52,16 @@ static unsigned int mmuGetFaultStatus(void);
 static address_t mmuGetFreePageFrame(void);
 static void mmuCreateAndFillL2PageTable(unsigned int virtualAddress, process_t* runningProcess);
 static void mmuMapFreePageFrameIntoL2PageTable(unsigned int virtualAddress, pageTablePointer_t l2PageTable);
+static int mmuGetFreePageFrameNumber(void);
+static void mmuSetPageFrameUsageStatus(unsigned int pageFrameNumber, unsigned int pageFrameStatus);
+static address_t mmuGetAddressOfPageFrameNumber(unsigned int pageFrameNumber);
 
 // accessed by MMULoadDabtData in coprocessor.asm
 volatile uint32_t dabtAccessedVirtualAddress;
 volatile uint32_t dabtFaultStatusRegisterValue;
+
+// bitmap used for allocating page frames
+static char pageFramesBitMap[BIT_MAP_LENGTH];
 
 // for testing purposes
 // TODO: delete after testing
@@ -72,6 +83,7 @@ int MMUInit()
 	MemoryManagerReserveAllDirectMappedRegions();
 
 	// master page table for kernel region must be created statically and before MMU is enabled
+	// TODO: update kernel page table to hold actual mapping
 	kernelMasterPageTable = mmuCreateMasterPageTable(KERNEL_START_ADDRESS, KERNEL_END_ADDRESS);
 	mmuSetKernelMasterPageTable(kernelMasterPageTable);
 	mmuSetProcessPageTable(kernelMasterPageTable);
@@ -207,6 +219,16 @@ int MMUInitProcess(process_t* process)
 
 
 /**
+ * \brief	Sets all page frames of a process to unused, when process is being killed.
+ */
+int MMUFreeAllPageFramesOfProcess(process_t* process)
+{
+	// TODO: IMPLEMENT!!!!
+	return MMU_OK;
+}
+
+
+/**
  * \brief	Creates a master page table for the kernel region.
  * 			Maps statically physical and virtual addresses
  * \return 	Address of page table if successful.
@@ -249,10 +271,84 @@ static void mmuWritePageTableEntryL2(address_t physicalAddress)
 }
 
 
-// TODO: implement, bitmap for free page frames needed
+/**
+ * \brief	Gets a free page frame, and sets its status to used;
+ * 			Returns physical address of page frame if successful, NULL otherwise.
+ */
 static address_t mmuGetFreePageFrame(void)
 {
+	int freePageFrame = mmuGetFreePageFrameNumber();
 
+	if(PAGE_FRAME_NOT_FOUND == freePageFrame)
+	{
+		printf("\nPROCESS MEMORY SPACE USED UP!\n");
+		return NULL;
+	}
+
+	mmuSetPageFrameUsageStatus(freePageFrame, SET_PAGE_FRAME_IS_USED);
+	return mmuGetAddressOfPageFrameNumber(freePageFrame);
+}
+
+
+/**
+ * \brief	Gets the number of a free page frame in the page frames bitmap.
+ * 			Returns -1 if no free page frame left.
+ */
+static int mmuGetFreePageFrameNumber(void)
+{
+	unsigned int bitMapByte;
+	unsigned int pageNumberOfByte;
+
+	for(bitMapByte = 0; bitMapByte < sizeof(pageFramesBitMap); bitMapByte++)
+	{
+		for(pageNumberOfByte = 0; pageNumberOfByte < 8; pageNumberOfByte++)
+		{
+			unsigned int pageStatus = (pageFramesBitMap[bitMapByte] >> pageNumberOfByte) & 1;
+			if(!pageStatus)
+			{
+				return ((bitMapByte * 8) + pageNumberOfByte);
+			}
+		}
+	}
+
+	return PAGE_FRAME_NOT_FOUND;
+}
+
+
+/**
+ * \brief	Sets the status of a page frame to free(0) or used(1).
+ */
+static void mmuSetPageFrameUsageStatus(unsigned int pageFrameNumber, unsigned int pageFrameStatus)
+{
+	char bitMapByte = pageFramesBitMap[pageFrameNumber/8];
+
+	switch(pageFrameStatus)
+	{
+		case SET_PAGE_FRAME_IS_USED:
+			bitMapByte |= (pageFrameStatus & PAGE_FRAME_STATUS_MASK) << (pageFrameNumber % 8);
+			break;
+		case SET_PAGE_FRAME_IS_FREE:
+			bitMapByte &= ~(pageFrameStatus & PAGE_FRAME_STATUS_MASK) << (pageFrameNumber % 8);
+			break;
+	}
+
+	pageFramesBitMap[pageFrameNumber/8] = bitMapByte;
+}
+
+
+/**
+ * \brief	Returns the physical address of a page frame number.
+ */
+static address_t mmuGetAddressOfPageFrameNumber(unsigned int pageFrameNumber)
+{
+	if(PROCESS_MEMORY_SPACE < pageFrameNumber + PAGE_SIZE_4KB)
+	{
+		return NULL;
+	}
+	else
+	{
+		return PROCESS_PAGES_START_ADDRESS + PAGE_SIZE_4KB * pageFrameNumber;
+	}
 }
 
 

@@ -30,6 +30,7 @@ memoryRegion_t memorySections[MEMORY_REGIONS];
  */
 int MemoryManagerInit()
 {
+	// TODO: refactor virtual mapping
 	memoryManagerInitializeRegion(&memorySections[BOOT_ROM_REGION], true, BOOT_ROM_START_ADDRESS, BOOT_ROM_END_ADDRESS);
 	memoryManagerInitializeRegion(&memorySections[INTERNAL_SRAM_REGION], true, INTERNAL_SRAM_START_ADDRESS, INTERNAL_SRAM_END_ADDRESS);
 	memoryManagerInitializeRegion(&memorySections[MEMORY_MAPPED_IO_REGION], true, MEMORY_MAPPED_IO_START_ADDRESS, MEMORY_MAPPED_IO_END_ADDRESS);
