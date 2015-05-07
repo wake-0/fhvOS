@@ -26,6 +26,8 @@
 #define PAGE_FRAME_STATUS_MASK					1
 #define SET_PAGE_FRAME_IS_FREE						0
 #define SET_PAGE_FRAME_IS_USED						1
+#define L1_PAGE_TABLE_ENTRIES					4096
+#define L2_PAGE_TABLE_ENTRIES					256
 
 // MMU FAULT STATUS VALUES
 #define ALIGNMENT_FAULT							0x1
@@ -46,7 +48,7 @@ static void mmuSetProcessPageTable(pageTablePointer_t table);
 static void mmuSetDomainToFullAccess(void);
 static pageTablePointer_t mmuCreateMasterPageTable(uint32_t virtualStartAddress, uint32_t virtualEndAddress);
 static int mmuGetTableIndex(unsigned int virtualAddress, unsigned int indexType);
-static pageTablePointer_t mmuGetL2PageTable(pageTablePointer_t pageTableL1, unsigned int virtualAddress);
+static pageTablePointer_t mmuGetAddressSpecificL2PageTable(pageTablePointer_t pageTableL1, unsigned int virtualAddress);
 static void mmuSetTranslationTableSelectionBoundary(unsigned int selectionBoundary);
 static unsigned int mmuGetFaultStatus(void);
 static address_t mmuGetFreePageFrame(void);
@@ -55,6 +57,7 @@ static void mmuMapFreePageFrameIntoL2PageTable(unsigned int virtualAddress, page
 static int mmuGetFreePageFrameNumber(void);
 static void mmuSetPageFrameUsageStatus(unsigned int pageFrameNumber, unsigned int pageFrameStatus);
 static address_t mmuGetAddressOfPageFrameNumber(unsigned int pageFrameNumber);
+static void freeAllPageFramesOfL2PageTable(pageTablePointer_t l2PageTable);
 
 // accessed by MMULoadDabtData in coprocessor.asm
 volatile uint32_t dabtAccessedVirtualAddress;
@@ -97,6 +100,8 @@ int MMUInit()
 	return MMU_OK;
 }
 
+
+
 void MMUHandleDataAbortException(context_t* context)
 {
 	printf("dabt interrupt\n");
@@ -134,8 +139,8 @@ void MMUHandleDataAbortException(context_t* context)
 			break;
 		case SECOND_LEVEL_TRANSLATION_FAULT:
 			// no page frame
-			//pageTablePointer_t l2PageTable = mmuGetL2PageTable(runningProcess->pageTableL1, dabtAccessedVirtualAddress);
-			mmuMapFreePageFrameIntoL2PageTable(dabtAccessedVirtualAddress, mmuGetL2PageTable(runningProcess->pageTableL1, dabtAccessedVirtualAddress));
+			//pageTablePointer_t l2PageTable = mmuGetAddressSpecificL2PageTable(runningProcess->pageTableL1, dabtAccessedVirtualAddress);
+			mmuMapFreePageFrameIntoL2PageTable(dabtAccessedVirtualAddress, mmuGetAddressSpecificL2PageTable(runningProcess->pageTableL1, dabtAccessedVirtualAddress));
 			break;
 		case FIRST_LEVEL_PERMISSION_FAULT:
 			SchedulerKillProcess(runningProcess->id);
@@ -224,7 +229,28 @@ int MMUInitProcess(process_t* process)
 int MMUFreeAllPageFramesOfProcess(process_t* process)
 {
 	// TODO: IMPLEMENT!!!!
+	unsigned int pageTableEntry;
+
+	for(pageTableEntry = 0; pageTableEntry < L1_PAGE_TABLE_ENTRIES; pageTableEntry++)
+	{
+		pageTablePointer_t l2PageTable = *(process->pageTableL1 + pageTableEntry);
+		freeAllPageFramesOfL2PageTable(l2PageTable);
+	}
+
 	return MMU_OK;
+}
+
+
+// TODO: implement
+static void freeAllPageFramesOfL2PageTable(pageTablePointer_t l2PageTable)
+{
+	unsigned int pageTableEntry;
+
+	for(pageTableEntry = 0; pageTableEntry < L2_PAGE_TABLE_ENTRIES; pageTableEntry++)
+	{
+		unsigned int l2PageTableEntry = *(l2PageTable + pageTableEntry);
+		// TODO: finish
+	}
 }
 
 
@@ -389,7 +415,7 @@ static void mmuSetTranslationTableSelectionBoundary(unsigned int selectionBounda
 
 
 
-static pageTablePointer_t mmuGetL2PageTable(pageTablePointer_t pageTableL1, unsigned int virtualAddress)
+static pageTablePointer_t mmuGetAddressSpecificL2PageTable(pageTablePointer_t pageTableL1, unsigned int virtualAddress)
 {
 	int tableOffset = mmuGetTableIndex(virtualAddress, INDEX_OF_L2_PAGE_TABLE);
 
