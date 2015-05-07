@@ -14,6 +14,7 @@
 #define UPPER_12_BITS_MASK						0xFFF00000
 #define BOUNDARY_SELECTION_MASK					0x7
 #define BOUNDARY_AT_HALF_OF_VIRTUAL_MEMORY		0x1
+#define BOUNDARY_AT_QUARTER_OF_MEMORY			0x6
 #define TTBRC_N									BOUNDARY_AT_HALF_OF_VIRTUAL_MEMORY
 #define FAULT_STATUS_MASK_BITS_0_TO_3			0xF
 #define FAULT_STATUS_MASK_BIT_4					0x400
@@ -92,7 +93,7 @@ int MMUInit()
 	mmuSetProcessPageTable(kernelMasterPageTable);
 
 	// MMU Settings
-	mmuSetTranslationTableSelectionBoundary(BOUNDARY_AT_HALF_OF_VIRTUAL_MEMORY);
+	mmuSetTranslationTableSelectionBoundary(BOUNDARY_AT_QUARTER_OF_MEMORY);
 	mmuSetDomainToFullAccess();
 
 	MMUEnable(); 	// TODO: enabling mmu still causes great problems <= son of a bitch
