@@ -74,6 +74,9 @@ Abbildung \ref{fig:MemoryMap} zeigt die Speicherverwaltung des Betriebssystems. 
  \label{table:SpecifiedVirtualMemory}
 \end{table}
 
+
+\lstinputlisting[language=C]{codefiles/region.c}
+
 \subsection{Umwandlung virtueller Adressen zu physikalische Adressen}
 
 Abbildung \ref{fig:largePageTranslation} zeigt die Umwandlung einer vom ARM Prozessor erzeugten virtuellen Adresse in eine physikalische Speicheradresse. Die Umwandlung wird vollständig durch die Prozessor-Hardware durchgeführt.
@@ -98,5 +101,7 @@ Die Bitsmap wird durch ein Array der Länge N/8 Bytes realisiert. N steht hier f
 	\caption{Beispiel einer Bitsmap zur Verwaltung der Page Frames}
 	\label{fig:BitsMap}
 \end{figure}
+
+
 
 \pagebreak 

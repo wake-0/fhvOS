@@ -64,7 +64,6 @@ typedef pageStatus_t * pageStatusPointer_t;
 // Data type for organizing the memory regions given in the ARM TRM.
 typedef struct region
 {
-	boolean_t directAccess;
     unsigned int startAddress;
     unsigned int endAddress;
     unsigned int pageSize;
