@@ -18,8 +18,6 @@
 #define REG_IDX_SHIFT                  	(0x05)
 #define REG_BIT_MASK                   	(0x1F)
 #define NUMBER_OF_INTERRUPTS            (128u)
-#define TRUE    1
-#define FALSE   0
 
 
 intHandler_t interruptRamVectors[NUMBER_OF_INTERRUPTS];
