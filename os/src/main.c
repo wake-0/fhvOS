@@ -10,6 +10,7 @@
 #include "devicemanager/devicemanager.h"
 #include "scheduler/scheduler.h"
 #include "driver/cpu/driver_cpu.h"
+#include "console/console.h"
 
 extern address_t GetContext(void);
 extern void CPUSwitchToPrivilegedMode(void);
@@ -19,9 +20,9 @@ extern void TimerInterruptStatusClear(Timer_t timer, unsigned int interruptNumbe
 void led1(void)
 {
 	device_t led = DeviceManagerGetDevice("LED0", 4);
-	device_t uart = DeviceManagerGetDevice("UART0", 5);
+	//device_t uart = DeviceManagerGetDevice("UART0", 5);
 
-	DeviceManagerOpen(uart);
+	//DeviceManagerOpen(uart);
 
 	volatile int i;
 	DeviceManagerOpen(led);
@@ -33,7 +34,7 @@ void led1(void)
 		for(i = 0; i < 10; i++) {
 			//printf("led1: i=%i\n", i);
 			sprintf(buf, "led1: i=%d\r\n", i);
-			DeviceManagerWrite(uart, buf, 12);
+			//DeviceManagerWrite(uart, buf, 12);
 		}
 
 		DeviceManagerWrite(led, "1", 1);
@@ -106,19 +107,22 @@ int foo(int value);
 
 int main(void)
 {
-	MMUInit();
-	/*
+	//MMUInit();
+
 	DeviceManagerInit();
 
 	device_t led3 = DeviceManagerGetDevice("LED3", 4);
 	DeviceManagerOpen(led3);
 	DeviceManagerWrite(led3, "1", 1);
 
+	device_t uart = DeviceManagerGetDevice("UART0", 5);
+	ConsoleInit(uart);
+
 	SchedulerInit();
 	SchedulerStartProcess(&led2);
 	SchedulerStartProcess(&led1);
 	SchedulerStartProcess(&process3);
-
+	SchedulerStartProcess(&ConsoleProcess);
 
 	device_t timer = DeviceManagerGetDevice("TIMER2", 6);
 
@@ -131,7 +135,7 @@ int main(void)
 
 	SchedulerStart(timer);
 	//led1();
-	*/
+
 	while(1)
 	{
 		volatile int i = 0;
