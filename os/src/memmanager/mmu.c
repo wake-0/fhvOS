@@ -305,6 +305,16 @@ static void mmuInitializeKernelMasterPageTable(pageTablePointer_t masterPageTabl
 		*(table + tableOffset) = pageTableEntry;
 		//table++;
 	}
+
+
+	for(physicalAddress = 0x20000; physicalAddress < 0x2001C; physicalAddress += 0x100000)
+	{
+		baseAddress = physicalAddress & UPPER_12_BITS_MASK;
+		pageTableEntry = baseAddress | MASTER_PAGE_TABLE_SECTION_FULL_ACCESS;
+		unsigned int tableOffset = mmuGetTableIndex(physicalAddress, INDEX_OF_L1_PAGE_TABLE);
+		*(table + tableOffset) = pageTableEntry;
+		//table++;
+	}
 }
 
 

@@ -107,6 +107,7 @@ int foo(int value);
 
 int main(void)
 {
+	MMUInit();
 
 	DeviceManagerInit();
 
@@ -134,7 +135,7 @@ int main(void)
 
 	SchedulerStart(timer);
 	//led1();
-	MMUInit();
+
 
 	while(1)
 	{
