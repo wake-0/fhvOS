@@ -11,11 +11,11 @@
 /*
  * Defines for the process stack start and size
  */
-#define STACK_START		(0x800FFFFC)
+#define STACK_START		(0x8000FFFC)
 // 3840 Byte
 #define STACK_SIZE		(10000)
 
-#define TIME_SLICE		(10)
+#define TIME_SLICE		(4500)
 
 /*
  * Register defines
@@ -53,7 +53,7 @@ void dummyEnd() {
  * Functions from the .h file
  */
 int SchedulerInit(void) {
-	memset((void*)STACK_START, 0, STACK_SIZE * 3);
+	memset((void*)STACK_START, 0, STACK_SIZE * 1);
 
 	int i;
 	for (i = 0; i < PROCESSES_MAX; i++) {

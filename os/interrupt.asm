@@ -43,6 +43,7 @@ I_BIT             .set   0x80
 ;
 	.global irq_handler
 	.global swi_handler
+	.global dabt_handler
 	.global GetContext
 	.global RevertStackPointer
 	.global RestoreRegisters
@@ -134,7 +135,7 @@ GetContext:
 	ADD    R0, SP, #40				  ; Add SP to return register
 	MOV    PC, LR					  ; Return to code
 
-dabt_handler1:
+dabt_handler:
 	; save context
 	STMFD    SP, {R0-R12}^
 	NOP
@@ -149,6 +150,7 @@ dabt_handler1:
 
 	; handle mmu data abort
 	BL		MMUHandleDataAbortException
+	; TODO if the running process was killed, don't restore context(idle loop)
 
 	; restore context
 	LDMFD	 SP!, {R12}

@@ -114,6 +114,7 @@ void MMUHandleDataAbortException(context_t* context)
 
 	process_t* runningProcess = SchedulerGetRunningProcess();
 
+
 	if(NULL == runningProcess)
 	{
 		// TODO: define where the context is located on the stack and put starting address into R0
@@ -284,10 +285,25 @@ static void mmuInitializeKernelMasterPageTable(pageTablePointer_t masterPageTabl
 	unsigned int region;
 	pageTablePointer_t table = masterPageTable;
 
-	for(region = 0; region < MEMORY_REGIONS-2; region++)
+	// TODO: MEMORY_REGIONS-2 or -1? => map page table regions into l1 master page table?
+	for(region = 0; region < MEMORY_REGIONS-1; region++)
 	{
 		memoryRegionPointer_t memoryRegion = MemoryManagerGetRegion(region);
 		mmuMapDirectRegionToKernelMasterPageTable(memoryRegion, table);
+	}
+
+	// mapping of exceptions
+	unsigned int physicalAddress;
+	unsigned int pageTableEntry = 0;
+	unsigned int baseAddress = 0;
+
+	for(physicalAddress = 0x4030CE04; physicalAddress < 0x4030CE3C; physicalAddress += 0x100000)
+	{
+		baseAddress = physicalAddress & UPPER_12_BITS_MASK;
+		pageTableEntry = baseAddress | MASTER_PAGE_TABLE_SECTION_FULL_ACCESS;
+		unsigned int tableOffset = mmuGetTableIndex(physicalAddress, INDEX_OF_L1_PAGE_TABLE);
+		*(table + tableOffset) = pageTableEntry;
+		//table++;
 	}
 }
 
@@ -301,12 +317,13 @@ static void mmuMapDirectRegionToKernelMasterPageTable(memoryRegionPointer_t memo
 	unsigned int pageTableEntry = 0;
 	unsigned int baseAddress = 0;
 
-	for(physicalAddress = memoryRegion->startAddress; physicalAddress < memoryRegion->endAddress; physicalAddress += L1_PAGE_TABLE_SIZE_16KB)
+	for(physicalAddress = memoryRegion->startAddress; physicalAddress < memoryRegion->endAddress; physicalAddress += 0x100000)
 	{
 		baseAddress = physicalAddress & UPPER_12_BITS_MASK;
 		pageTableEntry = baseAddress | MASTER_PAGE_TABLE_SECTION_FULL_ACCESS;
-		*table = pageTableEntry;
-		table++;
+		unsigned int tableOffset = mmuGetTableIndex(physicalAddress, INDEX_OF_L1_PAGE_TABLE);
+		*(table + tableOffset) = pageTableEntry;
+		//table++;
 	}
 }
 
@@ -421,7 +438,8 @@ static void mmuSetProcessPageTable(pageTablePointer_t table)
 
 static void mmuSetDomainToFullAccess(void)
 {
-	MMUSetDomainAccess(MMU_DOMAIN_FULL_ACCESS);
+	// TODO: 0x3 added for testing
+	MMUSetDomainAccess(0x3);
 }
 
 

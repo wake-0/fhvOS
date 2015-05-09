@@ -244,7 +244,7 @@ interrupt void pabt_handler() {
 /**
  * Is called on any prefetch abort.
  */
-#pragma INTERRUPT(dabt_handler, PABT)
-interrupt void dabt_handler() {
+#pragma INTERRUPT(dabt_handler1, PABT)
+interrupt void dabt_handler1() {
 	printf("dabt interrupt\n");
 }

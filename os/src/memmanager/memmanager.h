@@ -28,11 +28,23 @@
 #define L1_PAGE_TABLE_SIZE_16KB			0x4000
 #define L2_PAGE_TABLE_SIZE_1KB			0x400
 
+typedef struct PAGESTATUS_T pageStatus_t;
+
 #define BOOT_ROM_REGION						0
+static pageStatus_t romRegion[43];
+
 #define MEMORY_MAPPED_IO_REGION				1
+static pageStatus_t mmioRegion[261359];
+
 #define KERNEL_REGION						2
+static pageStatus_t kernelRegion[4095];
+
 #define PAGE_TABLE_REGION					3
+static pageStatus_t tableRegion[1279];
+
 #define PROCESS_REGION						4
+static pageStatus_t procRegion[256767];
+
 
 #define BOOT_ROM_START_ADDRESS				0x40000000
 #define BOOT_ROM_END_ADDRESS				0x4002BFFF
@@ -53,7 +65,7 @@
 #define MEMORY_OK							1
 #define MEMORY_NOT_OK						-1
 
-typedef struct
+typedef struct PAGESTATUS_T
 {
 	boolean_t reserved;
 	unsigned int processID;
