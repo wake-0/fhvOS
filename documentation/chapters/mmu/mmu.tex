@@ -2,6 +2,14 @@
 
 Bei der virtuellen Speicherverwaltung erfolgt die Umwandlung von vom ARM Prozessor generierten, virtuellen Adressen in physikalische Adressen durch die \emph{Memory Management Unit} (MMU). Dieses Kapitel enthält die Beschreibung des Designs und der Implementierung der virtuellen Speicherverwaltung des Betriebssystems sowie der Einstellungen der MMU.\\
 
+\subsection{Grundlegende Funktionsweise}
+
+\begin{figure}[H]
+	\includegraphics[scale=0.7]{figures/addressTranslation}
+	\caption{Zweistufiges Seitentabellensystem \cite[S. B3-1325]{ARM:ARM}}
+	\label{fig:}
+\end{figure}
+
 \subsection{Aufteilung des virtuellen Speichers und Mapping}
 
 Die \emph{VSMAv7} definiert zwei unabhängige Formate für translation tables \cite[S. B3-1318]{ARM:ARM}:
@@ -52,6 +60,32 @@ Der verwendete ARM Prozessor verfügt über zwei Register (\emph{Translation Tab
 \end{itemize}
 
 
+\begin{figure}[H]
+	\includegraphics[scale=0.8]{figures/ttbr0format}
+	\caption{TTBR0 Format \cite[S. B4-1726]{ARM:ARM}}
+	\label{fig:TTBR0Format}
+\end{figure}
+
+
+\begin{figure}[H]
+	\includegraphics[scale=0.8]{figures/ttbr1format}
+	\caption{TTBR1 Format \cite[S. B4-1730]{ARM:ARM}}
+	\label{fig:TTBR1Format}
+\end{figure}
+
+\begin{figure}[H]
+	\includegraphics[scale=0.7]{figures/firstLevelDescriptor}
+	\caption{First-Level Deskriptorformate \cite[S. B3-1326]{ARM:ARM}}
+	\label{fig:firstLevelDescriptor}
+\end{figure}
+
+\begin{figure}[H]
+	\includegraphics[scale=0.7]{figures/secondLevelDescriptor}
+	\caption{Secondt-Level Deskriptorformate \cite[S. B3-1327]{ARM:ARM}}
+	\label{fig:secondLevelDescriptor}
+\end{figure}
+
+
 Abbildung \ref{fig:MemoryMap} zeigt die Speicherverwaltung des Betriebssystems. Die rechte Seite stellt das physikalische Speichermapping dar und wurde dem Datenblatt des ARM \cite[S. 155]{ARM:TRM} entnommen. Die linke Seite zeigt die Aufteilung des virtuellen Speichers.\\
 
 \begin{figure}[H]
@@ -81,12 +115,18 @@ Abbildung \ref{fig:MemoryMap} zeigt die Speicherverwaltung des Betriebssystems. 
 
 Abbildung \ref{fig:largePageTranslation} zeigt die Umwandlung einer vom ARM Prozessor erzeugten virtuellen Adresse in eine physikalische Speicheradresse. Die Umwandlung wird vollständig durch die Prozessor-Hardware durchgeführt.
 
+
 \begin{figure}[H]
-	\includegraphics[scale=0.8]{figures/largePageTranslation}
-	\caption{Umwandlung einer virtuellen Adresse durch die ARM CPU \cite[S. B3-1337]{ARM:ARM}}
+	\includegraphics[scale=0.8]{figures/sectionTranslation}
+	\caption{1 MB Section Translation durch die ARM CPU \cite[S. B3-1335]{ARM:ARM}}
 	\label{fig:largePageTranslation}
 \end{figure}
 
+\begin{figure}[H]
+	\includegraphics[scale=0.8]{figures/smallPageTranslation}
+	\caption{Small Page Translation durch die ARM CPU \cite[S. B3-1337]{ARM:ARM}}
+	\label{fig:largePageTranslation}
+\end{figure}
 
 
 \subsection{Allokierung der Page Frames}
