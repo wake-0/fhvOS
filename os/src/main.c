@@ -109,6 +109,7 @@ int main(void)
 {
 	MMUInit();
 
+	/*
 	DeviceManagerInit();
 
 	device_t led3 = DeviceManagerGetDevice("LED3", 4);
@@ -136,7 +137,7 @@ int main(void)
 	SchedulerStart(timer);
 	//led1();
 
-
+	*/
 	while(1)
 	{
 		volatile int i = 0;

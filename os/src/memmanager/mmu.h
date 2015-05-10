@@ -24,6 +24,8 @@
 #define INDEX_OF_L1_PAGE_TABLE 			0x0
 #define INDEX_OF_L2_PAGE_TABLE 			0x1
 #define INDEX_OF_PAGE_FRAME				0x2
+#define TTBR1							0x1
+#define TTBR0							0x0
 
 #define VALID_PAGE_TABLE_OFFSET			0x0
 
@@ -40,7 +42,7 @@ typedef uint32_t* pageTablePointer_t;
 
 typedef struct
 {
-	unsigned int sectionBaseAddress : 22;
+	unsigned int sectionBaseAddress;
 	unsigned int accessPermission : 2;
 	unsigned int domain : 4;
 	unsigned int cachedBuffered : 2;
@@ -51,7 +53,7 @@ typedef struct
 
 typedef struct
 {
-	unsigned int pageBaseAddress : 20;
+	unsigned int pageBaseAddress;
 	unsigned int accessPermission : 2;
 	unsigned int TEX : 3;
 	unsigned int cachedBuffered : 2;
