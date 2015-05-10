@@ -19,6 +19,7 @@
 #define DESCRIPTOR_TYPE_SECTION 		0x2
 #define DESCRIPTOR_TYPE_PAGE_TABLE 		0x1
 #define DESCRIPTOR_TYPE_SMALL_PAGE		0x2
+#define DESCRIPTOR_TYPE_LARGE_PAGE		0x1
 #define FULL_ACCESS						0x3
 #define INDEX_OF_L1_PAGE_TABLE 			0x0
 #define INDEX_OF_L2_PAGE_TABLE 			0x1
@@ -26,13 +27,36 @@
 
 #define VALID_PAGE_TABLE_OFFSET			0x0
 
-#define N 0x1
+#define BOUNDARY_SELECTION_MASK					0x7
+#define BOUNDARY_AT_HALF_OF_VIRTUAL_MEMORY		0x1
+#define BOUNDARY_AT_QUARTER_OF_MEMORY			0x6
+#define N										BOUNDARY_AT_QUARTER_OF_MEMORY
 #define L1_PAGE_TABLE_INDEX_NATIVE_MASK 0xFFF00000
 #define L1_PAGE_TABLE_INDEX_MASK (L1_PAGE_TABLE_INDEX_NATIVE_MASK >> N) & L1_PAGE_TABLE_INDEX_NATIVE_MASK
 #define L2_PAGE_TABLE_INDEX_MASK 	0xFF000
 #define PAGE_FRAME_INDEX_MASK		0xFFF
 
 typedef uint32_t* pageTablePointer_t;
+
+typedef struct
+{
+	unsigned int sectionBaseAddress : 22;
+	unsigned int accessPermission : 2;
+	unsigned int domain : 4;
+	unsigned int cachedBuffered : 2;
+	unsigned int descriptorType : 2;
+
+} firstLevelDescriptor_t;
+
+
+typedef struct
+{
+	unsigned int pageBaseAddress : 20;
+	unsigned int accessPermission : 2;
+	unsigned int TEX : 3;
+	unsigned int cachedBuffered : 2;
+	unsigned int descriptorType : 2;
+} secondLevelDescriptor_t;
 
 
 extern int MMUInit(void);
