@@ -32,7 +32,7 @@
 
 
 %general data
-\newcommand{\myauthor}{Höss, Petrovi\'c, Wallis}
+\newcommand{\myauthor}{Nicolaj Höss, Marko Petrovi\'c, Kevin Wallis}
 \newcommand{\mytitle}{Dokumentation des OS}
 \newcommand{\myuniversity}{Fachhochschule Vorarlberg}
 \newcommand{\mycourse}{S1: Softwarelösungen für ressourcenbeschränkte Systeme}
@@ -60,6 +60,32 @@
 \cfoot[]{}
 %footer right
 \ofoot[]{\thepage\ von \pageref{LastPage}}
+
+\usepackage{color}				% defining syntax colours
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{ 
+  language=Matlab, 
+  backgroundcolor=\color{white},
+  numbers=left,
+  numbersep=5pt,
+  showstringspaces=false,
+  frame=single,
+  rulecolor=\color{black},
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  tabsize=2,
+  breaklines=true,
+  captionpos=tl,
+  basicstyle=\footnotesize,
+  commentstyle=\color{mygreen},
+  keywordstyle=\color{blue},     
+  stringstyle=\color{mymauve},
+  postbreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\color{red}\hookrightarrow\space}}}
+
 
 \begin{document}
 

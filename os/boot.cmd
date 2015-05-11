@@ -8,8 +8,8 @@
  */
 
 
--stack  0xFFFFFF                             /* SOFTWARE STACK SIZE           */
--heap   0xFFFFFF                             /* HEAP AREA SIZE                */
+-stack  0x0FFFFF                             /* SOFTWARE STACK SIZE           */
+-heap   0x0FFFFF                             /* HEAP AREA SIZE                */
 
 
 // set program starting point
@@ -26,7 +26,7 @@ MEMORY
 	bootROM128:				o = 0x40000000	l = 0x1FFFF			// 128kB BOOT ROM
 	bootROM48:				o = 0x40020000	l = 0xBFFF			// 48kB BOOT ROM
     internalSRAM:     		o = 0x402F0400  l = 0x0000FC00  	// 64kB internal SRAM
-    externalSDRAM:   		o = 0x80000000  l = 0x40000000		// 1GB external DDR Bank 0 // TODO This should be 0x4..
+    externalSDRAM:   		o = 0x80000000  l = 0x3FFFFFFF		// 1GB external DDR Bank 0 // TODO This should be 0x4..
     exceptions:				o = 0x4030CE04	l = 0xC4
 }
 

@@ -107,8 +107,9 @@ int foo(int value);
 
 int main(void)
 {
-	//MMUInit();
+	MMUInit();
 
+	/*
 	DeviceManagerInit();
 
 	device_t led3 = DeviceManagerGetDevice("LED3", 4);
@@ -120,9 +121,9 @@ int main(void)
 
 	SchedulerInit();
 	SchedulerStartProcess(&led2);
-	SchedulerStartProcess(&led1);
-	SchedulerStartProcess(&process3);
-	SchedulerStartProcess(&ConsoleProcess);
+	//SchedulerStartProcess(&led1);
+	//SchedulerStartProcess(&process3);
+	//SchedulerStartProcess(&ConsoleProcess);
 
 	device_t timer = DeviceManagerGetDevice("TIMER2", 6);
 
@@ -136,6 +137,7 @@ int main(void)
 	SchedulerStart(timer);
 	//led1();
 
+	*/
 	while(1)
 	{
 		volatile int i = 0;

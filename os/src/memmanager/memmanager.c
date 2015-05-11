@@ -31,10 +31,20 @@ memoryRegion_t memorySections[MEMORY_REGIONS];
 int MemoryManagerInit()
 {
 	memoryManagerInitializeRegion(&memorySections[BOOT_ROM_REGION], true, BOOT_ROM_START_ADDRESS, BOOT_ROM_END_ADDRESS);
+	memorySections[BOOT_ROM_REGION].pageStatus = &romRegion[0];
+
 	memoryManagerInitializeRegion(&memorySections[MEMORY_MAPPED_IO_REGION], true, MEMORY_MAPPED_IO_START_ADDRESS, MEMORY_MAPPED_IO_END_ADDRESS);
+	memorySections[MEMORY_MAPPED_IO_REGION].pageStatus = &mmioRegion[0];
+
 	memoryManagerInitializeRegion(&memorySections[KERNEL_REGION], true, KERNEL_START_ADDRESS, KERNEL_END_ADDRESS);
+	memorySections[KERNEL_REGION].pageStatus = &kernelRegion[0];
+
 	memoryManagerInitializeRegion(&memorySections[PAGE_TABLE_REGION], true, PAGE_TABLES_START_ADDRESS, PAGE_TABLES_END_ADDRESS);
+	memorySections[PAGE_TABLE_REGION].pageStatus = &tableRegion[0];
+
 	memoryManagerInitializeRegion(&memorySections[PROCESS_REGION], false, PROCESS_PAGES_START_ADDRESS, PROCESS_PAGES_END_ADDRESS);
+	memorySections[PROCESS_REGION].pageStatus = &procRegion[0];
+
 	return MEMORY_OK;
 }
 
@@ -49,12 +59,12 @@ static void memoryManagerInitializeRegion(memoryRegionPointer_t memoryRegion, bo
 {
 	memoryRegion->startAddress 		= startAddress;
 	memoryRegion->endAddress 		= endAddress;
-	memoryRegion->directAccess 		= access;
+	//memoryRegion->directAccess 		= access;
 	int length 						= endAddress - startAddress;
 	memoryRegion->numberOfPages 	= (length / PAGE_SIZE_4KB);
 	memoryRegion->reservedPages 	= 0;
-	memoryRegion->pageStatus	 	= (pageStatusPointer_t)malloc( sizeof(pageStatus_t) * memoryRegion->numberOfPages);
-	memset(memoryRegion->pageStatus,0, sizeof(pageStatus_t) * memoryRegion->numberOfPages);
+	//memoryRegion->pageStatus	 	= (pageStatusPointer_t)malloc( sizeof(pageStatus_t) * memoryRegion->numberOfPages);
+	//memset(memoryRegion->pageStatus,0, sizeof(pageStatus_t) * memoryRegion->numberOfPages);
 	// TODO Handle case (pageStatus == 0)
 }
 
@@ -294,7 +304,7 @@ static void memoryManagerReserveDirectMappedRegion(unsigned int memoryRegion)
 {
 	memoryRegionPointer_t region = MemoryManagerGetRegion(memoryRegion);
 
-	if(TRUE == region->directAccess)
+	//if(TRUE == region->directAccess)
 	{
 		MemoryManagerReserveAllPages(region);
 	}

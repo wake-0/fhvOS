@@ -12,9 +12,8 @@
 
 #define MASTER_PAGE_TABLE_SECTION_FULL_ACCESS	0xC02		// AP = 0b11, first two bits are 0b10 for section entry
 #define UPPER_12_BITS_MASK						0xFFF00000
-#define BOUNDARY_SELECTION_MASK					0x7
-#define BOUNDARY_AT_HALF_OF_VIRTUAL_MEMORY		0x1
-#define BOUNDARY_AT_QUARTER_OF_MEMORY			0x6
+#define UPPER_22_BITS_MASK						0xFFFFFC00
+#define UPPER_20_BITS_MASK						0xFFFFF000
 #define TTBRC_N									BOUNDARY_AT_HALF_OF_VIRTUAL_MEMORY
 #define FAULT_STATUS_MASK_BITS_0_TO_3			0xF
 #define FAULT_STATUS_MASK_BIT_4					0x400
@@ -29,6 +28,30 @@
 #define SET_PAGE_FRAME_IS_USED						1
 #define L1_PAGE_TABLE_ENTRIES					4096
 #define L2_PAGE_TABLE_ENTRIES					256
+#define SECTION_BASE_POSITION					20
+#define SECTION_PAGE_TABLE_MASK					22
+#define PAGE_TABLE_BASE_POSITION				10
+#define AP_L1_POSITION							10
+#define AP_L2_POSITION							4
+#define CB_POSITION								2
+#define DOMAIN_POSITION							5
+#define SMALL_PAGE_BASE_MASK					0xFFFFF000
+#define SMALL_PAGE_BASE_POSITION				12
+
+// cache and buffer attributes
+#define	NON_CACHED_NON_BUFFERED	            	0x0
+#define	NON_CACHED_BUFFERED	            		0x1
+#define	WRITE_THROUGH	            			0x2
+#define	WRITE_BACK					            0x3
+
+// domain attributes
+#define DOMAIN_NO_ACCESS						0x0
+#define DOMAIN_CLIENT_ACCESS					0x1
+#define DOMAIN_MANAGER_ACCESS					0x3
+
+// access permission settings, see p. B3-1358
+#define AP_FULL_ACCESS							0x3
+#define AP_NO_ACCESS							0x0
 
 // MMU FAULT STATUS VALUES
 #define ALIGNMENT_FAULT							0x1
@@ -48,7 +71,7 @@ static void mmuSetKernelMasterPageTable(pageTablePointer_t table);
 static void mmuSetProcessPageTable(pageTablePointer_t table);
 static void mmuSetDomainToFullAccess(void);
 static pageTablePointer_t mmuCreateMasterPageTable(uint32_t virtualStartAddress, uint32_t virtualEndAddress);
-static int mmuGetTableIndex(unsigned int virtualAddress, unsigned int indexType);
+static int mmuGetTableIndex(unsigned int virtualAddress, unsigned int indexType, unsigned int ttbrType);
 static pageTablePointer_t mmuGetAddressSpecificL2PageTable(pageTablePointer_t pageTableL1, unsigned int virtualAddress);
 static void mmuSetTranslationTableSelectionBoundary(unsigned int selectionBoundary);
 static unsigned int mmuGetFaultStatus(void);
@@ -60,6 +83,8 @@ static void mmuSetPageFrameUsageStatus(unsigned int pageFrameNumber, unsigned in
 static address_t mmuGetAddressOfPageFrameNumber(unsigned int pageFrameNumber);
 static void freeAllPageFramesOfL2PageTable(pageTablePointer_t l2PageTable);
 static void mmuMapDirectRegionToKernelMasterPageTable(memoryRegionPointer_t memoryRegion, pageTablePointer_t table);
+static unsigned int mmuCreateL1PageTableEntry(firstLevelDescriptor_t PTE);
+static unsigned int mmuCreateL2PageTableEntry(secondLevelDescriptor_t PTE);
 
 // accessed by MMULoadDabtData in coprocessor.asm
 volatile uint32_t dabtAccessedVirtualAddress;
@@ -113,6 +138,7 @@ void MMUHandleDataAbortException(context_t* context)
 	MMULoadDabtData();
 
 	process_t* runningProcess = SchedulerGetRunningProcess();
+
 
 	if(NULL == runningProcess)
 	{
@@ -175,8 +201,15 @@ static void mmuCreateAndFillL2PageTable(unsigned int virtualAddress, process_t* 
 {
 	// create a L2 page table and write it into L1 page table
 	pageTablePointer_t newL2PageTable = MemoryManagerCreatePageTable(L2_PAGE_TABLE);
-	unsigned int tableIndex = mmuGetTableIndex(virtualAddress, INDEX_OF_L1_PAGE_TABLE);
-	*(runningProcess->pageTableL1 + tableIndex) = newL2PageTable;
+	unsigned int tableIndex = mmuGetTableIndex(virtualAddress, INDEX_OF_L1_PAGE_TABLE, TTBR0);
+
+	firstLevelDescriptor_t pageTableEntry;
+	pageTableEntry.sectionBaseAddress 	= (unsigned int)newL2PageTable & SECTION_PAGE_TABLE_MASK;
+	pageTableEntry.descriptorType 		= DESCRIPTOR_TYPE_PAGE_TABLE;
+	pageTableEntry.cachedBuffered 		= WRITE_BACK;
+	pageTableEntry.domain 				= DOMAIN_MANAGER_ACCESS;
+
+	*(runningProcess->pageTableL1 + tableIndex) = mmuCreateL1PageTableEntry(pageTableEntry);
 
 	mmuMapFreePageFrameIntoL2PageTable(virtualAddress, newL2PageTable);
 }
@@ -189,8 +222,16 @@ static void mmuMapFreePageFrameIntoL2PageTable(unsigned int virtualAddress, page
 {
 	// TODO: handle the case no free page frames are left
 	address_t freePageFrame = mmuGetFreePageFrame();
-	unsigned int tableIndex = mmuGetTableIndex(virtualAddress, INDEX_OF_L2_PAGE_TABLE);
-	*(l2PageTable + tableIndex) = freePageFrame;
+
+	secondLevelDescriptor_t pageTableEntry;
+	pageTableEntry.pageBaseAddress 	= freePageFrame & SMALL_PAGE_BASE_MASK;
+	pageTableEntry.descriptorType  	= DESCRIPTOR_TYPE_SMALL_PAGE;
+	pageTableEntry.accessPermission = AP_FULL_ACCESS;
+	pageTableEntry.cachedBuffered 	= WRITE_BACK;
+
+	// write into table
+	unsigned int tableIndex = mmuGetTableIndex(virtualAddress, INDEX_OF_L2_PAGE_TABLE, TTBR0);
+	*(l2PageTable + tableIndex) = mmuCreateL2PageTableEntry(pageTableEntry);
 }
 
 
@@ -284,11 +325,37 @@ static void mmuInitializeKernelMasterPageTable(pageTablePointer_t masterPageTabl
 	unsigned int region;
 	pageTablePointer_t table = masterPageTable;
 
-	for(region = 0; region < MEMORY_REGIONS-2; region++)
+	// TODO: MEMORY_REGIONS-2 or -1? => map page table regions into l1 master page table?
+	for(region = 0; region < MEMORY_REGIONS-1; region++)
 	{
 		memoryRegionPointer_t memoryRegion = MemoryManagerGetRegion(region);
 		mmuMapDirectRegionToKernelMasterPageTable(memoryRegion, table);
 	}
+
+	// mapping of exceptions
+	unsigned int physicalAddress;
+	unsigned int pageTableEntry = 0;
+	unsigned int baseAddress = 0;
+
+	/* TODO: NOT NEEDED because exception handlers are mapped to addresses 0x4030CE04 and above, this is kernel space -> delete it afterwards
+	for(physicalAddress = 0x4030CE04; physicalAddress < 0x4030CE3C; physicalAddress += 0x100000)
+	{
+		baseAddress = physicalAddress & UPPER_12_BITS_MASK;
+		pageTableEntry = baseAddress | MASTER_PAGE_TABLE_SECTION_FULL_ACCESS;
+		unsigned int tableOffset = mmuGetTableIndex(physicalAddress, INDEX_OF_L1_PAGE_TABLE);
+		*(table + tableOffset) = pageTableEntry;
+		//table++;
+	}
+
+
+	for(physicalAddress = 0x20000; physicalAddress < 0x2001C; physicalAddress += 0x100000)
+	{
+		baseAddress = physicalAddress & UPPER_12_BITS_MASK;
+		pageTableEntry = baseAddress | MASTER_PAGE_TABLE_SECTION_FULL_ACCESS;
+		unsigned int tableOffset = mmuGetTableIndex(physicalAddress, INDEX_OF_L1_PAGE_TABLE);
+		*(table + tableOffset) = pageTableEntry;
+		//table++;
+	} */
 }
 
 
@@ -298,23 +365,66 @@ static void mmuInitializeKernelMasterPageTable(pageTablePointer_t masterPageTabl
 static void mmuMapDirectRegionToKernelMasterPageTable(memoryRegionPointer_t memoryRegion, pageTablePointer_t table)
 {
 	unsigned int physicalAddress;
-	unsigned int pageTableEntry = 0;
-	unsigned int baseAddress = 0;
+	//unsigned int pageTableEntry = 0;
+	//unsigned int baseAddress = 0;
+	firstLevelDescriptor_t pageTableEntry;
 
-	for(physicalAddress = memoryRegion->startAddress; physicalAddress < memoryRegion->endAddress; physicalAddress += L1_PAGE_TABLE_SIZE_16KB)
+	for(physicalAddress = memoryRegion->startAddress; physicalAddress < memoryRegion->endAddress; physicalAddress += 0x100000)
 	{
-		baseAddress = physicalAddress & UPPER_12_BITS_MASK;
-		pageTableEntry = baseAddress | MASTER_PAGE_TABLE_SECTION_FULL_ACCESS;
-		*table = pageTableEntry;
-		table++;
+		pageTableEntry.sectionBaseAddress 	= physicalAddress & UPPER_12_BITS_MASK;
+		pageTableEntry.descriptorType 		= DESCRIPTOR_TYPE_SECTION;
+		pageTableEntry.cachedBuffered 		= WRITE_BACK;
+		pageTableEntry.accessPermission 	= AP_FULL_ACCESS;
+		pageTableEntry.domain 				= DOMAIN_MANAGER_ACCESS;
+
+		//baseAddress = physicalAddress & UPPER_12_BITS_MASK;
+		//pageTableEntry = baseAddress | MASTER_PAGE_TABLE_SECTION_FULL_ACCESS;
+		unsigned int tableOffset = mmuGetTableIndex(physicalAddress, INDEX_OF_L1_PAGE_TABLE, TTBR1);
+		*(table + tableOffset) = mmuCreateL1PageTableEntry(pageTableEntry);
+		//table++;
 	}
 }
 
 
-// TODO: implement
-static void mmuWritePageTableEntryL2(address_t physicalAddress)
+static unsigned int mmuCreateL1PageTableEntry(firstLevelDescriptor_t PTE)
 {
+	unsigned int entry = (PTE.accessPermission << AP_L1_POSITION) | (PTE.domain << DOMAIN_POSITION)
+			| (PTE.cachedBuffered << CB_POSITION) | PTE.descriptorType;
 
+	switch(PTE.descriptorType)
+	{
+		case DESCRIPTOR_TYPE_SECTION:
+			entry |= (PTE.sectionBaseAddress &   UPPER_12_BITS_MASK);
+			break;
+		case DESCRIPTOR_TYPE_PAGE_TABLE:
+			entry |= (PTE.sectionBaseAddress & UPPER_22_BITS_MASK);
+			break;
+		default:
+			return FAULT_PAGE_TABLE_ENTRY;
+	}
+
+	return entry;
+}
+
+
+
+static unsigned int mmuCreateL2PageTableEntry(secondLevelDescriptor_t PTE)
+{
+	unsigned int entry = (PTE.accessPermission << AP_L2_POSITION)
+					| (PTE.cachedBuffered << CB_POSITION) | PTE.descriptorType;
+
+	switch(PTE.descriptorType)
+	{
+		case DESCRIPTOR_TYPE_SMALL_PAGE:
+			entry |= (PTE.pageBaseAddress & UPPER_20_BITS_MASK);
+			break;
+		case DESCRIPTOR_TYPE_LARGE_PAGE:
+			return FAULT_PAGE_TABLE_ENTRY;		// TODO: implement if needed
+		default:
+			return FAULT_PAGE_TABLE_ENTRY;
+	}
+
+	return entry;
 }
 
 
@@ -421,7 +531,8 @@ static void mmuSetProcessPageTable(pageTablePointer_t table)
 
 static void mmuSetDomainToFullAccess(void)
 {
-	MMUSetDomainAccess(MMU_DOMAIN_FULL_ACCESS);
+	// TODO: 0x3 added for testing
+	MMUSetDomainAccess(0x3);
 }
 
 
@@ -438,7 +549,7 @@ static void mmuSetTranslationTableSelectionBoundary(unsigned int selectionBounda
 
 static pageTablePointer_t mmuGetAddressSpecificL2PageTable(pageTablePointer_t pageTableL1, unsigned int virtualAddress)
 {
-	int tableOffset = mmuGetTableIndex(virtualAddress, INDEX_OF_L2_PAGE_TABLE);
+	int tableOffset = mmuGetTableIndex(virtualAddress, INDEX_OF_L2_PAGE_TABLE, TTBR0);
 
 	if(tableOffset < VALID_PAGE_TABLE_OFFSET)
 	{
@@ -455,14 +566,25 @@ static pageTablePointer_t mmuGetAddressSpecificL2PageTable(pageTablePointer_t pa
 
 
 /**
- * \brief	Gets the L1, L2 or page frame index out of a virtual address.
+ * \brief	Gets the L1, L2 or page frame index out of a virtual address. see p.B3-1335
  */
-static int mmuGetTableIndex(unsigned int virtualAddress, unsigned int indexType)
+static int mmuGetTableIndex(unsigned int virtualAddress, unsigned int indexType, unsigned int ttbrType)
 {
+	unsigned int upperBitsMask = 0;
+
+	if(TTBR1 == ttbrType)
+	{
+		upperBitsMask = L1_PAGE_TABLE_INDEX_NATIVE_MASK;
+	}
+	else
+	{
+		upperBitsMask = L1_PAGE_TABLE_INDEX_MASK;
+	}
+
 	switch(indexType)
 	{
 		case INDEX_OF_L1_PAGE_TABLE:
-			return ((virtualAddress & L1_PAGE_TABLE_INDEX_MASK) >> L1_INDEX_POSITION_IN_VIRTUAL_ADDRESS);
+			return ((virtualAddress & upperBitsMask) >> L1_INDEX_POSITION_IN_VIRTUAL_ADDRESS);
 		case INDEX_OF_L2_PAGE_TABLE:
 			return ((virtualAddress & L2_PAGE_TABLE_INDEX_MASK) >> L2_INDEX_POSITION_IN_VIRTUAL_ADDRESS);
 		case INDEX_OF_PAGE_FRAME:

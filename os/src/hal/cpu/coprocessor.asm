@@ -114,13 +114,14 @@ currentStatus: .field currentStatusInSCTLR, 32
 
 ; see p. B4-1711, accessing SCTLR register
 MMUEnable:
-    STMFD	SP!, {R0,R1}
+    STMFD	SP!, {R0}
 	MRC 	p15, #0, R0, C1, C0, #0
 	; add SCTLR_ICACHE | SCTLR_DCACHE | SCTLR_PREDICT | SCTLR_MMUEN = 0x1805
-	MOV 	R1, #0x01
-	ORR 	R0, R0, R1
+	ORR 	R0, R0, #1
+    DSB
 	MCR		p15, #0, R0, C1, C0, #0
-   	LDMFD 	SP!, {R0,R1}
+	ISB
+   	LDMFD 	SP!, {R0}
    	MOV 	PC, LR
 
 
