@@ -76,9 +76,12 @@ void ConsoleProcess()
 					commandPos--;
 					command[commandPos] = '\0';
 				}
-				if (commandPos >= 0)
+				else
 				{
 					command[commandPos++] = buf[0];
+				}
+				if (commandPos > 0)
+				{
 					DeviceManagerWrite(consoleDevice, buf, 1);
 				}
 			}
