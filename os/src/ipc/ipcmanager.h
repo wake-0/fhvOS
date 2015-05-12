@@ -16,9 +16,9 @@
 #define IPC_MANAGER_NOT_AUTHORISED		(-3)
 #define IPC_MANAGER_NO_MESSAGE_AVAIL	(-4)
 
-int IpcManagerRegisterNamespace(char* namespace_name);
-int IpcManagerSendMessage(char* namespace_name, char* message);
-int IpcManagerHasMessage(char* namespace_name);
-int IpcManagerGetNextMessage(char* namespace_name, char* message_buffer, int len);
+extern int IpcManagerRegisterNamespace(char* namespace_name);
+extern int IpcManagerSendMessage(char* namespace_name, char* message);
+extern int IpcManagerHasMessage(char* namespace_name);
+extern int IpcManagerGetNextMessage(char* namespace_name, char* message_buffer, int len);
 
 #endif /* IPC_IPCMANAGER_H_ */
