@@ -169,6 +169,10 @@ static boolean_t acceptChar(char ch)
 	case 'A' ... 'Z':
 	case '0' ... '9':
 	case '/':
+	case ' ':
+	case '*':
+	case '|':
+	case '"':
 		return true;
 	}
 	return false;
