@@ -49,6 +49,8 @@ void ConsoleProcess()
 	{
 		printPrompt();		// Prompt: root@fhvos#
 
+		//scanf("%s", command);
+
 		memset(&command[0], '\0', CONSOLE_MAX_COMMAND_LENGTH);
 		int commandPos = 0;
 
@@ -136,4 +138,43 @@ void clearScreen()
 	{
 		DeviceManagerWrite(consoleDevice, "                                      \r\n", 42);
 	}
+}
+
+struct __FILE
+{
+  int handle;
+
+  /* Whatever you require here. If the only file you are using is */
+  /* standard output using printf() for debugging, no file handling */
+  /* is required. */
+};
+
+/* FILE is typedef’d in stdio.h. */
+
+FILE __stdout;
+
+int fputc(int ch, FILE *f)
+{
+    char tempch = ch;
+    switch (tempch) {
+    case '\n':
+    	DeviceManagerWrite(consoleDevice, "\r\n", 2);
+    	break;
+    default:
+		DeviceManagerWrite(consoleDevice, &tempch, 1);
+    	break;
+    }
+    return ch;
+}
+
+int fputs(const char *s, FILE *f)
+{
+	int cnt = 0;
+	char tmpChar = s[cnt];
+	while (tmpChar != '\0') {
+		DeviceManagerWrite(consoleDevice, &tmpChar, 1);
+		cnt++;
+		tmpChar = s[cnt];
+	}
+	return 0;
 }
