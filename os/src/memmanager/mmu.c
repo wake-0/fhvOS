@@ -21,11 +21,13 @@
 #define L2_INDEX_POSITION_IN_VIRTUAL_ADDRESS	12
 #define TTBR1_BASE_ADDRESS_MASK					0xFFFFC000
 #define TTBR0_BASE_ADDRESS_MASK					(0xFFFFC000 >> TTBRC_N) | 0xFFFFC000
-#define BIT_MAP_LENGTH							(PROCESS_PAGES_END_ADDRESS - PROCESS_PAGES_START_ADDRESS) / PAGE_SIZE_4KB
-#define PAGE_FRAME_NOT_FOUND					-1
+#define NUMBER_OF_PAGE_TABLE_PAGE_FRAMES		((0x814FFFFF - 0x81000000) / 0x1000)
+#define BIT_MAP_LENGTH							(((SDRAM_END_ADDRESS - PAGE_TABLES_START_ADDRESS) / PAGE_SIZE_4KB) / 8)
+#define BIT_MAP_LENGTH_FOR_PAGE_TABLES			(((0x814FFFFF - 0x81000000) / 0x1000) / 8)
+#define PAGE_FRAME_NOT_FOUND					0
 #define PAGE_FRAME_STATUS_MASK					1
-#define SET_PAGE_FRAME_IS_FREE						0
-#define SET_PAGE_FRAME_IS_USED						1
+#define SET_PAGE_FRAME_IS_FREE					0
+#define SET_PAGE_FRAME_IS_USED					1
 #define L1_PAGE_TABLE_ENTRIES					4096
 #define L2_PAGE_TABLE_ENTRIES					256
 #define SECTION_BASE_POSITION					20
@@ -75,16 +77,22 @@ static uint32_t mmuGetTableIndex(unsigned int virtualAddress, unsigned int index
 static pageTablePointer_t mmuGetAddressSpecificL2PageTable(pageTablePointer_t pageTableL1, unsigned int virtualAddress);
 static void mmuSetTranslationTableSelectionBoundary(unsigned int selectionBoundary);
 static unsigned int mmuGetFaultStatus(void);
-static address_t mmuGetFreePageFrame(void);
+static address_t mmuGetFreePageFrameForProcess(void);
 static void mmuCreateAndFillL2PageTable(unsigned int virtualAddress, process_t* runningProcess);
 static void mmuMapFreePageFrameIntoL2PageTable(unsigned int virtualAddress, pageTablePointer_t l2PageTable);
-static int mmuGetFreePageFrameNumber(void);
 static void mmuSetPageFrameUsageStatus(unsigned int pageFrameNumber, unsigned int pageFrameStatus);
 static address_t mmuGetAddressOfPageFrameNumber(unsigned int pageFrameNumber);
 static void freeAllPageFramesOfL2PageTable(pageTablePointer_t l2PageTable);
 static void mmuMapDirectRegionToKernelMasterPageTable(memoryRegionPointer_t memoryRegion, pageTablePointer_t table);
 static unsigned int mmuCreateL1PageTableEntry(firstLevelDescriptor_t PTE);
 static unsigned int mmuCreateL2PageTableEntry(secondLevelDescriptor_t PTE);
+static address_t mmuGetFreePageFrameForPageTable(unsigned int pageFramesToReserve);
+
+
+
+
+static pageAddressPointer_t mmuCreatePageTable(unsigned int pageTableType);
+
 
 // accessed by MMULoadDabtData in coprocessor.asm
 volatile uint32_t dabtAccessedVirtualAddress;
@@ -206,7 +214,7 @@ static unsigned int mmuGetFaultStatus(void)
 static void mmuCreateAndFillL2PageTable(unsigned int virtualAddress, process_t* runningProcess)
 {
 	// create a L2 page table and write it into L1 page table
-	pageTablePointer_t newL2PageTable = MemoryManagerCreatePageTable(L2_PAGE_TABLE);
+	pageTablePointer_t newL2PageTable = mmuCreatePageTable(L2_PAGE_TABLE);
 	unsigned int tableIndex = mmuGetTableIndex(virtualAddress, INDEX_OF_L1_PAGE_TABLE, TTBR0);
 
 	firstLevelDescriptor_t pageTableEntry;
@@ -227,7 +235,7 @@ static void mmuCreateAndFillL2PageTable(unsigned int virtualAddress, process_t* 
 static void mmuMapFreePageFrameIntoL2PageTable(unsigned int virtualAddress, pageTablePointer_t l2PageTable)
 {
 	// TODO: handle the case no free page frames are left
-	address_t freePageFrame = mmuGetFreePageFrame();
+	address_t freePageFrame = mmuGetFreePageFrameForProcess();
 
 	secondLevelDescriptor_t pageTableEntry;
 	pageTableEntry.pageBaseAddress 	= freePageFrame & SMALL_PAGE_BASE_MASK;
@@ -265,7 +273,7 @@ int MMUSwitchToProcess(process_t* process)
  */
 int MMUInitProcess(process_t* process)
 {
-	pageTablePointer_t l1PageTable = MemoryManagerCreatePageTable(L1_PAGE_TABLE);
+	pageTablePointer_t l1PageTable = mmuCreatePageTable(L1_PAGE_TABLE);
 	process->pageTableL1 = l1PageTable;
 	return MMU_OK;
 }
@@ -281,7 +289,7 @@ int MMUFreeAllPageFramesOfProcess(process_t* process)
 
 	for(pageTableEntry = 0; pageTableEntry < L1_PAGE_TABLE_ENTRIES; pageTableEntry++)
 	{
-		pageTablePointer_t l2PageTable = *(process->pageTableL1 + pageTableEntry);
+		pageTablePointer_t l2PageTable = (pageTablePointer_t)*(process->pageTableL1 + pageTableEntry);
 		freeAllPageFramesOfL2PageTable(l2PageTable);
 	}
 
@@ -296,7 +304,7 @@ static void freeAllPageFramesOfL2PageTable(pageTablePointer_t l2PageTable)
 
 	for(pageTableEntry = 0; pageTableEntry < L2_PAGE_TABLE_ENTRIES; pageTableEntry++)
 	{
-		unsigned int l2PageTableEntry = *(l2PageTable + pageTableEntry);
+		unsigned int l2PageTableEntry = (unsigned int)*(l2PageTable + pageTableEntry);
 		// TODO: finish
 	}
 }
@@ -314,7 +322,7 @@ static void mmuCreateMasterPageTable(uint32_t virtualStartAddress, uint32_t virt
 		return;
 	}
 
-	kernelMasterPageTable = MemoryManagerCreatePageTable(L1_PAGE_TABLE);
+	kernelMasterPageTable = mmuCreatePageTable(L1_PAGE_TABLE);
 	mmuInitializeKernelMasterPageTable();
 }
 
@@ -416,46 +424,134 @@ static unsigned int mmuCreateL2PageTableEntry(secondLevelDescriptor_t PTE)
 
 
 /**
+ * \brief	Checks the status of a page frame in the bits map.
+ */
+static int mmuPageFrameIsUsed(unsigned int pageFrameNumber)
+{
+	return (pageFramesBitMap[pageFrameNumber/8] >> (pageFrameNumber % 8)) & 0x1;
+}
+
+
+/**
  * \brief	Gets a free page frame, and sets its status to used;
  * 			Returns physical address of page frame if successful, NULL otherwise.
  */
-static address_t mmuGetFreePageFrame(void)
+static address_t mmuGetFreePageFrameForProcess(void)
 {
-	int freePageFrame = mmuGetFreePageFrameNumber();
+	unsigned int bitMapByte;
+	unsigned int pageNumberOfByte;
+	unsigned int pageFrameNumber;
 
-	if(PAGE_FRAME_NOT_FOUND == freePageFrame)
+	for(bitMapByte = BIT_MAP_LENGTH_FOR_PAGE_TABLES + 1; bitMapByte < sizeof(pageFramesBitMap); bitMapByte++)
+	{
+		for(pageNumberOfByte = 0; pageNumberOfByte < 8; pageNumberOfByte++)
+		{
+			pageFrameNumber = ((bitMapByte * 8) + pageNumberOfByte);
+
+			if(!mmuPageFrameIsUsed(pageFrameNumber))
+			{
+				break;
+			}
+			else
+			{
+				pageFrameNumber = 0;
+			}
+		}
+
+		if(pageFrameNumber != 0)
+		{
+			break;
+		}
+	}
+
+	if(PAGE_FRAME_NOT_FOUND == pageFrameNumber)
 	{
 		printf("\nPROCESS MEMORY SPACE USED UP!\n");
 		return NULL;
 	}
 
-	mmuSetPageFrameUsageStatus(freePageFrame, SET_PAGE_FRAME_IS_USED);
-	return mmuGetAddressOfPageFrameNumber(freePageFrame);
+	mmuSetPageFrameUsageStatus(pageFrameNumber, SET_PAGE_FRAME_IS_USED);
+	return mmuGetAddressOfPageFrameNumber(pageFrameNumber);
 }
 
 
 /**
- * \brief	Gets the number of a free page frame in the page frames bitmap.
- * 			Returns -1 if no free page frame left.
+ * \brief	Allocates the needed space for L1 and L2 page tables.
+ * 			Returns physical start address of page table if successful, NULL otherwise.
  */
-static int mmuGetFreePageFrameNumber(void)
+static address_t mmuGetFreePageFrameForPageTable(unsigned int pageFramesToReserve)
 {
 	unsigned int bitMapByte;
 	unsigned int pageNumberOfByte;
 
-	for(bitMapByte = 0; bitMapByte < sizeof(pageFramesBitMap); bitMapByte++)
+	for(bitMapByte = 0; bitMapByte < BIT_MAP_LENGTH_FOR_PAGE_TABLES; bitMapByte++)
 	{
 		for(pageNumberOfByte = 0; pageNumberOfByte < 8; pageNumberOfByte++)
 		{
-			unsigned int pageStatus = (pageFramesBitMap[bitMapByte] >> pageNumberOfByte) & 1;
-			if(!pageStatus)
+			unsigned int pageFrameNumber = ((bitMapByte * 8) + pageNumberOfByte);
+
+			if(NUMBER_OF_PAGE_TABLE_PAGE_FRAMES < pageFrameNumber)
 			{
-				return ((bitMapByte * 8) + pageNumberOfByte);
+				return NULL;
+			}
+			else if(!mmuPageFrameIsUsed(pageFrameNumber))
+			{
+				if(pageFramesToReserve == 1)
+				{
+					mmuSetPageFrameUsageStatus(pageFrameNumber, SET_PAGE_FRAME_IS_USED);
+					return mmuGetAddressOfPageFrameNumber(pageFrameNumber);
+				}
+				else if((mmuGetAddressOfPageFrameNumber(pageFrameNumber) % L1_PAGE_TABLE_SIZE_16KB) != 0)
+				{
+					// check for 16 kB alignment failed
+					continue;
+				}
+
+				// check consecutive page frames
+				if(!mmuPageFrameIsUsed(pageFrameNumber + 1) && !mmuPageFrameIsUsed(pageFrameNumber + 2) && !mmuPageFrameIsUsed(pageFrameNumber + 3))
+				{
+					mmuSetPageFrameUsageStatus(pageFrameNumber, SET_PAGE_FRAME_IS_USED);
+					mmuSetPageFrameUsageStatus(pageFrameNumber + 1, SET_PAGE_FRAME_IS_USED);
+					mmuSetPageFrameUsageStatus(pageFrameNumber + 2, SET_PAGE_FRAME_IS_USED);
+					mmuSetPageFrameUsageStatus(pageFrameNumber + 3, SET_PAGE_FRAME_IS_USED);
+					return mmuGetAddressOfPageFrameNumber(pageFrameNumber);
+				}
+				else
+				{
+					pageNumberOfByte += 3;
+				}
 			}
 		}
 	}
+	return NULL;
+}
 
-	return PAGE_FRAME_NOT_FOUND;
+static pageAddressPointer_t mmuCreatePageTable(unsigned int pageTableType)
+{
+	pageAddressPointer_t tableStartAddress = 0;
+	unsigned int pagesToReserve = 0;
+
+	switch(pageTableType)
+	{
+		case L1_PAGE_TABLE:
+			pagesToReserve = L1_TABLE_PAGE_COUNT;			// 16kB
+			break;
+		case L2_PAGE_TABLE:
+			pagesToReserve = L2_TABLE_PAGE_COUNT;			// 1kB
+			break;
+		default:
+			return NULL;
+	}
+
+	tableStartAddress = (pageAddressPointer_t)mmuGetFreePageFrameForPageTable(pagesToReserve);
+
+	if(NULL == tableStartAddress)
+	{
+		return NULL;
+	}
+
+	memset(tableStartAddress, FAULT_PAGE_TABLE_ENTRY, PAGE_SIZE_4KB * pagesToReserve);
+	return tableStartAddress;
 }
 
 
@@ -485,13 +581,14 @@ static void mmuSetPageFrameUsageStatus(unsigned int pageFrameNumber, unsigned in
  */
 static address_t mmuGetAddressOfPageFrameNumber(unsigned int pageFrameNumber)
 {
-	if(PROCESS_MEMORY_SPACE < pageFrameNumber + PAGE_SIZE_4KB)
+	if((PROCESS_MEMORY_SPACE + PAGE_TABLE_SPACE) < pageFrameNumber + PAGE_SIZE_4KB)
 	{
 		return NULL;
 	}
 	else
 	{
-		return PROCESS_PAGES_START_ADDRESS + PAGE_SIZE_4KB * pageFrameNumber;
+		// physical address = start address of page table region in physical memory + number of pages times page frame size
+		return PAGE_TABLES_START_ADDRESS + PAGE_SIZE_4KB * pageFrameNumber;
 	}
 }
 
@@ -545,7 +642,7 @@ static pageTablePointer_t mmuGetAddressSpecificL2PageTable(pageTablePointer_t pa
 	if(tableOffset < VALID_PAGE_TABLE_OFFSET)
 	{
 		// no existing L2 page table, create one
-		return MemoryManagerCreatePageTable(L2_PAGE_TABLE);
+		return mmuCreatePageTable(L2_PAGE_TABLE);
 	}
 	else
 	{
