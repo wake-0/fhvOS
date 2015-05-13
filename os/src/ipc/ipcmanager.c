@@ -28,12 +28,12 @@ typedef struct {
 } namespace_t;
 
 static namespace_t* namespaces[MAX_OPEN_DOMAINS];
-static int nsIdx = 0;
-
+static volatile int nsIdx = 0;
 namespace_t* getNamespaceByName(char* name);
 
 int IpcManagerRegisterNamespace(char* namespace_name)
 {
+	// TODO Mutex
 	if (nsIdx >= (MAX_OPEN_DOMAINS))
 	{
 		return IPC_MANAGER_UKNOWN_ERROR;
@@ -54,12 +54,18 @@ int IpcManagerRegisterNamespace(char* namespace_name)
 		return IPC_MANAGER_INVALID_NAME;
 	}
 
-	// Allocate space for the name
-	namespaces[nsIdx]->name = malloc(len);
-	strcpy(namespaces[nsIdx]->name, namespace_name);
+	// Create new namespace
+	namespace_t* ns = malloc(sizeof(namespace_t));
 
-	namespaces[nsIdx]->procId = proc->id;
-	nsIdx++;
+	// Allocate space for the name
+	char* charptr = malloc((len + 1) * sizeof(char));
+	ns->name = charptr;
+	strcpy(ns->name, namespace_name);
+	ns->name[len] = '\0';
+
+	ns->procId = proc->id;
+	ns->messageCount = 0;
+	namespaces[nsIdx++] = ns;
 	return IPC_MANAGER_OK;
 }
 
@@ -99,8 +105,9 @@ int IpcManagerSendMessage(char* sender_namespace, char* namespace_name, char* me
 	// Add new message
 	ipc_message_t* newMessage = malloc(sizeof(ipc_message_t));
 	newMessage->sender_namespace = sender->name;
-	newMessage->message = malloc(msgLen * sizeof(char));
+	newMessage->message = malloc((msgLen + 1) * sizeof(char));
 	strcpy(newMessage->message, message);
+	newMessage->message[msgLen] = '\0';
 
 	// TODO Add a mutex/semaphore
 	receiver->messageQueue[receiver->messageCount++] = newMessage;
@@ -167,6 +174,8 @@ int IpcManagerGetNextMessage(char* namespace_name, char* message_buffer, int msg
 
 	// Free memory
 	free(message->message);
+	free(message);
+
 	return IPC_MANAGER_OK;
 }
 
@@ -175,10 +184,13 @@ namespace_t* getNamespaceByName(char* name)
 	int idx = 0;
 	while (namespaces[idx] != 0)
 	{
-		if (strcmp(namespaces[idx]->name, name))
+		int res = strcmp(namespaces[idx]->name, name);
+		//printf("Comparing %s with %s and res=%d\n", name, namespaces[idx]->name, res);
+		if (res == 0)
 		{
 			return namespaces[idx];
 		}
+		idx++;
 	}
 	return NULL;
 }
