@@ -66,11 +66,11 @@
 #define	SYNCHRONOUS_EXTERNAL_ABORT				0x8
 
 
-static void mmuInitializeKernelMasterPageTable(pageTablePointer_t masterPageTable);
+static void mmuInitializeKernelMasterPageTable(void);
 static void mmuSetKernelMasterPageTable(pageTablePointer_t table);
 static void mmuSetProcessPageTable(pageTablePointer_t table);
 static void mmuSetDomainToFullAccess(void);
-static pageTablePointer_t mmuCreateMasterPageTable(uint32_t virtualStartAddress, uint32_t virtualEndAddress);
+static void mmuCreateMasterPageTable(uint32_t virtualStartAddress, uint32_t virtualEndAddress);
 static uint32_t mmuGetTableIndex(unsigned int virtualAddress, unsigned int indexType, unsigned int ttbrType);
 static pageTablePointer_t mmuGetAddressSpecificL2PageTable(pageTablePointer_t pageTableL1, unsigned int virtualAddress);
 static void mmuSetTranslationTableSelectionBoundary(unsigned int selectionBoundary);
@@ -104,38 +104,36 @@ volatile uint32_t currentStatusInTTBCR;
 pageTablePointer_t kernelMasterPageTable;
 
 
+/**
+ * \brief	Initialises the MMU for using. This includes creating a master page table and mapping it into the corresponding TTBR register.
+ */
 int MMUInit()
 {
 	MemoryManagerInit();
 
 	MMUDisable();
 
-	// reserve direct mapped regions
+	// reserve direct mapped regions so no accidently reserving of pages can occur
 	MemoryManagerReserveAllDirectMappedRegions();
 
 	// master page table for kernel region must be created statically and before MMU is enabled
-	kernelMasterPageTable = mmuCreateMasterPageTable(KERNEL_START_ADDRESS, KERNEL_END_ADDRESS);
+	mmuCreateMasterPageTable(KERNEL_START_ADDRESS, KERNEL_END_ADDRESS);
 	mmuSetKernelMasterPageTable(kernelMasterPageTable);
-
-	MMUReadKernelTableAddress();
-
 	mmuSetProcessPageTable(kernelMasterPageTable);
-
-	MMUReadProcessTableAddress();
 
 	// MMU Settings
 	mmuSetTranslationTableSelectionBoundary(BOUNDARY_AT_QUARTER_OF_MEMORY);
 	mmuSetDomainToFullAccess();
 
-	MMUReadTTBCR();
-
-	MMUEnable(); 	// TODO: enabling mmu still causes great problems <= son of a bitch
+	MMUEnable();
 
 	return MMU_OK;
 }
 
 
-
+/**
+ * \brief	Handles page faults of the MMU. Is called by the assembler function dabt_handler in interrupt.asm
+ */
 void MMUHandleDataAbortException(context_t* context)
 {
 	printf("dabt interrupt\n");
@@ -309,35 +307,39 @@ static void freeAllPageFramesOfL2PageTable(pageTablePointer_t l2PageTable)
  * 			Maps statically physical and virtual addresses
  * \return 	Address of page table if successful.
  */
-static pageTablePointer_t mmuCreateMasterPageTable(uint32_t virtualStartAddress, uint32_t virtualEndAddress)
+static void mmuCreateMasterPageTable(uint32_t virtualStartAddress, uint32_t virtualEndAddress)
 {
 	if(NULL != kernelMasterPageTable)
 	{
-		return kernelMasterPageTable;
+		return;
 	}
 
-	pageTablePointer_t masterTable = MemoryManagerCreatePageTable(L1_PAGE_TABLE);
-	mmuInitializeKernelMasterPageTable(masterTable);
-	return masterTable;
+	kernelMasterPageTable = MemoryManagerCreatePageTable(L1_PAGE_TABLE);
+	mmuInitializeKernelMasterPageTable();
 }
 
 
 /**
  * \brief	This function fills the master page table which contains the entries for the kernel, boot and I/O region.
- * 			It is statically mapped to the addresses 0x40310000 to 0x81000000. For the corret page table entry
+ * 			It is statically mapped to the addresses 0x40000000 to 0x814FFFFF. For the corret page table entry
  * 			format see ARM Architecture Reference Manual -> "first level descriptor"
  * \return 	none
  */
-static void mmuInitializeKernelMasterPageTable(pageTablePointer_t masterPageTable)
+static void mmuInitializeKernelMasterPageTable(void)
 {
-	unsigned int region;
-	pageTablePointer_t table = masterPageTable;
+	pageTablePointer_t table = kernelMasterPageTable;
 
-	for(region = 0; region < MEMORY_REGIONS-1; region++)
-	{
-		memoryRegionPointer_t memoryRegion = MemoryManagerGetRegion(region);
-		mmuMapDirectRegionToKernelMasterPageTable(memoryRegion, table);
-	}
+	memoryRegionPointer_t memoryRegion = MemoryManagerGetRegion(BOOT_ROM_REGION);
+	mmuMapDirectRegionToKernelMasterPageTable(memoryRegion, table);
+
+	memoryRegion = MemoryManagerGetRegion(MEMORY_MAPPED_IO_REGION);
+	mmuMapDirectRegionToKernelMasterPageTable(memoryRegion, table);
+
+	memoryRegion = MemoryManagerGetRegion(KERNEL_REGION);
+	mmuMapDirectRegionToKernelMasterPageTable(memoryRegion, table);
+
+	memoryRegion = MemoryManagerGetRegion(PAGE_TABLE_REGION);
+	mmuMapDirectRegionToKernelMasterPageTable(memoryRegion, table);
 }
 
 
@@ -347,8 +349,6 @@ static void mmuInitializeKernelMasterPageTable(pageTablePointer_t masterPageTabl
 static void mmuMapDirectRegionToKernelMasterPageTable(memoryRegionPointer_t memoryRegion, pageTablePointer_t table)
 {
 	unsigned int physicalAddress;
-	//unsigned int pageTableEntry = 0;
-	//unsigned int baseAddress = 0;
 	firstLevelDescriptor_t pageTableEntry;
 
 	for(physicalAddress = memoryRegion->startAddress; physicalAddress < memoryRegion->endAddress; physicalAddress += 0x100000)
@@ -359,17 +359,18 @@ static void mmuMapDirectRegionToKernelMasterPageTable(memoryRegionPointer_t memo
 		pageTableEntry.accessPermission 	= AP_FULL_ACCESS;
 		pageTableEntry.domain 				= DOMAIN_MANAGER_ACCESS;
 
-		//baseAddress = physicalAddress & UPPER_12_BITS_MASK;
-		//pageTableEntry = baseAddress | MASTER_PAGE_TABLE_SECTION_FULL_ACCESS;
 		uint32_t tableOffset = mmuGetTableIndex(physicalAddress, INDEX_OF_L1_PAGE_TABLE, TTBR1);
-		//uint32_t *newAddress = (uint32_t*)((uint8_t*)table + tableOffset);
-		uint32_t *newAddress = table + (tableOffset << 2)/sizeof(uint32_t);
-		*newAddress = mmuCreateL1PageTableEntry(pageTableEntry);
-		//table++;
+
+		// see Format of first-level Descriptor on p. B3-1335 in ARM Architecture Reference Manual ARMv7 edition
+		uint32_t *firstLevelDescriptorAddress = table + (tableOffset << 2)/sizeof(uint32_t);
+		*firstLevelDescriptorAddress = mmuCreateL1PageTableEntry(pageTableEntry);
 	}
 }
 
 
+/**
+ * \brief	Creates a 32 bit page table entry from a first-level descriptor struct.
+ */
 static unsigned int mmuCreateL1PageTableEntry(firstLevelDescriptor_t PTE)
 {
 	unsigned int entry = (PTE.accessPermission << AP_L1_POSITION) | (PTE.domain << DOMAIN_POSITION)
@@ -391,7 +392,9 @@ static unsigned int mmuCreateL1PageTableEntry(firstLevelDescriptor_t PTE)
 }
 
 
-
+/**
+ * \brief	Creates a 32 bit page table entry from a second-level descriptor struct.
+ */
 static unsigned int mmuCreateL2PageTableEntry(secondLevelDescriptor_t PTE)
 {
 	unsigned int entry = (PTE.accessPermission << AP_L2_POSITION)
@@ -499,7 +502,7 @@ static address_t mmuGetAddressOfPageFrameNumber(unsigned int pageFrameNumber)
 static void mmuSetKernelMasterPageTable(pageTablePointer_t table)
 {
 	MMUFlushTLB();
-	MMUSetKernelTable(table);
+	MMUSetKernelTable((uint32_t)table);
 }
 
 
@@ -509,14 +512,16 @@ static void mmuSetKernelMasterPageTable(pageTablePointer_t table)
 static void mmuSetProcessPageTable(pageTablePointer_t table)
 {
 	MMUFlushTLB();
-	MMUSetProcessTable(table);
+	MMUSetProcessTable((uint32_t)table);
 }
 
 
+/**
+ * \brief	Sets all domain in the coprocessor register to manager mode(full access without permission checking).
+ */
 static void mmuSetDomainToFullAccess(void)
 {
-	// TODO: 0x3 added for testing
-	MMUSetDomainAccess(0xFFFFFFFF);
+	MMUSetDomainAccess(MMU_DOMAIN_FULL_ACCESS);
 }
 
 
@@ -530,7 +535,9 @@ static void mmuSetTranslationTableSelectionBoundary(unsigned int selectionBounda
 }
 
 
-
+/**
+ * \brief	Returns the address of a L2 page table. If none is existing, it creates one.
+ */
 static pageTablePointer_t mmuGetAddressSpecificL2PageTable(pageTablePointer_t pageTableL1, unsigned int virtualAddress)
 {
 	int tableOffset = mmuGetTableIndex(virtualAddress, INDEX_OF_L2_PAGE_TABLE, TTBR0);
