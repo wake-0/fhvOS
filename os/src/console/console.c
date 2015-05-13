@@ -142,7 +142,7 @@ int fgetc(FILE *p)
 		ungetBuf = 0;
 		return temp;
 	}
-	char buf;
+	char buf = 0;
 	do {
 		DeviceManagerRead(consoleDevice, &buf, 1);
 		if (buf == '\r' || buf == '\0')
