@@ -19,6 +19,7 @@
 #define FAULT_STATUS_MASK_BIT_4					0x400
 #define L1_INDEX_POSITION_IN_VIRTUAL_ADDRESS	20
 #define L2_INDEX_POSITION_IN_VIRTUAL_ADDRESS	12
+#define DESCRIPTOR_MASK							0x3
 #define TTBR1_BASE_ADDRESS_MASK					0xFFFFC000
 #define TTBR0_BASE_ADDRESS_MASK					(0xFFFFC000 >> TTBRC_N) | 0xFFFFC000
 #define NUMBER_OF_PAGE_TABLE_PAGE_FRAMES		((0x814FFFFF - 0x81000000) / 0x1000)
@@ -82,12 +83,11 @@ static void mmuCreateAndFillL2PageTable(unsigned int virtualAddress, process_t* 
 static void mmuMapFreePageFrameIntoL2PageTable(unsigned int virtualAddress, pageTablePointer_t l2PageTable);
 static void mmuSetPageFrameUsageStatus(unsigned int pageFrameNumber, unsigned int pageFrameStatus);
 static address_t mmuGetAddressOfPageFrameNumber(unsigned int pageFrameNumber);
-static void freeAllPageFramesOfL2PageTable(pageTablePointer_t l2PageTable);
+static void mmuFreeAllPageFramesOfL2PageTable(pageTablePointer_t l2PageTable);
 static void mmuMapDirectRegionToKernelMasterPageTable(memoryRegionPointer_t memoryRegion, pageTablePointer_t table);
 static unsigned int mmuCreateL1PageTableEntry(firstLevelDescriptor_t PTE);
 static unsigned int mmuCreateL2PageTableEntry(secondLevelDescriptor_t PTE);
 static address_t mmuGetFreePageFrameForPageTable(unsigned int pageFramesToReserve);
-
 
 
 
@@ -284,28 +284,34 @@ int MMUInitProcess(process_t* process)
  */
 int MMUFreeAllPageFramesOfProcess(process_t* process)
 {
-	// TODO: IMPLEMENT!!!!
-	unsigned int pageTableEntry;
+	unsigned int numberOfPageTableEntry;
+	unsigned int pageTableEntry = 0;
 
-	for(pageTableEntry = 0; pageTableEntry < L1_PAGE_TABLE_ENTRIES; pageTableEntry++)
+	for(numberOfPageTableEntry = 0; numberOfPageTableEntry < L1_PAGE_TABLE_ENTRIES; numberOfPageTableEntry++)
 	{
-		pageTablePointer_t l2PageTable = (pageTablePointer_t)*(process->pageTableL1 + pageTableEntry);
-		freeAllPageFramesOfL2PageTable(l2PageTable);
+		pageTableEntry = (unsigned int) *(process->pageTableL1 + numberOfPageTableEntry);
+
+		pageTablePointer_t l2PageTable = (pageTablePointer_t)(pageTableEntry & UPPER_22_BITS_MASK);
+		mmuFreeAllPageFramesOfL2PageTable(l2PageTable);
 	}
 
 	return MMU_OK;
 }
 
 
-// TODO: implement
-static void freeAllPageFramesOfL2PageTable(pageTablePointer_t l2PageTable)
+/**
+ * \brief	Sets all page frames in a L2 page table free.
+ */
+static void mmuFreeAllPageFramesOfL2PageTable(pageTablePointer_t l2PageTable)
 {
 	unsigned int pageTableEntry;
 
 	for(pageTableEntry = 0; pageTableEntry < L2_PAGE_TABLE_ENTRIES; pageTableEntry++)
 	{
 		unsigned int l2PageTableEntry = (unsigned int)*(l2PageTable + pageTableEntry);
-		// TODO: finish
+		unsigned int smallPageBaseAddress = l2PageTableEntry & UPPER_20_BITS_MASK;
+		unsigned int pageFrameNumber = (smallPageBaseAddress - PAGE_TABLES_START_ADDRESS) / PAGE_SIZE_4KB;
+		mmuSetPageFrameUsageStatus(pageFrameNumber, SET_PAGE_FRAME_IS_FREE);
 	}
 }
 
