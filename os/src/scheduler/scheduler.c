@@ -15,7 +15,7 @@
 // 3840 Byte
 #define STACK_SIZE		(10000)
 
-#define TIME_SLICE		(4500)
+#define TIME_SLICE		(50)
 
 /*
  * Register defines

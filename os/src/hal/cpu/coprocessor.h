@@ -21,3 +21,4 @@ extern void MMUSetTranslationTableControlRegister(unsigned int translationTableC
 extern void MMUReadProcessTableAddress(void);
 extern void MMUReadKernelTableAddress(void);
 extern void MMUReadSystemControlRegister(void);
+extern void MMUReadTTBCR(void);

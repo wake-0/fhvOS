@@ -11,7 +11,6 @@
 
 #define CONSOLE_SCREEN_HEIGHT_LINES			(40)
 #define CONSOLE_MAX_COMMAND_LENGTH			(255)
-#define ASCII_BACKSPACE						(127)
 
 static boolean_t initialized = false;
 static device_t consoleDevice;
@@ -20,6 +19,9 @@ static void clearScreen();
 static void printWelcomeMessage();
 static void printOSLogo();
 static void printPrompt();
+static boolean_t acceptChar(char ch);
+
+static char ungetBuf;
 
 void ConsoleInit(device_t device)
 {
@@ -28,6 +30,8 @@ void ConsoleInit(device_t device)
 	DeviceManagerInit(consoleDevice);
 
 	DeviceManagerOpen(consoleDevice);
+
+	ungetBuf = 0;
 
 	initialized = true;
 }
@@ -47,52 +51,20 @@ void ConsoleProcess()
 	char command[CONSOLE_MAX_COMMAND_LENGTH];
 	while(TRUE)
 	{
+		memset(&command[0], 0, CONSOLE_MAX_COMMAND_LENGTH);
+
 		printPrompt();		// Prompt: root@fhvos#
 
-		memset(&command[0], '\0', CONSOLE_MAX_COMMAND_LENGTH);
-		int commandPos = 0;
-
-		boolean_t commandFound = false;
-		char buf[1];
-		while(commandFound == false) {
-			if (commandPos == CONSOLE_MAX_COMMAND_LENGTH)
-			{
-				// Send Backspace key
-				char bs[1] = { ASCII_BACKSPACE };
-				DeviceManagerWrite(consoleDevice, bs , 1);
-			}
-
-			DeviceManagerRead(consoleDevice, &buf[0], 1);
-
-			if (buf[0] == '\r')		// If user hit enter
-			{
-				commandFound = true;
-				DeviceManagerWrite(consoleDevice, "\r\n", 2);
-			}
-			else
-			{
-				if (buf[0] == ASCII_BACKSPACE && commandPos > 0) // TODO Add handling for more control commands
-				{
-					commandPos--;
-					command[commandPos] = '\0';
-				}
-				if (commandPos >= 0)
-				{
-					command[commandPos++] = buf[0];
-					DeviceManagerWrite(consoleDevice, buf, 1);
-				}
-			}
-		}
+		// Read the command using scanf (Overriden through fgetc and ungetc)
+		scanf("%s", command); // TODO Only allow a string length of CONSOLE_MAX_COMMAND_LENGTH-1
 
 		// TODO Send command to the kernel (IPC)
 
 		// XXX Just for debug purpose
-		char debugOutput[CONSOLE_MAX_COMMAND_LENGTH + 50];
-		sprintf(&debugOutput[0], "[DEBUG] input command:%s\r\n\r", command);
+		char debugOutput[CONSOLE_MAX_COMMAND_LENGTH + 50] = { 0 };
+		sprintf(&debugOutput[0], "[DEBUG] input command:%s\r\n", command);
 		DeviceManagerWrite(consoleDevice, debugOutput, CONSOLE_MAX_COMMAND_LENGTH + 50);
-		DeviceManagerWrite(consoleDevice, command, CONSOLE_MAX_COMMAND_LENGTH);
-		DeviceManagerWrite(consoleDevice, "\r\n", 2);
-
+		printf("[DEBUG] Using printf command:%s\r\n", command);
 	}
 }
 
@@ -133,4 +105,76 @@ void clearScreen()
 	{
 		DeviceManagerWrite(consoleDevice, "                                      \r\n", 42);
 	}
+}
+
+int fputc(int ch, FILE *f)
+{
+    char tempch = ch;
+    switch (tempch) {
+    case '\n':
+    	DeviceManagerWrite(consoleDevice, "\r\n", 2);
+    	break;
+    default:
+		DeviceManagerWrite(consoleDevice, &tempch, 1);
+    	break;
+    }
+    return ch;
+}
+
+int fputs(const char *s, FILE *f)
+{
+	int cnt = 0;
+	char tmpChar = s[cnt];
+	while (tmpChar != '\0') {
+		DeviceManagerWrite(consoleDevice, &tmpChar, 1);
+		cnt++;
+		tmpChar = s[cnt];
+	}
+	return 0;
+}
+
+int fgetc(FILE *p)
+{
+	// TODO Add a switch case over *p (only if we read from stdin we should run the following code)
+	if (ungetBuf != 0)
+	{
+		char temp = ungetBuf;
+		ungetBuf = 0;
+		return temp;
+	}
+	char buf = 0;
+	do {
+		DeviceManagerRead(consoleDevice, &buf, 1);
+		if (buf == '\r' || buf == '\0')
+		{
+			DeviceManagerWrite(consoleDevice, "\r\n", 2);
+			return '\0';
+		}
+	} while (acceptChar(buf) == false);
+	// Output the character
+	DeviceManagerWrite(consoleDevice, &buf, 1);
+	return buf;
+}
+
+int ungetc(int c, FILE *p)
+{
+	return (ungetBuf = c);
+}
+
+static boolean_t acceptChar(char ch)
+{
+	switch (ch)
+	{
+	case 'a' ... 'z':
+	case 'A' ... 'Z':
+	case '0' ... '9':
+	case '/':
+	case ' ':
+	case '*':
+	case '|':
+	case '"':
+	case '.':
+		return true;
+	}
+	return false;
 }
