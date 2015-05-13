@@ -15,10 +15,14 @@
 #define IPC_MANAGER_INVALID_NAME		(-2)
 #define IPC_MANAGER_NOT_AUTHORISED		(-3)
 #define IPC_MANAGER_NO_MESSAGE_AVAIL	(-4)
+#define IPC_MANAGER_MESSAGE_TOO_LONG	(-5)
+#define IPC_MANAGER_RECEIVER_BUSY		(-6)
+#define IPC_MANAGER_BUFFER_TOO_SMALL	(-7)
+#define IPC_MANAGER_UKNOWN_ERROR		(-10)
 
 extern int IpcManagerRegisterNamespace(char* namespace_name);
-extern int IpcManagerSendMessage(char* namespace_name, char* message);
+extern int IpcManagerSendMessage(char* sender_namespace, char* namespace_name, char* message);
 extern int IpcManagerHasMessage(char* namespace_name);
-extern int IpcManagerGetNextMessage(char* namespace_name, char* message_buffer, int len);
+extern int IpcManagerGetNextMessage(char* namespace_name, char* message_buffer, int msg_buf_len, char* sender_namespace, int ns_buf_len);
 
 #endif /* IPC_IPCMANAGER_H_ */
