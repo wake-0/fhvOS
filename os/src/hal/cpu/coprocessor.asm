@@ -24,6 +24,7 @@
 	.global MMULoadDabtData
 	.global MMUSetTranslationTableControlRegister
 	.global MMUReadSystemControlRegister
+	.global MMUReadTTBCR
 	.global InstructionCacheEnable
 	.global InstructionCacheDisable
 	.global InstructionCacheFlush
@@ -33,13 +34,14 @@
 	.global currentAddressInTTBR0
 	.global currentAddressInTTBR1
 	.global currentStatusInSCTLR
+	.global currentStatusInTTBCR
 
 accessedAddress: .field dabtAccessedVirtualAddress, 32
 faultState: .field dabtFaultStatusRegisterValue, 32
 processTableAddress: .field currentAddressInTTBR0, 32
 kernelTableAddress: .field currentAddressInTTBR1, 32
 currentStatus: .field currentStatusInSCTLR, 32
-
+currentTTBCRValue: .field currentStatusInTTBCR, 32
 
 ;	List of coprocessor instructions:
 ;
@@ -148,6 +150,13 @@ MMUReadSystemControlRegister:
 	MOV		PC, LR
 
 
+MMUReadTTBCR:
+	MOV		R0, #0
+	MRC 	p15, #0, R0, c2, c0, #2
+	LDR		R1, currentTTBCRValue
+	STR 	R0, [R1]
+	MOV		PC, LR
+
 MMUFlushTLB:
 	STMFD 	SP!, {R0, R1}
 	MOV 	R0, #0
@@ -205,9 +214,10 @@ MMULoadDabtData:
 
 ; see p. B4-1725
 MMUSetTranslationTableControlRegister:
+	MOV		R1, #0
+	MRC		p15, #0, R1, c2, c0, #2
+	ORR 	R1, R1, R0
 	MCR		p15, #0, R1, c2, c0, #2
-	ORR 	R0, R0, R1
-	MRC		p15, #0, R0, c2, c0, #2
 	MOV 	PC, LR
 
 

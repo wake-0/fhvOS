@@ -58,6 +58,7 @@ static pageStatus_t procRegion[256767];
 #define KERNEL_END_ADDRESS					0x80FFFFFF
 #define PAGE_TABLES_START_ADDRESS			0x81000000
 #define PAGE_TABLES_END_ADDRESS				0x814FFFFF
+#define PAGE_TABLE_SPACE					PAGE_TABLES_END_ADDRESS - PAGE_TABLES_START_ADDRESS
 #define PROCESS_PAGES_START_ADDRESS			0x00000000
 #define PROCESS_PAGES_END_ADDRESS			0x3EAFFFFF
 #define PROCESS_MEMORY_SPACE				PROCESS_PAGES_END_ADDRESS - PROCESS_PAGES_START_ADDRESS
@@ -95,7 +96,6 @@ extern pageAddressPointer_t MemoryManagerGetFreePagesInRegion(unsigned int memor
 extern memoryRegionPointer_t MemoryManagerGetRegion(unsigned int memoryRegionNumber);
 extern void MemoryManagerReserveAllPages(memoryRegionPointer_t region);
 extern pageAddressPointer_t MemoryManagerGetFreePagesInRegion(unsigned int memoryRegion, unsigned int pagesToReserve);
-extern pageAddressPointer_t MemoryManagerCreatePageTable(unsigned int pageTableType);
 extern int MemoryManagerReserveAllDirectMappedRegions(void);
 
 #endif /* MEMMANAGER_MEMMANAGER_H_ */

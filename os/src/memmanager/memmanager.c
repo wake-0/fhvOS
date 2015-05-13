@@ -217,39 +217,6 @@ static void memoryManagerReservePagesInARow(memoryRegionPointer_t region, unsign
 
 
 /**
- * \brief	Reserves a table of pagesToReserve count pages of pageSize size.
- * \return	Starting ddress of table if successfull, otherwise null.
- */
-pageAddressPointer_t MemoryManagerCreatePageTable(unsigned int pageTableType)
-{
-	pageAddressPointer_t tableStartAddress = 0;
-	int pagesToReserve = 0;
-
-	switch(pageTableType)
-	{
-		case L1_PAGE_TABLE:
-			pagesToReserve = L1_TABLE_PAGE_COUNT;			// 16kB
-			break;
-		case L2_PAGE_TABLE:
-			pagesToReserve = L2_TABLE_PAGE_COUNT;			// 1kB
-			break;
-		default:
-			return NULL;
-	}
-
-	tableStartAddress = MemoryManagerGetFreePagesInRegion(PAGE_TABLE_REGION, pagesToReserve);
-
-	if(NULL == tableStartAddress)
-	{
-		return NULL;
-	}
-
-	memset(tableStartAddress, FAULT_PAGE_TABLE_ENTRY, PAGE_SIZE_4KB * pagesToReserve);
-	return tableStartAddress;
-}
-
-
-/**
  * \brief	Evaluates if a certain number of free pages are in a row in a memory region.
  * \return 	Returns 0 if enough free pages in a row, counted pages else.
  */
