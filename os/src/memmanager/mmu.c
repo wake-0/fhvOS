@@ -7,6 +7,7 @@
 
 
 #include "mmu.h"
+#include "memmanager.h"
 
 #define MMU_DOMAIN_FULL_ACCESS 0xFFFFFFFF
 
@@ -88,6 +89,7 @@ static void mmuMapDirectRegionToKernelMasterPageTable(memoryRegionPointer_t memo
 static unsigned int mmuCreateL1PageTableEntry(firstLevelDescriptor_t PTE);
 static unsigned int mmuCreateL2PageTableEntry(secondLevelDescriptor_t PTE);
 static address_t mmuGetFreePageFrameForPageTable(unsigned int pageFramesToReserve);
+static void mmuMapDirectRegionToProcesPageTable(memoryRegionPointer_t memoryRegion, pageTablePointer_t table);
 
 
 
@@ -274,6 +276,8 @@ int MMUSwitchToProcess(process_t* process)
 int MMUInitProcess(process_t* process)
 {
 	pageTablePointer_t l1PageTable = mmuCreatePageTable(L1_PAGE_TABLE);
+	memoryRegionPointer_t region = MemoryManagerGetRegion(BOOT_ROM_EXCEPTIONS_REGION);
+	mmuMapDirectRegionToProcesPageTable(region, l1PageTable);
 	process->pageTableL1 = l1PageTable;
 	return MMU_OK;
 }
@@ -367,6 +371,31 @@ static void mmuInitializeKernelMasterPageTable(void)
  * \brief	This function maps one region directly into the master L1 page table.
  */
 static void mmuMapDirectRegionToKernelMasterPageTable(memoryRegionPointer_t memoryRegion, pageTablePointer_t table)
+{
+	unsigned int physicalAddress;
+	firstLevelDescriptor_t pageTableEntry;
+
+	for(physicalAddress = memoryRegion->startAddress; physicalAddress < memoryRegion->endAddress; physicalAddress += 0x100000)
+	{
+		pageTableEntry.sectionBaseAddress 	= physicalAddress & UPPER_12_BITS_MASK;
+		pageTableEntry.descriptorType 		= DESCRIPTOR_TYPE_SECTION;
+		pageTableEntry.cachedBuffered 		= WRITE_BACK;
+		pageTableEntry.accessPermission 	= AP_FULL_ACCESS;
+		pageTableEntry.domain 				= DOMAIN_MANAGER_ACCESS;
+
+		uint32_t tableOffset = mmuGetTableIndex(physicalAddress, INDEX_OF_L1_PAGE_TABLE, TTBR1);
+
+		// see Format of first-level Descriptor on p. B3-1335 in ARM Architecture Reference Manual ARMv7 edition
+		uint32_t *firstLevelDescriptorAddress = table + (tableOffset << 2)/sizeof(uint32_t);
+		*firstLevelDescriptorAddress = mmuCreateL1PageTableEntry(pageTableEntry);
+	}
+}
+
+
+/**
+ * \brief	This function maps one region directly into the master L1 page table.
+ */
+static void mmuMapDirectRegionToProcesPageTable(memoryRegionPointer_t memoryRegion, pageTablePointer_t table)
 {
 	unsigned int physicalAddress;
 	firstLevelDescriptor_t pageTableEntry;
