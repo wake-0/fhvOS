@@ -1,0 +1,1114 @@
+% Beamer Vorlage erstellt von Michael Mayer
+%  -------------------------------------------------------------------
+%\documentclass[handout]{beamer}
+\documentclass[10pt]{beamer}
+%\setbeamertemplate{background}{\includegraphics[width=\paperwidth,height=\paperheight]{desenho}}
+%http://texwelt.de/wissen/fragen/5434/wie-kann-ich-in-beamer-beim-colortheme-seahorse-die-farbe-der-rechten-spalte-und-der-zeile-oben-andern
+%http://www.matthiaspospiech.de/latex/vorlagen/beamer/preambel/beamer-settings/
+
+\usetheme[right,width=2cm,hideothersubsections %Sidebar auf rechter Seite mit eingestellter Sidbar Breite 
+]{PaloAlto}
+
+\usecolortheme{beaver}
+\usecolortheme[named=red]{structure}
+\graphicspath{{Pictures/}} % Specifies the directory where pictures are stored
+\usepackage{ngerman}
+
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern} %Gegen Fehlermeldung
+\usepackage{changepage}
+%Für Mindmap
+\usepackage{color}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest,compat/show suggested version=false} %Gegen Fehlermeldung
+\usetikzlibrary{shapes,arrows}
+
+%-----------------------------------------------------------------------------------
+%-----------------------------------------------------------------------------------
+%Für Seitenzahl Progressbar
+\usepackage{helvet}
+\usetikzlibrary{external}
+\RequirePackage{calc}
+\RequirePackage{fp}
+
+\def\progressfixedCircCnt{fixedCircCnt} % fixed circular counter
+\def\progressmovCircCnt{movCircCnt} % moving circular counter
+\def\progresscorner{corner} % a counter in the lower right corner
+\def\progressstyle{movCircCnt} % Hier Modus einstellen
+%\def\rotationcw{true} %Hier Richtung einstellen (durch kommentieren/unkommentieren)
+
+%Maße einstellen
+%the height of the header is 2.5 times the lineheight of the frame title
+\newlength{\height}
+\usebeamerfont{frametitle} %use the frame title font
+\setlength{\height}{2.4\baselineskip}
+% radius of the logo
+\newlength{\logoradius}
+\setlength{\logoradius}{0.7\height/2}
+% width of the border
+\newlength{\borderwidth}
+\setlength{ \borderwidth}{1.5mm}
+% inner radius of border of the logo frame
+\newlength{\logoinnerradius}
+\setlength{\logoinnerradius}{1.1\logoradius}
+% radius of the outer border of the logo frame
+\newlength{\logoouterradius}
+\setlength{\logoouterradius}{\logoinnerradius+\borderwidth}
+% radius of the counters
+\newlength{\counterradius}
+\setlength{\counterradius}{\logoinnerradius/2+\logoouterradius/2}
+
+\mode<presentation>
+{
+  \definecolor{beamer@countbarcolor}{RGB}{194,193,204}% light blue
+  %\definecolor{beamer@headercolor}{RGB}{33,26,82}% dark blue
+  \definecolor{beamer@countheadercolor}{RGB}{180,20,20}%dark red
+  \definecolor{beamer@countnormaltextcolor}{RGB}{105,105,105}% gray 
+  \setbeamercolor{countstructure}{fg=beamer@countheadercolor}
+  \setbeamercolor{countnormal text}{fg=beamer@countnormaltextcolor,bg=white}
+  \setbeamercolor{countframetitle}{fg=white,bg=beamer@countheadercolor}
+  \setbeamercolor{countsimple}{fg=beamer@countbarcolor,bg=beamer@countheadercolor}
+}
+
+\newcommand{\aauheaderbackground}{%
+  \tikzexternaldisable
+  \begin{tikzpicture}[overlay]
+    \coordinate (UL) at (0,0); %upper left corner of the slide
+    \coordinate (HLR) at (\paperwidth,-\height); %lower right of the header
+    \coordinate (logopos) at ([shift={(-\logoouterradius-\borderwidth,0.5\height)}] HLR);%coordinate of the logo
+    %draw the background of the header, the circle and the logo
+    {\usebeamercolor{countsimple}%
+      \usebeamercolor{countnormal text}%
+      % draw the blue background rectangle of the header
+      %\draw[draw=none,fill=countsimple.bg] (UL) rectangle (HLR);
+      % draw the outer circle
+      \fill[fill=countsimple.fg] (logopos) circle (\logoouterradius);
+      % draw the inner circle
+      \fill[fill=gray!15] (logopos) circle (\logoinnerradius);
+      % place the logo
+      %\node at (logopos) {\includegraphics[width=1.8\logoradius]{Logo_FHV}};
+      \node [fill=gray!15] at (logopos)  {\normalsize$^\text{\insertframenumber}/_\text{\inserttotalframenumber}$}; %$
+
+      %% draw progress circle/bar
+      \ifx\progressstyle\progressfixedCircCnt% the circular counter with a fixed counter
+        % calculate end position
+%        \ifx\beamer@rotationcw\undefined% counterclockwise rotation
+%          \pgfmathsetmacro{\progress}{360*\insertframenumber/\inserttotalframenumber};
+%        \else% clockwise rotation
+%          \pgfmathsetmacro{\progress}{-360*\insertframenumber/\inserttotalframenumber};
+%        \fi
+        \ifx\rotationcw\undefined% counterclockwise rotation
+          \FPeval\progress{360*\insertframenumber/\inserttotalframenumber}
+        \else% clockwise rotation
+          \FPeval\progress{(-360*\insertframenumber/\inserttotalframenumber)}
+        \fi
+        % draw the arc
+        \draw[color=countsimple.bg,line width=0.5*\borderwidth] ([xshift=\counterradius] logopos) arc[radius=\counterradius, start angle=0, end angle=\progress];
+        \fill[fill=countsimple.bg] ([shift={(\progress:\counterradius)}] logopos) circle (0.25\borderwidth);
+        % place the current frame number
+        \node[fill=countnormal text.bg,draw=countsimple.fg,thick,circle,minimum width=2*\borderwidth] at ([xshift=\counterradius]logopos) {{\usebeamercolor[fg]{countnormal text}\insertframenumber}}; %Auskommentieren wenn fixer Counter weg soll
+      \fi
+      
+      \ifx\progressstyle\progressmovCircCnt% the circular counter with a moving counter
+        % draw the current and total frame number
+%        \ifx\beamer@rotationcw\undefined% counterclockwise rotation
+%          \pgfmathsetmacro{\progress}{360*\insertframenumber/\inserttotalframenumber};
+%        \else% clockwise rotation
+%          \pgfmathsetmacro{\progress}{-360*\insertframenumber/\inserttotalframenumber};
+%        \fi
+        \ifx\rotationcw\undefined% counterclockwise rotation
+          \FPeval\progress{360*\insertframenumber/\inserttotalframenumber}
+        \else% clockwise rotation
+          \FPeval\progress{(-360*\insertframenumber/\inserttotalframenumber)}
+        \fi
+        % draw the arc
+        \draw[color=countsimple.bg,line width=0.5*\borderwidth] ([xshift=\counterradius] logopos) arc (0:\progress:\counterradius);
+        % place the total number of frames
+        \node[fill=countnormal text.bg,draw=countsimple.fg,circle,thick,minimum width=2*\borderwidth] at ([xshift=\counterradius] logopos) {{\usebeamercolor[fg]{countnormal text}\inserttotalframenumber}};
+        % place the current frame number
+        \node[fill=countnormal text.bg,draw=countsimple.fg,circle,thick,minimum width=2*\borderwidth] at ([shift={(\progress:\counterradius)}] logopos) {{\usebeamercolor[fg]{countnormal text}\insertframenumber}};
+      \fi
+    }
+  \end{tikzpicture}%
+  \tikzexternalenable
+}
+
+%-----------------------------------------------------------------------------------
+%-----------------------------------------------------------------------------------
+
+%Abbildungsbeschriftungen
+\usepackage{caption}
+\captionsetup{font=scriptsize,labelfont=scriptsize}
+%\setbeamerfont{caption}{size=\scriptsize}
+\setbeamerfont{caption}{series=\normalfont,size=\fontsize{7}{10}} 
+\renewcommand{\figurename}{Abb.}
+%Für Schaltungen
+\usepackage[siunitx]{circuitikz}
+
+%Für Bondgraphen
+\usepackage{bondgraph}
+
+%Euro Symbol
+\usepackage{eurosym}
+
+%Für Snippets
+\usepackage{listings}
+
+% --------------------------------------------
+% ----- Inhaltsfolie vor jedem Abschnitt -----
+% --------------------------------------------
+
+\AtBeginSection[]
+{
+  \begin{frame}<beamer>
+    \frametitle{Inhalt}
+    \tableofcontents[currentsection,currentsubsection,subsectionstyle=show/show/hide]
+  \end{frame}
+}
+% --------------------------------------------
+% --------------------------------------------
+% --------------------------------------------
+
+\setbeamertemplate{navigation symbols}{} %Aus und Einschalten Navigationsleiste, diese verschwindet wenn rechts der Inhalt dargestellt wird wie hier (wenn er links wäre erscheint Navigationsleiste wieder)
+
+%Einstellen der Navigationsleiste
+%\setbeamertemplate{navigation symbols}{ \insertslidenavigationsymbol \insertframenavigationsymbol \insertsubsectionnavigationsymbol \insertsectionnavigationsymbol %\insertdocnavigationsymbol \insertbackfindforwardnavigationsymbol \hspace{1em}% \usebeamerfont{footline} \insertframenumber/\inserttotalframenumber% 
+%}
+
+%Für tikz Mindmap
+\usepackage{tikz}
+\usetikzlibrary{mindmap,trees}
+\usepackage{verbatim}
+
+%Um Größe der Vektorgrafik einzustellen
+\usepackage{adjustbox}
+
+\usepackage{etoolbox}
+\makeatletter %Sidebar: Immer Section+Subsection
+\patchcmd{\insertverticalnavigation}%
+{\ifx\beamer@nav@css\beamer@hidetext{\usebeamertemplate{section in sidebar}}\else{\usebeamertemplate{section in sidebar shaded}}\fi}%
+{{\usebeamertemplate{section in sidebar}}}{}{}
+\makeatother
+
+\makeatletter %Titel und Autor aus Sidebar entfernen
+  \setbeamertemplate{sidebar \beamer@sidebarside}%{sidebar theme}
+  {
+    \beamer@tempdim=\beamer@sidebarwidth%
+    \advance\beamer@tempdim by -6pt%
+    \insertverticalnavigation{\beamer@sidebarwidth}%
+    \vfill
+    \ifx\beamer@sidebarside\beamer@lefttext%
+    \else%
+      \usebeamercolor{normal text}%
+      \llap{\usebeamertemplate***{navigation symbols}\hskip0.1cm}%
+      \vskip2pt%
+    \fi%
+  }%
+\makeatother
+
+%Fußzeile Schriften Einstellen
+\setbeamerfont{section in head/foot}{size*={6}{9.50}} 
+
+\setbeamertemplate{footline} %Fußzeile Einfügen
+{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,left]{section in head/foot}%
+    \usebeamerfont{section in head/foot}\hspace*{0.5em}
+\insertdate
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{section in head/foot}\insertshorttitle
+  \end{beamercolorbox}}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,left]{number in head/foot}%
+    \usebeamerfont{section in head/foot} \hspace{-87.2mm}\vspace*{+16mm} %für mitlaufend
+%\hspace{-87.2mm}\vspace*{+14.9mm} %für stehend 
+    \aauheaderbackground
+    %\insertframenumber/ \inserttotalframenumber \hspace*{0.5em} %herkömmliche seitenzahl
+  \end{beamercolorbox}%
+}
+
+%Farben Seitenleiste,Fußzeile usw. Einstellen http://en.wikibooks.org/wiki/LaTeX/Presentations und im Textfile
+%\setbeamercolor{title}{bg=white} %Rahmen um Titel
+\setbeamercolor{titlelike}{parent=structure}
+\setbeamercolor{frametitle}{fg=darkred, bg=gray!15}
+\setbeamercolor{section in head/foot}{fg=black,bg=gray!15}
+\setbeamercolor{author in head/foot}{fg=black,bg=gray!15}
+\setbeamercolor{number in head/foot}{fg=black,bg=gray!15}
+\setbeamercolor{section in sidebar}{fg=darkred, bg=gray!40}
+\setbeamercolor{section in sidebar shaded}{fg=gray}
+\setbeamercolor{subsection in sidebar}{fg=darkred, bg=gray!30}
+\setbeamercolor{subsection in sidebar shaded}{fg=gray}
+
+%Sidebar Schriftart ändern
+\setbeamerfont{section in sidebar}{size={\fontsize{6}{6}}}
+\setbeamerfont{subsection in sidebar}{size={\fontsize{5}{5}}}
+
+%Blockfarben ändern
+%\setbeamercolor{block body alerted}{bg=normal text.bg!90!black}
+\setbeamercolor{block title}{use=structure,fg=darkred,bg=gray!50}
+\setbeamercolor{block body}{use=structure,fg=black,bg=gray!15}
+%\setbeamercolor{block body example}{bg=normal text.bg!90!black}
+
+%Aufzählungsstil ändern
+\setbeamertemplate{itemize items}[default]
+\setbeamertemplate{enumerate items}[default]
+
+%Inhaltsangabe anders Numerieren
+\setbeamertemplate{section in toc}[sections numbered]
+\setbeamertemplate{subsection in toc}[subsections numbered]
+
+%Formelnummerierung der Reihe nach (1-X)
+\renewcommand\[{\begin{equation}}
+\renewcommand\]{\end{equation}}
+
+%Aussehen der Buttons
+\setbeamercolor{button}{fg=darkred, bg=gray!15}
+
+%Farben und Aussehen Literaturverzeichnis (Referenzen)
+\bibliographystyle{apalike}
+\setbeamertemplate{bibliography item}{[\theenumiv]}
+\setbeamercolor{bibliography item}{{fg=darkred}}
+\setbeamercolor*{bibliography entry title}{{fg=darkred}}
+\setbeamercolor*{bibliography entry title}{fg=black}
+\setbeamercolor*{bibliography entry author}{fg=black}
+\setbeamercolor*{bibliography entry location}{fg=blue}
+\setbeamercolor*{bibliography entry note}{fg=black}
+
+%Farbe Nummerierungen und Listen
+\setbeamercolor{enumerate item}{fg=darkred}
+\setbeamercolor{itemize item}{fg=darkred}
+\setbeamercolor{itemize subitem}{fg=darkred}
+\setbeamercolor{itemize subsubitem}{fg=darkred}
+\setbeamercolor{local structure}{fg=darkred} %Farbe alles
+
+%Caption bei Tabellen und Bildern
+\setbeamercolor{caption name}{fg=darkred}
+
+%Caption Nummerierung Anzeigen
+\setbeamertemplate{caption}[numbered]
+
+%Caption Farbe Einstellen
+\DeclareCaptionFont{darkred}{\color{darkred}}
+\DeclareCaptionFont{black}{\color{black}}
+\captionsetup{labelfont=darkred,textfont=black}
+
+%CodeSnippet Style definieren
+%http://en.wikibooks.org/wiki/LaTeX/Source_Code_Listings
+%http://stackoverflow.com/questions/586572/make-code-in-latex-look-nice
+\lstdefinestyle{Common}
+{   
+    language={PHP},
+    numbers=left,
+    numbersep=1em,
+    frame=single,
+    framesep=\fboxsep,
+    framerule=\fboxrule,
+    rulecolor=\color{gray!80}, % Frame border color
+    xleftmargin=\dimexpr\fboxsep+\fboxrule,
+    xrightmargin=\dimexpr\fboxsep+\fboxrule,
+    breaklines=true,
+    breakindent=0pt,
+    tabsize=2,
+    columns=flexible,
+    includerangemarker=false,
+    rangeprefix=//\ ,
+}
+\definecolor{darkgreen}{RGB}{50,93,61}
+\lstdefinestyle{A} %siehe \lstset
+{
+    style=Common,
+    backgroundcolor=\color{gray!5}, % Set the background color for the snippet - useful for highlighting
+    basicstyle=\scriptsize\ttfamily, % The default font size and style of the code
+    breakatwhitespace=false, % If true, only allows line breaks at white space
+	breaklines=true, % Automatic line breaking (prevents code from protruding outside the box)
+	captionpos=b,
+	firstnumber=1, % Line numbers begin at line 1
+	frame=single, % Frame around the code box, value can be: none, 	leftline, topline, bottomline, lines, single, shadowbox
+	frameround=tttt, % Rounds the corners of the frame for the top left, top right, bottom left and bottom right positions
+	frame=single, 
+    keywordstyle=\color{black},
+    identifierstyle=\color{black},
+    morekeywords={2002-12-14}, % Add any functions no included by default here separated by commas
+	numbers=left, % Location of line numbers, can take the values of: none, left, right
+	numbersep=5pt, % Distance of line numbers from the code box
+	numberstyle=\tiny\color{gray}, % Style used for line numbers
+	showtabs=false, % Display tabs in the code as lines
+	stepnumber=1, % The step distance between line numbers, i.e. how often will lines be numbered
+    stringstyle=\color{black},
+    commentstyle=\color{darkgreen},
+    tabsize=1 % Number of spaces per tab in the code
+}
+\renewcommand{\lstlistingname}{Quellcode}
+
+%\beamertemplatesolidbackgroundcolor{black!5}
+\setbeamercovered{transparent}
+\logo{\includegraphics[height=7mm]{Logo_FHV}}
+
+%  -------------------------------------------------------------------
+\title{Embedded Betriebssystem}
+\subtitle{für ARM Cortex-A8}
+\author{Nicolaj Höss, Marko Petrovi\'c, Kevin Wallis}
+\date{\today} %Gegen Fehlermeldung an dieser Stelle
+\begin{document}
+\institute[FHV]{
+   \includegraphics[height=1cm]{Logo_FHV2}\\
+   \vspace{0.5cm}
+   Fachhochschule Vorarlberg\\
+   Master Informatik\\
+   \vspace{0.5cm}
+   S1: Softwarelösungen für ressourcenbeschränkte Systeme\\
+}
+
+{
+\setbeamertemplate{background canvas}{\includegraphics[width=\paperwidth,height=\paperheight]{Pictures/Background}} %Hintergrundbild Titelseite
+\makeatletter %Titelseite zentrieren
+  \begin{frame}[plain]
+    \hspace*{-\beamer@leftsidebar}%
+    \advance\textwidth by \beamer@rightsidebar\relax
+    \beamer@leftsidebar=\z@
+    \begin{minipage}{\textwidth}\par%
+      \maketitle
+    \end{minipage}
+  \end{frame}
+}
+
+\addtocounter{framenumber}{-1} %Titelseite nicht Nummerieren
+
+\section*{Inhalt}
+\begin{frame}[allowframebreaks]
+\begin{adjustwidth}{+3em}{+3em}
+\transblindshorizontal
+\frametitle{Inhalt}
+%\tableofcontents %gesamtes Inhaltsverzeichnis
+\tableofcontents[hideallsubsections] %Ohne Unterkapitel
+\end{adjustwidth}
+\end{frame}
+
+\section{Was ist YAML}
+\begin{frame}
+\frametitle{Was ist YAML} 
+\begin{itemize}
+\setlength{\itemsep}{0.6cm}
+\item \glqq YAML Ain't Markup Language \grqq\\ 
+
+\item vereinfachte Auszeichnungssprache\\
+mensch- und maschinenlesbar\\
+Gliederung und Formatierung von Text und Daten\\
+
+\item zur Datenserialisierung\\
+\item ursprünglich an XML angelehnt\\
+\item Datenstrukturen von Perl, Python und C\\
+\item entwickelt von Clark Evans (2001) 
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Designziel} 
+Die Designziele von YAML sind: ~\cite{yam}  \vspace{0.2cm}
+\begin{itemize}
+\item leicht von Menschen lesbar\\[0.3cm]
+\item Portabilität zwischen Programmiersprachen\\[0.3cm]
+\item Übereinstimmung mit natürlichen Datenstrukturen\\[0.3cm]
+\item konsistentes Schema für generische Tools\\[0.3cm]
+%\item YAML unterstützt Einpasskompilierer.
+\item aussagekräftig und erweiterbar\\[0.3cm]
+\item leicht zu Implementieren und zu Verwenden\\[0.3cm]
+\end{itemize}
+\vspace{0.6cm}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Unterstützte Sprachen} 
+
+\begin{center}
+\begin{tabular}{ p{3cm} p{3cm} }
+  C & C++ \\[0.3cm]
+  JavaScript & Java \\[0.3cm]
+  Perl & PHP \\[0.3cm]
+  Python & ActionScript \\[0.3cm]
+  Ruby & .NET Plattform \\[0.3cm]
+\end{tabular}
+\end{center}
+
+\vspace{1cm}
+
+Und viele weitere mehr.
+
+\end{frame}
+
+\section{Aufbau und Syntax von YAML}
+\subsection{Besonderheiten}
+\begin{frame}
+\frametitle{Besonderheiten}
+
+Jede Datenstruktur darstellbar durch: 
+\begin{itemize}
+\item[\textbullet] Scalars (Einzelwerte)\\
+ %\textendash
+\item[\textbullet] Sequences (Arrays)\\ 
+\item[\textbullet] Mappings (Assoziativen Listen)\\
+\end{itemize}
+\vspace{0.3cm}
+
+\begin{itemize}
+\item Leerzeichen zum Kennzeichnen von Strukturen\\[0.3cm]
+\item Tabs sind nicht erlaubt
+\end{itemize}
+
+
+%Leerzeichen werden zum Kennzeichnen von Strukturen (Nesting) verwendet. Tabulatoren sind hingegen nicht erlaubt.
+\end{frame}
+
+\subsection{Semantik}
+\begin{frame}[fragile]\frametitle{Einzelwerte (Scalars)}
+%-----------------------------------------
+% ----- FRAME SPLIT IN TWO MINIPAGES -----
+%-----------------------------------------
+\fboxsep=0pt
+\noindent{%
+\begin{minipage}[t]{0.58\linewidth}
+% ----- BEGIN LEFT PART -----
+\begin{lstlisting}[style=A,caption={Einzelwerte\newline 
+         \tiny{\textcolor{gray}{Quelle: ~\cite{sym}}}},label={lst:c1},escapechar=|,linewidth=4cm] 
+#Strings
+'String'
+"String"
+#Numbers
+12      #int
+014     #octal
+0xC     #hex |\label{Zeile:7}|
+13.4    #float
+1.2e+34 #exponential
+.inf    #infinity
+#Nulls
+null
+~
+#Boolean 
+true
+false
+#Dates
+2002-12-14
+\end{lstlisting}
+%Siehe Code ~\ref{lst:c1}\\
+%Siehe Zeile ~\ref{Zeile:7}
+% ----- END LEFT PART -----
+\end{minipage}}%
+\hfill%
+{%
+\begin{minipage}[t]{0.42\linewidth}
+% ----- BEGIN RIGHT PART -----
+Unterstützte Typen:
+\begin{itemize}
+\item[\textendash] Strings
+\item[\textendash] Numerische Werte
+\item[\textendash] Boolsche Ausdrücke 
+\item[\textendash] Spezielles Format für Datum 
+\end{itemize}
+% ----- END RIGHT PART -----
+\end{minipage}
+}
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{Arrays (Sequences)}
+%-----------------------------------------
+% ----- FRAME SPLIT IN TWO MINIPAGES -----
+%-----------------------------------------
+\fboxsep=0pt
+\noindent{%
+\begin{minipage}[t]{0.58\linewidth}
+% ----- BEGIN LEFT PART -----
+\begin{lstlisting}[style=A,caption={Arrays\newline 
+         \tiny{\textcolor{gray}{Quelle: ~\cite{sym}}}},label={lst:c2},escapechar=|,linewidth=4cm] 
+a_sequence:
+ - PHP
+ - Perl
+ - Python
+#or Flowstyle:
+a_sequence:[PHP, Perl, Python] 
+
+\end{lstlisting}
+% ----- END LEFT PART -----
+\end{minipage}}%
+\hfill%
+{%
+\begin{minipage}[t]{0.42\linewidth}
+% ----- BEGIN RIGHT PART -----
+Erzeugen von Array: 
+\begin{itemize}
+\item Dash+Space
+\item oder im Flowstyle 
+\end{itemize}
+% ----- END RIGHT PART -----
+\end{minipage}
+}
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{Assoziative Listen (Mappings)}
+%-----------------------------------------
+% ----- FRAME SPLIT IN TWO MINIPAGES -----
+%-----------------------------------------
+\fboxsep=0pt
+\noindent{%
+\begin{minipage}[t]{0.58\linewidth}
+% ----- BEGIN LEFT PART -----
+\begin{lstlisting}[style=A,caption={Assoziative\newline 
+         \tiny{\textcolor{gray}{Quelle: ~\cite{sym}}}},label={lst:c3},escapechar=|,linewidth=5.2cm]
+a_map:
+ PHP: 5.2
+ MySQL: 5.1
+ Apache: 2.2.20
+#or Flowstyle:
+a_map: {PHP: 5.2, MySQL: 5.1, 
+Apache: 2.2.20}
+\end{lstlisting}
+
+\begin{lstlisting}[style=A,caption={Mischung\newline 
+         \tiny{\textcolor{gray}{Quelle: ~\cite{sym}}}},label={lst:c4},escapechar=|,linewidth=5.2cm]
+#Mix Mappings und Sequences:
+'Chapter1': [Introduction, Event Types]
+"Symfony1": {PHP: 5.0, Propel: 1.2}
+\end{lstlisting}
+
+% ----- END LEFT PART -----
+\end{minipage}}%
+\hfill%
+{%
+\begin{minipage}[t]{0.42\linewidth}
+% ----- BEGIN RIGHT PART -----
+
+\begin{itemize}
+\item bestehend aus Key und Value
+\item Key: Value
+\item auch im Flowstyle
+\end{itemize}
+% ----- END RIGHT PART -----
+\end{minipage}
+}
+\end{frame}
+
+\subsection{Andere Features}
+\begin{frame}[fragile]\frametitle{Andere Features}
+%-----------------------------------------
+% ----- FRAME SPLIT IN TWO MINIPAGES -----
+%-----------------------------------------
+\fboxsep=0pt
+\noindent{%
+\begin{minipage}[t]{0.58\linewidth}
+% ----- BEGIN LEFT PART -----
+\begin{lstlisting}[style=A,caption={Features\newline 
+         \tiny{\textcolor{gray}{Quelle: ~\cite{lear}}}},label={lst:c5},escapechar=|,linewidth=5.2cm]
+#Anchors:
+anchored_content: &anchor_name
+other_anchor: *anchor_name
+
+#Declare Types:
+!!str 0.5
+
+#Set type:
+set:
+    ? item1
+    ? item2
+    ? item3
+#entspricht 
+set:
+    item1: null
+    item2: null
+    item3: null
+\end{lstlisting}
+% ----- END LEFT PART -----
+\end{minipage}}%
+\hfill%
+{%
+\begin{minipage}[t]{0.42\linewidth}
+% ----- BEGIN RIGHT PART -----
+
+\begin{itemize}
+\item Anchor: ein Value für zwei Keys (Inhalt duplizieren)\\[0.2cm]
+\item mit !! wird ein Typ explizit angegeben (tags)\\[0.2cm]
+\item !!binary: base64-encoded representation of a binary\\[0.2cm] blob
+\item Set entspricht Map mit Null Values
+%\item yaml.load('[eggs, ham, spam]')
+\end{itemize}
+% ----- END RIGHT PART -----
+\end{minipage}
+}
+\end{frame}
+
+\subsection{Anwendungsbeispiel (Ruby)}
+\begin{frame}[fragile]\frametitle{Anwendungsbeispiel (Ruby)}
+%-----------------------------------------
+% ----- FRAME SPLIT IN TWO MINIPAGES -----
+%-----------------------------------------
+\fboxsep=0pt
+\noindent{%
+\begin{minipage}[t]{0.58\linewidth}
+% ----- BEGIN LEFT PART -----
+\begin{lstlisting}[style=A,caption={Features\newline 
+         \tiny{\textcolor{gray}{Quelle: ~\cite{rob}}}},label={lst:c6},escapechar=|,linewidth=5.2cm]
+#require 'yaml'
+# Set.new([1,2]).to_yaml
+--- !ruby/object:Set 
+hash: 
+  1: true
+  2: true
+\end{lstlisting}
+% ----- END LEFT PART -----
+\end{minipage}}%
+\hfill%
+{%
+\begin{minipage}[t]{0.42\linewidth}
+% ----- BEGIN RIGHT PART -----
+
+\begin{itemize}
+\item Kommentar: Zeile in Ruby
+\item Der Rest zeigt das Ergebnis in YAML
+\item ---: Tag der von Ruby erzeugt wurde
+\item YAML erlaubt das Hinzufügen von Metadaten
+\end{itemize}
+% ----- END RIGHT PART -----
+\end{minipage}
+}
+\end{frame}
+
+
+\subsection{Vergleich mit JSON}
+\begin{frame}
+\frametitle{Vergleich mit JSON}
+\begin{itemize}
+\item[\textbullet] JSON ist Untermenge von YAML\\
+\item[\textbullet] JSON Dokument ist gleichzeitig YAML 1.2 Dokument\\ (V1.1 nicht!)
+\item[\textbullet]JSON Designziele: Einfachheit, Universalität
+\item[\textbullet]YAML Designziele: Lesbarkeit durch Mensch, Unterstützt serielle Übertragung von Datenstrukturen 
+\item[\textbullet] Was YAML erlaubt und JSON nicht: ~\cite{cow}
+\begin{itemize}
+\item[\textbullet] Kommentare
+\item[\textbullet] Tags für Metadaten
+\item[\textbullet] Anchors
+\item[\textbullet] Dokument Start- und Endmarkierungen
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Vergleich mit JSON (Performance)}
+\begin{figure}[ht!]
+\includegraphics[width=\textwidth]{Performance1} 
+\vspace{-0.5cm}
+\caption{Serialization (dump) performance\centering \newline 
+         \tiny{\textcolor{gray}{Quelle: ~\cite{ser}}}}
+\end{figure}
+\vspace{-0.6cm}
+\begin{figure}[ht!]
+\includegraphics[width=\textwidth]{Performance2} 
+\vspace{-0.4cm}
+\caption{Deserialization (load) performance\newline \tiny{\textcolor{gray}{Quelle: ~\cite{ser}}}}
+\end{figure}
+\end{frame}
+
+\section{Design des Kommunikationsprotokolls}
+\subsection{Message Typen}
+\begin{frame}
+\frametitle{Message Typen} 
+\begin{itemize}
+\item Start\\ 
+\item Stop\\  
+\item Set Default Values\\ 
+\item Get Default Values\\
+\item Report -Default Values\\
+\item Report -Status\\
+\item Request -Status\\
+\item Report -Error\\
+\end{itemize} 
+\end{frame}
+
+\subsection{Designkriterien des Protokolls}
+\begin{frame}
+\frametitle{Designkriterien des Protokolls} 
+Designziele (nach Priorität): 
+\begin{itemize}
+\item[\textbullet] Lesbarkeit für den Menschen\\
+\item[\textbullet] Defaultparameter sind vorhanden\\
+\item[\textbullet] Reihenfolge der Parameter beliebig\\
+\item[\textbullet] Wenig Overhead (Geschwindigkeit)\\
+\end{itemize} 
+\end{frame}
+
+\subsection{Aufbau Protokoll}
+\begin{frame}
+\frametitle{Aufbau des Protokolls}
+\begin{table}[h]
+\small
+\caption{Protokollaufbau}
+\begin{tabular}{|l|l|l|l|l|l|l|l|}
+\hline
+\textbf{''MessageTyp''} & \textbf{: \{} & \textbf{Parametername} & \textbf{:} & \textbf{Wert} & \textbf{,} & \textbf{usw} & \textbf{\}}\\ \hline
+\end{tabular}
+\end{table} 
+
+\vspace{0.2cm}
+\textbf{YAML Ergebnis:}\\
+MessageTyp:\\
+\hspace{0.3cm}Parametername1: Wert1\\
+\hspace{0.3cm}Parametername2: Wert2\\
+\hspace{0.3cm}Parametername3: Wert3\\
+\end{frame}
+
+\subsection{Messages}
+
+\begin{frame}[fragile]
+	\frametitle{Start Message}	
+\fboxsep=0pt
+\noindent{%
+\begin{minipage}[t]{0.50\linewidth}
+% ----- BEGIN LEFT PART -----
+\begin{lstlisting}			[style=A,caption={Start Message\newline
+         \tiny{\textcolor{gray}{}}},label={lst:c7},escapechar=|,linewidth=4cm]
+		Start: { 
+		Delay: 0, 
+		FinalSpeed: 100, 
+		RiseTime: 2, 
+		Direction: Right, 
+		AutoStatus: False }
+\end{lstlisting}
+% ----- END LEFT PART -----
+\end{minipage}}%
+\hfill%
+{%
+\begin{minipage}[t]{0.50\linewidth}
+% ----- BEGIN RIGHT PART -----
+\begin{figure}[ht!]
+\flushright
+\includegraphics[scale=0.37]{start} 
+%\caption{Boost Converter Schaltung}
+\end{figure}
+% ----- END RIGHT PART -----
+\end{minipage}
+}
+	
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Stop Message}
+	\fboxsep=0pt
+\noindent{%
+\begin{minipage}[t]{0.50\linewidth}
+% ----- BEGIN LEFT PART -----
+\begin{lstlisting}			[style=A,caption={Stop Message\newline
+         \tiny{\textcolor{gray}{}}},label={lst:c8},escapechar=|,linewidth=4cm]
+	Stop: { 
+	Delay: 0, 
+	FinalSpeed: 0, 
+	FallTime: 2, 
+	AutoStatus: False, 
+	EmergencyStop: False }
+\end{lstlisting}
+% ----- END LEFT PART -----
+\end{minipage}}%
+\hfill%
+{%
+\begin{minipage}[t]{0.50\linewidth}
+% ----- BEGIN RIGHT PART -----
+\begin{figure}[ht!]
+\flushright
+\includegraphics[scale=0.35]{stop} 
+%\caption{Boost Converter Schaltung}
+\end{figure}
+% ----- END RIGHT PART -----
+\end{minipage}
+}
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+	\frametitle{Set und Get Default Values Messages}
+	\fboxsep=0pt
+\noindent{%
+\begin{minipage}[t]{0.50\linewidth}
+% ----- BEGIN LEFT PART -----
+\begin{lstlisting}			[style=A,caption={Set Default Values Message\newline
+         \tiny{\textcolor{gray}{}}},label={lst:c9},escapechar=|,linewidth=4cm]
+	SetDefaultValues: { 
+	Delay: 0, 
+	FinalSpeed: 100, 
+	FallTime: 2, 
+	RampTime: 3, 
+	Direction: Right,
+	FinalSpeedStart: 100,
+	FinalSpeedStop: 0 }
+\end{lstlisting}
+% ----- END LEFT PART -----
+\end{minipage}}%
+\hfill%
+{%
+\begin{minipage}[t]{0.50\linewidth}
+% ----- BEGIN RIGHT PART -----
+\begin{figure}[ht!]
+\flushright
+\includegraphics[scale=0.35]{setdefaultvalues} 
+%\caption{Boost Converter Schaltung}
+\end{figure}
+% ----- END RIGHT PART -----
+\end{minipage}
+}
+
+\noindent{%
+\begin{minipage}[t]{0.50\linewidth}
+% ----- BEGIN LEFT PART -----
+\begin{lstlisting}			[style=A,caption={Get Default Values Message\newline
+         \tiny{\textcolor{gray}{}}},label={lst:c10},escapechar=|,linewidth=4cm]
+	GetDefaultValues: {}
+\end{lstlisting}
+% ----- END LEFT PART -----
+\end{minipage}}%
+\hfill%
+{%
+\begin{minipage}[t]{0.50\linewidth}
+% ----- BEGIN RIGHT PART -----
+\begin{figure}[ht!]
+\flushright
+\includegraphics[scale=0.35]{getdefaultvalues} 
+%\caption{Boost Converter Schaltung}
+\end{figure}
+% ----- END RIGHT PART -----
+\end{minipage}
+}
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]
+	\frametitle{Report Default Values Message}
+	\fboxsep=0pt
+\noindent{%
+\begin{minipage}[t]{0.50\linewidth}
+% ----- BEGIN LEFT PART -----
+\begin{lstlisting}			[style=A,caption={Report Default Values Message\newline
+         \tiny{\textcolor{gray}{}}},label={lst:c11},escapechar=|,linewidth=4cm]
+	ReportDefaultValues: { 
+	Delay: 0, 
+	RiseTime: 2, 
+	FallTime: 2,
+	Direction: Right, 
+	FinalSpeedStart: 100,
+	FinalSpeedStop: 0 }
+\end{lstlisting}
+% ----- END LEFT PART -----
+\end{minipage}}%
+\hfill%
+{%
+\begin{minipage}[t]{0.50\linewidth}
+% ----- BEGIN RIGHT PART -----
+\begin{figure}[ht!]
+\flushright
+\includegraphics[scale=0.35]{reportdefaultvalues} 
+%\caption{Boost Converter Schaltung}
+\end{figure}
+% ----- END RIGHT PART -----
+\end{minipage}
+}
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]
+	\frametitle{Report und Request Messages}
+	\fboxsep=0pt
+\noindent{%
+\begin{minipage}[t]{0.50\linewidth}
+% ----- BEGIN LEFT PART -----
+\begin{lstlisting}			[style=A,caption={Report Status Message\newline
+         \tiny{\textcolor{gray}{}}},label={lst:c12},escapechar=|,linewidth=4cm]
+	ReportStatus: { Status: }
+\end{lstlisting}
+% ----- END LEFT PART -----
+\end{minipage}}%
+\hfill%
+{%
+\begin{minipage}[t]{0.50\linewidth}
+% ----- BEGIN RIGHT PART -----
+\begin{figure}[ht!]
+\flushright
+\includegraphics[scale=0.35]{reportstatus} 
+%\caption{Boost Converter Schaltung}
+\end{figure}
+% ----- END RIGHT PART -----
+\end{minipage}
+}
+
+	\fboxsep=0pt
+\noindent{%
+\begin{minipage}[t]{0.50\linewidth}
+% ----- BEGIN LEFT PART -----
+\begin{lstlisting}			[style=A,caption={Request Status Message\newline
+         \tiny{\textcolor{gray}{}}},label={lst:c13},escapechar=|,linewidth=4cm]
+	RequestStatus: {}
+\end{lstlisting}
+% ----- END LEFT PART -----
+\end{minipage}}%
+\hfill%
+{%
+\begin{minipage}[t]{0.50\linewidth}
+% ----- BEGIN RIGHT PART -----
+\begin{figure}[ht!]
+\flushright
+\includegraphics[scale=0.35]{requeststatus} 
+%\caption{Boost Converter Schaltung}
+\end{figure}
+% ----- END RIGHT PART -----
+\end{minipage}
+}
+
+	\fboxsep=0pt
+\noindent{%
+\begin{minipage}[t]{0.50\linewidth}
+% ----- BEGIN LEFT PART -----
+\begin{lstlisting}			[style=A,caption={Report Error Message\newline
+         \tiny{\textcolor{gray}{}}},label={lst:c14},escapechar=|,linewidth=4cm]
+	ReportError: {}
+\end{lstlisting}
+% ----- END LEFT PART -----
+\end{minipage}}%
+\hfill%
+{%
+\begin{minipage}[t]{0.50\linewidth}
+% ----- BEGIN RIGHT PART -----
+\begin{figure}[ht!]
+\flushright
+\includegraphics[scale=0.35]{reporterror} 
+%\caption{Boost Converter Schaltung}
+\end{figure}
+% ----- END RIGHT PART -----
+\end{minipage}
+}
+\end{frame}
+
+\subsection{Beschreibung und Abhängigkeiten}
+\begin{frame}
+\frametitle{Beschreibung und Abhängigkeiten}
+Parametername hätte auch weggelassen werden können.\\ 
+(Verwendung von Array statt Assoziativen Listen)\\
+\vspace{0.3cm}
+Wir haben uns dagegen entschieden weil:
+\begin{itemize}
+\item[\textbullet] Lesbarkeit verschlechtert wird\\ %\textendash
+\item[\textbullet] Reihenfolge der Parameter nicht mehr beliebig wäre
+\end{itemize}
+\vspace{0.3cm}
+Nachteile dieser Entscheidung:
+\begin{itemize}
+\item[\textbullet] Overhead (Geschwindigkeit)
+\end{itemize}
+\end{frame}
+
+\section{Bewertung}
+\subsection{Vorteile}
+
+\begin{frame}
+\frametitle{Vorteile} 
+YAML:
+\begin{itemize}
+\setlength{\itemsep}{0.3cm}
+\item[++] Leicht vom Mensch Schreiben, Lesen (vgl. XML)
+\item[++] Weiterverarbeitung der Daten in anderen Sprachen
+\item[+] Hinzufügen von Tags erlaubt
+\item[+] Sprache ist leicht zu Verwenden
+\end{itemize}
+
+\vspace{0.3cm}
+Entwickeltes Protokoll:
+\begin{itemize}
+\setlength{\itemsep}{0.3cm}
+\item[++] Leicht vom Mensch Schreiben, Lesen (vgl. XML)
+\item[+] Defaultparameter sind vorhanden (nicht alle Senden)
+\item[+] Reihenfolge der Parameter ist beliebig
+\end{itemize}
+\end{frame}
+
+\subsection{Nachteile}
+\begin{frame}
+\frametitle{Nachteile}
+YAML:
+\begin{itemize}
+\setlength{\itemsep}{0.3cm}
+\item[-- --] Geschwindigkeit (vgl. JSON)
+\item[-- --] Verbreitung und Bekanntheit
+\item[\textendash] Wird immer noch weiterentwickelt (Ausgereiftheit)
+\end{itemize}
+\vspace{0.3cm}
+
+Entwickeltes Protokoll:
+\begin{itemize}
+\setlength{\itemsep}{0.3cm}
+%\item[-- --] Leicht vom Mensch Schreiben, Lesen (vgl. XML)
+\item[\textendash] Vermeidbarer Overhead (Siehe Abhängigkeiten)
+\item[\textendash] Sender und Empfänger brauchen Befehlsliste
+\end{itemize}
+\end{frame}
+
+\section*{Referenzen}
+\begin{frame}[allowframebreaks]{Referenzen}
+\begin{thebibliography}{99}
+
+\setbeamertemplate{bibliography item}[text]
+\bibitem{wik}Wikipedia Community\newblock
+\emph{YAML}.
+\newblock \url{http://en.wikipedia.org/wiki/YAML}, 2015.
+
+\setbeamertemplate{bibliography item}[text]    
+\bibitem{sym}Symfony\newblock
+\emph{The YAML Format}.
+\newblock \url{http://symfony.com/doc/current/components/yaml/yaml_format.html}, 2015. 
+
+\setbeamertemplate{bibliography item}[text]    
+\bibitem{lear}Adam Brenecki\newblock
+\emph{Learn X in Y minutes}. \emph{Where X=yaml}.
+\newblock \url{http://learnxinyminutes.com/docs/yaml/}, 2015. 
+
+\setbeamertemplate{bibliography item}[text]    
+\bibitem{rob}Xavier Shay\newblock
+\emph{Robot Has No Heart}. \emph{YAML Tutorial}.
+\newblock \url{http://rhnh.net/2011/01/31/yaml-tutorial}, 2015.
+
+\setbeamertemplate{bibliography item}[text]    
+\bibitem{cpp}yaml-cpp\newblock
+\emph{HowToEmitYAML}.
+\newblock \url{https://code.google.com/p/yaml-cpp/wiki/HowToEmitYAML}, 2012.
+
+\setbeamertemplate{bibliography item}[text]    
+\bibitem{yam}Clark Evans et al. \newblock
+\emph{YAML Ain't Markup Language Version 1.2}.
+\newblock \url{http://yaml.org/spec/1.2/spec.html}, 2009.
+
+\setbeamertemplate{bibliography item}[text]    
+\bibitem{cow}CowTalk \newblock
+\emph{What me like YAML?}.
+\newblock \url{http://www.cowtowncoder.com/blog/archives/2012/04/entry_473.html}, 2009.
+
+\setbeamertemplate{bibliography item}[text]    
+\bibitem{ser} Malin Eriksson und Viktor Hallberg \newblock
+\emph{Comparison between JSON and YAML for data
+serialization}.
+\newblock \url{http://www.csc.kth.se/utbildning/kth/kurser/DD143X/dkand11/Group2Mads/victor.hallberg.malin.eriksson.report.pdf}, 2011.
+
+\end{thebibliography}
+\end{frame}
+
+\setbeamertemplate{background canvas}
+{\includegraphics[width=\paperwidth,height=\paperheight]{End}}
+\begin{frame}[plain,noframenumbering]
+\frametitle{Schluss}
+\vspace{115pt}
+\hspace{95pt}
+\textcolor{black}{\textbf {\large{Danke für Ihre Aufmerksamkeit.}}}
+\end{frame}
+
+
+\end{document}
