@@ -12,6 +12,6 @@
 #include "../devicemanager/devicemanager.h"
 
 extern void ConsoleInit();
-extern void ConsoleProcess();
+extern void ConsoleProcess(int argc, char** argv);
 
 #endif /* CONSOLE_CONSOLE_H_ */
