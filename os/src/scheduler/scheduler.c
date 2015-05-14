@@ -130,7 +130,7 @@ process_t* SchedulerStartProcess(processFunc func) {
 	// processes[freeProcess].context->registers[R13] = (void*) (STACK_START + freeProcess * STACK_SIZE);
 	// TODO: check this atomic end needed
 	CPUAtomicEnd();
-	return processes[freeProcess];
+	return &processes[freeProcess];
 }
 
 int SchedulerRunNextProcess(context_t* context) {

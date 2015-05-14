@@ -26,7 +26,7 @@
  * Typedefs for the process struct
  */
 typedef int8_t processId_t;
-typedef void (*processFunc)(void);
+typedef void (*processFunc)(int, char**);
 
 typedef address_t* register_t;
 
