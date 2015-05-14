@@ -346,6 +346,9 @@ static void mmuInitializeKernelMasterPageTable(void)
 	memoryRegionPointer_t memoryRegion = MemoryManagerGetRegion(BOOT_ROM_REGION);
 	mmuMapDirectRegionToKernelMasterPageTable(memoryRegion, table);
 
+	memoryRegion = MemoryManagerGetRegion(INTERNAL_SRAM_REGION);
+	mmuMapDirectRegionToKernelMasterPageTable(memoryRegion, table);
+
 	memoryRegion = MemoryManagerGetRegion(MEMORY_MAPPED_IO_REGION);
 	mmuMapDirectRegionToKernelMasterPageTable(memoryRegion, table);
 

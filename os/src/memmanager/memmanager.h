@@ -45,6 +45,8 @@ static pageStatus_t tableRegion[1279];
 #define PROCESS_REGION						4
 static pageStatus_t procRegion[256767];
 
+#define INTERNAL_SRAM_REGION				5
+static pageStatus_t sramRegion[15];
 
 #define BOOT_ROM_START_ADDRESS				0x40000000
 #define BOOT_ROM_END_ADDRESS				0x4002BFFF
