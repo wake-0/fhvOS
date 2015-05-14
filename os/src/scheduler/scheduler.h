@@ -65,7 +65,7 @@ typedef struct {
  */
 extern int SchedulerInit(void);
 extern int SchedulerStart(device_t timerDevice);
-extern int SchedulerStartProcess(processFunc func);
+extern process_t* SchedulerStartProcess(processFunc func);
 extern int SchedulerRunNextProcess(context_t* context);
 extern int SchedulerKillProcess(processId_t id);
 extern process_t* SchedulerGetRunningProcess(void);
