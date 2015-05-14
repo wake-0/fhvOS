@@ -221,15 +221,16 @@ processId_t getNextProcessIdByState(processState_t state, int startId) {
 boolean_t timerISR(address_t context)
 {
 	// volatile address_t spa = GetContext();
+
 	context_t* spaContext = (context_t*) context;
 
 	DeviceManagerWrite(timer, DISABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
 	DeviceManagerWrite(timer, CLEAR_INTERRUPT_STATUS, TIMER_IRQ_OVERFLOW);
 
-	SchedulerRunNextProcess(spaContext);
+	int result = SchedulerRunNextProcess(spaContext);
 
 	DeviceManagerWrite(timer, ENABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
 	DeviceManagerOpen(timer);
 
-	return FALSE;
+	return (result == SCHEDULER_OK) ? FALSE : TRUE;
 }
