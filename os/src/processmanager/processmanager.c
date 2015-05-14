@@ -37,16 +37,17 @@ void ProcessManagerInit(void)
 void ProcessManagerStartProcess(char * processName, void(*funcPtr)(int, char ** ))
 {
 	// Create new process info
-	process_t ptr = SchedulerStartProcess(funcPtr); // TODO Add argc and argv
+	process_t* ptr = SchedulerStartProcess(funcPtr); // TODO Add argc and argv
 	if (ptr == NULL)
 	{
 		// TODO Add return value
 		return;
 	}
+
 	MMUInitProcess(ptr);
-	processes[processIdx]->processScheduler = ptr;
-	strcpy(processes[processIdx]->processName, processName);
-	processes[processIdx]->startTime = KernelGetUptime();
+	processes[processIdx].processScheduler = ptr;
+	strcpy(processes[processIdx].processName, processName);
+	processes[processIdx].startTime = KernelGetUptime();
 
 }
 
