@@ -11,13 +11,29 @@
 #include "scheduler/scheduler.h"
 #include "driver/cpu/driver_cpu.h"
 #include "console/console.h"
+#include "processmanager/processmanager.h"
 
 extern address_t GetContext(void);
 extern void CPUSwitchToPrivilegedMode(void);
 extern void CPUSwitchToUserMode(void);
 extern void TimerInterruptStatusClear(Timer_t timer, unsigned int interruptNumber);
 
-void led1(void)
+void simpleProc1(int argc, char** argv)
+{
+	while(1)
+	{
+
+	}
+}
+void simpleProc2(int argc, char** argv)
+{
+	while(1)
+	{
+
+	}
+}
+
+void led1(int argc, char** argv)
 {
 	device_t led = DeviceManagerGetDevice("LED0", 4);
 	//device_t uart = DeviceManagerGetDevice("UART0", 5);
@@ -54,7 +70,7 @@ void led1(void)
 	}
 }
 
-void led2(void)
+void led2(int argc, char** argv)
 {
 	device_t led = DeviceManagerGetDevice("LED1", 4);
 	volatile int i;
@@ -84,7 +100,7 @@ void led2(void)
 	}
 }
 
-void process3(void)
+void process3(int argc, char** argv)
 {
 	volatile int i = 0;
 	for(i = 0; i < 10; i++) {
@@ -107,9 +123,6 @@ int foo(int value);
 
 int main(void)
 {
-	MMUInit();
-
-	/*
 	DeviceManagerInit();
 
 	device_t led3 = DeviceManagerGetDevice("LED3", 4);
@@ -118,26 +131,21 @@ int main(void)
 
 	device_t uart = DeviceManagerGetDevice("UART0", 5);
 	ConsoleInit(uart);
+	ProcessManagerInit();
 
-	SchedulerInit();
-	SchedulerStartProcess(&led2);
-	//SchedulerStartProcess(&led1);
-	//SchedulerStartProcess(&process3);
-	//SchedulerStartProcess(&ConsoleProcess);
 
-	device_t timer = DeviceManagerGetDevice("TIMER2", 6);
+	ProcessManagerStartProcess("sp1", &simpleProc1);
+	ProcessManagerStartProcess("sp2", &simpleProc2);
+
+	ProcessManagerStartProcess("led1", &led1);
+	ProcessManagerStartProcess("led2", &led2);
+	ProcessManagerStartProcess("proc3", &process3);
+	ProcessManagerStartProcess("tty", &ConsoleProcess);
+
 
 	// Set up the timer
-	DeviceManagerInitDevice(timer);
+	//DeviceManagerInitDevice(timer);
 
-	device_t cpu = DeviceManagerGetDevice("CPU", 3);
-	DeviceManagerIoctl(cpu, DRIVER_CPU_COMMAND_INTERRUPT_MASTER_IRQ_ENABLE, 0, NULL, 0);
-	DeviceManagerIoctl(cpu, DRIVER_CPU_COMMAND_INTERRUPT_RESET_AINTC, 0, NULL, 0);
-
-	SchedulerStart(timer);
-	//led1();
-
-	*/
 	while(1)
 	{
 		volatile int i = 0;

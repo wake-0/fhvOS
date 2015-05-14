@@ -212,14 +212,19 @@ interrupt void irq_handler1()
 	boolean_t restoreRegisters = interruptHandler((void*)context);
 
 
+	InterruptAllowNewIrqGeneration();
+
 	if(FALSE == restoreRegisters)
 	{
-		InterruptAllowNewIrqGeneration();
+		// TODO: Interrupt allow new irq generation must be called mandatory!
+		// old place: InterruptAllowNewIrqGeneration();
 		RestoreRegisters();
 	} else {
 		// revert stack pointer
 		RevertStackPointer();
 	}
+
+
 }
 
 #pragma INTERRUPT(udef_handler, UDEF)

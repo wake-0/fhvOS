@@ -36,7 +36,7 @@ void ConsoleInit(device_t device)
 	initialized = true;
 }
 
-void ConsoleProcess()
+void ConsoleProcess(int argc, char** argv)
 {
 
 	if (initialized == false) {

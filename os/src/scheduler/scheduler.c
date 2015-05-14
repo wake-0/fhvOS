@@ -7,6 +7,7 @@
 #include "scheduler.h"
 #include "../hal/cpu/hal_cpu.h"
 #include "../driver/timer/driver_timer.h"
+#include "../memmanager/mmu.h"
 
 /*
  * Defines for the process stack start and size
@@ -103,7 +104,9 @@ process_t* SchedulerStartProcess(processFunc func) {
 	// CONCLUSION: increment for SWI here and decrement according to systemstate in scheduleNextReady
 	processes[freeProcess].context->pc = (register_t*)func;
 	processes[freeProcess].context->lr = (address_t*)&dummyEnd;
-	processes[freeProcess].context->sp = (address_t*) (STACK_START + (freeProcess * STACK_SIZE));
+	//processes[freeProcess].context->sp = (address_t*) (STACK_START + (freeProcess * STACK_SIZE));
+	processes[freeProcess].context->sp = (address_t*) (0x10002000);
+
 	// CPSR
 	// N|Z|C|V|Q|IT|J| DNM| GE | IT   |E|A|I|F|T|  M  |
 	// Code | Size | Description
@@ -160,8 +163,7 @@ int SchedulerRunNextProcess(context_t* context) {
 
 	// Update the context for the next running process
 	memcpy(context, processes[runningProcess].context, sizeof(context_t));
-
-	MMUSwitchToProcess(processes[runningProcess]);
+	MMUSwitchToProcess(&processes[runningProcess]);
 	CPUAtomicEnd();
 	return SCHEDULER_OK;
 }

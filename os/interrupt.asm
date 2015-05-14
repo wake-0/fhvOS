@@ -109,7 +109,7 @@ irq_handler:
     B        irq_handler1			  ; Branch to code
 
 RevertStackPointer:
-	ADD 	 SP, SP, #64			  ; Restore initial SP
+	ADD 	 SP, SP, #68			  ; Restore initial SP
 	MOV 	 PC, LR					  ; Return TODO Is there no return command for asm?
 
 RestoreRegisters:
