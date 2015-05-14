@@ -161,6 +161,7 @@ int SchedulerRunNextProcess(context_t* context) {
 	// Update the context for the next running process
 	memcpy(context, processes[runningProcess].context, sizeof(context_t));
 
+	MMUSwitchToProcess(processes[runningProcess]);
 	CPUAtomicEnd();
 	return SCHEDULER_OK;
 }
