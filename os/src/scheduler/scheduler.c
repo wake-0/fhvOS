@@ -83,13 +83,13 @@ int SchedulerStart(device_t initializedTimerDevice)
 	return 0;
 }
 
-int SchedulerStartProcess(processFunc func) {
+process_t* SchedulerStartProcess(processFunc func) {
 	CPUAtomicStart();
 
 	processId_t freeProcess = getNextFreeProcessId();
 	if (freeProcess == INVALID_PROCESS_ID) {
 		CPUAtomicEnd();
-		return SCHEDULER_ERROR;
+		return NULL;
 	}
 
 	processes[freeProcess].func = func;
@@ -130,7 +130,7 @@ int SchedulerStartProcess(processFunc func) {
 	// processes[freeProcess].context->registers[R13] = (void*) (STACK_START + freeProcess * STACK_SIZE);
 	// TODO: check this atomic end needed
 	CPUAtomicEnd();
-	return SCHEDULER_OK;
+	return processes[freeProcess];
 }
 
 int SchedulerRunNextProcess(context_t* context) {
