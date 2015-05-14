@@ -12,7 +12,7 @@
 
 #define PAGE_SIZE_64KB						0x10000
 #define PAGE_SIZE_4KB						0x1000
-#define MEMORY_REGIONS						5
+#define MEMORY_REGIONS						7
 #define L1_PAGE_TABLE						1
 #define L2_PAGE_TABLE						2
 #define L2_PAGE_TABLE_SIZE_1KB				0x400
@@ -48,6 +48,11 @@ static pageStatus_t procRegion[256767];
 #define INTERNAL_SRAM_REGION				5
 static pageStatus_t sramRegion[15];
 
+#define BOOT_ROM_EXCEPTIONS_REGION			6
+static pageStatus_t romExceptionsRegion[1];
+
+#define BOOT_ROM_EXCEPTIONS_START_ADDRESS	0x20000
+#define BOOT_ROM_EXCEPTIONS_END_ADDRESS		0x2001C
 #define BOOT_ROM_START_ADDRESS				0x40000000
 #define BOOT_ROM_END_ADDRESS				0x4002BFFF
 #define MEMORY_MAPPED_IO_START_ADDRESS 		0x40310000

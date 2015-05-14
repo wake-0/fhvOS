@@ -48,6 +48,9 @@ int MemoryManagerInit()
 	memoryManagerInitializeRegion(&memorySections[INTERNAL_SRAM_REGION], true, INTERNAL_SRAM_START_ADDRESS, INTERNAL_SRAM_END_ADDRESS);
 	memorySections[INTERNAL_SRAM_REGION].pageStatus = &sramRegion[0];
 
+	memoryManagerInitializeRegion(&memorySections[BOOT_ROM_EXCEPTIONS_REGION], true, BOOT_ROM_EXCEPTIONS_START_ADDRESS, BOOT_ROM_EXCEPTIONS_END_ADDRESS);
+	memorySections[BOOT_ROM_EXCEPTIONS_REGION].pageStatus = &romExceptionsRegion[0];
+
 	return MEMORY_OK;
 }
 
@@ -64,7 +67,16 @@ static void memoryManagerInitializeRegion(memoryRegionPointer_t memoryRegion, bo
 	memoryRegion->endAddress 		= endAddress;
 	//memoryRegion->directAccess 		= access;
 	int length 						= endAddress - startAddress;
-	memoryRegion->numberOfPages 	= (length / PAGE_SIZE_4KB);
+
+	if((length / PAGE_SIZE_4KB) < 0)
+	{
+		memoryRegion->numberOfPages 	= 1;
+	}
+	else
+	{
+		memoryRegion->numberOfPages 	= (length / PAGE_SIZE_4KB);
+	}
+
 	memoryRegion->reservedPages 	= 0;
 	//memoryRegion->pageStatus	 	= (pageStatusPointer_t)malloc( sizeof(pageStatus_t) * memoryRegion->numberOfPages);
 	//memset(memoryRegion->pageStatus,0, sizeof(pageStatus_t) * memoryRegion->numberOfPages);
