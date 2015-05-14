@@ -217,7 +217,6 @@ static void mmuCreateAndFillL2PageTable(unsigned int virtualAddress, process_t* 
 {
 	// create a L2 page table and write it into L1 page table
 	pageTablePointer_t newL2PageTable = mmuCreatePageTable(L2_PAGE_TABLE);
-	unsigned int tableIndex = mmuGetTableIndex(virtualAddress, INDEX_OF_L1_PAGE_TABLE, TTBR0);
 
 	firstLevelDescriptor_t pageTableEntry;
 	pageTableEntry.sectionBaseAddress 	= (unsigned int)newL2PageTable & SECTION_PAGE_TABLE_MASK;
@@ -225,7 +224,9 @@ static void mmuCreateAndFillL2PageTable(unsigned int virtualAddress, process_t* 
 	pageTableEntry.cachedBuffered 		= WRITE_BACK;
 	pageTableEntry.domain 				= DOMAIN_MANAGER_ACCESS;
 
-	*(runningProcess->pageTableL1 + tableIndex) = mmuCreateL1PageTableEntry(pageTableEntry);
+	unsigned int tableOffset = mmuGetTableIndex(virtualAddress, INDEX_OF_L1_PAGE_TABLE, TTBR0);
+	uint32_t *firstLevelDescriptorAddress = runningProcess->pageTableL1 + (tableOffset << 2)/sizeof(uint32_t);
+	*firstLevelDescriptorAddress = mmuCreateL1PageTableEntry(pageTableEntry);
 
 	mmuMapFreePageFrameIntoL2PageTable(virtualAddress, newL2PageTable);
 }
@@ -246,10 +247,9 @@ static void mmuMapFreePageFrameIntoL2PageTable(unsigned int virtualAddress, page
 	pageTableEntry.cachedBuffered 	= WRITE_BACK;
 
 	// write into table
-	unsigned int tableIndex = mmuGetTableIndex(virtualAddress, INDEX_OF_L2_PAGE_TABLE, TTBR0);
-
-	// TODO: wrong table writing
-	*(l2PageTable + tableIndex) = mmuCreateL2PageTableEntry(pageTableEntry);
+	unsigned int tableOffset = mmuGetTableIndex(virtualAddress, INDEX_OF_L2_PAGE_TABLE, TTBR0);
+	uint32_t *secondLevelDescriptorAddress = l2PageTable + (tableOffset << 2)/sizeof(uint32_t);
+	*secondLevelDescriptorAddress = mmuCreateL2PageTableEntry(pageTableEntry);
 }
 
 
