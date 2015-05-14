@@ -7,6 +7,7 @@
 #include "scheduler.h"
 #include "../hal/cpu/hal_cpu.h"
 #include "../driver/timer/driver_timer.h"
+#include "../memmanager/mmu.h"
 
 /*
  * Defines for the process stack start and size
@@ -160,8 +161,7 @@ int SchedulerRunNextProcess(context_t* context) {
 
 	// Update the context for the next running process
 	memcpy(context, processes[runningProcess].context, sizeof(context_t));
-
-	MMUSwitchToProcess(processes[runningProcess]);
+	MMUSwitchToProcess(&processes[runningProcess]);
 	CPUAtomicEnd();
 	return SCHEDULER_OK;
 }
