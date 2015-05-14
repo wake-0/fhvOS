@@ -104,7 +104,9 @@ process_t* SchedulerStartProcess(processFunc func) {
 	// CONCLUSION: increment for SWI here and decrement according to systemstate in scheduleNextReady
 	processes[freeProcess].context->pc = (register_t*)func;
 	processes[freeProcess].context->lr = (address_t*)&dummyEnd;
-	processes[freeProcess].context->sp = (address_t*) (STACK_START + (freeProcess * STACK_SIZE));
+	//processes[freeProcess].context->sp = (address_t*) (STACK_START + (freeProcess * STACK_SIZE));
+	processes[freeProcess].context->sp = (address_t*) (0x10002000);
+
 	// CPSR
 	// N|Z|C|V|Q|IT|J| DNM| GE | IT   |E|A|I|F|T|  M  |
 	// Code | Size | Description

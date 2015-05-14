@@ -247,6 +247,8 @@ static void mmuMapFreePageFrameIntoL2PageTable(unsigned int virtualAddress, page
 
 	// write into table
 	unsigned int tableIndex = mmuGetTableIndex(virtualAddress, INDEX_OF_L2_PAGE_TABLE, TTBR0);
+
+	// TODO: wrong table writing
 	*(l2PageTable + tableIndex) = mmuCreateL2PageTableEntry(pageTableEntry);
 }
 
