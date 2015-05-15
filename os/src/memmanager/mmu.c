@@ -721,6 +721,7 @@ static uint32_t mmuGetTableIndex(unsigned int virtualAddress, unsigned int index
 		case INDEX_OF_PAGE_FRAME:
 			return (virtualAddress & PAGE_FRAME_INDEX_MASK);
 		default:
-			return -1;
+			// TODO: check if -1 should be returned
+			return 0;
 	}
 }

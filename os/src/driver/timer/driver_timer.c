@@ -145,7 +145,7 @@ int TimerDriverIoctl(uint16_t timer, uint16_t timeInMilis, uint8_t interruptMode
 	TimerReloadValueSet(timer, timerCounterValue);
 
 	// register ISR to timer
-	intHandler_t intHandler = (void (*)(void))buf;
+	intHandler_t intHandler = (intHandler_t)buf;
 	InterruptHandlerRegister(interruptNumber, intHandler);
 	InterruptPrioritySet(interruptNumber, 0);
 	InterruptHandlerEnable(interruptNumber);

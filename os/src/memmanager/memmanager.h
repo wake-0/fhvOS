@@ -28,7 +28,11 @@
 #define L1_PAGE_TABLE_SIZE_16KB			0x4000
 #define L2_PAGE_TABLE_SIZE_1KB			0x400
 
-typedef struct PAGESTATUS_T pageStatus_t;
+typedef struct PAGESTATUS_T
+{
+	boolean_t reserved;
+	unsigned int processID;
+} pageStatus_t;
 
 #define BOOT_ROM_REGION						0
 static pageStatus_t romRegion[43];
@@ -72,12 +76,6 @@ static pageStatus_t romExceptionsRegion[1];
 #define PAGES_IN_A_ROW_FOUND				0
 #define MEMORY_OK							1
 #define MEMORY_NOT_OK						-1
-
-typedef struct PAGESTATUS_T
-{
-	boolean_t reserved;
-	unsigned int processID;
-} pageStatus_t;
 
 typedef pageStatus_t * pageStatusPointer_t;
 
