@@ -24,15 +24,15 @@
 
 
 
-static void TimerHalSetControlRegisterField(unsigned int baseRegister, unsigned int controlSettings)
+static void TimerHalSetControlRegisterField(address_t baseAddress, unsigned int controlSettings)
 {
-	if(DMTIMER1_MS == baseRegister)
+	if(DMTIMER1_MS == baseAddress)
 	{
-		HWREG(baseRegister + TCLR_1MS) |= controlSettings;
+		HWREG(baseAddress + TCLR_1MS) |= controlSettings;
 	}
 	else
 	{
-		HWREG(baseRegister + TCLR) |= controlSettings;
+		HWREG(baseAddress + TCLR) |= controlSettings;
 	}
 }
 
@@ -42,267 +42,267 @@ void TimerHalActivateTimerInPowerControl(unsigned int timer)
 }
 
 
-void TimerHalEnableInterrupts(unsigned int baseRegister, unsigned int timerIrq)
+void TimerHalEnableInterrupts(address_t baseAddress, unsigned int timerIrq)
 {
-    HWREG(baseRegister + IRQENABLE_SET) = (timerIrq &
+    HWREG(baseAddress + IRQENABLE_SET) = (timerIrq &
 	                                           (IRQ_CAPTURE_ENABLE |
 											    IRQ_OVERFLOW_ENABLE |
 												IRQ_MATCH_ENABLE));
 }
 
 
-void TimerHalDisableInterrupts(unsigned int baseRegister, unsigned int timerIrq)
+void TimerHalDisableInterrupts(address_t baseAddress, unsigned int timerIrq)
 {
-	HWREG(baseRegister + IRQENABLE_CLR) = (timerIrq &
+	HWREG(baseAddress + IRQENABLE_CLR) = (timerIrq &
 	                                           (IRQ_CAPTURE_ENABLE |
 											    IRQ_OVERFLOW_ENABLE |
 												IRQ_MATCH_ENABLE));
 }
 
 
-void TimerHalClearInterruptStatus(unsigned int baseRegister, unsigned int timerIrq)
+void TimerHalClearInterruptStatus(address_t baseAddress, unsigned int timerIrq)
 {
     /* Clear the interrupt status from IRQSTATUS register */
-    HWREG(baseRegister + IRQSTATUS) = (timerIrq &
+    HWREG(baseAddress + IRQSTATUS) = (timerIrq &
                                          (IRQ_CAPTURE_ENABLE |
 										 IRQ_OVERFLOW_ENABLE |
 										 IRQ_MATCH_ENABLE));
 }
 
-void TimerHalWriteIrqStatusRawRegister(unsigned int baseRegister, unsigned int timerIrq)
+void TimerHalWriteIrqStatusRawRegister(address_t baseAddress, unsigned int timerIrq)
 {
-	HWREG(baseRegister + IRQSTATUS_RAW) = (timerIrq &
+	HWREG(baseAddress + IRQSTATUS_RAW) = (timerIrq &
 	                                         (IRQ_CAPTURE_ENABLE |
 											 IRQ_OVERFLOW_ENABLE |
 											 IRQ_MATCH_ENABLE));
 }
 
-void TimerHalStart(unsigned int baseRegister)
+void TimerHalStart(address_t baseAddress)
 {
-	DMTimerWaitForWrite(WRITE_PEND_TCRR, baseRegister);
-	TimerHalSetControlRegisterField(baseRegister, DMTIMER_TCLR_START);
+	DMTimerWaitForWrite(WRITE_PEND_TCRR, baseAddress);
+	TimerHalSetControlRegisterField(baseAddress, DMTIMER_TCLR_START);
 }
 
 
-void TimerHalStop(unsigned int baseRegister)
+void TimerHalStop(address_t baseAddress)
 {
-	DMTimerWaitForWrite(WRITE_PEND_TCRR, baseRegister);
+	DMTimerWaitForWrite(WRITE_PEND_TCRR, baseAddress);
 
-	if(DMTIMER1_MS == baseRegister)
+	if(DMTIMER1_MS == baseAddress)
 	{
-		HWREG(baseRegister + TCLR_1MS) &= DMTIMER_TCLR_STOP;
+		HWREG(baseAddress + TCLR_1MS) &= DMTIMER_TCLR_STOP;
 	}
 	else
 	{
-		HWREG(baseRegister + TCLR) &= DMTIMER_TCLR_STOP;
+		HWREG(baseAddress + TCLR) &= DMTIMER_TCLR_STOP;
 	}
 }
 
 
-void TimerHalSetCounterValue(unsigned int baseRegister, unsigned int counterValue)
+void TimerHalSetCounterValue(address_t baseAddress, unsigned int counterValue)
 {
-	DMTimerWaitForWrite(WRITE_PEND_TCRR, baseRegister);
+	DMTimerWaitForWrite(WRITE_PEND_TCRR, baseAddress);
 
-	if(DMTIMER1_MS == baseRegister)
+	if(DMTIMER1_MS == baseAddress)
 	{
-		HWREG(baseRegister + TCRR_1MS) = counterValue;
+		HWREG(baseAddress + TCRR_1MS) = counterValue;
 	}
 	else
 	{
-		HWREG(baseRegister + TCRR) = counterValue;
+		HWREG(baseAddress + TCRR) = counterValue;
 	}
 }
 
 /*
  *	\brief:
- *	\param: 	baseRegister		base address of timer
+ *	\param: 	baseAddress		base address of timer
  *	\return:	actual value of timer
  */
-unsigned int TimerHalGetCounterValue(unsigned int baseRegister)
+unsigned int TimerHalGetCounterValue(address_t baseAddress)
 {
-	if(DMTIMER1_MS == baseRegister)
+	if(DMTIMER1_MS == baseAddress)
 	{
-		DMTimerWaitForWrite_1MS(WRITE_PEND_TCRR, baseRegister);
-		return HWREG(baseRegister + TCRR_1MS);
+		DMTimerWaitForWrite_1MS(WRITE_PEND_TCRR, baseAddress);
+		return HWREG(baseAddress + TCRR_1MS);
 	}
 	else
 	{
-		DMTimerWaitForWrite(WRITE_PEND_TCRR, baseRegister);
-		return HWREG(baseRegister + TCRR);
+		DMTimerWaitForWrite(WRITE_PEND_TCRR, baseAddress);
+		return HWREG(baseAddress + TCRR);
 	}
 }
 
 
-unsigned int TimerHalGetReloadValue(unsigned int baseRegister)
+unsigned int TimerHalGetReloadValue(address_t baseAddress)
 {
-	if(DMTIMER1_MS == baseRegister)
+	if(DMTIMER1_MS == baseAddress)
 	{
-		DMTimerWaitForWrite_1MS(WRITE_PEND_TCRR, baseRegister);
-		return HWREG(baseRegister + TLDR_1MS);
+		DMTimerWaitForWrite_1MS(WRITE_PEND_TCRR, baseAddress);
+		return HWREG(baseAddress + TLDR_1MS);
 	}
 	else
 	{
-		DMTimerWaitForWrite(WRITE_PEND_TCRR, baseRegister);
-		return HWREG(baseRegister + TLDR);
+		DMTimerWaitForWrite(WRITE_PEND_TCRR, baseAddress);
+		return HWREG(baseAddress + TLDR);
 	}
 }
 
 /*
  *	\brief:
- *	\param: 	baseRegister				base address of timer
+ *	\param: 	baseAddress				base address of timer
  *	\param:		timerCounterReloadValue		reload value of specified timer
  */
-void TimerHalSetCounterReloadValue(unsigned int baseRegister, unsigned int timerCounterReloadValue)
+void TimerHalSetCounterReloadValue(address_t baseAddress, unsigned int timerCounterReloadValue)
 {
-	if(DMTIMER1_MS == baseRegister)
+	if(DMTIMER1_MS == baseAddress)
 	{
-		DMTimerWaitForWrite_1MS(WRITE_PEND_TCRR, baseRegister);
-		HWREG(baseRegister + TLDR_1MS) = timerCounterReloadValue;
+		DMTimerWaitForWrite_1MS(WRITE_PEND_TCRR, baseAddress);
+		HWREG(baseAddress + TLDR_1MS) = timerCounterReloadValue;
 	}
 	else
 	{
-		DMTimerWaitForWrite(WRITE_PEND_TLDR, baseRegister);
-		HWREG(baseRegister + TLDR) = timerCounterReloadValue;
+		DMTimerWaitForWrite(WRITE_PEND_TLDR, baseAddress);
+		HWREG(baseAddress + TLDR) = timerCounterReloadValue;
 	}
 }
 
 
 
-void TimerHalResetCounterRegister(unsigned int baseRegister, unsigned int resetValue)
+void TimerHalResetCounterRegister(address_t baseAddress, unsigned int resetValue)
 {
-	HWREG(baseRegister + TIOCP_CFG) |= TIOCP_CFG_SOFTRESET;
+	HWREG(baseAddress + TIOCP_CFG) |= TIOCP_CFG_SOFTRESET;
 
-	while(TIOCP_CFG_SOFTRESET == (HWREG(baseRegister + TIOCP_CFG) & TIOCP_CFG_SOFTRESET))
+	while(TIOCP_CFG_SOFTRESET == (HWREG(baseAddress + TIOCP_CFG) & TIOCP_CFG_SOFTRESET))
 		;
 }
 
 /*
  *	\brief:
- *	\param: baseRegister		base address of timer
+ *	\param: baseAddress		base address of timer
  *	\param: reloadMode				0x00 one-shot timer
  *									0x02 auto-reload
  */
-static void TimerHalSetReloadMode(unsigned int baseRegister, unsigned int reloadMode)
+static void TimerHalSetReloadMode(address_t baseAddress, unsigned int reloadMode)
 {
-	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseRegister);
+	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseAddress);
 	unsigned int controlSetting = reloadMode & (ONE_SHOT_TIMER | AUTO_RELOAD);
-	TimerHalSetControlRegisterField(baseRegister, controlSetting);
+	TimerHalSetControlRegisterField(baseAddress, controlSetting);
 }
 
 
 /*
  *	\brief:
- *	\param: baseRegister		base address of timer
+ *	\param: baseAddress		base address of timer
  *	\param: mode				0x00 compare mode disabled
 *								0x20 compare mode enabled
  */
-static void TimerHalSetCompareMode(unsigned int baseRegister, unsigned int compareMode)
+static void TimerHalSetCompareMode(address_t baseAddress, unsigned int compareMode)
 {
-	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseRegister);
+	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseAddress);
 	unsigned int controlSetting = compareMode & (ENABLE_COMPARE | DISABLE_COMPARE);
-	TimerHalSetControlRegisterField(baseRegister, controlSetting);
+	TimerHalSetControlRegisterField(baseAddress, controlSetting);
 }
 
 
-void TimerHalConfigureMode(unsigned int baseRegister, unsigned int compareMode, unsigned int reloadMode)
+void TimerHalConfigureMode(address_t baseAddress, unsigned int compareMode, unsigned int reloadMode)
 {
-	TimerHalSetCompareMode(baseRegister, compareMode);
-	TimerHalSetReloadMode(baseRegister, reloadMode);
+	TimerHalSetCompareMode(baseAddress, compareMode);
+	TimerHalSetReloadMode(baseAddress, reloadMode);
 }
 
 /*
  *	\brief:
- *	\param: baseRegister		base address of timer
+ *	\param: baseAddress		base address of timer
  *	\param: triggerMode				0x000 no trigger
  *									0x400 trigger on overflow
  *									0x800 trigger on overflow and match
  */
-void TimerHalSetTriggerMode(unsigned int baseRegister, unsigned int triggerMode)
+void TimerHalSetTriggerMode(address_t baseAddress, unsigned int triggerMode)
 {
-	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseRegister);
+	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseAddress);
 
 	unsigned int controlSetting = triggerMode & (NO_TRIGGER | OVERFLOW_TRIGGER
 			| OVERFLOW_MATCH_TRIGGER);
 
-	TimerHalSetControlRegisterField(baseRegister, controlSetting);
+	TimerHalSetControlRegisterField(baseAddress, controlSetting);
 }
 
 /*
  *	\brief:
- *	\param: baseRegister		base address of timer
+ *	\param: baseAddress		base address of timer
  *	\param: captureMode				0x0000 single capture
  *									0x4000 capture on second event
  */
-void TimerHalSetCaptureMode(unsigned int baseRegister, unsigned int captureMode)
+void TimerHalSetCaptureMode(address_t baseAddress, unsigned int captureMode)
 {
-	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseRegister);
+	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseAddress);
 	unsigned int controlSetting = captureMode & (SINGLE_CAPTURE | CAPTURE_ON_SECOND_EVENT);
-	TimerHalSetControlRegisterField(baseRegister, controlSetting);
+	TimerHalSetControlRegisterField(baseAddress, controlSetting);
 }
 
 /*
  *	\brief:
- *	\param: baseRegister		base address of timer
+ *	\param: baseAddress		base address of timer
  *	\param: pinMode					0x0000 pulse
  *									0x1000 toggle
  */
-void TimerHalSetOutputPinMode(unsigned int baseRegister, unsigned int controlRegister, unsigned int pinMode)
+void TimerHalSetOutputPinMode(address_t baseAddress, unsigned int controlRegister, unsigned int pinMode)
 {
-	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseRegister);
+	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseAddress);
 	unsigned int controlSetting = pinMode & (PINMODE_PULSE | PINMODE_TOGGLE);
-	TimerHalSetControlRegisterField(baseRegister, controlSetting);
+	TimerHalSetControlRegisterField(baseAddress, controlSetting);
 }
 
 /*
  *	\brief:
- *	\param: baseRegister			base address of timer
+ *	\param: baseAddress			base address of timer
  *	\param: transitionMode			0x000 no capture
  *									0x100 capture on low to high transition
  *									0x200 capture on high to low transition
  *									0x300 capture on both edge transition
  */
-void TimerHalSetTransitionCaptureMode(unsigned int baseRegister, unsigned int transitionMode)
+void TimerHalSetTransitionCaptureMode(address_t baseAddress, unsigned int transitionMode)
 {
-	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseRegister);
+	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseAddress);
 
 	unsigned int controlSetting = transitionMode & (NO_CAPTURE
 									| CAPTURE_ON_TRANSITION_LOW_TO_HIGH
 									| CAPTURE_ON_TRANSITION_HIGH_TO_LOW
 									| CAPTURE_ON_BOTH_EDGE_TRANSITION);
 
-	TimerHalSetControlRegisterField(baseRegister, controlSetting);
+	TimerHalSetControlRegisterField(baseAddress, controlSetting);
 }
 
 
 
-unsigned int TimerHalGetPostedStatus(unsigned int baseRegister)
+unsigned int TimerHalGetPostedStatus(address_t baseAddress)
 {
-    return (HWREG(baseRegister + TWPS));
+    return (HWREG(baseAddress + TWPS));
 }
 
 
-void TimerHalClearIrqPendingFlag(unsigned int baseRegister, unsigned int timerIrq)
+void TimerHalClearIrqPendingFlag(address_t baseAddress, unsigned int timerIrq)
 {
-	HWREG(baseRegister + IRQSTATUS) = (timerIrq &
+	HWREG(baseAddress + IRQSTATUS) = (timerIrq &
 	                                         (IRQ_CAPTURE_ENABLE |
 											 IRQ_OVERFLOW_ENABLE |
 											 IRQ_MATCH_ENABLE));
 }
 
 
-void TimerHalEnableClockPrescaler(unsigned int baseRegister, unsigned int prescalerValue)
+void TimerHalEnableClockPrescaler(address_t baseAddress, unsigned int prescalerValue)
 {
-	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseRegister);
+	DMTimerWaitForWrite(WRITE_PEND_TCLR, baseAddress);
 
-	HWREG(baseRegister + TCLR) |= (prescalerValue & (PRESCALER_ENABLE | PRESCALER_VALUE_RANGE));
+	HWREG(baseAddress + TCLR) |= (prescalerValue & (PRESCALER_ENABLE | PRESCALER_VALUE_RANGE));
 }
 
 
-void TimerHalDisableClockPrescaler(unsigned int baseRegister)
+void TimerHalDisableClockPrescaler(address_t baseAddress)
 {
-    DMTimerWaitForWrite(WRITE_PEND_TCLR, baseRegister);
+    DMTimerWaitForWrite(WRITE_PEND_TCLR, baseAddress);
 
-    HWREG(baseRegister + TCLR) &= PRESCALER_DISABLE;
+    HWREG(baseAddress + TCLR) &= PRESCALER_DISABLE;
 }
 
 
@@ -401,9 +401,9 @@ static void TimerHalWaitForOcpwpClockBeingActive(void)
 }
 
 
-static void TimerHalActivateClockDomain(unsigned int baseRegister, unsigned int controlRegister, unsigned int settings)
+static void TimerHalActivateClockDomain(address_t baseAddress, unsigned int controlRegister, unsigned int settings)
 {
-	while(!(HWREG(baseRegister + controlRegister) & (settings)));
+	while(!(HWREG(baseAddress + controlRegister) & (settings)));
 }
 
 static void TimerHalActivateClock(unsigned int timer)
