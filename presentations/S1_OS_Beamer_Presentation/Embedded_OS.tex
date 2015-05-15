@@ -387,425 +387,81 @@
 \end{adjustwidth}
 \end{frame}
 
-\section{Was ist YAML}
+\section{Einführung}
 \begin{frame}
-\frametitle{Was ist YAML} 
-\begin{itemize}
-\setlength{\itemsep}{0.6cm}
-\item \glqq YAML Ain't Markup Language \grqq\\ 
-
-\item vereinfachte Auszeichnungssprache\\
-mensch- und maschinenlesbar\\
-Gliederung und Formatierung von Text und Daten\\
-
-\item zur Datenserialisierung\\
-\item ursprünglich an XML angelehnt\\
-\item Datenstrukturen von Perl, Python und C\\
-\item entwickelt von Clark Evans (2001) 
-
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Designziel} 
-Die Designziele von YAML sind: ~\cite{yam}  \vspace{0.2cm}
-\begin{itemize}
-\item leicht von Menschen lesbar\\[0.3cm]
-\item Portabilität zwischen Programmiersprachen\\[0.3cm]
-\item Übereinstimmung mit natürlichen Datenstrukturen\\[0.3cm]
-\item konsistentes Schema für generische Tools\\[0.3cm]
-%\item YAML unterstützt Einpasskompilierer.
-\item aussagekräftig und erweiterbar\\[0.3cm]
-\item leicht zu Implementieren und zu Verwenden\\[0.3cm]
-\end{itemize}
-\vspace{0.6cm}
+\frametitle{Einführung} 
 
 \end{frame}
 
 \begin{frame}
-\frametitle{Unterstützte Sprachen} 
-
-\begin{center}
-\begin{tabular}{ p{3cm} p{3cm} }
-  C & C++ \\[0.3cm]
-  JavaScript & Java \\[0.3cm]
-  Perl & PHP \\[0.3cm]
-  Python & ActionScript \\[0.3cm]
-  Ruby & .NET Plattform \\[0.3cm]
-\end{tabular}
-\end{center}
-
-\vspace{1cm}
-
-Und viele weitere mehr.
+\frametitle{Projektziele} 
 
 \end{frame}
 
-\section{Aufbau und Syntax von YAML}
-\subsection{Besonderheiten}
+\section{Betriebssystemarchitektur}
+\subsection{Aufbau}
 \begin{frame}
-\frametitle{Besonderheiten}
+\frametitle{Aufbau des Betriebssystems}
 
-Jede Datenstruktur darstellbar durch: 
-\begin{itemize}
-\item[\textbullet] Scalars (Einzelwerte)\\
- %\textendash
-\item[\textbullet] Sequences (Arrays)\\ 
-\item[\textbullet] Mappings (Assoziativen Listen)\\
-\end{itemize}
-\vspace{0.3cm}
-
-\begin{itemize}
-\item Leerzeichen zum Kennzeichnen von Strukturen\\[0.3cm]
-\item Tabs sind nicht erlaubt
-\end{itemize}
-
-
-%Leerzeichen werden zum Kennzeichnen von Strukturen (Nesting) verwendet. Tabulatoren sind hingegen nicht erlaubt.
 \end{frame}
 
-\subsection{Semantik}
-\begin{frame}[fragile]\frametitle{Einzelwerte (Scalars)}
-%-----------------------------------------
-% ----- FRAME SPLIT IN TWO MINIPAGES -----
-%-----------------------------------------
-\fboxsep=0pt
-\noindent{%
-\begin{minipage}[t]{0.58\linewidth}
-% ----- BEGIN LEFT PART -----
-\begin{lstlisting}[style=A,caption={Einzelwerte\newline 
-         \tiny{\textcolor{gray}{Quelle: ~\cite{sym}}}},label={lst:c1},escapechar=|,linewidth=4cm] 
-#Strings
-'String'
-"String"
-#Numbers
-12      #int
-014     #octal
-0xC     #hex |\label{Zeile:7}|
-13.4    #float
-1.2e+34 #exponential
-.inf    #infinity
-#Nulls
-null
-~
-#Boolean 
-true
-false
-#Dates
-2002-12-14
-\end{lstlisting}
-%Siehe Code ~\ref{lst:c1}\\
-%Siehe Zeile ~\ref{Zeile:7}
-% ----- END LEFT PART -----
-\end{minipage}}%
-\hfill%
-{%
-\begin{minipage}[t]{0.42\linewidth}
-% ----- BEGIN RIGHT PART -----
-Unterstützte Typen:
-\begin{itemize}
-\item[\textendash] Strings
-\item[\textendash] Numerische Werte
-\item[\textendash] Boolsche Ausdrücke 
-\item[\textendash] Spezielles Format für Datum 
-\end{itemize}
-% ----- END RIGHT PART -----
-\end{minipage}
-}
-\end{frame}
+\subsection{Hardware Abstraction Layer - HAL}
+\begin{frame}[fragile]\frametitle{Hardware Abstraction Layer - HAL}
 
-\begin{frame}[fragile]\frametitle{Arrays (Sequences)}
-%-----------------------------------------
-% ----- FRAME SPLIT IN TWO MINIPAGES -----
-%-----------------------------------------
-\fboxsep=0pt
-\noindent{%
-\begin{minipage}[t]{0.58\linewidth}
-% ----- BEGIN LEFT PART -----
-\begin{lstlisting}[style=A,caption={Arrays\newline 
-         \tiny{\textcolor{gray}{Quelle: ~\cite{sym}}}},label={lst:c2},escapechar=|,linewidth=4cm] 
-a_sequence:
- - PHP
- - Perl
- - Python
-#or Flowstyle:
-a_sequence:[PHP, Perl, Python] 
 
-\end{lstlisting}
-% ----- END LEFT PART -----
-\end{minipage}}%
-\hfill%
-{%
-\begin{minipage}[t]{0.42\linewidth}
-% ----- BEGIN RIGHT PART -----
-Erzeugen von Array: 
-\begin{itemize}
-\item Dash+Space
-\item oder im Flowstyle 
-\end{itemize}
-% ----- END RIGHT PART -----
-\end{minipage}
-}
-\end{frame}
-
-\begin{frame}[fragile]\frametitle{Assoziative Listen (Mappings)}
-%-----------------------------------------
-% ----- FRAME SPLIT IN TWO MINIPAGES -----
-%-----------------------------------------
-\fboxsep=0pt
-\noindent{%
-\begin{minipage}[t]{0.58\linewidth}
-% ----- BEGIN LEFT PART -----
-\begin{lstlisting}[style=A,caption={Assoziative\newline 
-         \tiny{\textcolor{gray}{Quelle: ~\cite{sym}}}},label={lst:c3},escapechar=|,linewidth=5.2cm]
-a_map:
- PHP: 5.2
- MySQL: 5.1
- Apache: 2.2.20
-#or Flowstyle:
-a_map: {PHP: 5.2, MySQL: 5.1, 
-Apache: 2.2.20}
-\end{lstlisting}
-
-\begin{lstlisting}[style=A,caption={Mischung\newline 
-         \tiny{\textcolor{gray}{Quelle: ~\cite{sym}}}},label={lst:c4},escapechar=|,linewidth=5.2cm]
-#Mix Mappings und Sequences:
-'Chapter1': [Introduction, Event Types]
-"Symfony1": {PHP: 5.0, Propel: 1.2}
-\end{lstlisting}
-
-% ----- END LEFT PART -----
-\end{minipage}}%
-\hfill%
-{%
-\begin{minipage}[t]{0.42\linewidth}
-% ----- BEGIN RIGHT PART -----
-
-\begin{itemize}
-\item bestehend aus Key und Value
-\item Key: Value
-\item auch im Flowstyle
-\end{itemize}
-% ----- END RIGHT PART -----
-\end{minipage}
-}
-\end{frame}
-
-\subsection{Andere Features}
-\begin{frame}[fragile]\frametitle{Andere Features}
-%-----------------------------------------
-% ----- FRAME SPLIT IN TWO MINIPAGES -----
-%-----------------------------------------
-\fboxsep=0pt
-\noindent{%
-\begin{minipage}[t]{0.58\linewidth}
-% ----- BEGIN LEFT PART -----
-\begin{lstlisting}[style=A,caption={Features\newline 
-         \tiny{\textcolor{gray}{Quelle: ~\cite{lear}}}},label={lst:c5},escapechar=|,linewidth=5.2cm]
-#Anchors:
-anchored_content: &anchor_name
-other_anchor: *anchor_name
-
-#Declare Types:
-!!str 0.5
-
-#Set type:
-set:
-    ? item1
-    ? item2
-    ? item3
-#entspricht 
-set:
-    item1: null
-    item2: null
-    item3: null
-\end{lstlisting}
-% ----- END LEFT PART -----
-\end{minipage}}%
-\hfill%
-{%
-\begin{minipage}[t]{0.42\linewidth}
-% ----- BEGIN RIGHT PART -----
-
-\begin{itemize}
-\item Anchor: ein Value für zwei Keys (Inhalt duplizieren)\\[0.2cm]
-\item mit !! wird ein Typ explizit angegeben (tags)\\[0.2cm]
-\item !!binary: base64-encoded representation of a binary\\[0.2cm] blob
-\item Set entspricht Map mit Null Values
-%\item yaml.load('[eggs, ham, spam]')
-\end{itemize}
-% ----- END RIGHT PART -----
-\end{minipage}
-}
-\end{frame}
-
-\subsection{Anwendungsbeispiel (Ruby)}
-\begin{frame}[fragile]\frametitle{Anwendungsbeispiel (Ruby)}
-%-----------------------------------------
-% ----- FRAME SPLIT IN TWO MINIPAGES -----
-%-----------------------------------------
-\fboxsep=0pt
-\noindent{%
-\begin{minipage}[t]{0.58\linewidth}
-% ----- BEGIN LEFT PART -----
-\begin{lstlisting}[style=A,caption={Features\newline 
-         \tiny{\textcolor{gray}{Quelle: ~\cite{rob}}}},label={lst:c6},escapechar=|,linewidth=5.2cm]
-#require 'yaml'
-# Set.new([1,2]).to_yaml
---- !ruby/object:Set 
-hash: 
-  1: true
-  2: true
-\end{lstlisting}
-% ----- END LEFT PART -----
-\end{minipage}}%
-\hfill%
-{%
-\begin{minipage}[t]{0.42\linewidth}
-% ----- BEGIN RIGHT PART -----
-
-\begin{itemize}
-\item Kommentar: Zeile in Ruby
-\item Der Rest zeigt das Ergebnis in YAML
-\item ---: Tag der von Ruby erzeugt wurde
-\item YAML erlaubt das Hinzufügen von Metadaten
-\end{itemize}
-% ----- END RIGHT PART -----
-\end{minipage}
-}
 \end{frame}
 
 
-\subsection{Vergleich mit JSON}
+\subsection{Treiber}
+
+\begin{frame}[fragile]\frametitle{Struktur der Treiber}
+
+\end{frame}
+
+\subsection{Virtuelle Speicherverwaltung}
+\begin{frame}[fragile]\frametitle{Entwurf}
+
+\end{frame}
+
+
+\subsection{Betriebssystemapplikation}
 \begin{frame}
-\frametitle{Vergleich mit JSON}
-\begin{itemize}
-\item[\textbullet] JSON ist Untermenge von YAML\\
-\item[\textbullet] JSON Dokument ist gleichzeitig YAML 1.2 Dokument\\ (V1.1 nicht!)
-\item[\textbullet]JSON Designziele: Einfachheit, Universalität
-\item[\textbullet]YAML Designziele: Lesbarkeit durch Mensch, Unterstützt serielle Übertragung von Datenstrukturen 
-\item[\textbullet] Was YAML erlaubt und JSON nicht: ~\cite{cow}
-\begin{itemize}
-\item[\textbullet] Kommentare
-\item[\textbullet] Tags für Metadaten
-\item[\textbullet] Anchors
-\item[\textbullet] Dokument Start- und Endmarkierungen
-\end{itemize}
-\end{itemize}
+\frametitle{Applikation}
+
 \end{frame}
 
-\section{Design des Kommunikationsprotokolls}
-\subsection{Message Typen}
+\section{Zusammenfassung}
+\subsection{Ergebnisse}
 \begin{frame}
-\frametitle{Message Typen} 
-\begin{itemize}
-\item Start\\ 
-\item Stop\\  
-\item Set Default Values\\ 
-\item Get Default Values\\
-\item Report -Default Values\\
-\item Report -Status\\
-\item Request -Status\\
-\item Report -Error\\
-\end{itemize} 
+\frametitle{Ergebnisse} 
+
 \end{frame}
 
-\subsection{Designkriterien des Protokolls}
+\subsection{Aufgetretene Schwierigkeiten}
 \begin{frame}
-\frametitle{Designkriterien des Protokolls} 
-Designziele (nach Priorität): 
-\begin{itemize}
-\item[\textbullet] Lesbarkeit für den Menschen\\
-\item[\textbullet] Defaultparameter sind vorhanden\\
-\item[\textbullet] Reihenfolge der Parameter beliebig\\
-\item[\textbullet] Wenig Overhead (Geschwindigkeit)\\
-\end{itemize} 
+\frametitle{Aufgetretene Schwierigkeiten} 
+
 \end{frame}
 
-\subsection{Aufbau Protokoll}
+\subsection{Weiteres Vorgehen}
 \begin{frame}
-\frametitle{Aufbau des Protokolls}
-\begin{table}[h]
-\small
-\caption{Protokollaufbau}
-\begin{tabular}{|l|l|l|l|l|l|l|l|}
-\hline
-\textbf{''MessageTyp''} & \textbf{: \{} & \textbf{Parametername} & \textbf{:} & \textbf{Wert} & \textbf{,} & \textbf{usw} & \textbf{\}}\\ \hline
-\end{tabular}
-\end{table} 
+\frametitle{Weiteres Vorgehen} 
 
-\vspace{0.2cm}
-\textbf{YAML Ergebnis:}\\
-MessageTyp:\\
-\hspace{0.3cm}Parametername1: Wert1\\
-\hspace{0.3cm}Parametername2: Wert2\\
-\hspace{0.3cm}Parametername3: Wert3\\
 \end{frame}
 
-\subsection{Messages}
-
-
-\subsection{Beschreibung und Abhängigkeiten}
-\begin{frame}
-\frametitle{Beschreibung und Abhängigkeiten}
-Parametername hätte auch weggelassen werden können.\\ 
-(Verwendung von Array statt Assoziativen Listen)\\
-\vspace{0.3cm}
-Wir haben uns dagegen entschieden weil:
-\begin{itemize}
-\item[\textbullet] Lesbarkeit verschlechtert wird\\ %\textendash
-\item[\textbullet] Reihenfolge der Parameter nicht mehr beliebig wäre
-\end{itemize}
-\vspace{0.3cm}
-Nachteile dieser Entscheidung:
-\begin{itemize}
-\item[\textbullet] Overhead (Geschwindigkeit)
-\end{itemize}
-\end{frame}
 
 \section{Bewertung}
 \subsection{Vorteile}
 
 \begin{frame}
 \frametitle{Vorteile} 
-YAML:
-\begin{itemize}
-\setlength{\itemsep}{0.3cm}
-\item[++] Leicht vom Mensch Schreiben, Lesen (vgl. XML)
-\item[++] Weiterverarbeitung der Daten in anderen Sprachen
-\item[+] Hinzufügen von Tags erlaubt
-\item[+] Sprache ist leicht zu Verwenden
-\end{itemize}
 
-\vspace{0.3cm}
-Entwickeltes Protokoll:
-\begin{itemize}
-\setlength{\itemsep}{0.3cm}
-\item[++] Leicht vom Mensch Schreiben, Lesen (vgl. XML)
-\item[+] Defaultparameter sind vorhanden (nicht alle Senden)
-\item[+] Reihenfolge der Parameter ist beliebig
-\end{itemize}
 \end{frame}
 
 \subsection{Nachteile}
 \begin{frame}
 \frametitle{Nachteile}
-YAML:
-\begin{itemize}
-\setlength{\itemsep}{0.3cm}
-\item[-- --] Geschwindigkeit (vgl. JSON)
-\item[-- --] Verbreitung und Bekanntheit
-\item[\textendash] Wird immer noch weiterentwickelt (Ausgereiftheit)
-\end{itemize}
-\vspace{0.3cm}
 
-Entwickeltes Protokoll:
-\begin{itemize}
-\setlength{\itemsep}{0.3cm}
-%\item[-- --] Leicht vom Mensch Schreiben, Lesen (vgl. XML)
-\item[\textendash] Vermeidbarer Overhead (Siehe Abhängigkeiten)
-\item[\textendash] Sender und Empfänger brauchen Befehlsliste
-\end{itemize}
 \end{frame}
 
 \section*{Referenzen}
@@ -817,41 +473,6 @@ Entwickeltes Protokoll:
 \emph{YAML}.
 \newblock \url{http://en.wikipedia.org/wiki/YAML}, 2015.
 
-\setbeamertemplate{bibliography item}[text]    
-\bibitem{sym}Symfony\newblock
-\emph{The YAML Format}.
-\newblock \url{http://symfony.com/doc/current/components/yaml/yaml_format.html}, 2015. 
-
-\setbeamertemplate{bibliography item}[text]    
-\bibitem{lear}Adam Brenecki\newblock
-\emph{Learn X in Y minutes}. \emph{Where X=yaml}.
-\newblock \url{http://learnxinyminutes.com/docs/yaml/}, 2015. 
-
-\setbeamertemplate{bibliography item}[text]    
-\bibitem{rob}Xavier Shay\newblock
-\emph{Robot Has No Heart}. \emph{YAML Tutorial}.
-\newblock \url{http://rhnh.net/2011/01/31/yaml-tutorial}, 2015.
-
-\setbeamertemplate{bibliography item}[text]    
-\bibitem{cpp}yaml-cpp\newblock
-\emph{HowToEmitYAML}.
-\newblock \url{https://code.google.com/p/yaml-cpp/wiki/HowToEmitYAML}, 2012.
-
-\setbeamertemplate{bibliography item}[text]    
-\bibitem{yam}Clark Evans et al. \newblock
-\emph{YAML Ain't Markup Language Version 1.2}.
-\newblock \url{http://yaml.org/spec/1.2/spec.html}, 2009.
-
-\setbeamertemplate{bibliography item}[text]    
-\bibitem{cow}CowTalk \newblock
-\emph{What me like YAML?}.
-\newblock \url{http://www.cowtowncoder.com/blog/archives/2012/04/entry_473.html}, 2009.
-
-\setbeamertemplate{bibliography item}[text]    
-\bibitem{ser} Malin Eriksson und Viktor Hallberg \newblock
-\emph{Comparison between JSON and YAML for data
-serialization}.
-\newblock \url{http://www.csc.kth.se/utbildning/kth/kurser/DD143X/dkand11/Group2Mads/victor.hallberg.malin.eriksson.report.pdf}, 2011.
 
 \end{thebibliography}
 \end{frame}
