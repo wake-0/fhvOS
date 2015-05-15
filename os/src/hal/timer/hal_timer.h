@@ -5,6 +5,8 @@
  *      Author: Marko Petrovic
  */
 
+#include "../../platform/platform.h"
+
 #define NUMBER_OF_TIMERS	8
 #define DMTIMER_TCLR_START	(0x01)
 #define DMTIMER_TCLR_STOP	(0xFFFFFFFE)
@@ -17,28 +19,28 @@ typedef enum {TIMER0, TIMER1_MS, TIMER2,
 	} Timer_t;
 
 
-extern void TimerHalEnableInterrupts(unsigned int baseRegister, unsigned int timerIrq);
-extern void TimerHalDisableInterrupts(unsigned int baseRegister, unsigned int timerIrq);
-void TimerHalClearInterruptStatus(unsigned int baseRegister, unsigned int timerIrq);
-extern unsigned int TimerHalGetTimerBaseAddress(unsigned int timer);
-extern unsigned int TimerHalGetMuxRegisterAddress(unsigned int timer);
-extern unsigned int TimerHalGetClockControlRegisterAddress(unsigned int timer);
+extern void TimerHalEnableInterrupts(address_t baseAddress, unsigned int timerIrq);
+extern void TimerHalDisableInterrupts(address_t baseAddress, unsigned int timerIrq);
+void TimerHalClearInterruptStatus(address_t baseAddress, unsigned int timerIrq);
+extern unsigned int TimerHalGetTimerBaseAddress(address_t baseAddress);
+extern unsigned int TimerHalGetMuxRegisterAddress(address_t baseAddress);
+extern unsigned int TimerHalGetClockControlRegisterAddress(address_t baseAddress);
 extern unsigned int TimerHalGetInterruptNumber(unsigned int timer);
 extern void TimerHalSetClockSettings(unsigned int timer, unsigned int timerMuxSelectionRegister, unsigned int timerClockControlRegister, unsigned int clkSource);
-extern void TimerHalEnableClockPrescaler(unsigned int baseRegister, unsigned int prescalerValue);
-extern void TimerHalDisableClockPrescaler(unsigned int baseRegister);
-extern void TimerHalClearIrqPendingFlag(unsigned int baseRegister, unsigned int timerIrq);
-extern unsigned int TimerHalGetPostedStatus(unsigned int baseRegister);
-extern void TimerHalWriteIrqStatusRawRegister(unsigned int baseRegister, unsigned int timerIrq);
-extern void TimerHalStart(unsigned int baseRegister);
-extern void TimerHalStop(unsigned int baseRegister);
-extern void TimerHalSetCounterValue(unsigned int baseRegister, unsigned int counterValue);
-extern unsigned int TimerHalGetCounterValue(unsigned int baseRegiser);
-extern void TimerHalSetCounterReloadValue(unsigned int baseRegister, unsigned int timerCounterReloadValue);
-extern void TimerHalResetCounterRegister(unsigned int baseRegister, unsigned int resetValue);
-extern void TimerHalConfigureMode(unsigned int baseRegister, unsigned int compareMode, unsigned int reloadMode);
-extern void TimerHalSetTriggerMode(unsigned int baseRegister, unsigned int triggerMode);
-extern void TimerHalSetCaptureMode(unsigned int baseRegister, unsigned int captureMode);
-extern void TimerHalSetOutputPinMode(unsigned int baseRegister, unsigned int controlRegister, unsigned int pinMode);
-extern void TimerHalSetTransitionCaptureMode(unsigned int baseRegister, unsigned int transitionMode);
-unsigned int TimerHalGetReloadValue(unsigned int baseRegister);
+extern void TimerHalEnableClockPrescaler(address_t baseAddress, unsigned int prescalerValue);
+extern void TimerHalDisableClockPrescaler(address_t baseAddress);
+extern void TimerHalClearIrqPendingFlag(address_t baseAddress, unsigned int timerIrq);
+extern unsigned int TimerHalGetPostedStatus(address_t baseAddress);
+extern void TimerHalWriteIrqStatusRawRegister(address_t baseAddress, unsigned int timerIrq);
+extern void TimerHalStart(address_t baseAddress);
+extern void TimerHalStop(address_t baseAddress);
+extern void TimerHalSetCounterValue(address_t baseAddress, unsigned int counterValue);
+extern unsigned int TimerHalGetCounterValue(address_t baseAddress);
+extern void TimerHalSetCounterReloadValue(address_t baseAddress, unsigned int timerCounterReloadValue);
+extern void TimerHalResetCounterRegister(address_t baseAddress, unsigned int resetValue);
+extern void TimerHalConfigureMode(address_t baseAddress, unsigned int compareMode, unsigned int reloadMode);
+extern void TimerHalSetTriggerMode(address_t baseAddress, unsigned int triggerMode);
+extern void TimerHalSetCaptureMode(address_t baseAddress, unsigned int captureMode);
+extern void TimerHalSetOutputPinMode(address_t baseAddress, unsigned int controlRegister, unsigned int pinMode);
+extern void TimerHalSetTransitionCaptureMode(address_t baseAddress, unsigned int transitionMode);
+unsigned int TimerHalGetReloadValue(address_t baseAddress);
