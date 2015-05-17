@@ -2,15 +2,20 @@
  * kernel.c
  *
  *  Created on: 14.05.2015
- *      Author: Marko
+ *      Author: Marko Petrovic
+ *      Contr.: Nicolaj Hoess
  */
 
 #include "kernel.h"
 
+static long uptimeTicks = 0;
+
 long KernelGetUptime()
 {
-	// TODO Count the start time in millis
-	return 1337;
+	return uptimeTicks;
 }
 
-
+long KernelTick(int ticks)
+{
+	return (uptimeTicks += ticks);
+}
