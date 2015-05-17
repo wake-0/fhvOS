@@ -23,7 +23,7 @@
 intHandler_t interruptRamVectors[NUMBER_OF_INTERRUPTS];
 intHandler_t interruptIrqResetHandlers[NUMBER_OF_INTERRUPTS];
 
-static boolean_t InterruptDefaultHandler(void);
+static boolean_t InterruptDefaultHandler(void* callbackFunction);
 
 
 static void InterruptResetController(void)
@@ -195,7 +195,7 @@ void InterruptMasterFIQDisable(void)
     CPUfiqd();
 }
 
-static boolean_t InterruptDefaultHandler(void)
+static boolean_t InterruptDefaultHandler(void* callbackFunction)
 {
     return FALSE;
 }

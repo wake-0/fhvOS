@@ -1,7 +1,7 @@
 \documentclass[11pt]{scrartcl}
 \usepackage{wrapfig}
 \usepackage{verbatim} 
-
+\usepackage{acronym}
 \usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
 \usepackage{fourier} % Use the Adobe Utopia font for the document - comment this line to return to the LaTeX default
 %\usepackage[english]{babel} % german headers
@@ -19,7 +19,7 @@
 \usepackage{color}
 \usepackage{sectsty} % Allows customizing section commands
 \usepackage{epstopdf}
-
+\usepackage[pass]{geometry}
 \usepackage{cite}
 \usepackage{textcomp}
 \usepackage{subfiles}
@@ -33,7 +33,8 @@
 
 %general data
 \newcommand{\myauthor}{Nicolaj Höss, Marko Petrovi\'c, Kevin Wallis}
-\newcommand{\mytitle}{Dokumentation des OS}
+\newcommand{\mytitle}{Embedded Betriebssystem}
+\newcommand{\mysubtitle}{für ARM Cortex-A8}
 \newcommand{\myuniversity}{Fachhochschule Vorarlberg}
 \newcommand{\mycourse}{S1: Softwarelösungen für ressourcenbeschränkte Systeme}
 \newcommand{\mystudy}{Master Informatik (ITM2)}
@@ -100,7 +101,8 @@
 ~
 \vfill\vfill\vfill
 
-{\Huge\bfseries\mytitle}
+{\Huge\bfseries\mytitle} \\
+{\Large\bfseries\mysubtitle}
 
 \vfill
 
@@ -137,11 +139,13 @@
 %%Inhaltsverzeichnis
 \tableofcontents
 
+\newpage
 %%Abbildungsverzeichnis
 \listoffigures
-
+\newpage
 \pagebreak
 
+\include{chapters/abbreviations/abbreviations}
 \include{chapters/general/general}
 \include{chapters/architecture/architecture}
 \include{chapters/hal/hal}
