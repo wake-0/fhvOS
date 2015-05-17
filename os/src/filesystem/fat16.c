@@ -148,7 +148,7 @@ int Fat16PrintFilesFromRootDirectory(void) {
 
 int Fat16ReadFile(char* fileSystem, char* fileToRead) {
 	FILE* in;
-	File* out;
+	FILE* out;
 
 	unsigned long fatStart;
 	unsigned long rootStart;

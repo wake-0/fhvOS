@@ -732,11 +732,6 @@ static uint32_t mmuGetTableIndex(unsigned int virtualAddress, unsigned int index
 		case INDEX_OF_PAGE_FRAME:
 			return (virtualAddress & PAGE_FRAME_INDEX_MASK);
 		default:
-<<<<<<< HEAD
-			return INVALID_PAGE_TABLE_OFFSET;
-=======
-			// TODO: check if -1 should be returned
-			return 0;
->>>>>>> 149d9a23eac226e38bced4647426e203fbe8950e
 	}
+	return INVALID_PAGE_TABLE_OFFSET;
 }
