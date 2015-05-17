@@ -13,5 +13,6 @@
 
 extern void ConsoleInit();
 extern void ConsoleProcess(int argc, char** argv);
+extern void ConsoleClear();
 
 #endif /* CONSOLE_CONSOLE_H_ */

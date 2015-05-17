@@ -15,7 +15,6 @@
 static boolean_t initialized = false;
 static device_t consoleDevice;
 
-static void clearScreen();
 static void printWelcomeMessage();
 static void printOSLogo();
 static void printPrompt();
@@ -44,7 +43,7 @@ void ConsoleProcess(int argc, char** argv)
 		return;
 	}
 
-	clearScreen();
+	ConsoleClear();
 	printOSLogo();
 	printWelcomeMessage();
 
@@ -98,13 +97,13 @@ void printPrompt()
 	DeviceManagerWrite(consoleDevice, "\r\nroot@fhv-os# ", 15);
 }
 
-void clearScreen()
+void ConsoleClear()
 {
-	int i = 0;
-	for (i = 0; i < CONSOLE_SCREEN_HEIGHT_LINES; i++)
-	{
-		DeviceManagerWrite(consoleDevice, "                                      \r\n", 42);
-	}
+	char escCommand[1] = { 27 };
+	DeviceManagerWrite(consoleDevice, escCommand, 1);       // ESC command
+	DeviceManagerWrite(consoleDevice, "[2J", 3);    // Clear screen command
+	DeviceManagerWrite(consoleDevice, escCommand, 1);		// ESC command
+	DeviceManagerWrite(consoleDevice, "[H", 2);     // Cursor to home command
 }
 
 int fputc(int ch, FILE *f)
