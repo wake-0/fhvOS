@@ -8,11 +8,12 @@
 #include "filesystem.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "../kernel/kernel.h"
 
 // general defines
 #define BUFFER_SIZE 			(4096)
-#define EOF						(0xFFFF)
+#define END_OF_FILE				(0xFFFF)
 
 // filetype defines
 #define ENTRY_UNUSED			(0x00)
@@ -66,7 +67,7 @@ static void readFile(FILE * in, FILE * out, unsigned long fatStart,
 	fseek(in, dataStart + clusterSize * (cluster - 2), SEEK_SET);
 
 	// Read until we run out of file or clusters
-	while (fileLeft > 0 && cluster != EOF) {
+	while (fileLeft > 0 && cluster != END_OF_FILE) {
 		bytesToRead = sizeof(buffer);
 
 		// don't read past the file or cluster end
