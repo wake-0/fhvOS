@@ -8,6 +8,7 @@
 #include "../hal/cpu/hal_cpu.h"
 #include "../driver/timer/driver_timer.h"
 #include "../memmanager/mmu.h"
+#include "../kernel/kernel.h"
 
 /*
  * Defines for the process stack start and size
@@ -240,6 +241,8 @@ processId_t getNextProcessIdByState(processState_t state, int startId) {
 
 boolean_t timerISR(address_t context)
 {
+	KernelTick(TIME_SLICE); // TODO See Bug #66 (This should be extracted to another timer with 1ms)
+
 	// volatile address_t spa = GetContext();
 
 	context_t* spaContext = (context_t*) context;
