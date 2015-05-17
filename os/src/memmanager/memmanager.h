@@ -73,11 +73,11 @@ static pageStatus_t romExceptionsRegion[1];
 #define MEMORY_OK							1
 #define MEMORY_NOT_OK						-1
 
-typedef struct PAGESTATUS_T
+struct PAGESTATUS_T
 {
 	boolean_t reserved;
 	unsigned int processID;
-} pageStatus_t;
+};
 
 typedef pageStatus_t * pageStatusPointer_t;
 

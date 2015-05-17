@@ -35,6 +35,7 @@
 	.global currentAddressInTTBR1
 	.global currentStatusInSCTLR
 	.global currentStatusInTTBCR
+	.global CleanDataCache
 
 accessedAddress: .field dabtAccessedVirtualAddress, 32
 faultState: .field dabtFaultStatusRegisterValue, 32
@@ -237,6 +238,12 @@ InstructionCacheDisable:
     POP     {lr}
     BX      lr
 
+CleanDataCache:
+	MOV		r0, #0
+	MRC 	p15, #0, r0, c7, c10, #3
+	MOV		r0, #0
+	MCR		p15, #0, r0, c7, c10, #4
+	BX		lr
 
 InstructionCacheFlush:
     MOV     r0, #0

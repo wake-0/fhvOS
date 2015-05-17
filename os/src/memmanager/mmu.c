@@ -67,7 +67,8 @@
 #define SECOND_LEVEL_DOMAIN_FAULT				0xB
 #define TLB_CONFLICT_ABORT						0x10
 #define DEBUG_EVENT								0x2
-#define	SYNCHRONOUS_EXTERNAL_ABORT				0x8
+#define	SYNCHRONOUS_EXTERNAL_NON_TRANSLATION	0x8
+#define SYNCHRONOUS_EXTERNAL_ABORT_2ND_LVL		0xE
 
 
 static void mmuInitializeKernelMasterPageTable(void);
@@ -144,9 +145,9 @@ int MMUInit()
 /**
  * \brief	Handles page faults of the MMU. Is called by the assembler function dabt_handler in interrupt.asm
  */
-void MMUHandleDataAbortException(context_t* context)
+void MMUHandleDataAbortException()
 {
-	printf("dabt interrupt\n");
+	context_t* context = NULL; // TODO Get the context
 
 	// get mmu data abort details
 	dabtAccessedVirtualAddress 		= 0;
@@ -155,7 +156,12 @@ void MMUHandleDataAbortException(context_t* context)
 
 	process_t* runningProcess = SchedulerGetRunningProcess();
 
-
+	if(NULL == dabtAccessedVirtualAddress)
+	{
+		// TODO NPE (Kill process)
+		printf("NPE from process %d\n", runningProcess->id);
+		return;
+	}
 	if(NULL == runningProcess)
 	{
 		// TODO: define where the context is located on the stack and put starting address into R0
@@ -170,6 +176,8 @@ void MMUHandleDataAbortException(context_t* context)
 	}
 
 	unsigned int faultState = mmuGetFaultStatus();
+
+	printf("dabt interrupt from pid=%i, with fault state=%i\n", runningProcess->id, faultState);
 
 	switch(faultState)
 	{
@@ -193,6 +201,8 @@ void MMUHandleDataAbortException(context_t* context)
 			break;
 		case DEBUG_EVENT:
 			break;
+		case SYNCHRONOUS_EXTERNAL_NON_TRANSLATION:
+			printf("Sync ext abort\n");
 		default:
 			break;
 	}
@@ -219,13 +229,13 @@ static void mmuCreateAndFillL2PageTable(unsigned int virtualAddress, process_t* 
 	pageTablePointer_t newL2PageTable = mmuCreatePageTable(L2_PAGE_TABLE);
 
 	firstLevelDescriptor_t pageTableEntry;
-	pageTableEntry.sectionBaseAddress 	= (unsigned int)newL2PageTable & SECTION_PAGE_TABLE_MASK;
+	pageTableEntry.sectionBaseAddress 	= (unsigned int)newL2PageTable & UPPER_22_BITS_MASK;
 	pageTableEntry.descriptorType 		= DESCRIPTOR_TYPE_PAGE_TABLE;
 	pageTableEntry.cachedBuffered 		= WRITE_BACK;
 	pageTableEntry.domain 				= DOMAIN_MANAGER_ACCESS;
 
 	unsigned int tableOffset = mmuGetTableIndex(virtualAddress, INDEX_OF_L1_PAGE_TABLE, TTBR0);
-	uint32_t *firstLevelDescriptorAddress = runningProcess->pageTableL1 + (tableOffset << 2)/sizeof(uint32_t);
+	address_t *firstLevelDescriptorAddress = runningProcess->pageTableL1 + (tableOffset << 2)/sizeof(address_t);
 	*firstLevelDescriptorAddress = mmuCreateL1PageTableEntry(pageTableEntry);
 
 	mmuMapFreePageFrameIntoL2PageTable(virtualAddress, newL2PageTable);
@@ -262,6 +272,7 @@ int MMUSwitchToProcess(process_t* process)
 {
 	if(NULL == process->pageTableL1)
 	{
+		// TODO Another option is to create L1 page table
 		return MMU_NOT_OK;
 	}
 
@@ -682,7 +693,7 @@ static pageTablePointer_t mmuGetAddressSpecificL2PageTable(pageTablePointer_t pa
 {
 	int tableOffset = mmuGetTableIndex(virtualAddress, INDEX_OF_L2_PAGE_TABLE, TTBR0);
 
-	if(tableOffset < VALID_PAGE_TABLE_OFFSET)
+	if(tableOffset == INVALID_PAGE_TABLE_OFFSET)
 	{
 		// no existing L2 page table, create one
 		return mmuCreatePageTable(L2_PAGE_TABLE);
@@ -721,6 +732,6 @@ static uint32_t mmuGetTableIndex(unsigned int virtualAddress, unsigned int index
 		case INDEX_OF_PAGE_FRAME:
 			return (virtualAddress & PAGE_FRAME_INDEX_MASK);
 		default:
-			return -1;
+			return INVALID_PAGE_TABLE_OFFSET;
 	}
 }

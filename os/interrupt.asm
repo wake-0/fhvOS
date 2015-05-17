@@ -47,7 +47,7 @@ I_BIT             .set   0x80
 	.global GetContext
 	.global RevertStackPointer
 	.global RestoreRegisters
-	.global MMUHandleDataAbortException
+	.ref MMUHandleDataAbortException
 	.ref interruptRamVectors
 	.ref interruptIrqResetHandlers
 	.ref irq_handler1
@@ -136,31 +136,22 @@ GetContext:
 	MOV    PC, LR					  ; Return to code
 
 dabt_handler:
-	; save context
-	STMFD    SP, {R0-R12}^
+	STMFD	 SP, {R0-R14}^
 	NOP
-    SUB 	 SP, SP, #52
-	STMFD 	 SP, {LR}^ 					; Store LR user mode
+	SUB		 SP, SP, #60
+	STMFD  	 SP!, {LR}
+
+	MRS		 R1, SPSR					; copy SPSR
+	STMFD	 SP!, {R1}					; backup SPSR in stack
+
+	BL		 MMUHandleDataAbortException
+
+	LDMFD	 SP!, {R1}
+	MSR		 SPSR_cxsf, R1
+	LDMFD	 SP!, {LR}
 	NOP
-	SUB		 SP, SP, #4
-	MRS      R12, CPSR               	; Copy cpsr
-    STMFD    SP, {R12}^          	 	; {r1, r12} Save fpscr and spsr
-    NOP
-    SUB		 SP, SP, #4
+	LDMFD	 SP, {R0-R14}^
+	ADD		 SP, SP, #60
 
-	; handle mmu data abort
-	BL		MMUHandleDataAbortException
-	; TODO if the running process was killed, don't restore context(idle loop)
-
-	; restore context
-	LDMFD	 SP!, {R12}
-	MSR		 SPSR_cxsf, R12
-	LDMFD  	 SP, {LR}^
-	NOP
-	ADD		 SP, SP, #4
-	LDMFD	SP, { R0 - R12 }^			; restore user-registers, if changed by scheduler
-	ADD		SP, SP, #52
-
-	; return
-	SUBS	PC, LR, #4
+	SUBS	 PC, LR, #8
 .end

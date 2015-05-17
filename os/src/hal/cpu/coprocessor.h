@@ -22,3 +22,4 @@ extern void MMUReadProcessTableAddress(void);
 extern void MMUReadKernelTableAddress(void);
 extern void MMUReadSystemControlRegister(void);
 extern void MMUReadTTBCR(void);
+extern void CleanDataCache(void);
