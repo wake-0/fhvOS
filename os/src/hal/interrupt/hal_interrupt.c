@@ -12,7 +12,7 @@
 #include "../am335x/hw_types.h"
 #include "../am335x/soc_AM335x.h"
 #include "../cpu/hal_cpu.h"
-#include "stdio.h"
+#include "../../kernel/kernel.h"
 
 
 #define REG_IDX_SHIFT                  	(0x05)
@@ -229,20 +229,20 @@ interrupt void irq_handler1()
 
 #pragma INTERRUPT(udef_handler, UDEF)
 interrupt void udef_handler() {
-	printf("udef interrupt\n");
+	KernelDebug("udef interrupt\n");
 	;
 
 }
 
 #pragma INTERRUPT(fiq_handler, FIQ)
 interrupt void fiq_handler() {
-	printf("fiq interrupt\n");
+	KernelDebug("fiq interrupt\n");
 	;
 }
 
 #pragma INTERRUPT(pabt_handler, PABT)
 interrupt void pabt_handler() {
-	printf("pabt interrupt\n");
+	KernelDebug("pabt interrupt\n");
 	;
 }
 
@@ -251,5 +251,5 @@ interrupt void pabt_handler() {
  */
 #pragma INTERRUPT(dabt_handler1, PABT)
 interrupt void dabt_handler1() {
-	printf("dabt interrupt\n");
+	KernelDebug("dabt interrupt\n");
 }

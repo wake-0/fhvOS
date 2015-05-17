@@ -8,6 +8,7 @@
 #include "console.h"
 
 #include <stdio.h>
+#include "../kernel/kernel.h"
 
 #define CONSOLE_SCREEN_HEIGHT_LINES			(40)
 #define CONSOLE_MAX_COMMAND_LENGTH			(255)
@@ -59,11 +60,7 @@ void ConsoleProcess(int argc, char** argv)
 
 		// TODO Send command to the kernel (IPC)
 
-		// XXX Just for debug purpose
-		char debugOutput[CONSOLE_MAX_COMMAND_LENGTH + 50] = { 0 };
-		sprintf(&debugOutput[0], "[DEBUG] input command:%s\r\n", command);
-		DeviceManagerWrite(consoleDevice, debugOutput, CONSOLE_MAX_COMMAND_LENGTH + 50);
-		printf("[DEBUG] Using printf command:%s\r\n", command);
+		KernelDebug("Input command received: %s\n", command);
 	}
 }
 

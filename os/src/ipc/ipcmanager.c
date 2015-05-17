@@ -185,7 +185,6 @@ namespace_t* getNamespaceByName(char* name)
 	while (namespaces[idx] != 0)
 	{
 		int res = strcmp(namespaces[idx]->name, name);
-		//printf("Comparing %s with %s and res=%d\n", name, namespaces[idx]->name, res);
 		if (res == 0)
 		{
 			return namespaces[idx];

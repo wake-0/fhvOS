@@ -8,6 +8,7 @@
 
 #include "mmu.h"
 #include "memmanager.h"
+#include "../kernel/kernel.h"
 
 #define MMU_DOMAIN_FULL_ACCESS 0xFFFFFFFF
 
@@ -159,7 +160,7 @@ void MMUHandleDataAbortException()
 	if(NULL == dabtAccessedVirtualAddress)
 	{
 		// TODO NPE (Kill process)
-		printf("NPE from process %d\n", runningProcess->id);
+		KernelError("NPE from process %d\n", runningProcess->id);
 		return;
 	}
 	if(NULL == runningProcess)
@@ -177,12 +178,12 @@ void MMUHandleDataAbortException()
 
 	unsigned int faultState = mmuGetFaultStatus();
 
-	printf("dabt interrupt from pid=%i, with fault state=%i\n", runningProcess->id, faultState);
+	KernelDebug("dabt interrupt from pid=%i, with fault state=%i\n", runningProcess->id, faultState);
 
 	switch(faultState)
 	{
 		case ALIGNMENT_FAULT:
-			printf("Alignment fault! \n");
+			KernelDebug("Alignment fault! \n");
 			break;
 		case FIRST_LEVEL_TRANSLATION_FAULT:
 			// no L2 page table
@@ -202,7 +203,7 @@ void MMUHandleDataAbortException()
 		case DEBUG_EVENT:
 			break;
 		case SYNCHRONOUS_EXTERNAL_NON_TRANSLATION:
-			printf("Sync ext abort\n");
+			KernelDebug("Sync ext abort\n");
 		default:
 			break;
 	}
@@ -520,7 +521,7 @@ static address_t mmuGetFreePageFrameForProcess(void)
 
 	if(PAGE_FRAME_NOT_FOUND == pageFrameNumber)
 	{
-		printf("\nPROCESS MEMORY SPACE USED UP!\n");
+		KernelError("PROCESS MEMORY SPACE USED UP!\n");
 		return NULL;
 	}
 

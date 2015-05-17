@@ -160,8 +160,6 @@ int SchedulerRunNextProcess(context_t* context) {
 	runningProcess = nextProcess;
 	processes[runningProcess].state = RUNNING;
 
-	//printf("running process with ID %d\n", nextProcess);
-
 	// Update the context for the next running process
 	memcpy(context, processes[runningProcess].context, sizeof(context_t));
 	MMUSwitchToProcess(&processes[runningProcess]);
@@ -175,6 +173,8 @@ int SchedulerKillProcess(processId_t id) {
 		CPUAtomicEnd();
 		return SCHEDULER_ERROR;
 	}
+
+	KernelDebug("Scheduler is killing process with pid=%i\n", id);
 
 	// TODO: check the process to kill is running, when running change and then kill
 	processes[id].state = FREE;

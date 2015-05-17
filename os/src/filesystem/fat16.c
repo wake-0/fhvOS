@@ -8,6 +8,7 @@
 #include "filesystem.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "../kernel/kernel.h"
 
 // general defines
 #define BUFFER_SIZE 			(4096)
@@ -30,20 +31,20 @@ static void printFileInfo(Fat16Entry* entry) {
 	case ENTRY_UNUSED:
 		return; // unused entry
 	case ENTRY_DELETED:
-		printf("Deleted file: [?%.7s.%.3s]\n", entry->filename + 1, entry->ext);
+		KernelDebug("Deleted file: [?%.7s.%.3s]\n", entry->filename + 1, entry->ext);
 		return;
 	case ENTRY_STARTING_0xE5:
-		printf("File starting with 0xE5: [%c%.7s.%.3s]\n", 0xE5,
+		KernelDebug("File starting with 0xE5: [%c%.7s.%.3s]\n", 0xE5,
 				entry->filename + 1, entry->ext);
 		break;
 	case ENTRY_DIRECTORY:
-		printf("Directory: [%.8s.%.3s]\n", entry->filename, entry->ext);
+		KernelDebug("Directory: [%.8s.%.3s]\n", entry->filename, entry->ext);
 		break;
 	default:
-		printf("File: [%.8s.%.3s]\n", entry->filename, entry->ext);
+		KernelDebug("File: [%.8s.%.3s]\n", entry->filename, entry->ext);
 	}
 
-	printf(
+	KernelDebug(
 			"  Modified: %04d-%02d-%02d %02d:%02d.%02d    Start: [%04X]    Size: %d\n",
 			1980 + (entry->modifyDate >> 9), (entry->modifyDate >> 5) & 0xF,
 			entry->modifyDate & 0x1F, (entry->modifyTime >> 11),
@@ -79,7 +80,7 @@ static void readFile(FILE * in, FILE * out, unsigned long fatStart,
 		// read data from cluster, write to file
 		bytesRead = fread(buffer, 1, bytesToRead, in);
 		fwrite(buffer, 1, bytesRead, out);
-		printf("Copied %d bytes\n", bytesRead);
+		KernelDebug("Copied %d bytes\n", bytesRead);
 
 		// decrease byte counters for current cluster and whole file
 		clusterLeft -= bytesRead;
@@ -90,7 +91,7 @@ static void readFile(FILE * in, FILE * out, unsigned long fatStart,
 			fseek(in, fatStart + cluster * 2, SEEK_SET);
 			fread(&cluster, 2, 1, in);
 
-			printf("End of cluster reached, next cluster %d\n", cluster);
+			KernelDebug("End of cluster reached, next cluster %d\n", cluster);
 
 			fseek(in, dataStart + clusterSize * (cluster - 2), SEEK_SET);
 			clusterLeft = clusterSize; // reset cluster byte counter
@@ -115,20 +116,20 @@ int Fat16PrintFilesFromRootDirectory(void) {
 	for (i = 0; i < 4; i++) {
 		if (pt[i].partitionType == 4 || pt[i].partitionType == 6
 				|| pt[i].partitionType == 14) {
-			printf("FAT16 filesystem found from partition %d\n", i);
+			KernelDebug("FAT16 filesystem found from partition %d\n", i);
 			break;
 		}
 	}
 
 	if (i == 4) {
-		printf("No FAT16 filesystem found, exiting...\n");
+		KernelDebug("No FAT16 filesystem found, exiting...\n");
 		return -1;
 	}
 
 	fseek(in, 512 * pt[i].startSector, SEEK_SET);
 	fread(&bs, sizeof(Fat16BootSector), 1, in);
 
-	printf("Now at 0x%X, sector size %d, FAT size %d sectors, %d FATs\n\n",
+	KernelDebug("Now at 0x%X, sector size %d, FAT size %d sectors, %d FATs\n\n",
 			ftell(in), bs.sectorSize, bs.fatSizeSectors, bs.numberOfFats);
 
 	fseek(in,
@@ -140,7 +141,7 @@ int Fat16PrintFilesFromRootDirectory(void) {
 		printFileInfo(&entry);
 	}
 
-	printf("\nRoot directory read, now at 0x%X\n", ftell(in));
+	KernelDebug("\nRoot directory read, now at 0x%X\n", ftell(in));
 	fclose(in);
 
 	return 0;
@@ -163,7 +164,7 @@ int Fat16ReadFile(char* fileSystem, char* fileToRead) {
 	char fileExt[4] = "   ";
 
 	if ((in = fopen(fileSystem, "rb")) == NULL) {
-		printf("Filesystem image file %s not found!\n", fileSystem);
+		KernelError("Filesystem image file %s not found!\n", fileSystem);
 		return -1;
 	}
 
@@ -178,7 +179,7 @@ int Fat16ReadFile(char* fileSystem, char* fileToRead) {
 		fileExt[j - 1] = fileToRead[i + j];
 	}
 
-	printf("Opened %s, looking for [%s.%s]\n", fileSystem, filename, fileExt);
+	KernelDebug("Opened %s, looking for [%s.%s]\n", fileSystem, filename, fileExt);
 
 	// go to partition table start
 	fseek(in, 0x1BE, SEEK_SET);
@@ -188,13 +189,13 @@ int Fat16ReadFile(char* fileSystem, char* fileToRead) {
 	for (i = 0; i < 4; i++) {
 		if (pt[i].partitionType == 4 || pt[i].partitionType == 6
 				|| pt[i].partitionType == 14) {
-			printf("FAT16 filesystem found from partition %d\n", i);
+			KernelDebug("FAT16 filesystem found from partition %d\n", i);
 			break;
 		}
 	}
 
 	if (i == 4) {
-		printf("No FAT16 filesystem found, exiting...\n");
+		KernelError("No FAT16 filesystem found, exiting...\n");
 		return -1;
 	}
 
@@ -206,7 +207,7 @@ int Fat16ReadFile(char* fileSystem, char* fileToRead) {
 	rootStart = fatStart + bs.fatSizeSectors * bs.numberOfFats * bs.sectorSize;
 	dataStart = rootStart + bs.rootDirEntries * sizeof(Fat16Entry);
 
-	printf("FAT start at %08X, root dir at %08X, data at %08X\n", fatStart,
+	KernelDebug("FAT start at %08X, root dir at %08X, data at %08X\n", fatStart,
 			rootStart, dataStart);
 
 	fseek(in, rootStart, SEEK_SET);
@@ -216,13 +217,13 @@ int Fat16ReadFile(char* fileSystem, char* fileToRead) {
 
 		if (memcmp(entry.filename, filename, 8) == 0
 				&& memcmp(entry.ext, fileExt, 3) == 0) {
-			printf("File found!\n");
+			KernelDebug("File found!\n");
 			break;
 		}
 	}
 
 	if (i == bs.rootDirEntries) {
-		printf("File not found!");
+		KernelError("File not found!");
 		return -1;
 	}
 
