@@ -22,6 +22,9 @@ void simpleProc1(int argc, char** argv)
 {
 	while(1)
 	{
+		volatile int i;
+		printf("Process 1\n");
+		for(i = 0; i < 0x0200000; i++);
 
 	}
 }
@@ -29,7 +32,9 @@ void simpleProc2(int argc, char** argv)
 {
 	while(1)
 	{
-
+		volatile int i;
+		printf("---------Process 2\n");
+		for(i = 0; i < 0x0200000; i++);
 	}
 }
 
