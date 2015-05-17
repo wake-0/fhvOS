@@ -83,8 +83,6 @@ swi_handler:
     ADD      r13, r13, #0x4           ; Adjust the stack pointer
     LDMFD    r13!, {r0-r1, pc}^       ; Restore registers from IRQ stack
 
-
-
 irq_handler:
 	SUB      LR, LR, #4               ; Apply lr correction (DO NOT CHANGE)
 	STMFD	 SP!, {LR}				  ; LR becomes PC in context struct
@@ -101,7 +99,7 @@ irq_handler:
 	NOP
 	SUB		 SP, SP, #4
 
-    MRS      R12, CPSR                ; Copy cpsr
+    MRS      R12, SPSR                ; Copy cpsr
     STMFD    SP, {R12}^          	  ; Save cpsr
     NOP
     SUB		 SP, SP, #4			      ; SP correction
@@ -114,7 +112,8 @@ RevertStackPointer:
 
 RestoreRegisters:
 	ADD		 SP, SP, #40			  ; Those 40 bytes are still not clear to us ;)
-	LDMFD	 SP!, {CPSR}			  ; Restore CPSR
+	LDMFD	 SP!, {R1}
+	MSR		 SPSR_cxsf, R1
 
 	LDMFD  	 SP, {LR}^				  ; Restore user LR
 	NOP
