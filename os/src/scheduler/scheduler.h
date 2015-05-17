@@ -69,5 +69,7 @@ extern process_t* SchedulerStartProcess(processFunc func);
 extern int SchedulerRunNextProcess(context_t* context);
 extern int SchedulerKillProcess(processId_t id);
 extern process_t* SchedulerGetRunningProcess(void);
+extern void SchedulerBlockProcess(processId_t process);
+extern void SchedulerUnblockProcess(processId_t process);
 
 #endif /* SCHEDULER_SCHEDULER_H_ */

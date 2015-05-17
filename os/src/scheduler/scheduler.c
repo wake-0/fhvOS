@@ -192,6 +192,23 @@ process_t* SchedulerGetRunningProcess(void) {
 	return &processes[runningProcess];
 }
 
+void SchedulerBlockProcess(processId_t process)
+{
+	processes[process].state = BLOCKED;
+
+	// TODO This works but decreases performance of the os
+	// We should immediately run the next thread by a software interrupt
+	while (processes[process].state == BLOCKED)
+	{
+		;
+	}
+}
+
+void SchedulerUnblockProcess(processId_t process)
+{
+	processes[process].state = READY;
+}
+
 /*
  * Helper methods
  */
