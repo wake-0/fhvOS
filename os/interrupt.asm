@@ -44,13 +44,10 @@ I_BIT             .set   0x80
 	.global irq_handler
 	.global swi_handler
 	.global dabt_handler
-	.global GetContext
-	.global RevertStackPointer
-	.global RestoreRegisters
 	.ref MMUHandleDataAbortException
 	.ref interruptRamVectors
 	.ref interruptIrqResetHandlers
-	.ref irq_handler1
+	.ref InterruptTimerISR
 
 ;
 ; definition of irq handlers
@@ -95,7 +92,7 @@ irq_handler:
 	NOP
 	SUB		 SP, SP, #4
 
-	STMFD 	 SP, {R14}^ 			  ; Store user LR
+	STMFD 	 SP, {LR}^ 			  	  ; Store user LR
 	NOP
 	SUB		 SP, SP, #4
 
@@ -104,53 +101,72 @@ irq_handler:
     NOP
     SUB		 SP, SP, #4			      ; SP correction
 
-    B        irq_handler1			  ; Branch to code
+	MOV		 R5, SP
+	STR		 R5, [SP, #72]
+	MOV		 R0, SP
 
-RevertStackPointer:
-	ADD 	 SP, SP, #68			  ; Restore initial SP
-	MOV 	 PC, LR					  ; Return TODO Is there no return command for asm?
+    BL       InterruptTimerISR			  ; Branch to code
 
-RestoreRegisters:
-	ADD		 SP, SP, #40			  ; Those 40 bytes are still not clear to us ;)
+	; Restore Context
 	LDMFD	 SP!, {R1}
 	MSR		 SPSR_cxsf, R1
+	NOP
 
-	LDMFD  	 SP, {LR}^				  ; Restore user LR
+	LDMFD	 SP, {LR}^
 	NOP
 	ADD		 SP, SP, #4
 
-	LDMFD  	 SP, {R13}^				  ; Restore user SP
+	LDMFD	 SP, {R13}^
 	NOP
 	ADD		 SP, SP, #4
 
-	;LDMFD  	 SP, {R0-R12, PC}^	  ; Restore user R0-R12 and PC
-									  ; As we override PC we instantly jump to that code
-
-	LDMFD    SP, {R0-R12}^
-	ADD      SP, SP, #52
-	LDMFD	 SP!, {PC}^
-
-GetContext:
-	ADD    R0, SP, #40				  ; Add SP to return register
-	MOV    PC, LR					  ; Return to code
+	LDMFD	 SP, {R0-R12}^
+	NOP
+	ADD		 SP, SP, #52
+    LDMFD	 SP!, {PC}^
 
 dabt_handler:
-	STMFD	 SP, {R0-R14}^
-	NOP
-	SUB		 SP, SP, #60
-	STMFD  	 SP!, {LR}
+	SUB      LR, LR, #8               ; Apply lr correction (DO NOT CHANGE)
+	STMFD	 SP!, {LR}				  ; LR becomes PC in context struct
 
-	MRS		 R1, SPSR					; copy SPSR
-	STMFD	 SP!, {R1}					; backup SPSR in stack
+    STMFD    SP, {R0-R12}^    		  ; Save R0-R12
+    NOP								  ; See http://stackoverflow.com/questions/324704/arm-access-user-r13-and-r14-from-supervisor-mode
+    SUB 	 SP, SP, #52			  ; SP correction
+
+	STMFD 	 SP, {R13}^ 			  ; Store user SP
+	NOP
+	SUB		 SP, SP, #4
+
+	STMFD 	 SP, {LR}^ 			  	  ; Store user LR
+	NOP
+	SUB		 SP, SP, #4
+
+    MRS      R12, SPSR                ; Copy cpsr
+    STMFD    SP, {R12}^          	  ; Save cpsr
+    NOP
+    SUB		 SP, SP, #4			      ; SP correction
+
+	MOV		 R5, SP
+	STR		 R5, [SP, #72]
+	MOV		 R0, SP
 
 	BL		 MMUHandleDataAbortException
 
 	LDMFD	 SP!, {R1}
 	MSR		 SPSR_cxsf, R1
-	LDMFD	 SP!, {LR}
 	NOP
-	LDMFD	 SP, {R0-R14}^
-	ADD		 SP, SP, #60
 
-	SUBS	 PC, LR, #8
+	LDMFD	 SP, {LR}^
+	NOP
+	ADD		 SP, SP, #4
+
+	LDMFD	 SP, {R13}^
+	NOP
+	ADD		 SP, SP, #4
+
+	LDMFD	 SP, {R0-R12}^
+	NOP
+	ADD		 SP, SP, #52
+    LDMFD	 SP!, {PC}^
+
 .end

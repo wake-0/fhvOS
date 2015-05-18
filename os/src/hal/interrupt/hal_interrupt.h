@@ -132,11 +132,8 @@ extern "C" {
 #define SYS_INT_DMA_INTR_PIN1                  (124)
 #define SYS_INT_SPI1INT                        (125)
 
-
-
-typedef boolean_t (*intHandler_t)(void*);
+typedef void (*intHandler_t)(void*);
 typedef void (*intResetHandler_t)(void);
-
 
 extern void InterruptResetAINTC(void);
 extern void InterruptPrioritySet(unsigned int intrNum, unsigned int priority);
@@ -155,6 +152,8 @@ extern void InterruptMasterIRQEnable(void);
 extern void InterruptMasterIRQDisable(void);
 extern void InterruptMasterFIQEnable(void);
 extern void InterruptMasterFIQDisable(void);
+
+extern void InterruptTimerISR(address_t* context);
 
 /* Functions which are defined in interrupt.asm */
 extern address_t GetContext(void);

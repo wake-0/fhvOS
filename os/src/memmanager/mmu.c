@@ -146,10 +146,8 @@ int MMUInit()
 /**
  * \brief	Handles page faults of the MMU. Is called by the assembler function dabt_handler in interrupt.asm
  */
-void MMUHandleDataAbortException()
+void MMUHandleDataAbortException(context_t* context)
 {
-	context_t* context = NULL; // TODO Get the context
-
 	// get mmu data abort details
 	dabtAccessedVirtualAddress 		= 0;
 	dabtFaultStatusRegisterValue	= 0;

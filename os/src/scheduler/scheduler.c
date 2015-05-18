@@ -17,7 +17,7 @@
 // 3840 Byte
 #define STACK_SIZE		(10000)
 
-#define TIME_SLICE		(50)
+#define TIME_SLICE		(10)
 
 /*
  * Register defines
@@ -38,7 +38,7 @@ static processId_t getNextProcessIdByState(processState_t state, int startId);
 static processId_t getNextFreeProcessId(void);
 static processId_t getNextReadyProcessId(void);
 
-static boolean_t timerISR(address_t context);
+static void timerISR(address_t* context);
 
 void dummyEnd() {
 	// End process properly
@@ -239,21 +239,17 @@ processId_t getNextProcessIdByState(processState_t state, int startId) {
 	return INVALID_PROCESS_ID;
 }
 
-boolean_t timerISR(address_t context)
+void timerISR(address_t* context)
 {
 	KernelTick(TIME_SLICE); // TODO See Bug #66 (This should be extracted to another timer with 1ms)
 
-	// volatile address_t spa = GetContext();
-
-	context_t* spaContext = (context_t*) context;
+	context_t* procContext = (context_t*) context;
 
 	DeviceManagerWrite(timer, DISABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
 	DeviceManagerWrite(timer, CLEAR_INTERRUPT_STATUS, TIMER_IRQ_OVERFLOW);
 
-	int result = SchedulerRunNextProcess(spaContext);
+	SchedulerRunNextProcess(procContext);
 
 	DeviceManagerWrite(timer, ENABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
 	DeviceManagerOpen(timer);
-
-	return (result == SCHEDULER_OK) ? FALSE : TRUE;
 }

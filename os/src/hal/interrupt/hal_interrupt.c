@@ -23,7 +23,7 @@
 intHandler_t interruptRamVectors[NUMBER_OF_INTERRUPTS];
 intHandler_t interruptIrqResetHandlers[NUMBER_OF_INTERRUPTS];
 
-static boolean_t InterruptDefaultHandler(void* callbackFunction);
+static void InterruptDefaultHandler(void* callbackFunction);
 
 
 static void InterruptResetController(void)
@@ -195,36 +195,20 @@ void InterruptMasterFIQDisable(void)
     CPUfiqd();
 }
 
-static boolean_t InterruptDefaultHandler(void* callbackFunction)
+static void InterruptDefaultHandler(void* callbackFunction)
 {
-    return FALSE;
+    ;
 }
 
-
-#pragma INTERRUPT(irq_handler1, IRQ)
-interrupt void irq_handler1()
+void InterruptTimerISR(address_t* context)
 {
-	volatile address_t context = GetContext();
-
 	unsigned int activeIrq = InterruptActiveIrqNumberGet();
 
 	intHandler_t interruptHandler = InterruptGetHandler(activeIrq);
-	boolean_t restoreRegisters = interruptHandler((void*)context);
 
+	interruptHandler(context);
 
 	InterruptAllowNewIrqGeneration();
-
-	if(FALSE == restoreRegisters)
-	{
-		// TODO: Interrupt allow new irq generation must be called mandatory!
-		// old place: InterruptAllowNewIrqGeneration();
-		RestoreRegisters();
-	} else {
-		// revert stack pointer
-		RevertStackPointer();
-	}
-
-
 }
 
 #pragma INTERRUPT(udef_handler, UDEF)
