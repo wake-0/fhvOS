@@ -176,7 +176,6 @@ int SchedulerKillProcess(processId_t id) {
 
 	KernelDebug("Scheduler is killing process with pid=%i\n", id);
 
-	// TODO: check the process to kill is running, when running change and then kill
 	processes[id].state = FREE;
 	processes[id].func = NULL;
 

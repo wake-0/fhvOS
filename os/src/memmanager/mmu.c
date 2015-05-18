@@ -157,20 +157,20 @@ void MMUHandleDataAbortException(context_t* context)
 
 	if(NULL == dabtAccessedVirtualAddress)
 	{
-		// TODO NPE (Kill process)
 		KernelError("NPE from process %d\n", runningProcess->id);
+		SchedulerKillProcess(runningProcess->id);
+		SchedulerRunNextProcess(context);
 		return;
 	}
 	if(NULL == runningProcess)
 	{
-		// TODO: define where the context is located on the stack and put starting address into R0
 		SchedulerRunNextProcess(context);
 		return;
 	}
 	else if(NULL == runningProcess->pageTableL1)
 	{
 		SchedulerKillProcess(runningProcess->id);
-		// TODO: what happens after killing a process? which process is next?
+		SchedulerRunNextProcess(context);
 		return;
 	}
 
