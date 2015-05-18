@@ -1,4 +1,8 @@
-
+;
+; Authors: 	Nicolaj Höss
+;			Marko Petrovic
+;			Kevin Wallis
+;
 ; Description:
 ; Assembler interrupt handler
 
@@ -44,6 +48,7 @@ I_BIT             .set   0x80
 	.global irq_handler
 	.global swi_handler
 	.global dabt_handler
+	.ref SystemCallHandler
 	.ref MMUHandleDataAbortException
 	.ref interruptRamVectors
 	.ref interruptIrqResetHandlers
@@ -62,24 +67,35 @@ _intIrqResetHandlers:
 	.word interruptIrqResetHandlers
 
 ;
-; The SVC Handler switches to system mode if the SVC number is 458752. If the
-; SVC number is different, no mode switching will be done.
+; The SVC Handler switches to system mode if the SVC number is 458752. It
+; is also used to handle system calls.
 ;
 swi_handler:
-    STMFD    r13!, {r0-r1, r14}       ; Save context in SVC stack
-    SUB      r13, r13, #0x4           ; Adjust the stack pointer
-    LDR      r0, [r14, #-4]           ; R0 points to SWI instruction
-    BIC      r0, r0, #MASK_SVC_NUM    ; Get the SWI number
-    CMP      r0, #458752
+	; store registers
+    STMFD    SP!, {R0-R12, LR}       	; Save context in SVC stack
+    SUB      SP, SP, #0x4            	; Adjust the stack pointer
 
-    ; swi handler
+    ; prepare switch to system mode
+    MRSEQ    R1, SPSR                 	; Copy SPSR
+    ORREQ    R1, R1, #0x1F            	; Change the mode to System
 
-    MRSEQ    r1, spsr                 ; Copy SPSR
-    ORREQ    r1, r1, #0x1F            ; Change the mode to System
-    MSREQ    spsr_cf, r1              ; Restore SPSR
-    ADD      r13, r13, #0x4           ; Adjust the stack pointer
-    LDMFD    r13!, {r0-r1, pc}^       ; Restore registers from IRQ stack
+    ; get svc number
+    LDR      R0, [LR, #-4]            	; R0 points to SWI instruction
+    BIC      R0, R0, #MASK_SVC_NUM    	; Get the SWI number
 
+	MSREQ    CPSR_cf, R1				; switch to system mode
+
+    ; branch to system call handler
+    BL		SystemCallHandler
+
+   	; restore registers
+    ADD      SP, SP, #0x4           ; Adjust the stack pointer
+    LDMFD    SP!, {R0-R12, PC}^       ; Restore registers from IRQ stack
+
+
+;
+; The IRQ handler is used to handle exceptions from peripherial modules and for performing a context switch.
+;
 irq_handler:
 	SUB      LR, LR, #4               ; Apply lr correction (DO NOT CHANGE)
 	STMFD	 SP!, {LR}				  ; LR becomes PC in context struct
@@ -125,6 +141,9 @@ irq_handler:
 	ADD		 SP, SP, #52
     LDMFD	 SP!, {PC}^
 
+;
+; This handler is used by the MMU hardware to handle page faults.
+;
 dabt_handler:
 	SUB      LR, LR, #8               ; Apply lr correction (DO NOT CHANGE)
 	STMFD	 SP!, {LR}				  ; LR becomes PC in context struct
