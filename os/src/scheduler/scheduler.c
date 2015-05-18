@@ -176,6 +176,8 @@ int SchedulerKillProcess(processId_t id) {
 
 	KernelDebug("Scheduler is killing process with pid=%i\n", id);
 
+	MMUFreeAllPageFramesOfProcess(&processes[id]);
+
 	processes[id].state = FREE;
 	processes[id].func = NULL;
 
