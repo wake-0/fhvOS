@@ -12,6 +12,7 @@
 
 #define CONSOLE_SCREEN_HEIGHT_LINES			(40)
 #define CONSOLE_MAX_COMMAND_LENGTH			(255)
+#define CONSOLE_SCANF_FORMAT				"%254[^\0]s"
 
 static boolean_t initialized = false;
 static device_t consoleDevice;
@@ -56,11 +57,10 @@ void ConsoleProcess(int argc, char** argv)
 		printPrompt();		// Prompt: root@fhvos#
 
 		// Read the command using scanf (Overriden through fgetc and ungetc)
-		scanf("%s", command); // TODO Only allow a string length of CONSOLE_MAX_COMMAND_LENGTH-1
+		scanf(CONSOLE_SCANF_FORMAT, command);
+		KernelDebug("Input command received: %s\n", command);
 
 		// TODO Send command to the kernel (IPC)
-
-		KernelDebug("Input command received: %s\n", command);
 	}
 }
 
