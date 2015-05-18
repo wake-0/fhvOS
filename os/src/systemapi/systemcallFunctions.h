@@ -19,5 +19,6 @@
 #define USER_MODE 0x10
 
 extern void SystemCallChangeMode(int mode);
+extern void SystemCallHandler(unsigned int systemCallNumber);
 
 #endif /* SYSTEMAPI_SYSTEMCALLFUNCTIONS_H_ */
