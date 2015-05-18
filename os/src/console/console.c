@@ -35,6 +35,8 @@ void ConsoleInit(device_t device)
 	ungetBuf = 0;
 
 	initialized = true;
+
+	ConsoleClear();
 }
 
 void ConsoleProcess(int argc, char** argv)

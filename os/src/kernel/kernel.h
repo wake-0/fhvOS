@@ -9,6 +9,7 @@
 #ifndef KERNEL_KERNEL_H_
 #define KERNEL_KERNEL_H_
 
+extern void KernelStart();
 extern long KernelGetUptime();
 extern long KernelTick(int ticks);
 extern int	KernelInfo(const char *format, ...);
