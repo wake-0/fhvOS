@@ -72,6 +72,10 @@ void printWelcomeMessage()
 }
 void printOSLogo()
 {
+	unsigned int major, minor, patch;
+	KernelVersion(&major, &minor, &patch);
+	char versionLine[43];
+
 	DeviceManagerWrite(consoleDevice, "                            @'        \r\n", 42);
 	DeviceManagerWrite(consoleDevice, "                           @@@'       \r\n", 42);
 	DeviceManagerWrite(consoleDevice, "                          @WA@@'      \r\n", 42);
@@ -87,7 +91,11 @@ void printOSLogo()
 	DeviceManagerWrite(consoleDevice, " @   @@  @  :@@        @'  @@<3@@@@   \r\n", 42);
 	DeviceManagerWrite(consoleDevice, " :   ;:  :   :            @@@WA@@@    \r\n", 42);
 	DeviceManagerWrite(consoleDevice, " FHV OS                  @@@@@@@@     \r\n", 42);
-	DeviceManagerWrite(consoleDevice, " Kernel v0.0.1            @@@@@@      \r\n", 42);
+
+	// TODO If a version number's length is >1 we'll face a formatting issue :)
+	sprintf(&versionLine[0], " Kernel v%i.%i.%i            @@@@@@      \r\n", major, minor, patch);
+	DeviceManagerWrite(consoleDevice, &versionLine[0], 42);
+
 	DeviceManagerWrite(consoleDevice, "                           @<3@       \r\n", 42);
 	DeviceManagerWrite(consoleDevice, "                            @@        \r\n", 42);
 }

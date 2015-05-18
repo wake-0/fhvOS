@@ -13,9 +13,14 @@
 #include "../console/console.h"
 #include <stdio.h>
 
+#define KERNEL_VERSION_MAJOR		(0)
+#define KERNEL_VERSION_MINOR		(1)
+#define KERNEL_VERSION_PATCH		(0)
+
 static long uptimeTicks = 0;
 static boolean_t started = FALSE;
 static mutex_t startMutex;
+
 void KernelStart()
 {
 	MutexLock(&startMutex);
@@ -55,6 +60,13 @@ void KernelStart()
 	{
 
 	}
+}
+
+void KernelVersion(unsigned int* major, unsigned int* minor, unsigned int* patch)
+{
+	*major = KERNEL_VERSION_MAJOR;
+	*minor = KERNEL_VERSION_MINOR;
+	*patch = KERNEL_VERSION_PATCH;
 }
 
 long KernelGetUptime()

@@ -10,6 +10,7 @@
 #define KERNEL_KERNEL_H_
 
 extern void KernelStart();
+extern void KernelVersion(unsigned int* major, unsigned int* minor, unsigned int* patch);
 extern long KernelGetUptime();
 extern long KernelTick(int ticks);
 extern int	KernelInfo(const char *format, ...);
