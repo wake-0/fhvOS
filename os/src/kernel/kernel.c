@@ -27,7 +27,7 @@ int	KernelInfo(const char *format, ...)
 	va_list arg;
 	va_start (arg, format);
 	int res = 0;
-	res += printf("[INFO  @%i] ", KernelGetUptime());
+	res += printf("[INFO  @ %i] ", KernelGetUptime());
 	res += vprintf(format, arg);
 	va_end(arg);
 
@@ -50,7 +50,7 @@ int	KernelError(const char *format, ...)
 	va_list arg;
 	va_start (arg, format);
 	int res = 0;
-	res += printf("[ERROR @%i] ", KernelGetUptime());
+	res += printf("[ERROR @ %i] ", KernelGetUptime());
 	res += vprintf(format, arg);
 	va_end(arg);
 
