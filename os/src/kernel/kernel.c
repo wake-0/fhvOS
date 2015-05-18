@@ -11,7 +11,6 @@
 #include <stdio.h>
 
 static long uptimeTicks = 0;
-static mutex_t outputMutex;
 
 long KernelGetUptime()
 {
@@ -25,8 +24,6 @@ long KernelTick(int ticks)
 
 int	KernelInfo(const char *format, ...)
 {
-	MutexLock(&outputMutex);
-
 	va_list arg;
 	va_start (arg, format);
 	int res = 0;
@@ -34,14 +31,10 @@ int	KernelInfo(const char *format, ...)
 	res += vprintf(format, arg);
 	va_end(arg);
 
-	MutexUnlock(&outputMutex);
-
 	return res;
 }
 int	KernelDebug(const char *format, ...)
 {
-	MutexLock(&outputMutex);
-
 	va_list arg;
 	va_start (arg, format);
 	int res = 0;
@@ -49,13 +42,10 @@ int	KernelDebug(const char *format, ...)
 	res += vprintf(format, arg);
 	va_end(arg);
 
-	MutexUnlock(&outputMutex);
-
 	return res;
 }
 int	KernelError(const char *format, ...)
 {
-	MutexLock(&outputMutex);
 
 	va_list arg;
 	va_start (arg, format);
@@ -63,8 +53,6 @@ int	KernelError(const char *format, ...)
 	res += printf("[ERROR @%i] ", KernelGetUptime());
 	res += vprintf(format, arg);
 	va_end(arg);
-
-	MutexUnlock(&outputMutex);
 
 	return res;
 }
