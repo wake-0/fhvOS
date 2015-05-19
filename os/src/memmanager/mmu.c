@@ -235,7 +235,7 @@ static void mmuCreateAndFillL2PageTable(unsigned int virtualAddress, process_t* 
 	firstLevelDescriptor_t pageTableEntry;
 	pageTableEntry.sectionBaseAddress 	= (unsigned int)newL2PageTable & UPPER_22_BITS_MASK;
 	pageTableEntry.descriptorType 		= DESCRIPTOR_TYPE_PAGE_TABLE;
-	pageTableEntry.cachedBuffered 		= WRITE_BACK;
+	pageTableEntry.cachedBuffered 		= NON_CACHED_NON_BUFFERED;
 	pageTableEntry.domain 				= DOMAIN_MANAGER_ACCESS;
 
 	unsigned int tableOffset = mmuGetTableIndex(virtualAddress, INDEX_OF_L1_PAGE_TABLE, TTBR0);
@@ -258,7 +258,7 @@ static void mmuMapFreePageFrameIntoL2PageTable(unsigned int virtualAddress, page
 	pageTableEntry.pageBaseAddress 	= freePageFrame & SMALL_PAGE_BASE_MASK;
 	pageTableEntry.descriptorType  	= DESCRIPTOR_TYPE_SMALL_PAGE;
 	pageTableEntry.accessPermission = AP_FULL_ACCESS;
-	pageTableEntry.cachedBuffered 	= WRITE_BACK;
+	pageTableEntry.cachedBuffered 	= NON_CACHED_NON_BUFFERED;
 
 	// write into table
 	unsigned int tableOffset = mmuGetTableIndex(virtualAddress, INDEX_OF_L2_PAGE_TABLE, TTBR0);
@@ -396,7 +396,7 @@ static void mmuMapDirectRegionToKernelMasterPageTable(memoryRegionPointer_t memo
 	{
 		pageTableEntry.sectionBaseAddress 	= physicalAddress & UPPER_12_BITS_MASK;
 		pageTableEntry.descriptorType 		= DESCRIPTOR_TYPE_SECTION;
-		pageTableEntry.cachedBuffered 		= WRITE_BACK;
+		pageTableEntry.cachedBuffered 		= NON_CACHED_NON_BUFFERED;
 		pageTableEntry.accessPermission 	= AP_FULL_ACCESS;
 		pageTableEntry.domain 				= DOMAIN_MANAGER_ACCESS;
 
@@ -421,7 +421,7 @@ static void mmuMapDirectRegionToProcesPageTable(memoryRegionPointer_t memoryRegi
 	{
 		pageTableEntry.sectionBaseAddress 	= physicalAddress & UPPER_12_BITS_MASK;
 		pageTableEntry.descriptorType 		= DESCRIPTOR_TYPE_SECTION;
-		pageTableEntry.cachedBuffered 		= WRITE_BACK;
+		pageTableEntry.cachedBuffered 		= NON_CACHED_NON_BUFFERED;
 		pageTableEntry.accessPermission 	= AP_FULL_ACCESS;
 		pageTableEntry.domain 				= DOMAIN_MANAGER_ACCESS;
 
