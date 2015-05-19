@@ -7,15 +7,19 @@
  */
 
 #include "kernel.h"
+#include "../platform/platform.h"
 #include "../processmanager/processmanager.h"
 #include "../processmanager/mutex.h"
 #include "../devicemanager/devicemanager.h"
 #include "../console/console.h"
 #include <stdio.h>
+#include <string.h>
 
 #define KERNEL_VERSION_MAJOR		(0)
 #define KERNEL_VERSION_MINOR		(1)
 #define KERNEL_VERSION_PATCH		(0)
+
+#define	KERNEL_MAX_COMMAND_ARGS		(64)
 
 static long uptimeTicks = 0;
 static boolean_t started = FALSE;
@@ -77,6 +81,28 @@ long KernelGetUptime()
 long KernelTick(int ticks)
 {
 	return (uptimeTicks += ticks);
+}
+
+void KernelExecute(char* inputCommand)
+{
+	// Parse the command
+	// TODO I'm not sure if we should parse the command and args in this function or directly in the console
+	char* argv[KERNEL_MAX_COMMAND_ARGS];
+	int argc = 0;
+	char* command;
+
+	char* ch;
+	ch = strtok(inputCommand, " ");
+	command = ch;
+	do {
+		ch = strtok(NULL, " ");
+		argv[argc++] = ch;
+	} while (ch != NULL);
+	argc--;
+
+	KernelDebug("Command=%s and has %i arguments\n", command, argc);
+
+	// TODO Find command/file with name=command and execute it with argc, argv
 }
 
 int	KernelInfo(const char *format, ...)

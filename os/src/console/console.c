@@ -60,9 +60,9 @@ void ConsoleProcess(int argc, char** argv)
 
 		// Read the command using scanf (Overriden through fgetc and ungetc)
 		scanf(CONSOLE_SCANF_FORMAT, command);
-		KernelDebug("Input command received: %s\n", command);
+		KernelDebug("Console: Input command received: %s\n", command);
 
-		// TODO Send command to the kernel (IPC)
+		KernelExecute(command);
 	}
 }
 

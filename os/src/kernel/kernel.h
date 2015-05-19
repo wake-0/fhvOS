@@ -16,5 +16,6 @@ extern long KernelTick(int ticks);
 extern int	KernelInfo(const char *format, ...);
 extern int	KernelDebug(const char *format, ...);
 extern int	KernelError(const char *format, ...);
+extern void KernelExecute(char* command);
 
 #endif /* KERNEL_KERNEL_H_ */
