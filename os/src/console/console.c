@@ -80,17 +80,17 @@ void printOSLogo()
 	DeviceManagerWrite(consoleDevice, "                           @@@'       \r\n", 42);
 	DeviceManagerWrite(consoleDevice, "                          @WA@@'      \r\n", 42);
 	DeviceManagerWrite(consoleDevice, "                         @@@@@@@;     \r\n", 42);
-	DeviceManagerWrite(consoleDevice, "                        @@@AS@@@@'    \r\n", 42);
-	DeviceManagerWrite(consoleDevice, "                         @@@@@PR@@'   \r\n", 42);
-	DeviceManagerWrite(consoleDevice, "                         @@@<3@@@@@'  \r\n", 42);
-	DeviceManagerWrite(consoleDevice, "                        @@AS@@@@@@@@' \r\n", 42);
-	DeviceManagerWrite(consoleDevice, " @@@+@@  @ @+  @       @@AAW@@@@WA@@@'\r\n", 42);
-	DeviceManagerWrite(consoleDevice, " @   @@  @ +@ @@      @@@@@'+@@PR@@@@@\r\n", 42);
-	DeviceManagerWrite(consoleDevice, " @@@.@@@@@  @ @,     @@WA@'  @@@@@@@@ \r\n", 42);
-	DeviceManagerWrite(consoleDevice, " @   @@  @  @'@       @@@'  @@@@@WA@  \r\n", 42);
-	DeviceManagerWrite(consoleDevice, " @   @@  @  :@@        @'  @@<3@@@@   \r\n", 42);
-	DeviceManagerWrite(consoleDevice, " :   ;:  :   :            @@@WA@@@    \r\n", 42);
-	DeviceManagerWrite(consoleDevice, " FHV OS                  @@@@@@@@     \r\n", 42);
+	DeviceManagerWrite(consoleDevice, "                        @@@AS@@@@'               __           __       \r\n", 75);
+	DeviceManagerWrite(consoleDevice, "                         @@@@@PR@@'             /\\ \\         / /\\      \r\n", 75);
+	DeviceManagerWrite(consoleDevice, "                         @@@<3@@@@@'           /  \\ \\       / /  \\     \r\n", 75);
+	DeviceManagerWrite(consoleDevice, "                        @@AS@@@@@@@@'         / /\\ \\ \\     / / /\\ \\__  \r\n", 75);
+	DeviceManagerWrite(consoleDevice, " @@@+@@  @ @+  @       @@@AW@@@@WA@@@'       / / /\\ \\ \\   / / /\\ \\___\\ \r\n", 75);
+	DeviceManagerWrite(consoleDevice, " @   @@  @ +@ @@      @@@@@'+@@PR@@@@@      / / /  \\ \\_\\  \\ \\ \\ \\/___/ \r\n", 75);
+	DeviceManagerWrite(consoleDevice, " @@@.@@@@@  @ @,     @@WA@'  @@@@@@@@      / / /   / / /   \\ \\ \\       \r\n", 75);
+	DeviceManagerWrite(consoleDevice, " @   @@  @  @'@       @@@'  @@@@@WA@      / / /   / / /_    \\ \\ \\      \r\n", 75);
+	DeviceManagerWrite(consoleDevice, " @   @@  @  :@@        @'  @@<3@@@@      / / /___/ / //_/\\__/ / /      \r\n", 75);
+	DeviceManagerWrite(consoleDevice, " :   ;:  :   :            @@@WA@@@      / / /____\\/ / \\ \\/___/ /       \r\n", 75);
+	DeviceManagerWrite(consoleDevice, " FHV OS                  @@@@@@@@       \\/_________/   \\_____\\/        \r\n", 75);
 
 	// TODO If a version number's length is >1 we'll face a formatting issue :)
 	sprintf(&versionLine[0], " Kernel v%i.%i.%i            @@@@@@      \r\n", major, minor, patch);
