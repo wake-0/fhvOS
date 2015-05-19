@@ -12,6 +12,7 @@
 #include "../processmanager/mutex.h"
 #include "../devicemanager/devicemanager.h"
 #include "../console/console.h"
+#include "../filemanager/filemanager.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -102,7 +103,10 @@ void KernelExecute(char* inputCommand)
 
 	KernelDebug("Command=%s and has %i arguments\n", command, argc);
 
-	// TODO Find command/file with name=command and execute it with argc, argv
+	if (FILE_MANAGER_NOT_FOUND == FileManagerOpenExecutable(command, TRUE, argc, argv))
+	{
+		printf("Command %s not found\n", command);
+	}
 }
 
 int	KernelInfo(const char *format, ...)
