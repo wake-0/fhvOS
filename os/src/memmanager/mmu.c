@@ -70,6 +70,7 @@
 #define DEBUG_EVENT								0x2
 #define	SYNCHRONOUS_EXTERNAL_NON_TRANSLATION	0x8
 #define SYNCHRONOUS_EXTERNAL_ABORT_2ND_LVL		0xE
+#define IMPRECISE_EXTERNAL_ABORT				0b10110
 
 
 static void mmuInitializeKernelMasterPageTable(void);
@@ -148,6 +149,7 @@ int MMUInit()
  */
 void MMUHandleDataAbortException(context_t* context)
 {
+	KernelDebug("Data Abort Interrupt occured\n");
 	// get mmu data abort details
 	dabtAccessedVirtualAddress 		= 0;
 	dabtFaultStatusRegisterValue	= 0;
@@ -202,6 +204,9 @@ void MMUHandleDataAbortException(context_t* context)
 			break;
 		case SYNCHRONOUS_EXTERNAL_NON_TRANSLATION:
 			KernelDebug("Sync ext abort\n");
+		case IMPRECISE_EXTERNAL_ABORT:
+			KernelError("Imprecise external abort\n");
+			break;
 		default:
 			break;
 	}
