@@ -46,6 +46,7 @@ void ProcessManagerStartProcess(char * processName, void(*funcPtr)(int, char ** 
 
 	MMUInitProcess(ptr);
 	processes[processIdx].processScheduler = ptr;
+	processes[processIdx].processName = malloc(strlen(processName) * sizeof(char));
 	strcpy(processes[processIdx].processName, processName);
 	processes[processIdx].startTime = KernelGetUptime();
 
