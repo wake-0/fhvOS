@@ -49,6 +49,7 @@ void ProcessManagerStartProcess(char * processName, void(*funcPtr)(int, char ** 
 	strcpy(processes[processIdx].processName, processName);
 	processes[processIdx].startTime = KernelGetUptime();
 
+	SchedulerUnblockProcess(ptr->id);
 }
 
 void ProcessManagerKillProcess(int processId)

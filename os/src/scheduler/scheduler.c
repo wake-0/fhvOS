@@ -96,7 +96,7 @@ process_t* SchedulerStartProcess(processFunc func) {
 
 	processes[freeProcess].func = func;
 	processes[freeProcess].id = freeProcess;
-	processes[freeProcess].state = READY;
+	processes[freeProcess].state = BLOCKED;
 
 	// IMPORTANT: when a task which was interrupted by SWI is scheduled by IRQ the
 	// PC must be incremented because PC will be changed by return through SUBS thus prevent to repeat last SWI instruction
