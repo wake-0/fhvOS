@@ -6,29 +6,26 @@
  */
 
 #include "systemcallFunctions.h"
-
-void SystemCallChangeMode(int mode)
-{
-	switch(mode)
-	{
-		case SYSTEM_MODE:
-			CPUSwitchToPrivilegedMode();
-			break;
-		case USER_MODE:
-			CPUSwitchToUserMode();
-			break;
-	}
-}
-
-
+#include "../kernel/kernel.h"
+#include <stdio.h>
 /**
  * \brief	Handles system calls. This function is called by the assembler swi_handler function
  * 			in interrupt.asm.
  */
-void SystemCallHandler(unsigned int systemCallNumber)
+void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumber, context_t* context)
 {
-	// TODO: place system call handling HERE
-	// system calls are performed in dependence on the system call number
-	// when this function is entered, the operational mode is system mode
-	;
+	KernelDebug("Systemcall number=%i\n", message->systemCallNumber);
+	KernelDebug("message arg=%s\n", message->messageArgs.buf);
+	switch (message->systemCallNumber)
+	{
+		case SYSTEM_CALL_EXEC:
+		{
+			// Disassemble argument package
+			char* command = message->messageArgs.buf;
+			KernelExecute(command);
+			break;
+		}
+		default:
+			break;
+	}
 }

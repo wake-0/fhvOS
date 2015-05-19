@@ -13,12 +13,13 @@
 #include "../driver/led/driver_led.h"
 #include "../driver/uart/driver_uart.h"
 #include "../hal/gpio/hal_gpio.h"
-
+#include "../scheduler/scheduler.h"
+#include "systemcalls.h"
 
 #define SYSTEM_MODE 0x1F
 #define USER_MODE 0x10
 
 extern void SystemCallChangeMode(int mode);
-extern void SystemCallHandler(unsigned int systemCallNumber);
+extern void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumber, context_t* context);
 
 #endif /* SYSTEMAPI_SYSTEMCALLFUNCTIONS_H_ */

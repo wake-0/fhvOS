@@ -26,6 +26,7 @@ MASK_ACTIVE_IRQ		.set	0x0000007F
 MASK_NEW_IRQ		.set	0x00000001
 MASK_SYS_MODE		.set	0x1F
 MASK_IRQ_MODE		.set	0x12
+MASK_SWI_MODE		.set	0x13
 MASK_I_BIT			.set	0x80
 MASK_SWI_NUM		.set	0xFF000000
 NEWIRQAGR			.set 	0x00000001
@@ -71,26 +72,58 @@ _intIrqResetHandlers:
 ; is also used to handle system calls.
 ;
 swi_handler:
-	; store registers
-    STMFD    SP!, {R0-R12, LR}       	; Save context in SVC stack
-    SUB      SP, SP, #0x4            	; Adjust the stack pointer
+	STMFD	 SP!, {LR}
 
-    ; prepare switch to system mode
-    MRSEQ    R1, SPSR                 	; Copy SPSR
-    ORREQ    R1, R1, #0x1F            	; Change the mode to System
+    STMFD    SP, {R0-R12}^
+    NOP
+    SUB 	 SP, SP, #52
 
-    ; get svc number
-    LDR      R0, [LR, #-4]            	; R0 points to SWI instruction
-    BIC      R0, R0, #MASK_SVC_NUM    	; Get the SWI number
+	STMFD 	 SP, {R13}^
+	NOP
+	SUB		 SP, SP, #4
 
-	MSREQ    CPSR_cf, R1				; switch to system mode
+	STMFD 	 SP, {LR}^
+	NOP
+	SUB		 SP, SP, #4
 
-    ; branch to system call handler
+    MRS      R12, SPSR
+    STMFD    SP, {R12}^
+    NOP
+    SUB		 SP, SP, #4
+
+    ; Prepare switch to system mode
+    MRSEQ    R3, CPSR                 		; Copy SPSR
+    ORREQ    R3, R3, #MASK_SYS_MODE    		; Change the mode to System
+
+	MOV		 R5, SP
+	STR		 R5, [SP, #72]
+	MOV		 R2, SP
+
+	MSREQ    CPSR_c, R3					; Switch to system mode
+
     BL		SystemCallHandler
 
-   	; restore registers
-    ADD      SP, SP, #0x4           ; Adjust the stack pointer
-    LDMFD    SP!, {R0-R12, PC}^       ; Restore registers from IRQ stack
+    MRS	  R3, CPSR                 		; Copy SPSR
+    BIC      R3, R3, #0x0F
+    ORR      R3, R3, #MASK_SWI_MODE    	; Change the mode to System
+	MSR      CPSR_c, R3					; Switch to SWI mode
+
+	LDMFD	 SP!, {R1}
+	MSR		 SPSR_cxsf, R1
+	NOP
+
+	LDMFD	 SP, {LR}^
+	NOP
+	ADD		 SP, SP, #4
+
+	LDMFD	 SP, {R13}^
+	NOP
+	ADD		 SP, SP, #4
+
+	LDMFD	 SP, {R0-R12}^
+	NOP
+	ADD		 SP, SP, #52
+    LDMFD	 SP!, {PC}^
 
 
 ;
