@@ -204,6 +204,7 @@ void MMUHandleDataAbortException(context_t* context)
 			break;
 		case SYNCHRONOUS_EXTERNAL_NON_TRANSLATION:
 			KernelDebug("Sync ext abort\n");
+			break;
 		case IMPRECISE_EXTERNAL_ABORT:
 			KernelError("Imprecise external abort\n");
 			break;
