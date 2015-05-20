@@ -25,6 +25,8 @@
 	.global MMUSetTranslationTableControlRegister
 	.global MMUReadSystemControlRegister
 	.global MMUReadTTBCR
+	.global MMUWriteContextIdRegister
+	.global MMUReadContextIdRegister
 	.global InstructionCacheEnable
 	.global InstructionCacheDisable
 	.global InstructionCacheFlush
@@ -35,6 +37,7 @@
 	.global currentAddressInTTBR1
 	.global currentStatusInSCTLR
 	.global currentStatusInTTBCR
+	.global currentContextIdRegisterValue
 	.global CleanDataCache
 
 accessedAddress: .field dabtAccessedVirtualAddress, 32
@@ -43,6 +46,7 @@ processTableAddress: .field currentAddressInTTBR0, 32
 kernelTableAddress: .field currentAddressInTTBR1, 32
 currentStatus: .field currentStatusInSCTLR, 32
 currentTTBCRValue: .field currentStatusInTTBCR, 32
+contextId: .field currentContextIdRegisterValue, 32
 
 ;	List of coprocessor instructions:
 ;
@@ -197,6 +201,20 @@ MMUReadKernelTableAddress:
 	STR 	R0, [R1]
    	MOV 	PC, LR
 
+
+; see p. B4-1549
+MMUWriteContextIdRegister:
+	MCR 	p15, #0, R0, c13, c0, #1
+	MOV		PC, LR
+
+; see p. B4-1549
+MMUReadContextIdRegister:
+	MOV		R0, #0
+	MRC 	p15, #0, R0, C13, C0, #1
+	MOV		R1, #0
+	LDR		R1, contextId
+	STR		R0, [R1]
+	MOV		PC, LR
 
 MMUSetDomainAccess:
 	MCR 	P15, #0, R0, C3, C0, #0
