@@ -12,14 +12,17 @@
 #include <stdlib.h>
 
 
-static void memoryManagerInitializeRegion(memoryRegionPointer_t, boolean_t, unsigned int, unsigned int );
-static boolean_t memoryManagerSufficientSpace(memoryRegionPointer_t region, unsigned int pagesToReserve);
+static void memoryManagerInitializeRegion(memoryRegionPointer_t, unsigned int, unsigned int );
 static pageAddressPointer_t memoryManagerGetPageAddress(memoryRegionPointer_t region, unsigned int pageNumber);
 static int memoryManagerLookupSectionForFreePagesInRow(memoryRegionPointer_t region, unsigned int startingPageNumber, unsigned int pagesToReserve);
 static void memoryManagerReservePagesInARow(memoryRegionPointer_t region, unsigned int pageNumber, unsigned int pagesToReserve);
 static void memoryManagerReserveDirectMappedRegion(unsigned int memoryRegion);
+static int memoryManagerReserveSinglePage(memoryRegionPointer_t region, unsigned int pageNumber);
+static int memoryManagerReserveSinglePage(memoryRegionPointer_t region, unsigned int pageNumber);
+static void memoryManagerReserveAllPagesOfRegion(memoryRegionPointer_t region);
 
-memoryRegion_t memorySections[MEMORY_REGIONS];
+// contains the regions of the virtual memory
+static memoryRegion_t memorySections[MEMORY_REGIONS];
 
 
 /**
@@ -30,25 +33,25 @@ memoryRegion_t memorySections[MEMORY_REGIONS];
  */
 int MemoryManagerInit()
 {
-	memoryManagerInitializeRegion(&memorySections[BOOT_ROM_REGION], true, BOOT_ROM_START_ADDRESS, BOOT_ROM_END_ADDRESS);
+	memoryManagerInitializeRegion(&memorySections[BOOT_ROM_REGION], BOOT_ROM_START_ADDRESS, BOOT_ROM_END_ADDRESS);
 	memorySections[BOOT_ROM_REGION].pageStatus = &romRegion[0];
 
-	memoryManagerInitializeRegion(&memorySections[MEMORY_MAPPED_IO_REGION], true, MEMORY_MAPPED_IO_START_ADDRESS, MEMORY_MAPPED_IO_END_ADDRESS);
+	memoryManagerInitializeRegion(&memorySections[MEMORY_MAPPED_IO_REGION], MEMORY_MAPPED_IO_START_ADDRESS, MEMORY_MAPPED_IO_END_ADDRESS);
 	memorySections[MEMORY_MAPPED_IO_REGION].pageStatus = &mmioRegion[0];
 
-	memoryManagerInitializeRegion(&memorySections[KERNEL_REGION], true, KERNEL_START_ADDRESS, KERNEL_END_ADDRESS);
+	memoryManagerInitializeRegion(&memorySections[KERNEL_REGION], KERNEL_START_ADDRESS, KERNEL_END_ADDRESS);
 	memorySections[KERNEL_REGION].pageStatus = &kernelRegion[0];
 
-	memoryManagerInitializeRegion(&memorySections[PAGE_TABLE_REGION], true, PAGE_TABLES_START_ADDRESS, PAGE_TABLES_END_ADDRESS);
+	memoryManagerInitializeRegion(&memorySections[PAGE_TABLE_REGION], PAGE_TABLES_START_ADDRESS, PAGE_TABLES_END_ADDRESS);
 	memorySections[PAGE_TABLE_REGION].pageStatus = &tableRegion[0];
 
-	memoryManagerInitializeRegion(&memorySections[PROCESS_REGION], false, PROCESS_PAGES_START_ADDRESS, PROCESS_PAGES_END_ADDRESS);
+	memoryManagerInitializeRegion(&memorySections[PROCESS_REGION], PROCESS_PAGES_START_ADDRESS, PROCESS_PAGES_END_ADDRESS);
 	memorySections[PROCESS_REGION].pageStatus = &procRegion[0];
 
-	memoryManagerInitializeRegion(&memorySections[INTERNAL_SRAM_REGION], true, INTERNAL_SRAM_START_ADDRESS, INTERNAL_SRAM_END_ADDRESS);
+	memoryManagerInitializeRegion(&memorySections[INTERNAL_SRAM_REGION], INTERNAL_SRAM_START_ADDRESS, INTERNAL_SRAM_END_ADDRESS);
 	memorySections[INTERNAL_SRAM_REGION].pageStatus = &sramRegion[0];
 
-	memoryManagerInitializeRegion(&memorySections[BOOT_ROM_EXCEPTIONS_REGION], true, BOOT_ROM_EXCEPTIONS_START_ADDRESS, BOOT_ROM_EXCEPTIONS_END_ADDRESS);
+	memoryManagerInitializeRegion(&memorySections[BOOT_ROM_EXCEPTIONS_REGION], BOOT_ROM_EXCEPTIONS_START_ADDRESS, BOOT_ROM_EXCEPTIONS_END_ADDRESS);
 	memorySections[BOOT_ROM_EXCEPTIONS_REGION].pageStatus = &romExceptionsRegion[0];
 
 	return MEMORY_OK;
@@ -58,14 +61,12 @@ int MemoryManagerInit()
 /**
  * \brief	This function initializes a memory region. It calculates the number of maximum
  * 			available pages and reserves memory for the page satus structs.
- * \param  	access				- defines if accessed directly or over virtual memory management
  * \return 	None
  */
-static void memoryManagerInitializeRegion(memoryRegionPointer_t memoryRegion, boolean_t access, unsigned int startAddress, unsigned int endAddress)
+static void memoryManagerInitializeRegion(memoryRegionPointer_t memoryRegion, unsigned int startAddress, unsigned int endAddress)
 {
 	memoryRegion->startAddress 		= startAddress;
 	memoryRegion->endAddress 		= endAddress;
-	//memoryRegion->directAccess 		= access;
 	int length 						= endAddress - startAddress;
 
 	if((length / PAGE_SIZE_4KB) < 0)
@@ -78,15 +79,24 @@ static void memoryManagerInitializeRegion(memoryRegionPointer_t memoryRegion, bo
 	}
 
 	memoryRegion->reservedPages 	= 0;
-	//memoryRegion->pageStatus	 	= (pageStatusPointer_t)malloc( sizeof(pageStatus_t) * memoryRegion->numberOfPages);
-	//memset(memoryRegion->pageStatus,0, sizeof(pageStatus_t) * memoryRegion->numberOfPages);
 	// TODO Handle case (pageStatus == 0)
 }
 
 
-memoryRegionPointer_t MemoryManagerGetRegion(unsigned int memorySectionNumber)
+/**
+ * \brief	Evaluates if enough free pages are left in a memory region.
+ * \return 	Pointer on the memory region if successful, null else
+ */
+memoryRegionPointer_t MemoryManagerGetRegion(unsigned int memoryRegionNumber)
 {
-	return &memorySections[memorySectionNumber];
+	if(memoryRegionNumber < MEMORY_REGIONS)
+	{
+		return &memorySections[memoryRegionNumber];
+	}
+	else
+	{
+		return NULL;
+	}
 }
 
 
@@ -96,7 +106,7 @@ memoryRegionPointer_t MemoryManagerGetRegion(unsigned int memorySectionNumber)
  *			Increase number of reserved pages of the region.
  * \return 	True if reservation was successfull
  */
-int MemoryManagerReserveSinglePage(memoryRegionPointer_t region, unsigned int pageNumber)
+static int memoryManagerReserveSinglePage(memoryRegionPointer_t region, unsigned int pageNumber)
 {
 	if(pageNumber > region->numberOfPages)
 	{
@@ -110,69 +120,12 @@ int MemoryManagerReserveSinglePage(memoryRegionPointer_t region, unsigned int pa
 
 
 /**
- * \brief	Evaluates if enough free pages are left in a memory region.
- * \return 	True if enough space left, else false.
- */
-static boolean_t memoryManagerSufficientSpace(memoryRegionPointer_t region, unsigned int pagesToReserve)
-{
-	int unreservedPages = region->numberOfPages - region->reservedPages;
-	if(unreservedPages > pagesToReserve)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-
-/**
- * \brief	Reserves a a number of pages if enough space is available.
- * \return 	True if reservation was successfull
- */
-int MemoryManagerReserveMultiplePages(unsigned int memoryRegion, unsigned int pagesToReserve)
-{
-	memoryRegionPointer_t region = MemoryManagerGetRegion(memoryRegion);
-	unsigned int reservedPages = 0;
-
-	if(false == memoryManagerSufficientSpace(region, pagesToReserve))
-	{
-		return MEMORY_NOT_OK;
-	}
-
-	while(reservedPages < pagesToReserve)
-	{
-		MemoryManagerReserveSinglePage(region, reservedPages);
-		reservedPages++;
-	}
-
-	return MEMORY_OK;
-}
-
-
-/**
- * \brief	Reserves all pages of a memory region.
- * \return 	none
- */
-void MemoryManagerReserveAllPages(memoryRegionPointer_t region)
-{
-	unsigned int page;
-
-	for(page = 0; page < region->numberOfPages; page++)
-	{
-		MemoryManagerReserveSinglePage(region, page);
-	}
-}
-
-
-/**
  * \brief	Finds a number of pages of a specified region in a row.
  * \return	Address of first page in row if successfull, otherwise null.
  */
-pageAddressPointer_t MemoryManagerGetFreePagesInRegion(unsigned int memoryRegion, unsigned int pagesToReserve)
+pageAddressPointer_t MemoryManagerGetFreePagesInProcessRegion(unsigned int pagesToReserve)
 {
-	memoryRegionPointer_t region = MemoryManagerGetRegion(memoryRegion);
+	memoryRegionPointer_t region = MemoryManagerGetRegion(PROCESS_REGION);
 	int unreservedPages = region->numberOfPages - region->reservedPages;
 
 	if((pagesToReserve > region->numberOfPages) || (pagesToReserve > unreservedPages) || (pagesToReserve == 0))
@@ -269,25 +222,34 @@ static pageAddressPointer_t memoryManagerGetPageAddress(memoryRegionPointer_t re
 
 /**
  * \brief	Reserves all pages of all regions except page table and process region.
+ * 			This is done in order to prevent accidently allocation of pages in non-process space regions.
  */
 int MemoryManagerReserveAllDirectMappedRegions(void)
 {
-	unsigned int memoryRegion;
-
-	for(memoryRegion = 0; memoryRegion < MEMORY_REGIONS - 2; memoryRegion++)
-	{
-		memoryManagerReserveDirectMappedRegion(memoryRegion);
-	}
-
+	memoryManagerReserveDirectMappedRegion(BOOT_ROM_REGION);
+	memoryManagerReserveDirectMappedRegion(MEMORY_MAPPED_IO_REGION);
+	memoryManagerReserveDirectMappedRegion(BOOT_ROM_EXCEPTIONS_REGION);
+	memoryManagerReserveDirectMappedRegion(INTERNAL_SRAM_REGION);
+	memoryManagerReserveDirectMappedRegion(KERNEL_REGION);
 	return MEMORY_OK;
 }
 
 static void memoryManagerReserveDirectMappedRegion(unsigned int memoryRegion)
 {
 	memoryRegionPointer_t region = MemoryManagerGetRegion(memoryRegion);
+	memoryManagerReserveAllPagesOfRegion(region);
+}
 
-	//if(TRUE == region->directAccess)
+/**
+ * \brief	Reserves all pages of a memory region.
+ * \return 	none
+ */
+static void memoryManagerReserveAllPagesOfRegion(memoryRegionPointer_t region)
+{
+	unsigned int page;
+
+	for(page = 0; page < region->numberOfPages; page++)
 	{
-		MemoryManagerReserveAllPages(region);
+		memoryManagerReserveSinglePage(region, page);
 	}
 }

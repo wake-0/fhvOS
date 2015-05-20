@@ -97,10 +97,8 @@ typedef memoryRegion_t* memoryRegionPointer_t;
 typedef uint32_t* pageAddressPointer_t;
 
 extern int MemoryManagerInit();
-extern pageAddressPointer_t MemoryManagerGetFreePagesInRegion(unsigned int memoryRegion, unsigned int pagesToReserve);
+extern pageAddressPointer_t MemoryManagerGetFreePagesInProcessRegion(unsigned int pagesToReserve);
 extern memoryRegionPointer_t MemoryManagerGetRegion(unsigned int memoryRegionNumber);
-extern void MemoryManagerReserveAllPages(memoryRegionPointer_t region);
-extern pageAddressPointer_t MemoryManagerGetFreePagesInRegion(unsigned int memoryRegion, unsigned int pagesToReserve);
 extern int MemoryManagerReserveAllDirectMappedRegions(void);
 
 #endif /* MEMMANAGER_MEMMANAGER_H_ */
