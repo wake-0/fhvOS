@@ -22,6 +22,10 @@
 
 #define	KERNEL_MAX_COMMAND_ARGS		(64)
 
+#define	KERNEL_DEBUG_OUTPUT			0
+#define KERNEL_ERROR_OUTPUT			1
+#define KERNEL_INFO_OUTPUT			1
+
 static long uptimeTicks = 0;
 static boolean_t started = FALSE;
 static mutex_t startMutex;
@@ -111,6 +115,7 @@ void KernelExecute(char* inputCommand)
 
 int	KernelInfo(const char *format, ...)
 {
+#if	KERNEL_INFO_OUTPUT
 	va_list arg;
 	va_start (arg, format);
 	int res = 0;
@@ -119,9 +124,12 @@ int	KernelInfo(const char *format, ...)
 	va_end(arg);
 
 	return res;
+#endif
 }
+
 int	KernelDebug(const char *format, ...)
 {
+#if KERNEL_DEBUG_OUTPUT
 	va_list arg;
 	va_start (arg, format);
 	int res = 0;
@@ -130,10 +138,12 @@ int	KernelDebug(const char *format, ...)
 	va_end(arg);
 
 	return res;
+#endif
 }
+
 int	KernelError(const char *format, ...)
 {
-
+#if KERNEL_ERROR_OUTPUT
 	va_list arg;
 	va_start (arg, format);
 	int res = 0;
@@ -142,4 +152,5 @@ int	KernelError(const char *format, ...)
 	va_end(arg);
 
 	return res;
+#endif
 }
