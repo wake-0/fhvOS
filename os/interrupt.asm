@@ -99,14 +99,14 @@ swi_handler:
 	STR		 R5, [SP, #72]
 	MOV		 R2, SP
 
-	MSREQ    CPSR_c, R3					; Switch to system mode
+	MSREQ    CPSR_c, R3						; Switch to system mode
 
-    BL		SystemCallHandler
+    BL		 SystemCallHandler
 
-    MRS	  R3, CPSR                 		; Copy SPSR
-    BIC      R3, R3, #0x0F
-    ORR      R3, R3, #MASK_SWI_MODE    	; Change the mode to System
-	MSR      CPSR_c, R3					; Switch to SWI mode
+    MRS	     R3, CPSR                 		; Copy SPSR
+    BIC      R3, R3, #0x1F
+    ORR      R3, R3, #MASK_SWI_MODE    		; Change the mode to System
+	MSR      CPSR_c, R3						; Switch to SWI mode
 
 	LDMFD	 SP!, {R1}
 	MSR		 SPSR_cxsf, R1

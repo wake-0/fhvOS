@@ -128,6 +128,8 @@ int foo(int value);
 
 int main(void)
 {
+	KernelStart();
+	/*
 	DeviceManagerInit();
 
 	device_t led3 = DeviceManagerGetDevice("LED3", 4);
@@ -150,7 +152,7 @@ int main(void)
 
 	// Set up the timer
 	//DeviceManagerInitDevice(timer);
-
+	*/
 	while(1)
 	{
 		volatile int i = 0;

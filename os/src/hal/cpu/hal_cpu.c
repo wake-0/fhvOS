@@ -43,48 +43,6 @@
 
 #include "hal_cpu.h"
 
-/*****************************************************************************
-**                   FUNCTION DEFINITIONS
-******************************************************************************/
-/**
- * \brief     This API can be used to switch from user mode to privileged mode
- *            The priviledge mode will be system mode. System mode will share 
- *            the same resources as user mode, but with privileges.
- *
- * \param     None.
- *
- * \return    None.
- *
- * Note : All the access to system configuration which needs privileged access
- *        can be done after calling this API.
- **/
-void CPUSwitchToPrivilegedMode(void)
-{
-    asm("    SWI   #458752");
-}
-
-/**
- * \brief     This API can be used to switch from any previleged mode of ARM to 
- *            user mode. After this API is called, the program will continue
- *            to operate in non-privileged mode, until any exception occurs.
- *            After the exception is serviced, execution will continue in user
- *            mode.
- *
- * \param     None.
- *
- * \return    None.
- *
- * Note : All the access to system configuration which needs privileged access
- *        shall be done before this API is called.
- **/
-void CPUSwitchToUserMode(void)
-{
-    asm("    mrs     r0, CPSR\n\t"
-        "    bic     r0, r0, #0x0F\n\t"
-        "    orr     r0, r0, #0x10\n\t "
-        "    msr     CPSR_c, r0");
-}
-
 /**
  * \brief     This API is called when the CPU is aborted or during execution
  *            of any undefined instruction. Both IRQ and FIQ will be disabled
