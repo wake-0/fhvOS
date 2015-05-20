@@ -310,7 +310,7 @@ int MMUFreeAllPageFramesOfProcess(process_t* process)
 
 	for(numberOfPageTableEntry = 0; numberOfPageTableEntry < L1_PAGE_TABLE_ENTRIES; numberOfPageTableEntry++)
 	{
-		pageTableEntry = (unsigned int) (process->pageTableL1 + numberOfPageTableEntry);
+		pageTableEntry = (unsigned int)*(process->pageTableL1 + numberOfPageTableEntry);
 
 		pageTablePointer_t l2PageTable = (pageTablePointer_t)(pageTableEntry & UPPER_22_BITS_MASK);
 		mmuFreeAllPageFramesOfL2PageTable(l2PageTable);
@@ -329,7 +329,7 @@ static void mmuFreeAllPageFramesOfL2PageTable(pageTablePointer_t l2PageTable)
 
 	for(pageTableEntry = 0; pageTableEntry < L2_PAGE_TABLE_ENTRIES; pageTableEntry++)
 	{
-		unsigned int l2PageTableEntry = (unsigned int)(l2PageTable + pageTableEntry);
+		unsigned int l2PageTableEntry = (unsigned int)*(l2PageTable + pageTableEntry);
 		unsigned int smallPageBaseAddress = l2PageTableEntry & UPPER_20_BITS_MASK;
 		unsigned int pageFrameNumber = (smallPageBaseAddress - PAGE_TABLES_START_ADDRESS) / PAGE_SIZE_4KB;
 		mmuSetPageFrameUsageStatus(pageFrameNumber, SET_PAGE_FRAME_IS_FREE);
