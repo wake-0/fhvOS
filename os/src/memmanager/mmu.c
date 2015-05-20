@@ -112,6 +112,7 @@ volatile uint32_t currentAddressInTTBR0;
 volatile uint32_t currentAddressInTTBR1;
 volatile uint32_t currentStatusInSCTLR;
 volatile uint32_t currentStatusInTTBCR;
+volatile uint32_t currentContextIdRegisterValue;
 
 // master L1 page table for statical mapping of kernel, I/O and boot rom
 pageTablePointer_t kernelMasterPageTable;
