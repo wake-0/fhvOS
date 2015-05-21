@@ -22,20 +22,6 @@ static void Edma3CompletionIsr(void* params);
 static void Edma3CCErrorIsr(void* params);
 static void HSMMCSDIsr(void* params);
 
-// Macros
-/** DMAQNUM bits Clear */
-#define EDMA3CC_DMAQNUM_CLR(chNum)            ( ~ (0x7u << (((chNum) % 8u) * 4u)))
-/** DMAQNUM bits Set */
-#define EDMA3CC_DMAQNUM_SET(chNum,queNum)     ((0x7u & (queNum)) << (((chNum) % 8u) * 4u))
-/** QDMAQNUM bits Clear */
-#define EDMA3CC_QDMAQNUM_CLR(chNum)           ( ~ (0x7u << ((chNum) * 4u)))
-/** QDMAQNUM bits Set */
-#define EDMA3CC_QDMAQNUM_SET(chNum,queNum)    ((0x7u & (queNum)) << ((chNum) * 4u))
-/** OPT-TCC bitfield Set */
-#define EDMA3CC_OPT_TCC_SET(tcc)              (((EDMA3CC_OPT_TCC >> \
-                                              EDMA3CC_OPT_TCC_SHIFT) & \
-                                              (tcc)) << EDMA3CC_OPT_TCC_SHIFT)
-
 #define EDMA_COMPLTN_INT_NUM 			      (SYS_INT_EDMACOMPINT)
 #define EDMA_ERROR_INT_NUM 					  (SYS_INT_EDMAERRINT)
 #define MMCSD_INT_NUM 						  (SYS_INT_MMCSD0INT)
