@@ -120,6 +120,8 @@ int	KernelInfo(const char *format, ...)
 	va_end(arg);
 
 	return res;
+#else
+	return 0;
 #endif
 }
 
@@ -134,6 +136,8 @@ int	KernelDebug(const char *format, ...)
 	va_end(arg);
 
 	return res;
+#else
+	return 0;
 #endif
 }
 
@@ -148,5 +152,7 @@ int	KernelError(const char *format, ...)
 	va_end(arg);
 
 	return res;
+#else
+	return 0;
 #endif
 }
