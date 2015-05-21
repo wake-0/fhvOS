@@ -22,10 +22,6 @@
 
 #define	KERNEL_MAX_COMMAND_ARGS		(64)
 
-#define	KERNEL_DEBUG_OUTPUT			0
-#define KERNEL_ERROR_OUTPUT			1
-#define KERNEL_INFO_OUTPUT			1
-
 static long uptimeTicks = 0;
 static boolean_t started = FALSE;
 static mutex_t startMutex;

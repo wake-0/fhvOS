@@ -331,6 +331,10 @@ int MMUFreeAllPageFramesOfProcess(process_t* process)
 		mmuFreeAllPageFramesOfL2PageTable(l2PageTableBaseAddress);
 	}
 
+	#if	KERNEL_INFO_OUTPUT
+		printf("\nfinished freeing\n");
+	#endif
+
 	return MMU_OK;
 }
 

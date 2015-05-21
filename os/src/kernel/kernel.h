@@ -9,6 +9,10 @@
 #ifndef KERNEL_KERNEL_H_
 #define KERNEL_KERNEL_H_
 
+#define	KERNEL_DEBUG_OUTPUT			0
+#define KERNEL_ERROR_OUTPUT			1
+#define KERNEL_INFO_OUTPUT			1
+
 extern void KernelStart();
 extern void KernelVersion(unsigned int* major, unsigned int* minor, unsigned int* patch);
 extern long KernelGetUptime();
