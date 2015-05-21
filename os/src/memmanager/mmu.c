@@ -94,7 +94,7 @@ static unsigned int mmuCreateL2PageTableEntry(secondLevelDescriptor_t PTE);
 static address_t mmuGetFreePageFrameForPageTable(unsigned int pageFramesToReserve);
 static void mmuMapDirectRegionToProcesPageTable(memoryRegionPointer_t memoryRegion, pageTablePointer_t table);
 static void mmuFreeSmallPage(unsigned int l2PageTableEntry);
-
+static void mmuFreePageTablePageFrames(unsigned int pageTableType, pageTablePointer_t pageTable);
 
 static pageAddressPointer_t mmuCreatePageTable(unsigned int pageTableType);
 
@@ -329,8 +329,13 @@ int MMUFreeAllPageFramesOfProcess(process_t* process)
 
 		pageTablePointer_t l2PageTableBaseAddress = (pageTablePointer_t)(pageTableEntry & UPPER_22_BITS_MASK);
 		mmuFreeAllPageFramesOfL2PageTable(l2PageTableBaseAddress);
+
+		// free page frames used by l2 page table
+		//mmuFreePageTablePageFrames(L2_PAGE_TABLE, l2PageTableBaseAddress);
 	}
 
+	// free page frames used by process l1 page table
+	//mmuFreePageTablePageFrames(L1_PAGE_TABLE, process->pageTableL1);
 	KernelDebug("MMU finished freeing process page tables of pid=%d\n", process->id);
 
 	return MMU_OK;
@@ -365,7 +370,7 @@ static void mmuFreeAllPageFramesOfL2PageTable(pageTablePointer_t l2PageTable)
 
 
 /**
- * \brief	This function frees a smal page in the page frame bitsmap.
+ * \brief	This function frees a small page in the page frame bitsmap.
  */
 static void mmuFreeSmallPage(unsigned int l2PageTableEntry)
 {
@@ -374,6 +379,42 @@ static void mmuFreeSmallPage(unsigned int l2PageTableEntry)
 	mmuSetPageFrameUsageStatus(pageFrameNumber, SET_PAGE_FRAME_IS_FREE);
 }
 
+
+/**
+ * \brief	This function frees the small page frame used for page tables in the page frame bitsmap.
+ */
+static void mmuFreePageTablePageFrames(unsigned int pageTableType, pageTablePointer_t pageTable)
+{
+	if((L1_PAGE_TABLE != pageTableType) & (L2_PAGE_TABLE != pageTableType))
+	{
+		return;
+	}
+
+	unsigned int pageFrameNumber 	= ((unsigned int)pageTable - PAGE_TABLES_START_ADDRESS) / PAGE_SIZE_4KB;
+	unsigned int reservedPages 		= 0;
+
+	switch(pageTableType)
+	{
+		case L1_PAGE_TABLE:
+			reservedPages = L1_TABLE_PAGE_COUNT;
+			mmuSetPageFrameUsageStatus(pageFrameNumber, SET_PAGE_FRAME_IS_FREE);
+			pageFrameNumber++;
+			mmuSetPageFrameUsageStatus(pageFrameNumber, SET_PAGE_FRAME_IS_FREE);
+			pageFrameNumber++;
+			mmuSetPageFrameUsageStatus(pageFrameNumber, SET_PAGE_FRAME_IS_FREE);
+			pageFrameNumber++;
+			mmuSetPageFrameUsageStatus(pageFrameNumber, SET_PAGE_FRAME_IS_FREE);
+			break;
+		case L2_PAGE_TABLE:
+			reservedPages = L2_TABLE_PAGE_COUNT;
+			mmuSetPageFrameUsageStatus(pageFrameNumber, SET_PAGE_FRAME_IS_FREE);
+			break;
+
+	}
+
+	// reset memory space formerly used by page table by setting to 0
+	memset(pageTable, 0, PAGE_SIZE_4KB * reservedPages);
+}
 
 /**
  * \brief	Creates a master page table for the kernel region.
