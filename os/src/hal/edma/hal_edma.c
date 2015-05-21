@@ -13,18 +13,14 @@
 #include "../am335x/hw_edma3cc.h"
 #include "../am335x/soc_AM335x.h"
 #include "../am335x/hw_cm_per.h"
+#include "../am335x/hw_control_AM335x.h"
 
 // Forward declarations
 static unsigned int edmaVersionGet(void);
-static void EDMA3EnableChInShadowReg(unsigned int baseAdd, unsigned int chType, unsigned int chNum);
-static void EDMA3MapChToEvtQ(unsigned int baseAdd, unsigned int chType, unsigned int chNum, unsigned int evtQNum);
-
 // Callback
 static void Edma3CompletionIsr(void* params);
 static void Edma3CCErrorIsr(void* params);
 static void HSMMCSDIsr(void* params);
-
-static void EDMA3EnableEvtIntr(unsigned int baseAdd, unsigned int chNum);
 
 // Macros
 /** DMAQNUM bits Clear */
@@ -288,7 +284,7 @@ unsigned int EDMA3RequestChannel(unsigned int baseAdd, unsigned int chType, unsi
     return retVal;
 }
 
-static void EDMA3EnableChInShadowReg(unsigned int baseAdd, unsigned int chType, unsigned int chNum)
+void EDMA3EnableChInShadowReg(unsigned int baseAdd, unsigned int chType, unsigned int chNum)
 {
     /* Allocate the DMA/QDMA channel */
     if (EDMA3_CHANNEL_TYPE_DMA == chType)
@@ -314,7 +310,7 @@ static void EDMA3EnableChInShadowReg(unsigned int baseAdd, unsigned int chType, 
     }
 }
 
-static void EDMA3EnableEvtIntr(unsigned int baseAdd, unsigned int chNum)
+void EDMA3EnableEvtIntr(unsigned int baseAdd, unsigned int chNum)
 {
     if(chNum < 32)
     {
@@ -328,7 +324,7 @@ static void EDMA3EnableEvtIntr(unsigned int baseAdd, unsigned int chNum)
     }
 }
 
-static void EDMA3MapChToEvtQ(unsigned int baseAdd, unsigned int chType, unsigned int chNum, unsigned int evtQNum)
+void EDMA3MapChToEvtQ(unsigned int baseAdd, unsigned int chType, unsigned int chNum, unsigned int evtQNum)
 {
     if (EDMA3_CHANNEL_TYPE_DMA == chType)
     {
@@ -345,6 +341,66 @@ static void EDMA3MapChToEvtQ(unsigned int baseAdd, unsigned int chType, unsigned
         HWREG(baseAdd + EDMA3CC_QDMAQNUM) |=
                        EDMA3CC_QDMAQNUM_SET(chNum, evtQNum);
     }
+}
+
+void EDMAPinMuxSetup(void)
+{
+    HWREG(SOC_CONTROL_REGS + CONTROL_CONF_MMC0_DAT3) =
+                   (0 << CONTROL_CONF_MMC0_DAT3_CONF_MMC0_DAT3_MMODE_SHIFT)    |
+                   (0 << CONTROL_CONF_MMC0_DAT3_CONF_MMC0_DAT3_PUDEN_SHIFT)    |
+                   (1 << CONTROL_CONF_MMC0_DAT3_CONF_MMC0_DAT3_PUTYPESEL_SHIFT)|
+                   (1 << CONTROL_CONF_MMC0_DAT3_CONF_MMC0_DAT3_RXACTIVE_SHIFT);
+
+    HWREG(SOC_CONTROL_REGS + CONTROL_CONF_MMC0_DAT2) =
+                   (0 << CONTROL_CONF_MMC0_DAT2_CONF_MMC0_DAT2_MMODE_SHIFT)    |
+                   (0 << CONTROL_CONF_MMC0_DAT2_CONF_MMC0_DAT2_PUDEN_SHIFT)    |
+                   (1 << CONTROL_CONF_MMC0_DAT2_CONF_MMC0_DAT2_PUTYPESEL_SHIFT)|
+                   (1 << CONTROL_CONF_MMC0_DAT2_CONF_MMC0_DAT2_RXACTIVE_SHIFT);
+
+    HWREG(SOC_CONTROL_REGS + CONTROL_CONF_MMC0_DAT1) =
+                   (0 << CONTROL_CONF_MMC0_DAT1_CONF_MMC0_DAT1_MMODE_SHIFT)    |
+                   (0 << CONTROL_CONF_MMC0_DAT1_CONF_MMC0_DAT1_PUDEN_SHIFT)    |
+                   (1 << CONTROL_CONF_MMC0_DAT1_CONF_MMC0_DAT1_PUTYPESEL_SHIFT)|
+                   (1 << CONTROL_CONF_MMC0_DAT1_CONF_MMC0_DAT1_RXACTIVE_SHIFT);
+
+    HWREG(SOC_CONTROL_REGS + CONTROL_CONF_MMC0_DAT0) =
+                   (0 << CONTROL_CONF_MMC0_DAT0_CONF_MMC0_DAT0_MMODE_SHIFT)    |
+                   (0 << CONTROL_CONF_MMC0_DAT0_CONF_MMC0_DAT0_PUDEN_SHIFT)    |
+                   (1 << CONTROL_CONF_MMC0_DAT0_CONF_MMC0_DAT0_PUTYPESEL_SHIFT)|
+                   (1 << CONTROL_CONF_MMC0_DAT0_CONF_MMC0_DAT0_RXACTIVE_SHIFT);
+
+    HWREG(SOC_CONTROL_REGS + CONTROL_CONF_MMC0_CLK) =
+                   (0 << CONTROL_CONF_MMC0_CLK_CONF_MMC0_CLK_MMODE_SHIFT)    |
+                   (0 << CONTROL_CONF_MMC0_CLK_CONF_MMC0_CLK_PUDEN_SHIFT)    |
+                   (1 << CONTROL_CONF_MMC0_CLK_CONF_MMC0_CLK_PUTYPESEL_SHIFT)|
+                   (1 << CONTROL_CONF_MMC0_CLK_CONF_MMC0_CLK_RXACTIVE_SHIFT);
+
+    HWREG(SOC_CONTROL_REGS + CONTROL_CONF_MMC0_CMD) =
+                   (0 << CONTROL_CONF_MMC0_CMD_CONF_MMC0_CMD_MMODE_SHIFT)    |
+                   (0 << CONTROL_CONF_MMC0_CMD_CONF_MMC0_CMD_PUDEN_SHIFT)    |
+                   (1 << CONTROL_CONF_MMC0_CMD_CONF_MMC0_CMD_PUTYPESEL_SHIFT)|
+                   (1 << CONTROL_CONF_MMC0_CMD_CONF_MMC0_CMD_RXACTIVE_SHIFT);
+
+     HWREG(SOC_CONTROL_REGS + CONTROL_CONF_SPI0_CS1) =
+                   (5 << CONTROL_CONF_SPI0_CS1_CONF_SPI0_CS1_MMODE_SHIFT)    |
+                   (0 << CONTROL_CONF_SPI0_CS1_CONF_SPI0_CS1_PUDEN_SHIFT)    |
+                   (1 << CONTROL_CONF_SPI0_CS1_CONF_SPI0_CS1_PUTYPESEL_SHIFT)|
+                   (1 << CONTROL_CONF_SPI0_CS1_CONF_SPI0_CS1_RXACTIVE_SHIFT);
+}
+
+/**
+ * \brief   This function will configure the required clocks for HS MMC/SD instance.
+ *
+ * \return  None.
+ *
+ */
+void HSMMCSDModuleClkConfig(void)
+{
+    HWREG(SOC_PRCM_REGS + CM_PER_MMC0_CLKCTRL) |=
+                             CM_PER_MMC0_CLKCTRL_MODULEMODE_ENABLE;
+
+    while((HWREG(SOC_PRCM_REGS + CM_PER_MMC0_CLKCTRL) &
+      CM_PER_MMC0_CLKCTRL_MODULEMODE) != CM_PER_MMC0_CLKCTRL_MODULEMODE_ENABLE);
 }
 
 static unsigned int edmaVersionGet(void)

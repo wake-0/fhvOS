@@ -8,6 +8,8 @@
 #ifndef HAL_EDMA_HAL_EDMA_H_
 #define HAL_EDMA_HAL_EDMA_H_
 
+#include "edma.h"
+
 #define		EDMA_REVID_AM335X                  (0x02u)
 #define 	SOC_EDMA3_NUM_DMACH                (64)
 #define 	SOC_EDMA3_NUM_QDMACH 			   (8)
@@ -27,5 +29,7 @@ extern void EDMAModuleClkConfig(void);
 extern void EDMA3Init(unsigned int baseAdd, unsigned int queNum);
 extern void EDMA3AINTCConfigure(void);
 extern unsigned int EDMA3RequestChannel(unsigned int baseAdd, unsigned int chType, unsigned int chNum, unsigned int tccNum, unsigned int evtQNum);
+extern void EDMAPinMuxSetup(void);
+extern void HSMMCSDModuleClkConfig(void);
 
 #endif /* HAL_EDMA_HAL_EDMA_H_ */
