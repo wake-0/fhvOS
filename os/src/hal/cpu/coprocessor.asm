@@ -25,7 +25,7 @@
 	.global MMUSetTranslationTableControlRegister
 	.global MMUReadSystemControlRegister
 	.global MMUReadTTBCR
-	.global MMUWriteContextIdRegister
+	.global MMUChangeTTBR0andContextId
 	.global MMUReadContextIdRegister
 	.global InstructionCacheEnable
 	.global InstructionCacheDisable
@@ -202,9 +202,32 @@ MMUReadKernelTableAddress:
    	MOV 	PC, LR
 
 
-; see p. B4-1549
-MMUWriteContextIdRegister:
-	MCR 	p15, #0, R0, c13, c0, #1
+; see p. B4-1549, p. B4-1387
+MMUChangeTTBR0andContextId:
+	; read TTBCR register value into R!
+	MOV		R2, #0
+	MRC 	p15, #0, R2, c2, c0, #2
+	; disable use of TTBR0 during ASID change
+	; by doing so it is avoided that the old ASID being associated
+	; with translation table walks from the new translation tables
+	; or the new ASID being associated with translation table walks
+	; from the old translation tables
+	; this is done setting TTBCR.PD0 = 1 (bit 4)
+	ORR		R2, R2, #0x10
+	MCR 	p15, #0, R2, c2, c0, #2
+	ISB
+	; change asid to new value
+	MCR 	p15, #0, R1, c13, c0, #1
+	; change process L1 page table base address
+	MCR 	p15, #0, R0, C2, C0, #0
+	ISB
+	; enable usage of TTBR0 again
+	MOV		R2, #0
+	MRC 	p15, #0, R2, c2, c0, #2
+	MOV 	R3, #0xFFEF
+	AND		R2, R2, R3
+	MCR 	p15, #0, R2, C2, C0, #0
+	; return
 	MOV		PC, LR
 
 ; see p. B4-1549

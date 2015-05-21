@@ -22,6 +22,6 @@ extern void MMUReadProcessTableAddress(void);
 extern void MMUReadKernelTableAddress(void);
 extern void MMUReadSystemControlRegister(void);
 extern void MMUReadTTBCR(void);
-extern void MMUWriteContextIdRegister(void);
+extern void MMUChangeTTBR0andContextId(unsigned int baseAddressTTBR0, unsigned int contextId);
 extern void MMUReadContextIdRegister(void);
 extern void CleanDataCache(void);
