@@ -93,7 +93,7 @@ static unsigned int mmuCreateL1PageTableEntry(firstLevelDescriptor_t PTE);
 static unsigned int mmuCreateL2PageTableEntry(secondLevelDescriptor_t PTE);
 static address_t mmuGetFreePageFrameForPageTable(unsigned int pageFramesToReserve);
 static void mmuMapDirectRegionToProcesPageTable(memoryRegionPointer_t memoryRegion, pageTablePointer_t table);
-
+static void mmuFreeSmallPage(unsigned int l2PageTableEntry);
 
 
 static pageAddressPointer_t mmuCreatePageTable(unsigned int pageTableType);
@@ -294,8 +294,8 @@ int MMUSwitchToProcess(process_t* process)
  */
 int MMUInitProcess(process_t* process)
 {
-	pageTablePointer_t l1PageTable = mmuCreatePageTable(L1_PAGE_TABLE);
-	memoryRegionPointer_t region = MemoryManagerGetRegion(BOOT_ROM_EXCEPTIONS_REGION);
+	pageTablePointer_t l1PageTable 	= mmuCreatePageTable(L1_PAGE_TABLE);
+	memoryRegionPointer_t region 	= MemoryManagerGetRegion(BOOT_ROM_EXCEPTIONS_REGION);
 	mmuMapDirectRegionToProcesPageTable(region, l1PageTable);
 	process->pageTableL1 = l1PageTable;
 	return MMU_OK;
@@ -312,11 +312,26 @@ int MMUFreeAllPageFramesOfProcess(process_t* process)
 
 	for(numberOfPageTableEntry = 0; numberOfPageTableEntry < L1_PAGE_TABLE_ENTRIES; numberOfPageTableEntry++)
 	{
-		pageTableEntry = (unsigned int)*(process->pageTableL1 + numberOfPageTableEntry);
+		pageTableEntry = (unsigned int)(*(process->pageTableL1 + numberOfPageTableEntry));
+		unsigned int l1DescriptorType = pageTableEntry & DESCRIPTOR_MASK;
 
-		pageTablePointer_t l2PageTable = (pageTablePointer_t)(pageTableEntry & UPPER_22_BITS_MASK);
-		mmuFreeAllPageFramesOfL2PageTable(l2PageTable);
+		switch(l1DescriptorType)
+		{
+			case DESCRIPTOR_TYPE_FAULT_ENTRY:
+				continue;
+			case DESCRIPTOR_TYPE_SECTION:
+				// first section is direct mapping for rom exception handler
+				continue;
+			case DESCRIPTOR_TYPE_PAGE_TABLE:
+				// break, this is correct
+				break;
+		}
+
+		pageTablePointer_t l2PageTableBaseAddress = (pageTablePointer_t)(pageTableEntry & UPPER_22_BITS_MASK);
+		mmuFreeAllPageFramesOfL2PageTable(l2PageTableBaseAddress);
 	}
+
+	KernelDebug("MMU finished freeing process page tables of pid=%d\n", process->id);
 
 	return MMU_OK;
 }
@@ -331,11 +346,32 @@ static void mmuFreeAllPageFramesOfL2PageTable(pageTablePointer_t l2PageTable)
 
 	for(pageTableEntry = 0; pageTableEntry < L2_PAGE_TABLE_ENTRIES; pageTableEntry++)
 	{
-		unsigned int l2PageTableEntry = (unsigned int)*(l2PageTable + pageTableEntry);
-		unsigned int smallPageBaseAddress = l2PageTableEntry & UPPER_20_BITS_MASK;
-		unsigned int pageFrameNumber = (smallPageBaseAddress - PAGE_TABLES_START_ADDRESS) / PAGE_SIZE_4KB;
-		mmuSetPageFrameUsageStatus(pageFrameNumber, SET_PAGE_FRAME_IS_FREE);
+		unsigned int l2PageTableEntry 		= (unsigned int)(*(l2PageTable + pageTableEntry));
+		unsigned int l2DescriptorType 		= l2PageTableEntry & DESCRIPTOR_MASK;
+
+		switch(l2DescriptorType)
+		{
+			case DESCRIPTOR_TYPE_FAULT_ENTRY:
+				continue;
+			case DESCRIPTOR_TYPE_LARGE_PAGE:
+				// implement if needed
+				break;
+			case DESCRIPTOR_TYPE_SMALL_PAGE:
+				mmuFreeSmallPage(l2PageTableEntry);
+				break;
+		}
 	}
+}
+
+
+/**
+ * \brief	This function frees a smal page in the page frame bitsmap.
+ */
+static void mmuFreeSmallPage(unsigned int l2PageTableEntry)
+{
+	unsigned int smallPageBaseAddress 	= l2PageTableEntry & UPPER_20_BITS_MASK;
+	unsigned int pageFrameNumber 		= (smallPageBaseAddress - PAGE_TABLES_START_ADDRESS) / PAGE_SIZE_4KB;
+	mmuSetPageFrameUsageStatus(pageFrameNumber, SET_PAGE_FRAME_IS_FREE);
 }
 
 

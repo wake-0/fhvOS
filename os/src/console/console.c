@@ -8,12 +8,13 @@
 #include "console.h"
 
 #include <stdio.h>
+#include <ctype.h>
 #include "../kernel/kernel.h"
 #include "../systemapi/systemcalls.h"
 
 #define CONSOLE_SCREEN_HEIGHT_LINES			(40)
 #define CONSOLE_MAX_COMMAND_LENGTH			(255)
-#define CONSOLE_SCANF_FORMAT				"%254[^\0]s"
+#define CONSOLE_SCANF_FORMAT				"%254[^\r]"
 
 static boolean_t initialized = false;
 static device_t consoleDevice;
@@ -22,8 +23,9 @@ static void printWelcomeMessage();
 static void printOSLogo();
 static void printPrompt();
 static boolean_t acceptChar(char ch);
+static void clearCommand(char*);
 
-static char ungetBuf;
+int unchar[2] = { -1, -1 };
 
 void ConsoleInit(device_t device)
 {
@@ -33,8 +35,6 @@ void ConsoleInit(device_t device)
 
 	DeviceManagerOpen(consoleDevice);
 
-	ungetBuf = 0;
-
 	initialized = true;
 
 	ConsoleClear();
@@ -42,9 +42,8 @@ void ConsoleInit(device_t device)
 
 void ConsoleProcess(int argc, char** argv)
 {
-
 	if (initialized == false) {
-		// TODO Send error message to the kernel (not initialized)
+		KernelError("Console not initialized before started as process\n");
 		return;
 	}
 
@@ -55,27 +54,37 @@ void ConsoleProcess(int argc, char** argv)
 	char command[CONSOLE_MAX_COMMAND_LENGTH];
 	while(TRUE)
 	{
-		memset(&command[0], 0, CONSOLE_MAX_COMMAND_LENGTH);
+		memset(&command[0], '\0', CONSOLE_MAX_COMMAND_LENGTH);
 
 		printPrompt();		// Prompt: root@fhvos#
 
 		// Read the command using scanf (Overriden through fgetc and ungetc)
-		scanf(CONSOLE_SCANF_FORMAT, command);
-		KernelDebug("Console: Input command received: %s\n", command);
+		int res = scanf(CONSOLE_SCANF_FORMAT, command);
+		clearCommand(command); // Re-ensure that no invalid characters are parsed
 
-		// System call
-		systemCallMessage_t message;
-		message.systemCallNumber = SYSTEM_CALL_EXEC;
-		message.messageArgs.forwardArg = CONSOLE_MAX_COMMAND_LENGTH;
-		message.messageArgs.buf = command;
+		int cLen = strlen(command);
+		if (res <= 0 || cLen <= 0)
+		{
+			KernelDebug("Empty command received\n");
+		}
+		else
+		{
+			KernelDebug("Console: Input command received (length=%i): %s\n", cLen, command);
 
-		SystemCall(&message);
+			// System call
+			systemCallMessage_t message;
+			message.systemCallNumber = SYSTEM_CALL_EXEC;
+			message.messageArgs.forwardArg = CONSOLE_MAX_COMMAND_LENGTH;
+			message.messageArgs.buf = command;
+
+			SystemCall(&message);
+		}
 	}
 }
 
 void printWelcomeMessage()
 {
-	DeviceManagerWrite(consoleDevice, "Welcome root...\r\nYou are logged in\r\n", 40); // TODO Extract this as a constant
+	DeviceManagerWrite(consoleDevice, "Welcome root...\r\nYou are logged in\r\n\r\n", 38); // TODO Extract this as a constant
 }
 void printOSLogo()
 {
@@ -83,10 +92,10 @@ void printOSLogo()
 	KernelVersion(&major, &minor, &patch);
 	char versionLine[43];
 
-	DeviceManagerWrite(consoleDevice, "                            @'        \r\n", 42);
-	DeviceManagerWrite(consoleDevice, "                           @@@'       \r\n", 42);
-	DeviceManagerWrite(consoleDevice, "                          @WA@@'      \r\n", 42);
-	DeviceManagerWrite(consoleDevice, "                         @@@@@@@;     \r\n", 42);
+	DeviceManagerWrite(consoleDevice, "                            @'        \r\n", 40);
+	DeviceManagerWrite(consoleDevice, "                           @@@'       \r\n", 40);
+	DeviceManagerWrite(consoleDevice, "                          @WA@@'      \r\n", 40);
+	DeviceManagerWrite(consoleDevice, "                         @@@@@@@;     \r\n", 40);
 	DeviceManagerWrite(consoleDevice, "                        @@@AS@@@@'               __           __       \r\n", 75);
 	DeviceManagerWrite(consoleDevice, "                         @@@@@PR@@'             /\\ \\         / /\\      \r\n", 75);
 	DeviceManagerWrite(consoleDevice, "                         @@@<3@@@@@'           /  \\ \\       / /  \\     \r\n", 75);
@@ -99,16 +108,16 @@ void printOSLogo()
 	DeviceManagerWrite(consoleDevice, " :   ;:  :   :            @@@WA@@@      / / /____\\/ / \\ \\/___/ /       \r\n", 75);
 	DeviceManagerWrite(consoleDevice, " FHV OS                  @@@@@@@@       \\/_________/   \\_____\\/        \r\n", 75);
 
-	// TODO If a version number's length is >1 we'll face a formatting issue :)
+	// FIXME If a version number's length is >1 we'll face a formatting issue :)
 	sprintf(&versionLine[0], " Kernel v%i.%i.%i            @@@@@@      \r\n", major, minor, patch);
-	DeviceManagerWrite(consoleDevice, &versionLine[0], 42);
+	DeviceManagerWrite(consoleDevice, &versionLine[0], 40);
 
-	DeviceManagerWrite(consoleDevice, "                           @<3@       \r\n", 42);
-	DeviceManagerWrite(consoleDevice, "                            @@        \r\n", 42);
+	DeviceManagerWrite(consoleDevice, "                           @<3@       \r\n", 40);
+	DeviceManagerWrite(consoleDevice, "                            @@        \r\n", 40);
 }
 void printPrompt()
 {
-	DeviceManagerWrite(consoleDevice, "\r\nroot@fhv-os# ", 15);
+	DeviceManagerWrite(consoleDevice, "root@fhv-os# ", 13);
 }
 
 void ConsoleClear()
@@ -119,6 +128,58 @@ void ConsoleClear()
 	DeviceManagerWrite(consoleDevice, escCommand, 1);		// ESC command
 	DeviceManagerWrite(consoleDevice, "[H", 2);     // Cursor to home command
 }
+
+static boolean_t acceptChar(char ch)
+{
+	switch (ch)
+	{
+	case 'a' ... 'z':
+	case 'A' ... 'Z':
+	case '0' ... '9':
+	case '/':
+	case ' ':
+	case '*':
+	case '|':
+	case '"':
+	case '.':
+	case '!':
+	case '§':
+	case '$':
+	case '%':
+	case '&':
+	case '(':
+	case ')':
+	case '=':
+	case '-':
+	case '_':
+	case '\\':
+	case '<':
+	case '>':
+		return true;
+	}
+	return false;
+}
+
+static void clearCommand(char* command)
+{
+	// Trim leading/trailing whitespaces
+	char* curr = command;
+	if (acceptChar(*curr) == FALSE) *curr = ' ';
+	int l = strlen(command);
+
+    while(isspace(curr[l - 1])) curr[--l] = 0;
+    while(*curr && isspace(*curr)) ++curr, --l;
+
+    memmove(command, curr, l + 1);
+}
+
+/*
+ * Override for printf and scanf family
+ * This is not a clean retargeting but works for the moment.
+ */
+
+FILE __stdout =     { 0 };
+FILE __stdin =      { 1 };
 
 int fputc(int ch, FILE *f)
 {
@@ -146,48 +207,40 @@ int fputs(const char *s, FILE *f)
 	return 0;
 }
 
-int fgetc(FILE *p)
+int fgetc(FILE *f)
 {
-	// TODO Add a switch case over *p (only if we read from stdin we should run the following code)
-	if (ungetBuf != 0)
-	{
-		char temp = ungetBuf;
-		ungetBuf = 0;
-		return temp;
-	}
-	char buf = 0;
-	do {
-		DeviceManagerRead(consoleDevice, &buf, 1);
-		if (buf == '\r' || buf == '\0')
-		{
-			DeviceManagerWrite(consoleDevice, "\r\n", 2);
-			return '\0';
-		}
-	} while (acceptChar(buf) == false);
-	// Output the character
-	DeviceManagerWrite(consoleDevice, &buf, 1);
-	return buf;
+    int c;
+
+    if (unchar[f->fd] == -1)
+    {
+    	char buf;
+        do {
+    		DeviceManagerRead(consoleDevice, &buf, 1);
+    		if (buf == '\r' || buf == '\0')
+    		{
+    			DeviceManagerWrite(consoleDevice, "\r\n", 2);
+    			f->buf = 0;
+    			f->pos = 0;
+    			return EOF;
+    		}
+    	} while (acceptChar(buf) == false);
+    	DeviceManagerWrite(consoleDevice, &buf, 1);
+    	f->pos++;
+        c = buf;
+    }
+    else
+    {
+        c = unchar[f->fd];
+        unchar[f->fd] = -1;
+    }
+    return c;
 }
 
-int ungetc(int c, FILE *p)
+int ungetc(int c, FILE *f)
 {
-	return (ungetBuf = c);
-}
-
-static boolean_t acceptChar(char ch)
-{
-	switch (ch)
-	{
-	case 'a' ... 'z':
-	case 'A' ... 'Z':
-	case '0' ... '9':
-	case '/':
-	case ' ':
-	case '*':
-	case '|':
-	case '"':
-	case '.':
-		return true;
-	}
-	return false;
+    unsigned char uc = c;
+    unchar[f->fd] = (int )uc;
+    if (uc == '\r')
+    	return EOF;
+    return (int )uc;
 }

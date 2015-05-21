@@ -111,6 +111,7 @@ void KernelExecute(char* inputCommand)
 
 int	KernelInfo(const char *format, ...)
 {
+#if	KERNEL_INFO_OUTPUT
 	va_list arg;
 	va_start (arg, format);
 	int res = 0;
@@ -119,9 +120,14 @@ int	KernelInfo(const char *format, ...)
 	va_end(arg);
 
 	return res;
+#else
+	return 0;
+#endif
 }
+
 int	KernelDebug(const char *format, ...)
 {
+#if KERNEL_DEBUG_OUTPUT
 	va_list arg;
 	va_start (arg, format);
 	int res = 0;
@@ -130,10 +136,14 @@ int	KernelDebug(const char *format, ...)
 	va_end(arg);
 
 	return res;
+#else
+	return 0;
+#endif
 }
+
 int	KernelError(const char *format, ...)
 {
-
+#if KERNEL_ERROR_OUTPUT
 	va_list arg;
 	va_start (arg, format);
 	int res = 0;
@@ -142,4 +152,7 @@ int	KernelError(const char *format, ...)
 	va_end(arg);
 
 	return res;
+#else
+	return 0;
+#endif
 }
