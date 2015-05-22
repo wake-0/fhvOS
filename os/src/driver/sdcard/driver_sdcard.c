@@ -9,7 +9,7 @@
 #include "mmcsd_proto.h"
 
 #include "../../hal/edma/hal_edma.h"
-#include "../../hal/am335x/hs_mmcsd.h"
+#include "../../hal/edma/hs_mmcsd.h"
 #include "../../hal/am335x/soc_AM335x.h"
 #include "../../hal/am335x/hw_edma3cc.h"
 
@@ -33,6 +33,7 @@ volatile unsigned int errFlag = 0;
 #define EDMA3_TRIG_MODE_EVENT 		(2u)
 #define EDMA3_TRIG_MODE_MANUAL 		(0u)
 #define EDMA3_TRIG_MODE_QDMA 		(1u)
+#define MMCSD_RX_EDMA_CHAN (EDMA3_CHA_MMCSD0_RX)
 
 static void EDMAInit(void);
 static void HSMMCSDControllerSetup(void);
@@ -413,42 +414,6 @@ static void HSMMCSDRxDmaConfig(void *ptr, unsigned int blkSize,
 	/* Enable the transfer */
 	EDMA3EnableTransfer(EDMA_INST_BASE, MMCSD_RX_EDMA_CHAN,
 			EDMA3_TRIG_MODE_EVENT);
-}
-
-unsigned int EDMA3EnableTransfer(unsigned int baseAdd, unsigned int chNum,
-		unsigned int trigMode) {
-	unsigned int retVal = FALSE;
-	switch (trigMode) {
-	case EDMA3_TRIG_MODE_MANUAL:
-		if (chNum < SOC_EDMA3_NUM_DMACH) {
-			EDMA3SetEvt(baseAdd, chNum);
-			retVal = TRUE;
-		}
-		break;
-
-	case EDMA3_TRIG_MODE_QDMA:
-		if (chNum < SOC_EDMA3_NUM_QDMACH) {
-			EDMA3EnableQdmaEvt(baseAdd, chNum);
-			retVal = TRUE;
-		}
-		break;
-
-	case EDMA3_TRIG_MODE_EVENT:
-		if (chNum < SOC_EDMA3_NUM_DMACH) {
-			/*clear SECR & EMCR to clean any previous NULL request    */
-			EDMA3ClrMissEvt(baseAdd, chNum);
-
-			/* Set EESR to enable event                               */
-			EDMA3EnableDmaEvt(baseAdd, chNum);
-			retVal = TRUE;
-		}
-		break;
-
-	default:
-		retVal = FALSE;
-		break;
-	}
-	return retVal;
 }
 
 static unsigned int MMCSDCtrlInit(mmcsdCtrlInfo *ctrl) {
