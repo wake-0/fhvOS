@@ -39,14 +39,16 @@ static void HSMMCSDControllerSetup(void);
 static unsigned int HSMMCSDControllerInit(mmcsdCtrlInfo *ctrl);
 static unsigned int HSMMCSDCardPresent(mmcsdCtrlInfo *ctrl);
 static void HSMMCSDIntEnable(mmcsdCtrlInfo *ctrl);
-static void HSMMCSDXferSetup(mmcsdCtrlInfo *ctrl, unsigned char rwFlag,
-		void *ptr, unsigned int blkSize, unsigned int nBlks);
+static void HSMMCSDXferSetup(mmcsdCtrlInfo *ctrl, unsigned char rwFlag, void *ptr, unsigned int blkSize, unsigned int nBlks);
 static int HSMMCSDBusFreqConfig(mmcsdCtrlInfo *ctrl, unsigned int busFreq);
 static void HSMMCSDBusWidthConfig(mmcsdCtrlInfo *ctrl, unsigned int busWidth);
 static unsigned int HSMMCSDCmdSend(mmcsdCtrlInfo *ctrl, mmcsdCmd *c);
 static unsigned int HSMMCSDCmdStatusGet(mmcsdCtrlInfo *ctrl);
 static unsigned int HSMMCSDXferStatusGet(mmcsdCtrlInfo *ctrl);
 static void HSMMCSDRxDmaConfig(void *ptr, unsigned int blkSize, unsigned int nblks);
+static unsigned int MMCSDCtrlInit(mmcsdCtrlInfo *ctrl);
+static void MMCSDIntEnable(mmcsdCtrlInfo *ctrl);
+static void HSMMCSDFsMount(unsigned int driveNum, void *ptr);
 
 /* EDMA callback function array */
 static void (*cb_Fxn[EDMA3_NUM_TCC])(unsigned int tcc, unsigned int status);
@@ -64,26 +66,48 @@ int SDCardInit(uint16_t id) {
 	EDMAPinMuxSetup();
 	HSMMCSDModuleClkConfig();
 	HSMMCSDControllerSetup();
+	MMCSDCtrlInit(&ctrlInfo);
+	MMCSDIntEnable(&ctrlInfo);
 
 	return DRIVER_OK;
-}
-
-static void EDMAInit(void) {
-	// Initialization of EDMA3
-	EDMA3Init(EDMA_INST_BASE, EVT_QUEUE_NUM);
-	// Configuring the AINTC to receive EDMA3 interrupts.
-	EDMA3AINTCConfigure();
-
-	// Request DMA Channel and TCC for MMCSD Receive
-	EDMA3RequestChannel(EDMA_INST_BASE, EDMA3_CHANNEL_TYPE_DMA,
-			MMCSD_RX_EDMA_CHAN, MMCSD_RX_EDMA_CHAN, EVT_QUEUE_NUM);
-
-	// Registering Callback Function for RX
-	cb_Fxn[MMCSD_RX_EDMA_CHAN] = &callback;
 }
 
 int SDCardOpen(uint16_t id) {
-	return DRIVER_OK;
+	volatile unsigned int i = 0;
+	volatile unsigned int initFlg = 1;
+
+	while (1) {
+		if ((HSMMCSDCardPresent(&ctrlInfo)) == 1) {
+			if (initFlg) {
+				HSMMCSDFsMount(0, &sdCard);
+				initFlg = 0;
+			}
+			return 1;
+		} else {
+			i = (i + 1) & 0xFFF;
+
+			if (i % 20 == 1) {
+				// TODO: check what should be done, when no SD card is insert
+				// printf("FS: Please insert the card \n\r");
+			}
+
+			if (initFlg != 1) {
+				/* Reinitialize all the state variables */
+				callbackOccured = 0;
+				xferCompFlag = 0;
+				dataTimeout = 0;
+				cmdCompFlag = 0;
+				cmdTimeout = 0;
+
+				/* Initialize the MMCSD controller */
+				MMCSDCtrlInit(&ctrlInfo);
+
+				MMCSDIntEnable(&ctrlInfo);
+			}
+
+			initFlg = 1;
+		}
+	}
 }
 
 int SDCardClose(uint16_t id) {
@@ -101,6 +125,20 @@ int SDCardRead(uint16_t id, char* buf, uint16_t len) {
 int SDCardIoctl(uint16_t id, uint16_t cmd, uint8_t mode, char* buf,
 		uint16_t len) {
 	return DRIVER_OK;
+}
+
+static void EDMAInit(void) {
+	// Initialization of EDMA3
+	EDMA3Init(EDMA_INST_BASE, EVT_QUEUE_NUM);
+	// Configuring the AINTC to receive EDMA3 interrupts.
+	EDMA3AINTCConfigure();
+
+	// Request DMA Channel and TCC for MMCSD Receive
+	EDMA3RequestChannel(EDMA_INST_BASE, EDMA3_CHANNEL_TYPE_DMA,
+	MMCSD_RX_EDMA_CHAN, MMCSD_RX_EDMA_CHAN, EVT_QUEUE_NUM);
+
+	// Registering Callback Function for RX
+	cb_Fxn[MMCSD_RX_EDMA_CHAN] = &callback;
 }
 
 /*
@@ -303,119 +341,132 @@ static unsigned int HSMMCSDCmdStatusGet(mmcsdCtrlInfo *ctrl) {
 	return status;
 }
 
-static unsigned int HSMMCSDXferStatusGet(mmcsdCtrlInfo *ctrl)
-{
-    unsigned int status = 0;
-    volatile unsigned int timeOut = 0xFFFF;
+static unsigned int HSMMCSDXferStatusGet(mmcsdCtrlInfo *ctrl) {
+	unsigned int status = 0;
+	volatile unsigned int timeOut = 0xFFFF;
 
-    while ((xferCompFlag == 0) && (dataTimeout == 0));
+	while ((xferCompFlag == 0) && (dataTimeout == 0))
+		;
 
-    if (xferCompFlag)
-    {
-        status = 1;
-        xferCompFlag = 0;
-    }
+	if (xferCompFlag) {
+		status = 1;
+		xferCompFlag = 0;
+	}
 
-    if (dataTimeout)
-    {
-        status = 0;
-        dataTimeout = 0;
-    }
+	if (dataTimeout) {
+		status = 0;
+		dataTimeout = 0;
+	}
 
-    /* Also, poll for the callback */
-    if (HWREG(ctrl->memBase + MMCHS_CMD) & MMCHS_CMD_DP)
-    {
-        while(callbackOccured == 0 && ((timeOut--) != 0));
-        callbackOccured = 0;
+	/* Also, poll for the callback */
+	if (HWREG(ctrl->memBase + MMCHS_CMD) & MMCHS_CMD_DP) {
+		while (callbackOccured == 0 && ((timeOut--) != 0))
+			;
+		callbackOccured = 0;
 
-        if(timeOut == 0)
-        {
-            status = 0;
-        }
-    }
+		if (timeOut == 0) {
+			status = 0;
+		}
+	}
 
-    ctrlInfo.dmaEnable = 0;
+	ctrlInfo.dmaEnable = 0;
 
-    return status;
+	return status;
 }
 
-static void HSMMCSDRxDmaConfig(void *ptr, unsigned int blkSize, unsigned int nblks)
-{
-    EDMA3CCPaRAMEntry paramSet;
+static void HSMMCSDRxDmaConfig(void *ptr, unsigned int blkSize,
+		unsigned int nblks) {
+	EDMA3CCPaRAMEntry paramSet;
 
-    paramSet.srcAddr    = ctrlInfo.memBase + MMCHS_DATA;
-    paramSet.destAddr   = (unsigned int)ptr;
-    paramSet.srcBIdx    = 0;
-    paramSet.srcCIdx    = 0;
-    paramSet.destBIdx   = 4;
-    paramSet.destCIdx   = (unsigned short)blkSize;
-    paramSet.aCnt       = 0x4;
-    paramSet.bCnt       = (unsigned short)blkSize/4;
-    paramSet.cCnt       = (unsigned short)nblks;
-    paramSet.bCntReload = 0x0;
-    paramSet.linkAddr   = 0xffff;
-    paramSet.opt        = 0;
+	paramSet.srcAddr = ctrlInfo.memBase + MMCHS_DATA;
+	paramSet.destAddr = (unsigned int) ptr;
+	paramSet.srcBIdx = 0;
+	paramSet.srcCIdx = 0;
+	paramSet.destBIdx = 4;
+	paramSet.destCIdx = (unsigned short) blkSize;
+	paramSet.aCnt = 0x4;
+	paramSet.bCnt = (unsigned short) blkSize / 4;
+	paramSet.cCnt = (unsigned short) nblks;
+	paramSet.bCntReload = 0x0;
+	paramSet.linkAddr = 0xffff;
+	paramSet.opt = 0;
 
-    /* Set OPT */
-    paramSet.opt |= ((MMCSD_RX_EDMA_CHAN << EDMA3CC_OPT_TCC_SHIFT) & EDMA3CC_OPT_TCC);
+	/* Set OPT */
+	paramSet.opt |= ((MMCSD_RX_EDMA_CHAN << EDMA3CC_OPT_TCC_SHIFT)
+			& EDMA3CC_OPT_TCC);
 
-    /* 1. Transmission complition interrupt enable */
-    paramSet.opt |= (1 << EDMA3CC_OPT_TCINTEN_SHIFT);
+	/* 1. Transmission complition interrupt enable */
+	paramSet.opt |= (1 << EDMA3CC_OPT_TCINTEN_SHIFT);
 
-    /* 2. Read FIFO : SRC Constant addr mode */
-    paramSet.opt |= (1 << 0);
+	/* 2. Read FIFO : SRC Constant addr mode */
+	paramSet.opt |= (1 << 0);
 
-    /* 3. SRC FIFO width is 32 bit */
-    paramSet.opt |= (2 << 8);
+	/* 3. SRC FIFO width is 32 bit */
+	paramSet.opt |= (2 << 8);
 
-    /* 4.  AB-Sync mode */
-    paramSet.opt |= (1 << 2);
+	/* 4.  AB-Sync mode */
+	paramSet.opt |= (1 << 2);
 
-    /* configure PaRAM Set */
-    EDMA3SetPaRAM(EDMA_INST_BASE, MMCSD_RX_EDMA_CHAN, &paramSet);
+	/* configure PaRAM Set */
+	EDMA3SetPaRAM(EDMA_INST_BASE, MMCSD_RX_EDMA_CHAN, &paramSet);
 
-    /* Enable the transfer */
-    EDMA3EnableTransfer(EDMA_INST_BASE, MMCSD_RX_EDMA_CHAN, EDMA3_TRIG_MODE_EVENT);
+	/* Enable the transfer */
+	EDMA3EnableTransfer(EDMA_INST_BASE, MMCSD_RX_EDMA_CHAN,
+			EDMA3_TRIG_MODE_EVENT);
 }
 
-unsigned int EDMA3EnableTransfer(unsigned int baseAdd,
-                                 unsigned int chNum,
-                                 unsigned int trigMode)
+unsigned int EDMA3EnableTransfer(unsigned int baseAdd, unsigned int chNum,
+		unsigned int trigMode) {
+	unsigned int retVal = FALSE;
+	switch (trigMode) {
+	case EDMA3_TRIG_MODE_MANUAL:
+		if (chNum < SOC_EDMA3_NUM_DMACH) {
+			EDMA3SetEvt(baseAdd, chNum);
+			retVal = TRUE;
+		}
+		break;
+
+	case EDMA3_TRIG_MODE_QDMA:
+		if (chNum < SOC_EDMA3_NUM_QDMACH) {
+			EDMA3EnableQdmaEvt(baseAdd, chNum);
+			retVal = TRUE;
+		}
+		break;
+
+	case EDMA3_TRIG_MODE_EVENT:
+		if (chNum < SOC_EDMA3_NUM_DMACH) {
+			/*clear SECR & EMCR to clean any previous NULL request    */
+			EDMA3ClrMissEvt(baseAdd, chNum);
+
+			/* Set EESR to enable event                               */
+			EDMA3EnableDmaEvt(baseAdd, chNum);
+			retVal = TRUE;
+		}
+		break;
+
+	default:
+		retVal = FALSE;
+		break;
+	}
+	return retVal;
+}
+
+static unsigned int MMCSDCtrlInit(mmcsdCtrlInfo *ctrl) {
+	return ctrl->ctrlInit(ctrl);
+}
+
+static void MMCSDIntEnable(mmcsdCtrlInfo *ctrl) {
+	ctrl->intrEnable(ctrl);
+
+	return;
+}
+
+static void HSMMCSDFsMount(unsigned int driveNum, void *ptr)
 {
-    unsigned int retVal = FALSE;
-    switch (trigMode)
-    {
-        case EDMA3_TRIG_MODE_MANUAL :
-            if (chNum < SOC_EDMA3_NUM_DMACH)
-            {
-                EDMA3SetEvt(baseAdd, chNum);
-                retVal = TRUE;
-            }
-           break;
-
-        case EDMA3_TRIG_MODE_QDMA :
-            if (chNum < SOC_EDMA3_NUM_QDMACH)
-            {
-                EDMA3EnableQdmaEvt(baseAdd, chNum);
-                retVal = TRUE;
-            }
-        break;
-
-        case EDMA3_TRIG_MODE_EVENT :
-            if (chNum < SOC_EDMA3_NUM_DMACH)
-            {
-                /*clear SECR & EMCR to clean any previous NULL request    */
-                EDMA3ClrMissEvt(baseAdd, chNum);
-
-                /* Set EESR to enable event                               */
-                EDMA3EnableDmaEvt(baseAdd, chNum);
-                retVal = TRUE;
-            }
-        break;
-
-        default :
-            retVal = FALSE;
-        break;
-    }
-    return retVal;
+	/*
+    f_mount(driveNum, &g_sFatFs);
+    fat_devices[driveNum].dev = ptr;
+    fat_devices[driveNum].fs = &g_sFatFs;
+    fat_devices[driveNum].initDone = 0;
+    */
 }
