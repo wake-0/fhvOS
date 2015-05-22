@@ -13,6 +13,7 @@
 #include "../led/driver_led.h"
 #include "../uart/driver_uart.h"
 #include "../timer/driver_timer.h"
+#include "../sdcard/driver_sdcard.h"
 
 #define MAX_DRIVER		255
 
@@ -61,6 +62,17 @@ void DriverManagerInit()
 	timer->read = &TimerDriverRead;
 	timer->ioctl = &TimerDriverIoctl;
 	drivers[DRIVER_ID_TIMER] = timer;
+
+	// SDCARD Driver
+
+	driver_t* sdcard = malloc(sizeof(driver_t));
+	sdcard->init = &SDCardInit;
+	sdcard->open = &SDCardOpen;
+	sdcard->close = &SDCardClose;
+	sdcard->write = &SDCardWrite;
+	sdcard->read = &SDCardRead;
+	sdcard->ioctl = &SDCardIoctl;
+	drivers[DRIVER_ID_SDCARD] = sdcard;
 }
 
 driver_t* DriverManagerGetDriver(driver_id_t driver_id)
