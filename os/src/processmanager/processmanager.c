@@ -40,8 +40,7 @@ void ProcessManagerStartProcess(char * processName, void(*funcPtr)(int, char ** 
 	process_t* ptr = SchedulerStartProcess(funcPtr); // TODO Add argc and argv
 	if (ptr == NULL)
 	{
-		// TODO Add return value
-		return;
+		return PROCESSMANAGER_FAILURE;
 	}
 
 	MMUInitProcess(ptr);
@@ -51,6 +50,8 @@ void ProcessManagerStartProcess(char * processName, void(*funcPtr)(int, char ** 
 	processes[processIdx].startTime = KernelGetUptime();
 
 	SchedulerUnblockProcess(ptr->id);
+
+	return ptr->id;
 }
 
 void ProcessManagerKillProcess(int processId)
