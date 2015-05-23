@@ -34,7 +34,7 @@ void ProcessManagerInit(void)
 }
 
 
-void ProcessManagerStartProcess(char * processName, void(*funcPtr)(int, char ** ))
+int ProcessManagerStartProcess(char * processName, void(*funcPtr)(int, char ** ))
 {
 	// Create new process info
 	process_t* ptr = SchedulerStartProcess(funcPtr); // TODO Add argc and argv
