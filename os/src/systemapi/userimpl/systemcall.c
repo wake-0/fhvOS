@@ -5,14 +5,12 @@
  *      Author: Marko
  */
 
-
-#include "systemcalls.h"
-#include "systemcallFunctions.h"
+#include "../includes/systemcall.h"
 
 #define SYSTEM_CALL_OK 1
 #define SYSTEM_CALL_FAILURE -1
 
-int SystemCall(systemCallMessage_t * message)
+int SystemCall(systemCallMessage_t* message)
 {
 	switch(message->systemCallNumber)
 	{

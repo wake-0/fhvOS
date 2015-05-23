@@ -5,8 +5,8 @@
  *      Author: Marko
  */
 
-#include "systemcallFunctions.h"
-#include "../kernel/kernel.h"
+#include "systemapi.h"
+#include "../../kernel/kernel.h"
 #include <stdio.h>
 /**
  * \brief	Handles system calls. This function is called by the assembler swi_handler function
@@ -15,13 +15,13 @@
 void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumber, context_t* context)
 {
 	KernelDebug("Systemcall number=%i\n", message->systemCallNumber);
-	KernelDebug("message arg=%s\n", message->messageArgs.buf);
+	KernelDebug("message arg=%s\n", message->messageArgs.callBuf);
 	switch (message->systemCallNumber)
 	{
 		case SYSTEM_CALL_EXEC:
 		{
 			// Disassemble argument package
-			char* command = message->messageArgs.buf;
+			char* command = message->messageArgs.callBuf;
 			KernelExecute(command);
 			break;
 		}

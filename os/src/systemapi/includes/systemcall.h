@@ -67,9 +67,10 @@
 
 typedef struct
 {
-	int forwardArg;
-	char* buf;
+	int callArg;
+	char* callBuf;
 	int* returnArg;
+	char* returnBuf;
 } messageArgs_t;
 
 typedef struct

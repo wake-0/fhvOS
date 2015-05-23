@@ -10,7 +10,8 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "../kernel/kernel.h"
-#include "../systemapi/systemcalls.h"
+
+#include "../systemapi/includes/system.h"
 
 #define CONSOLE_SCREEN_HEIGHT_LINES			(40)
 #define CONSOLE_MAX_COMMAND_LENGTH			(255)
@@ -71,13 +72,9 @@ void ConsoleProcess(int argc, char** argv)
 		{
 			KernelDebug("Console: Input command received (length=%i): %s\n", cLen, command);
 
-			// System call
-			systemCallMessage_t message;
-			message.systemCallNumber = SYSTEM_CALL_EXEC;
-			message.messageArgs.forwardArg = CONSOLE_MAX_COMMAND_LENGTH;
-			message.messageArgs.buf = command;
+			int pid = execute(command);
 
-			SystemCall(&message);
+			KernelDebug("Return value from execute(..) is=%d\n", pid);
 		}
 	}
 }
