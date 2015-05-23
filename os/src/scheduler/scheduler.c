@@ -30,6 +30,7 @@
 static processId_t runningProcess;
 static process_t processes[PROCESSES_MAX];
 static device_t timer;
+static boolean_t schedulingEnabled;
 
 /*
  * Internal functions
@@ -63,6 +64,8 @@ int SchedulerInit(void) {
 		processes[i].context = (context_t*) malloc(sizeof(context_t));
 		memset(processes[i].context, 0, sizeof(context_t));
 	}
+
+	schedulingEnabled = true;
 
 	// No process is running
 	runningProcess = INVALID_PROCESS_ID;
@@ -240,6 +243,16 @@ processId_t getNextProcessIdByState(processState_t state, int startId) {
 	return INVALID_PROCESS_ID;
 }
 
+void SchedulerDisableScheduling(void)
+{
+	schedulingEnabled = false;
+}
+
+void SchedulerEnableScheduling(void)
+{
+	schedulingEnabled = true;
+}
+
 void timerISR(address_t* context)
 {
 	KernelTick(TIME_SLICE); // TODO See Bug #66 (This should be extracted to another timer with 1ms)
@@ -249,7 +262,10 @@ void timerISR(address_t* context)
 	DeviceManagerWrite(timer, DISABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
 	DeviceManagerWrite(timer, CLEAR_INTERRUPT_STATUS, TIMER_IRQ_OVERFLOW);
 
-	SchedulerRunNextProcess(procContext);
+	if (schedulingEnabled)
+	{
+		SchedulerRunNextProcess(procContext);
+	}
 
 	DeviceManagerWrite(timer, ENABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
 	DeviceManagerOpen(timer);
