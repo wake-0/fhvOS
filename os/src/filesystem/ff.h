@@ -61,7 +61,7 @@
 /  Note that the files are always accessed in case insensitive. */
 
 
-#include "integer.h"
+#include "../platform/platform.h"
 #if defined(am335x)
 #include "soc_AM335x.h"
 #endif

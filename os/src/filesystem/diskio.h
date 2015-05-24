@@ -6,7 +6,7 @@
 
 #define _READONLY	0	/* 1: Read-only mode */
 
-#include "integer.h"
+#include "../platform/platform.h"
 
 
 /* Status of Disk Functions */

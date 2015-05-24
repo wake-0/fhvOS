@@ -42,7 +42,7 @@
 
 #include "mmcsd_proto.h"
 #include "string.h"
-#include "cache.h"
+#include "../../platform/cache.h"
 
 #define DATA_RESPONSE_WIDTH       (SOC_CACHELINE_SIZE)
 

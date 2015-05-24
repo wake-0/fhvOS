@@ -13,8 +13,6 @@
 #include "../driver/sdcard/hs_mmcsdlib.h"
 #include "ff.h"
 
-
-
 typedef struct _fatDevice
 {
     /* Pointer to underlying device/controller */
