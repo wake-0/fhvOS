@@ -53,3 +53,15 @@ void overriden__exit(int value)
 
 	SystemCall(&message);
 }
+
+/*
+ * \brief Sets the process to sleeping for the given amount of milliseconds
+ */
+void sleep(unsigned int milliseconds)
+{
+	systemCallMessage_t message;
+	message.systemCallNumber = SYSTEM_CALL_SLEEP;
+	message.messageArgs.callArg = milliseconds;
+
+	SystemCall(&message);
+}

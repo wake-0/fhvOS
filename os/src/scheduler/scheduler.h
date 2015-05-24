@@ -37,6 +37,7 @@ typedef enum {
 	READY,
 	RUNNING,
 	BLOCKED,
+	SLEEPING,
 	FREE
 } processState_t;
 
@@ -58,6 +59,8 @@ typedef struct {
 
 	context_t* context;
 	address_t* pageTableL1;
+
+	long wakeupTime;
 } process_t;
 
 /*
@@ -71,6 +74,7 @@ extern int SchedulerKillProcess(processId_t id);
 extern process_t* SchedulerGetRunningProcess(void);
 extern void SchedulerBlockProcess(processId_t process);
 extern void SchedulerUnblockProcess(processId_t process);
+extern void SchedulerSleepProcess(processId_t process, unsigned int millis);
 extern void SchedulerDisableScheduling(void);
 extern void SchedulerEnableScheduling(void);
 

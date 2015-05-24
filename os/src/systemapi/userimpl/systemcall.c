@@ -23,6 +23,9 @@ int SystemCall(systemCallMessage_t* message)
 	case SYSTEM_CALL_EXIT:
 	    asm(SYSTEM_CALL_ASM(SYSTEM_CALL_EXIT));
 		break;
+	case SYSTEM_CALL_SLEEP:
+	    asm(SYSTEM_CALL_ASM(SYSTEM_CALL_SLEEP));
+		break;
 	}
 
 	return SYSTEM_CALL_OK;

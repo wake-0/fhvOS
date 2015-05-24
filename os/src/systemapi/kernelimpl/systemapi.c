@@ -40,6 +40,14 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 			SchedulerRunNextProcess(context);
 			break;
 		}
+		case SYSTEM_CALL_SLEEP:
+		{
+			int millis = (unsigned int) message->messageArgs.callArg;
+			process_t* curr = SchedulerGetRunningProcess();
+			SchedulerSleepProcess(curr->id, millis);
+			SchedulerRunNextProcess(context);
+			break;
+		}
 		default:
 			break;
 	}
