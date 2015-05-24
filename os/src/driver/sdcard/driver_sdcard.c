@@ -10,7 +10,6 @@
 #include "hs_mmcsd.h"
 
 #include "../../filesystem/ff.h"
-
 #include "../../hal/edma/hal_edma.h"
 #include "../../hal/am335x/soc_AM335x.h"
 #include "../../hal/am335x/hw_edma3cc.h"
@@ -18,47 +17,49 @@
 
 #include <stdio.h>
 
+// Struct forward declarations
 struct _mmcsdCtrlInfo;
 
-volatile unsigned int callbackOccured = 0;
-volatile unsigned int xferCompFlag = 0;
-volatile unsigned int dataTimeout = 0;
-volatile unsigned int cmdCompFlag = 0;
-volatile unsigned int cmdTimeout = 0;
-volatile unsigned int errFlag = 0;
+// Defines
 
 /** @brief Base address of Channel controller  memory mapped registers        */
 #define SOC_EDMA30CC_0_REGS                  (0x49000000)
-
-/* EDMA3 Event queue number. */
+#define SOC_EDMA3_NUM_EVQUE 				 (4)
 #define EVT_QUEUE_NUM                  		 (0)
+#define MMCSD_INT_NUM 						 (SYS_INT_MMCSD0INT)
 
-#define SOC_EDMA3_NUM_EVQUE 4
+#define EDMA_COMPLTN_INT_NUM 			     (SYS_INT_EDMACOMPINT)
+#define EDMA_ERROR_INT_NUM 					 (SYS_INT_EDMAERRINT)
+#define EDMA_INST_BASE 						 (SOC_EDMA30CC_0_REGS)
+#define EDMA3CC_OPT_TCC_CLR 				 (~EDMA3CC_OPT_TCC)
+#define EDMA3_TRIG_MODE_EVENT 				 (2u)
+#define EDMA3_TRIG_MODE_MANUAL 				 (0u)
+#define EDMA3_TRIG_MODE_QDMA 				 (1u)
 
-#define MMCSD_INT_NUM 						  (SYS_INT_MMCSD0INT)
-#define EDMA_COMPLTN_INT_NUM 			      (SYS_INT_EDMACOMPINT)
-#define EDMA_ERROR_INT_NUM 					  (SYS_INT_EDMAERRINT)
-#define EDMA3CC_OPT_TCC_CLR 				  (~EDMA3CC_OPT_TCC)
+#define HSMMCSD_CARD_DETECT_PINNUM 			 (6)
+#define HSMMCSD_IN_FREQ 					 (96000000) /* 96MHz */
+#define HSMMCSD_INIT_FREQ 					 (400000) /* 400kHz */
+#define HS_MMCSD_SUPPORT_VOLT_1P8       	 (MMCHS_CAPA_VS18)
+#define HS_MMCSD_SUPPORT_VOLT_3P0       	 (MMCHS_CAPA_VS30)
+#define MMCSD_INST_BASE 					 (SOC_MMCHS_0_REGS)
+#define MMCSD_RX_EDMA_CHAN 					 (EDMA3_CHA_MMCSD0_RX)
 
-#define HSMMCSD_CARD_DETECT_PINNUM 	6
-#define HSMMCSD_IN_FREQ 			96000000 /* 96MHz */
-#define HSMMCSD_INIT_FREQ 			400000 /* 400kHz */
+#define PATH_BUF_SIZE   					 (512)
 
-#define EDMA_INST_BASE 				(SOC_EDMA30CC_0_REGS)
-#define MMCSD_INST_BASE 			(SOC_MMCHS_0_REGS)
-#define HS_MMCSD_SUPPORT_VOLT_1P8       (MMCHS_CAPA_VS18)
-#define HS_MMCSD_SUPPORT_VOLT_3P0       (MMCHS_CAPA_VS30)
-#define EDMA3_TRIG_MODE_EVENT 		(2u)
-#define EDMA3_TRIG_MODE_MANUAL 		(0u)
-#define EDMA3_TRIG_MODE_QDMA 		(1u)
-#define MMCSD_RX_EDMA_CHAN (EDMA3_CHA_MMCSD0_RX)
-
-// Callback
+// Callback functions
 static void Edma3CompletionIsr(void* params);
 static void Edma3CCErrorIsr(void* params);
 static void HSMMCSDIsr(void* params);
+/* EDMA callback function array */
+static void (*cb_Fxn[EDMA3_NUM_TCC])(unsigned int tcc, unsigned int status);
+static void callback(unsigned int tccNum, unsigned int status);
 
+// Forward declarations
+// EDMA (Enhanced direct memory access)
 static void EDMAInit(void);
+static void EDMA3AINTCConfigure(void);
+
+// HSMMCSD (High speed multi media ...)
 static void HSMMCSDControllerSetup(void);
 static unsigned int HSMMCSDControllerInit(mmcsdCtrlInfo *ctrl);
 static unsigned int HSMMCSDCardPresent(mmcsdCtrlInfo *ctrl);
@@ -75,7 +76,6 @@ static void HSMMCSDRxDmaConfig(void *ptr, unsigned int blkSize,
 static unsigned int MMCSDCtrlInit(mmcsdCtrlInfo *ctrl);
 static void MMCSDIntEnable(mmcsdCtrlInfo *ctrl);
 static void HSMMCSDFsMount(unsigned int driveNum, void *ptr);
-static void EDMA3AINTCConfigure(void);
 
 #ifdef __IAR_SYSTEMS_ICC__
 #pragma data_alignment=SOC_CACHELINE_SIZE
@@ -93,15 +93,21 @@ static FATFS g_sFatFs __attribute__ ((aligned (SOC_CACHELINE_SIZE)));
 
 #endif
 
+volatile unsigned int callbackOccured = 0;
+volatile unsigned int xferCompFlag = 0;
+volatile unsigned int dataTimeout = 0;
+volatile unsigned int cmdCompFlag = 0;
+volatile unsigned int cmdTimeout = 0;
+volatile unsigned int errFlag = 0;
+
 static DIR g_sDirObject;
 static FILINFO g_sFileInfo;
-
-/*****************************************************************************
- This buffer holds the full path to the current working directory.  Initially
- it is root ("/").
- ******************************************************************************/
-#define PATH_BUF_SIZE   512
+// This buffer holds the full path to the current working directory.  Initially it is root ("/").
 static char g_cCwdBuf[PATH_BUF_SIZE] = "/";
+/* SD Controller info structure */
+static mmcsdCtrlInfo ctrlInfo;
+/* SD card info structure */
+static mmcsdCardInfo sdCard;
 
 /* Fat devices registered */
 typedef struct _fatDevice {
@@ -116,15 +122,6 @@ typedef struct _fatDevice {
 
 } fatDevice;
 extern fatDevice fat_devices[2];
-
-/* EDMA callback function array */
-static void (*cb_Fxn[EDMA3_NUM_TCC])(unsigned int tcc, unsigned int status);
-static void callback(unsigned int tccNum, unsigned int status);
-
-/* SD Controller info structure */
-mmcsdCtrlInfo ctrlInfo;
-/* SD card info structure */
-mmcsdCardInfo sdCard;
 
 int SDCardInit(uint16_t id) {
 
@@ -144,9 +141,9 @@ int SDCardOpen(uint16_t id) {
 	volatile unsigned int initFlg = 1;
 	volatile FRESULT fresult;
 
-	 volatile int ulTotalSize = 0;
-	 volatile int ulFileCount = 0;
-	 volatile int ulDirCount = 0;
+	volatile int ulTotalSize = 0;
+	volatile int ulFileCount = 0;
+	volatile int ulDirCount = 0;
 
 	if ((HSMMCSDCardPresent(&ctrlInfo)) == 1) {
 
@@ -156,67 +153,61 @@ int SDCardOpen(uint16_t id) {
 		}
 
 		if (f_opendir(&g_sDirObject, g_cCwdBuf) == FR_OK) {
-			while(1)
-			    {
-			        /*
-			        ** Read an entry from the directory.
-			        */
-			        fresult = f_readdir(&g_sDirObject, &g_sFileInfo);
+			while (1) {
+				/*
+				 ** Read an entry from the directory.
+				 */
+				fresult = f_readdir(&g_sDirObject, &g_sFileInfo);
 
-			        /*
-			        ** Check for error and return if there is a problem.
-			        */
-			        if(fresult != FR_OK)
-			        {
-			            return(fresult);
-			        }
+				/*
+				 ** Check for error and return if there is a problem.
+				 */
+				if (fresult != FR_OK) {
+					return (fresult);
+				}
 
-			        /*
-			        ** If the file name is blank, then this is the end of the listing.
-			        */
-			        if(!g_sFileInfo.fname[0])
-			        {
-			            break;
-			        }
+				/*
+				 ** If the file name is blank, then this is the end of the listing.
+				 */
+				if (!g_sFileInfo.fname[0]) {
+					break;
+				}
 
-			        /*
-			        ** If the attribute is directory, then increment the directory count.
-			        */
-			        if(g_sFileInfo.fattrib & AM_DIR)
-			        {
-			            ulDirCount++;
-			        }
+				/*
+				 ** If the attribute is directory, then increment the directory count.
+				 */
+				if (g_sFileInfo.fattrib & AM_DIR) {
+					ulDirCount++;
+				}
 
-			        /*
-			        ** Otherwise, it is a file.  Increment the file count, and add in the
-			        ** file size to the total.
-			        */
-			        else
-			        {
-			            ulFileCount++;
-			            ulTotalSize += g_sFileInfo.fsize;
-			        }
+				/*
+				 ** Otherwise, it is a file.  Increment the file count, and add in the
+				 ** file size to the total.
+				 */
+				else {
+					ulFileCount++;
+					ulTotalSize += g_sFileInfo.fsize;
+				}
 
-			        /*
-			        ** Print the entry information on a single line with formatting to show
-			        ** the attributes, date, time, size, and name.
-			        */
-			        printf("%c%c%c%c%c %u/%02u/%02u %02u:%02u %9u  %s\n",
-			                           (g_sFileInfo.fattrib & AM_DIR) ? 'D' : '-',
-			                           (g_sFileInfo.fattrib & AM_RDO) ? 'R' : '-',
-			                           (g_sFileInfo.fattrib & AM_HID) ? 'H' : '-',
-			                           (g_sFileInfo.fattrib & AM_SYS) ? 'S' : '-',
-			                           (g_sFileInfo.fattrib & AM_ARC) ? 'A' : '-',
-			                           (g_sFileInfo.fdate >> 9) + 1980,
-			                           (g_sFileInfo.fdate >> 5) & 15,
-			                            g_sFileInfo.fdate & 31,
-			                           (g_sFileInfo.ftime >> 11),
-			                           (g_sFileInfo.ftime >> 5) & 63,
-			                            g_sFileInfo.fsize,
-			                            g_sFileInfo.fname);
-			    }
+				/*
+				 ** Print the entry information on a single line with formatting to show
+				 ** the attributes, date, time, size, and name.
+				 */
+				printf("%c%c%c%c%c %u/%02u/%02u %02u:%02u %9u  %s\n",
+						(g_sFileInfo.fattrib & AM_DIR) ? 'D' : '-',
+						(g_sFileInfo.fattrib & AM_RDO) ? 'R' : '-',
+						(g_sFileInfo.fattrib & AM_HID) ? 'H' : '-',
+						(g_sFileInfo.fattrib & AM_SYS) ? 'S' : '-',
+						(g_sFileInfo.fattrib & AM_ARC) ? 'A' : '-',
+						(g_sFileInfo.fdate >> 9) + 1980,
+						(g_sFileInfo.fdate >> 5) & 15, g_sFileInfo.fdate & 31,
+						(g_sFileInfo.ftime >> 11),
+						(g_sFileInfo.ftime >> 5) & 63, g_sFileInfo.fsize,
+						g_sFileInfo.fname);
+			}
 
-			printf("\n%4u File(s),%10u bytes total\n%4u Dir(s)", ulFileCount, ulTotalSize, ulDirCount);
+			printf("\n%4u File(s),%10u bytes total\n%4u Dir(s)", ulFileCount,
+					ulTotalSize, ulDirCount);
 
 		}
 
