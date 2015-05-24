@@ -27,6 +27,12 @@ volatile unsigned int cmdCompFlag = 0;
 volatile unsigned int cmdTimeout = 0;
 volatile unsigned int errFlag = 0;
 
+/** @brief Base address of Channel controller  memory mapped registers        */
+#define SOC_EDMA30CC_0_REGS                  (0x49000000)
+
+/* EDMA3 Event queue number. */
+#define EVT_QUEUE_NUM                  		 (0)
+
 #define SOC_EDMA3_NUM_EVQUE 4
 
 #define MMCSD_INT_NUM 						  (SYS_INT_MMCSD0INT)
