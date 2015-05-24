@@ -11,5 +11,6 @@
 #define	SYSTEM_FAILURE				-1
 
 extern int execute(char* command);
+extern void yield(void);
 
 #endif /* SYSTEMAPI_INCLUDES_SYSTEM_H_ */

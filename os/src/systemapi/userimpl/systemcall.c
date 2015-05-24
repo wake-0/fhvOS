@@ -17,6 +17,9 @@ int SystemCall(systemCallMessage_t* message)
 	case SYSTEM_CALL_EXEC:
 	    asm(SYSTEM_CALL_ASM(SYSTEM_CALL_EXEC));
 		break;
+	case SYSTEM_CALL_YIELD:
+	    asm(SYSTEM_CALL_ASM(SYSTEM_CALL_YIELD));
+		break;
 	}
 
 	return SYSTEM_CALL_OK;

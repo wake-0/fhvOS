@@ -31,3 +31,14 @@ int execute(char* command)
 
 	return returnArg;
 }
+
+/*
+ * \brief Switches to the next process
+ */
+void yield(void)
+{
+	systemCallMessage_t message;
+	message.systemCallNumber = SYSTEM_CALL_YIELD;
+
+	SystemCall(&message);
+}
