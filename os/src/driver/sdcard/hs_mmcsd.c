@@ -43,12 +43,12 @@
 #include "hs_mmcsd.h"
 #include "../../platform/platform.h"
 
-#include "../am335x/soc_AM335x.h"
-#include "../am335x/hw_types.h"
-#include "../am335x//hw_hs_mmcsd.h"
-#include "../am335x/hw_control_AM335x.h"
-#include "../am335x/hw_cm_per.h"
-#include "../am335x/hw_cm_dpll.h"
+#include "../../hal/am335x/soc_AM335x.h"
+#include "../../hal/am335x/hw_types.h"
+#include "../../hal/am335x//hw_hs_mmcsd.h"
+#include "../../hal/am335x/hw_control_AM335x.h"
+#include "../../hal/am335x/hw_cm_per.h"
+#include "../../hal/am335x/hw_cm_dpll.h"
 
 
 /*******************************************************************************

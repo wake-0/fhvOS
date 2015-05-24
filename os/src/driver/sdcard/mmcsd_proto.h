@@ -206,6 +206,12 @@ typedef struct _mmcsdCtrlInfo {
 #define SD_CMD6_GRP1_SEL      0xFFFFFFF0
 #define SD_CMD6_GRP1_HS       0x1
 
+extern unsigned int MMCSDBusWidthSet(mmcsdCtrlInfo *ctrl);
+extern unsigned int MMCSDCardInit(mmcsdCtrlInfo *ctrl);
+extern unsigned int MMCSDReadCmdSend(mmcsdCtrlInfo *ctrl, void *ptr, unsigned int block, unsigned int nblks);
+extern unsigned int MMCSDTranSpeedSet(mmcsdCtrlInfo *ctrl);
+extern unsigned int MMCSDWriteCmdSend(mmcsdCtrlInfo *ctrl, void *ptr, unsigned int block,
+        unsigned int nblks);
 #ifdef __cplusplus
 }
 #endif

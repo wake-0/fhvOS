@@ -483,7 +483,6 @@ extern void EDMA3ContextRestore(unsigned int baseAddr,
 
 extern void EDMAModuleClkConfig(void);
 extern void EDMA3Init(unsigned int baseAdd, unsigned int queNum);
-extern void EDMA3AINTCConfigure(void);
 extern unsigned int EDMA3RequestChannel(unsigned int baseAdd, unsigned int chType, unsigned int chNum, unsigned int tccNum, unsigned int evtQNum);
 extern void EDMAPinMuxSetup(void);
 extern void HSMMCSDModuleClkConfig(void);

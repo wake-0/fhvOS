@@ -54,16 +54,6 @@
 
 #include "../interrupt/hal_interrupt.h"
 
-// Callback
-static void Edma3CompletionIsr(void* params);
-static void Edma3CCErrorIsr(void* params);
-static void HSMMCSDIsr(void* params);
-
-#define EDMA_COMPLTN_INT_NUM 			      (SYS_INT_EDMACOMPINT)
-#define EDMA_ERROR_INT_NUM 					  (SYS_INT_EDMAERRINT)
-#define MMCSD_INT_NUM 						  (SYS_INT_MMCSD0INT)
-#define EDMA3CC_OPT_TCC_CLR 				  (~EDMA3CC_OPT_TCC)
-
 /****************************************************************************/
 /*                         GLOBAL VARIABLES                                 */
 /****************************************************************************/
@@ -1825,38 +1815,7 @@ void EDMAModuleClkConfig(void)
             CM_PER_TPTC2_CLKCTRL_STBYST));
 }
 
-void EDMA3AINTCConfigure(void)
-{
-    /* Registering EDMA3 Channel Controller transfer completion interrupt.  */
-	InterruptHandlerRegister(EDMA_COMPLTN_INT_NUM, Edma3CompletionIsr);
 
-    /* Setting the priority for EDMA3CC completion interrupt in AINTC. */
-	// IntPrioritySet(EDMA_COMPLTN_INT_NUM, 0, AINTC_HOSTINT_ROUTE_IRQ);
-
-    /* Registering EDMA3 Channel Controller Error Interrupt. */
-	InterruptHandlerRegister(EDMA_ERROR_INT_NUM, Edma3CCErrorIsr);
-
-    /* Setting the priority for EDMA3CC Error interrupt in AINTC. */
-    // IntPrioritySet(EDMA_ERROR_INT_NUM, 0, AINTC_HOSTINT_ROUTE_IRQ);
-
-    /* Enabling the EDMA3CC completion interrupt in AINTC. */
-	InterruptHandlerEnable(EDMA_COMPLTN_INT_NUM);
-
-    /* Enabling the EDMA3CC Error interrupt in AINTC. */
-	InterruptHandlerEnable(EDMA_ERROR_INT_NUM);
-
-    /* Registering HSMMC Interrupt handler */
-	InterruptHandlerRegister(MMCSD_INT_NUM, HSMMCSDIsr);
-
-    /* Setting the priority for EDMA3CC completion interrupt in AINTC. */
-    // IntPrioritySet(MMCSD_INT_NUM, 0, AINTC_HOSTINT_ROUTE_IRQ);
-
-    /* Enabling the HSMMC interrupt in AINTC. */
-	InterruptHandlerEnable(MMCSD_INT_NUM);
-
-    /* Enabling IRQ in CPSR of ARM processor. */
-	InterruptMasterIRQEnable();
-}
 
 void EDMAPinMuxSetup(void)
 {
@@ -1901,21 +1860,6 @@ void EDMAPinMuxSetup(void)
                    (0 << CONTROL_CONF_SPI0_CS1_CONF_SPI0_CS1_PUDEN_SHIFT)    |
                    (1 << CONTROL_CONF_SPI0_CS1_CONF_SPI0_CS1_PUTYPESEL_SHIFT)|
                    (1 << CONTROL_CONF_SPI0_CS1_CONF_SPI0_CS1_RXACTIVE_SHIFT);
-}
-
-static void Edma3CompletionIsr(void* params)
-{
-
-}
-
-static void Edma3CCErrorIsr(void* params)
-{
-
-}
-
-static void HSMMCSDIsr(void* params)
-{
-
 }
 
 /********************************* End of file ******************************/

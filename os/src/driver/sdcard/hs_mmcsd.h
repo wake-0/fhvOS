@@ -43,8 +43,8 @@
 #ifndef __HS_MMCSD_H__
 #define __HS_MMCSD_H__
 
-#include "../am335x/hw_hs_mmcsd.h"
-#include "../am335x/hw_types.h"
+#include "../../hal/am335x/hw_hs_mmcsd.h"
+#include "../../hal/am335x/hw_types.h"
 
 #ifdef __cplusplus
 extern "C" {
