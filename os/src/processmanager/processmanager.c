@@ -43,7 +43,6 @@ int ProcessManagerStartProcess(char * processName, void(*funcPtr)(int, char ** )
 		return PROCESSMANAGER_FAILURE;
 	}
 
-	MMUInitProcess(ptr);
 	processes[processIdx].processScheduler = ptr;
 	processes[processIdx].processName = malloc(strlen(processName) * sizeof(char));
 	strcpy(processes[processIdx].processName, processName);

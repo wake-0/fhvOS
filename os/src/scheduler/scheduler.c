@@ -136,6 +136,13 @@ process_t* SchedulerStartProcess(processFunc func) {
 	// processes[freeProcess].context->registers[R13] = (void*) (STACK_START + STACK_SIZE);
 	// processes[freeProcess].context->registers[R13] = (void*) (STACK_START + freeProcess * STACK_SIZE);
 	// TODO: check this atomic end needed
+
+	if (MMUInitProcess(&processes[freeProcess]) == MMU_NOT_OK)
+	{
+		processes[freeProcess].state = FREE;
+		return NULL;
+	}
+
 	CPUAtomicEnd();
 	return &processes[freeProcess];
 }
@@ -179,11 +186,11 @@ int SchedulerKillProcess(processId_t id) {
 
 	KernelDebug("Scheduler is killing process with pid=%i\n", id);
 
-	MMUFreeAllPageFramesOfProcess(&processes[id]);
 
 	processes[id].state = FREE;
 	processes[id].func = NULL;
 
+	MMUFreeAllPageFramesOfProcess(&processes[id]);
 	CPUAtomicEnd();
 	return SCHEDULER_OK;
 }

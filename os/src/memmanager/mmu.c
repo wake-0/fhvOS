@@ -295,6 +295,12 @@ int MMUSwitchToProcess(process_t* process)
 int MMUInitProcess(process_t* process)
 {
 	pageTablePointer_t l1PageTable 	= mmuCreatePageTable(L1_PAGE_TABLE);
+
+	if (l1PageTable == NULL)
+	{
+		return MMU_NOT_OK;
+	}
+
 	memoryRegionPointer_t region 	= MemoryManagerGetRegion(BOOT_ROM_EXCEPTIONS_REGION);
 	mmuMapDirectRegionToProcesPageTable(region, l1PageTable);
 	process->pageTableL1 = l1PageTable;
@@ -328,17 +334,17 @@ int MMUFreeAllPageFramesOfProcess(process_t* process)
 				// break, this is correct
 				pageTablePointer_t l2PageTableBaseAddress = (pageTablePointer_t)(pageTableEntry & UPPER_22_BITS_MASK);
 				mmuFreeAllPageFramesOfL2PageTable(l2PageTableBaseAddress);
+				mmuFreePageTablePageFrames(L2_PAGE_TABLE, l2PageTableBaseAddress);
 				break;
 			}
 		}
 
 
 		// free page frames used by l2 page table
-		//mmuFreePageTablePageFrames(L2_PAGE_TABLE, l2PageTableBaseAddress);
 	}
 
 	// free page frames used by process l1 page table
-	//mmuFreePageTablePageFrames(L1_PAGE_TABLE, process->pageTableL1);
+	mmuFreePageTablePageFrames(L1_PAGE_TABLE, process->pageTableL1);
 	KernelDebug("MMU finished freeing process page tables of pid=%d\n", process->id);
 
 	return MMU_OK;
@@ -415,8 +421,6 @@ static void mmuFreePageTablePageFrames(unsigned int pageTableType, pageTablePoin
 
 	}
 
-	// reset memory space formerly used by page table by setting to 0
-	memset(pageTable, 0, PAGE_SIZE_4KB * reservedPages);
 }
 
 /**
