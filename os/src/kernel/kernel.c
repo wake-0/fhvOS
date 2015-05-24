@@ -13,6 +13,7 @@
 #include "../devicemanager/devicemanager.h"
 #include "../console/console.h"
 #include "../filemanager/filemanager.h"
+#include "../systemapi/includes/system.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -171,6 +172,6 @@ static void kernelIdleProcess(int argc, char** argv)
 {
 	while(true)
 	{
-
+		yield();
 	}
 }
