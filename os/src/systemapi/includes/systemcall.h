@@ -61,15 +61,19 @@
 #define SYSTEM_CALL_SETSID            	62
 #define SYSTEM_CALL_GETPGRP           	63
 
+#define SYSTEM_CALL_YIELD				100
+#define SYSTEM_CALL_SLEEP				101
+
 #define __SYSTEM_CALL_STR_HELPER(x) #x
 #define SYSTEM_CALL_ASM_PREFIX			"    SWI   #"
 #define SYSTEM_CALL_ASM(x)				SYSTEM_CALL_ASM_PREFIX __SYSTEM_CALL_STR_HELPER(x)
 
 typedef struct
 {
-	int forwardArg;
-	char* buf;
+	int callArg;
+	char* callBuf;
 	int* returnArg;
+	char* returnBuf;
 } messageArgs_t;
 
 typedef struct

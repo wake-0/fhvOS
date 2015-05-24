@@ -9,6 +9,7 @@
 #include "../driver/timer/driver_timer.h"
 #include "../memmanager/mmu.h"
 #include "../kernel/kernel.h"
+#include "../systemapi/includes/system.h"
 
 /*
  * Defines for the process stack start and size
@@ -30,6 +31,7 @@
 static processId_t runningProcess;
 static process_t processes[PROCESSES_MAX];
 static device_t timer;
+static boolean_t schedulingEnabled;
 
 /*
  * Internal functions
@@ -41,15 +43,8 @@ static processId_t getNextReadyProcessId(void);
 static void timerISR(address_t* context);
 
 void dummyEnd() {
-	// End process properly
-	SchedulerKillProcess(runningProcess);
-
-	while(1)
-	{
-		;
-	}
+	exit(0);
 }
-
 
 /*
  * Functions from the .h file
@@ -63,6 +58,8 @@ int SchedulerInit(void) {
 		processes[i].context = (context_t*) malloc(sizeof(context_t));
 		memset(processes[i].context, 0, sizeof(context_t));
 	}
+
+	schedulingEnabled = true;
 
 	// No process is running
 	runningProcess = INVALID_PROCESS_ID;
@@ -133,6 +130,13 @@ process_t* SchedulerStartProcess(processFunc func) {
 	// processes[freeProcess].context->registers[R13] = (void*) (STACK_START + STACK_SIZE);
 	// processes[freeProcess].context->registers[R13] = (void*) (STACK_START + freeProcess * STACK_SIZE);
 	// TODO: check this atomic end needed
+
+	if (MMUInitProcess(&processes[freeProcess]) == MMU_NOT_OK)
+	{
+		processes[freeProcess].state = FREE;
+		return NULL;
+	}
+
 	CPUAtomicEnd();
 	return &processes[freeProcess];
 }
@@ -176,11 +180,11 @@ int SchedulerKillProcess(processId_t id) {
 
 	KernelDebug("Scheduler is killing process with pid=%i\n", id);
 
-	MMUFreeAllPageFramesOfProcess(&processes[id]);
 
 	processes[id].state = FREE;
 	processes[id].func = NULL;
 
+	MMUFreeAllPageFramesOfProcess(&processes[id]);
 	CPUAtomicEnd();
 	return SCHEDULER_OK;
 }
@@ -211,6 +215,13 @@ void SchedulerUnblockProcess(processId_t process)
 	processes[process].state = READY;
 }
 
+void SchedulerSleepProcess(processId_t process, unsigned int millis)
+{
+	processes[process].state = SLEEPING;
+	processes[process].wakeupTime = KernelGetUptime() + millis;
+	KernelDebug("Set pid=%d to sleeping\n", process);
+}
+
 /*
  * Helper methods
  */
@@ -232,12 +243,28 @@ processId_t getNextProcessIdByState(processState_t state, int startId) {
 	}
 
 	for (i = 0; i < PROCESSES_MAX; i++) {
+		if (processes[(i + startId) % PROCESSES_MAX].state == SLEEPING
+				&& processes[(i + startId) % PROCESSES_MAX].wakeupTime <= KernelGetUptime())
+		{
+			processes[(i + startId) % PROCESSES_MAX].state = READY;
+			KernelDebug("Waking up pid=%d\n", (i + startId) % PROCESSES_MAX);
+		}
 		if (processes[(i + startId) % PROCESSES_MAX].state == state) {
 			return (i + startId) % PROCESSES_MAX;
 		}
 	}
 
 	return INVALID_PROCESS_ID;
+}
+
+void SchedulerDisableScheduling(void)
+{
+	schedulingEnabled = false;
+}
+
+void SchedulerEnableScheduling(void)
+{
+	schedulingEnabled = true;
 }
 
 void timerISR(address_t* context)
@@ -249,7 +276,10 @@ void timerISR(address_t* context)
 	DeviceManagerWrite(timer, DISABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
 	DeviceManagerWrite(timer, CLEAR_INTERRUPT_STATUS, TIMER_IRQ_OVERFLOW);
 
-	SchedulerRunNextProcess(procContext);
+	if (schedulingEnabled)
+	{
+		SchedulerRunNextProcess(procContext);
+	}
 
 	DeviceManagerWrite(timer, ENABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);
 	DeviceManagerOpen(timer);

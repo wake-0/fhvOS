@@ -13,6 +13,7 @@
 #include "../devicemanager/devicemanager.h"
 #include "../console/console.h"
 #include "../filemanager/filemanager.h"
+#include "../systemapi/includes/system.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -25,6 +26,8 @@
 static long uptimeTicks = 0;
 static boolean_t started = FALSE;
 static mutex_t startMutex;
+
+static void kernelIdleProcess(int argc, char** argv);
 
 void KernelStart()
 {
@@ -52,9 +55,17 @@ void KernelStart()
 	ProcessManagerInit();
 	KernelInfo("Process Manager started\n");
 
+	SchedulerDisableScheduling();
+
+	KernelInfo("Starting idle process\n");
+	ProcessManagerStartProcess("idle", &kernelIdleProcess);
+	KernelInfo("Idle process started\n");
+
 	KernelInfo("Starting console\n");
 	ProcessManagerStartProcess("tty", &ConsoleProcess);
 	KernelInfo("Console Started\n");
+
+	SchedulerEnableScheduling();
 
 	started = TRUE;
 
@@ -155,4 +166,12 @@ int	KernelError(const char *format, ...)
 #else
 	return 0;
 #endif
+}
+
+static void kernelIdleProcess(int argc, char** argv)
+{
+	while(true)
+	{
+		yield();
+	}
 }

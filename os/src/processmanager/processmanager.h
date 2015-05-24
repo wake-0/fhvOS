@@ -10,6 +10,8 @@
 
 #include "../scheduler/scheduler.h"
 
+#define PROCESSMANAGER_FAILURE			-1
+
 typedef struct
 {
 	char * processName;
@@ -27,10 +29,9 @@ typedef struct
 } processInfoAPI_t;
 
 extern void ProcessManagerInit(void);
-extern void ProcessManagerStartProcess(char * processName, void (*funcPtr)(int, char ** ));
+extern int ProcessManagerStartProcess(char * processName, void (*funcPtr)(int, char ** ));
 extern void ProcessManagerKillProcess(int processId);
 extern int ProcessManagerGetRunningProcessesCount(void);
 extern void ProcessManagerListProcesses(processInfoAPI_t* processAPIPtr, int length);
-extern void ProcessManagerSetProcessState(int processId, processState_t processState);
 
 #endif /* PROCESSMANAGER_PROCESSMANAGER_H_ */

@@ -3,9 +3,8 @@
 #include "driver/uart/driver_uart.h"
 #include "driver/timer/driver_timer.h"
 #include "hal/interrupt/hal_interrupt.h"
-
+#include "kernel/kernel.h"
 #include "driver/manager/driver_manager.h"
-#include "systemapi/systemcalls.h"
 #include <stdlib.h>
 #include "devicemanager/devicemanager.h"
 #include "scheduler/scheduler.h"

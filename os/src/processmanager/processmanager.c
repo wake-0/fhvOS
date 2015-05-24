@@ -34,23 +34,23 @@ void ProcessManagerInit(void)
 }
 
 
-void ProcessManagerStartProcess(char * processName, void(*funcPtr)(int, char ** ))
+int ProcessManagerStartProcess(char * processName, void(*funcPtr)(int, char ** ))
 {
 	// Create new process info
 	process_t* ptr = SchedulerStartProcess(funcPtr); // TODO Add argc and argv
 	if (ptr == NULL)
 	{
-		// TODO Add return value
-		return;
+		return PROCESSMANAGER_FAILURE;
 	}
 
-	MMUInitProcess(ptr);
 	processes[processIdx].processScheduler = ptr;
 	processes[processIdx].processName = malloc(strlen(processName) * sizeof(char));
 	strcpy(processes[processIdx].processName, processName);
 	processes[processIdx].startTime = KernelGetUptime();
 
 	SchedulerUnblockProcess(ptr->id);
+
+	return ptr->id;
 }
 
 void ProcessManagerKillProcess(int processId)
@@ -66,11 +66,6 @@ int ProcessManagerGetRunningProcessesCount(void)
 
 
 void ProcessManagerListProcesses(processInfoAPI_t* processAPIPtr, int length)
-{
-	// TODO
-}
-
-void ProcessManagerSetProcessState(int processId, processState_t processState)
 {
 	// TODO
 }

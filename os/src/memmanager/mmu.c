@@ -233,7 +233,7 @@ static void mmuCreateAndFillL2PageTable(unsigned int virtualAddress, process_t* 
 {
 	// create a L2 page table and write it into L1 page table
 	pageTablePointer_t newL2PageTable = mmuCreatePageTable(L2_PAGE_TABLE);
-
+	KernelDebug("l2pageTable in createandfill(..)=%x\n", newL2PageTable);
 	firstLevelDescriptor_t pageTableEntry;
 	pageTableEntry.sectionBaseAddress 	= (unsigned int)newL2PageTable & UPPER_22_BITS_MASK;
 	pageTableEntry.descriptorType 		= DESCRIPTOR_TYPE_PAGE_TABLE;
@@ -295,9 +295,16 @@ int MMUSwitchToProcess(process_t* process)
 int MMUInitProcess(process_t* process)
 {
 	pageTablePointer_t l1PageTable 	= mmuCreatePageTable(L1_PAGE_TABLE);
+
+	if (l1PageTable == NULL)
+	{
+		return MMU_NOT_OK;
+	}
+
 	memoryRegionPointer_t region 	= MemoryManagerGetRegion(BOOT_ROM_EXCEPTIONS_REGION);
 	mmuMapDirectRegionToProcesPageTable(region, l1PageTable);
 	process->pageTableL1 = l1PageTable;
+	KernelDebug("Assigned l1pagetable for pid=%d is %x\n", process->id, l1PageTable);
 	return MMU_OK;
 }
 
@@ -323,19 +330,21 @@ int MMUFreeAllPageFramesOfProcess(process_t* process)
 				// first section is direct mapping for rom exception handler
 				continue;
 			case DESCRIPTOR_TYPE_PAGE_TABLE:
+			{
 				// break, this is correct
+				pageTablePointer_t l2PageTableBaseAddress = (pageTablePointer_t)(pageTableEntry & UPPER_22_BITS_MASK);
+				mmuFreeAllPageFramesOfL2PageTable(l2PageTableBaseAddress);
+				mmuFreePageTablePageFrames(L2_PAGE_TABLE, l2PageTableBaseAddress);
 				break;
+			}
 		}
 
-		pageTablePointer_t l2PageTableBaseAddress = (pageTablePointer_t)(pageTableEntry & UPPER_22_BITS_MASK);
-		mmuFreeAllPageFramesOfL2PageTable(l2PageTableBaseAddress);
 
 		// free page frames used by l2 page table
-		//mmuFreePageTablePageFrames(L2_PAGE_TABLE, l2PageTableBaseAddress);
 	}
 
 	// free page frames used by process l1 page table
-	//mmuFreePageTablePageFrames(L1_PAGE_TABLE, process->pageTableL1);
+	mmuFreePageTablePageFrames(L1_PAGE_TABLE, process->pageTableL1);
 	KernelDebug("MMU finished freeing process page tables of pid=%d\n", process->id);
 
 	return MMU_OK;
@@ -412,8 +421,6 @@ static void mmuFreePageTablePageFrames(unsigned int pageTableType, pageTablePoin
 
 	}
 
-	// reset memory space formerly used by page table by setting to 0
-	memset(pageTable, 0, PAGE_SIZE_4KB * reservedPages);
 }
 
 /**
@@ -702,10 +709,10 @@ static void mmuSetPageFrameUsageStatus(unsigned int pageFrameNumber, unsigned in
 	switch(pageFrameStatus)
 	{
 		case SET_PAGE_FRAME_IS_USED:
-			bitMapByte |= (pageFrameStatus & PAGE_FRAME_STATUS_MASK) << (pageFrameNumber % 8);
+			bitMapByte |= ((pageFrameStatus & PAGE_FRAME_STATUS_MASK) << (pageFrameNumber % 8));
 			break;
 		case SET_PAGE_FRAME_IS_FREE:
-			bitMapByte &= ~(pageFrameStatus & PAGE_FRAME_STATUS_MASK) << (pageFrameNumber % 8);
+			bitMapByte &= ~(PAGE_FRAME_STATUS_MASK << (pageFrameNumber % 8));
 			break;
 	}
 
