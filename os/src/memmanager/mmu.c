@@ -233,7 +233,7 @@ static void mmuCreateAndFillL2PageTable(unsigned int virtualAddress, process_t* 
 {
 	// create a L2 page table and write it into L1 page table
 	pageTablePointer_t newL2PageTable = mmuCreatePageTable(L2_PAGE_TABLE);
-
+	KernelDebug("l2pageTable in createandfill(..)=%x\n", newL2PageTable);
 	firstLevelDescriptor_t pageTableEntry;
 	pageTableEntry.sectionBaseAddress 	= (unsigned int)newL2PageTable & UPPER_22_BITS_MASK;
 	pageTableEntry.descriptorType 		= DESCRIPTOR_TYPE_PAGE_TABLE;
@@ -298,6 +298,7 @@ int MMUInitProcess(process_t* process)
 	memoryRegionPointer_t region 	= MemoryManagerGetRegion(BOOT_ROM_EXCEPTIONS_REGION);
 	mmuMapDirectRegionToProcesPageTable(region, l1PageTable);
 	process->pageTableL1 = l1PageTable;
+	KernelDebug("Assigned l1pagetable for pid=%d is %x\n", process->id, l1PageTable);
 	return MMU_OK;
 }
 
@@ -323,12 +324,14 @@ int MMUFreeAllPageFramesOfProcess(process_t* process)
 				// first section is direct mapping for rom exception handler
 				continue;
 			case DESCRIPTOR_TYPE_PAGE_TABLE:
+			{
 				// break, this is correct
+				pageTablePointer_t l2PageTableBaseAddress = (pageTablePointer_t)(pageTableEntry & UPPER_22_BITS_MASK);
+				mmuFreeAllPageFramesOfL2PageTable(l2PageTableBaseAddress);
 				break;
+			}
 		}
 
-		pageTablePointer_t l2PageTableBaseAddress = (pageTablePointer_t)(pageTableEntry & UPPER_22_BITS_MASK);
-		mmuFreeAllPageFramesOfL2PageTable(l2PageTableBaseAddress);
 
 		// free page frames used by l2 page table
 		//mmuFreePageTablePageFrames(L2_PAGE_TABLE, l2PageTableBaseAddress);
@@ -702,10 +705,10 @@ static void mmuSetPageFrameUsageStatus(unsigned int pageFrameNumber, unsigned in
 	switch(pageFrameStatus)
 	{
 		case SET_PAGE_FRAME_IS_USED:
-			bitMapByte |= (pageFrameStatus & PAGE_FRAME_STATUS_MASK) << (pageFrameNumber % 8);
+			bitMapByte |= ((pageFrameStatus & PAGE_FRAME_STATUS_MASK) << (pageFrameNumber % 8));
 			break;
 		case SET_PAGE_FRAME_IS_FREE:
-			bitMapByte &= ~(pageFrameStatus & PAGE_FRAME_STATUS_MASK) << (pageFrameNumber % 8);
+			bitMapByte &= ~(PAGE_FRAME_STATUS_MASK << (pageFrameNumber % 8));
 			break;
 	}
 
