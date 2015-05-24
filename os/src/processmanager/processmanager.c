@@ -70,8 +70,3 @@ void ProcessManagerListProcesses(processInfoAPI_t* processAPIPtr, int length)
 	// TODO
 }
 
-void ProcessManagerSetProcessState(int processId, processState_t processState)
-{
-	// TODO
-}
-
