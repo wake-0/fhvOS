@@ -8,9 +8,14 @@
 #ifndef SYSTEMAPI_INCLUDES_SYSTEM_H_
 #define SYSTEMAPI_INCLUDES_SYSTEM_H_
 
+#include <stdlib.h>
+
+#define exit(x)			overriden__exit(x)
+
 #define	SYSTEM_FAILURE				-1
 
 extern int execute(char* command);
 extern void yield(void);
+extern void overriden__exit(int);
 
 #endif /* SYSTEMAPI_INCLUDES_SYSTEM_H_ */

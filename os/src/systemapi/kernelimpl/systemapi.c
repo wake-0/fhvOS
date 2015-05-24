@@ -16,7 +16,7 @@
  */
 void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumber, context_t* context)
 {
-	KernelDebug("Systemcall number=%i\n", message->systemCallNumber);
+	//KernelDebug("Systemcall number=%i\n", message->systemCallNumber);
 	switch (message->systemCallNumber)
 	{
 		case SYSTEM_CALL_EXEC:
@@ -28,6 +28,15 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 		}
 		case SYSTEM_CALL_YIELD:
 		{
+			SchedulerRunNextProcess(context);
+			break;
+		}
+		case SYSTEM_CALL_EXIT:
+		{
+			int value = message->messageArgs.callArg;
+			(void)(value); // Get rid of unused warning TODO Use the return value of the proc
+			process_t* curr = SchedulerGetRunningProcess();
+			SchedulerKillProcess(curr->id);
 			SchedulerRunNextProcess(context);
 			break;
 		}

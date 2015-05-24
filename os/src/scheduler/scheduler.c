@@ -9,6 +9,7 @@
 #include "../driver/timer/driver_timer.h"
 #include "../memmanager/mmu.h"
 #include "../kernel/kernel.h"
+#include "../systemapi/includes/system.h"
 
 /*
  * Defines for the process stack start and size
@@ -42,15 +43,8 @@ static processId_t getNextReadyProcessId(void);
 static void timerISR(address_t* context);
 
 void dummyEnd() {
-	// End process properly
-	SchedulerKillProcess(runningProcess);
-
-	while(1)
-	{
-		;
-	}
+	exit(0);
 }
-
 
 /*
  * Functions from the .h file

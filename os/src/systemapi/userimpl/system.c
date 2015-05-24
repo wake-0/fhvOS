@@ -8,7 +8,6 @@
 #include "../includes/system.h"
 #include "../includes/systemcall.h"
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 /*
@@ -39,6 +38,18 @@ void yield(void)
 {
 	systemCallMessage_t message;
 	message.systemCallNumber = SYSTEM_CALL_YIELD;
+
+	SystemCall(&message);
+}
+
+/*
+ * \brief Quits the current process
+ */
+void overriden__exit(int value)
+{
+	systemCallMessage_t message;
+	message.systemCallNumber = SYSTEM_CALL_EXIT;
+	message.messageArgs.callArg = value;
 
 	SystemCall(&message);
 }
