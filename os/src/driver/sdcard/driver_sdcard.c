@@ -117,112 +117,12 @@ int SDCardInit(uint16_t id) {
 }
 
 int SDCardOpen(uint16_t id) {
-	volatile unsigned int i = 0;
-	volatile unsigned int initFlg = 1;
-	volatile FRESULT fresult;
-
-	volatile int ulTotalSize = 0;
-	volatile int ulFileCount = 0;
-	volatile int ulDirCount = 0;
-
 	if ((HSMMCSDCardPresent(&ctrlInfo)) == 1) {
-
-		if (initFlg) {
-			HSMMCSDFsMount(0, &sdCard);
-			initFlg = 0;
-		}
-
-		if (f_opendir(&g_sDirObject, g_cCwdBuf) == FR_OK) {
-			while (1) {
-				/*
-				 ** Read an entry from the directory.
-				 */
-				fresult = f_readdir(&g_sDirObject, &g_sFileInfo);
-
-				/*
-				 ** Check for error and return if there is a problem.
-				 */
-				if (fresult != FR_OK) {
-					return (fresult);
-				}
-
-				/*
-				 ** If the file name is blank, then this is the end of the listing.
-				 */
-				if (!g_sFileInfo.fname[0]) {
-					break;
-				}
-
-				/*
-				 ** If the attribute is directory, then increment the directory count.
-				 */
-				if (g_sFileInfo.fattrib & AM_DIR) {
-					ulDirCount++;
-				}
-
-				/*
-				 ** Otherwise, it is a file.  Increment the file count, and add in the
-				 ** file size to the total.
-				 */
-				else {
-					ulFileCount++;
-					ulTotalSize += g_sFileInfo.fsize;
-				}
-
-				/*
-				 ** Print the entry information on a single line with formatting to show
-				 ** the attributes, date, time, size, and name.
-				 */
-				printf("%c%c%c%c%c %u/%02u/%02u %02u:%02u %9u  %s\n",
-						(g_sFileInfo.fattrib & AM_DIR) ? 'D' : '-',
-						(g_sFileInfo.fattrib & AM_RDO) ? 'R' : '-',
-						(g_sFileInfo.fattrib & AM_HID) ? 'H' : '-',
-						(g_sFileInfo.fattrib & AM_SYS) ? 'S' : '-',
-						(g_sFileInfo.fattrib & AM_ARC) ? 'A' : '-',
-						(g_sFileInfo.fdate >> 9) + 1980,
-						(g_sFileInfo.fdate >> 5) & 15, g_sFileInfo.fdate & 31,
-						(g_sFileInfo.ftime >> 11),
-						(g_sFileInfo.ftime >> 5) & 63, g_sFileInfo.fsize,
-						g_sFileInfo.fname);
-			}
-
-			printf("\n%4u File(s),%10u bytes total\n%4u Dir(s)", ulFileCount,
-					ulTotalSize, ulDirCount);
-
-		}
-
-		// TODO: Process stuff
-		// For test purposes implement a readline or directory
-		// Remove return value otherwise it will stop here
-		//return 1;
-
-		//HSMMCSDFsProcessCmdLine();
-	} else {
-		i = (i + 1) & 0xFFF;
-
-		if (i % 20 == 1) {
-			// TODO: check what should be done, when no SD card is insert
-			// printf("FS: Please insert the card \n\r");
-		}
-
-		if (initFlg != 1) {
-			/* Reinitialize all the state variables */
-			callbackOccured = 0;
-			xferCompFlag = 0;
-			dataTimeout = 0;
-			cmdCompFlag = 0;
-			cmdTimeout = 0;
-
-			/* Initialize the MMCSD controller */
-			MMCSDCtrlInit(&ctrlInfo);
-
-			MMCSDIntEnable(&ctrlInfo);
-		}
-
-		initFlg = 1;
+		HSMMCSDFsMount(0, &sdCard);
+		return (f_opendir(&g_sDirObject, g_cCwdBuf) == FR_OK);
 	}
 
-	return DRIVER_OK;
+	return DRIVER_ERROR;
 }
 
 int SDCardClose(uint16_t id) {
@@ -234,6 +134,55 @@ int SDCardWrite(uint16_t id, char* buf, uint16_t len) {
 }
 
 int SDCardRead(uint16_t id, char* buf, uint16_t len) {
+	volatile unsigned int i = 0;
+	volatile FRESULT fresult;
+
+	volatile int ulTotalSize = 0;
+	volatile int ulFileCount = 0;
+	volatile int ulDirCount = 0;
+
+	if ((HSMMCSDCardPresent(&ctrlInfo)) == 1) {
+		while (1) {
+			// Read an entry from the directory.
+			fresult = f_readdir(&g_sDirObject, &g_sFileInfo);
+
+			// Check for error and return if there is a problem.
+			if (fresult != FR_OK) { return (fresult); }
+
+			// If the file name is blank, then this is the end of the listing.
+			if (!g_sFileInfo.fname[0]) { break; }
+
+			// If the attribute is directory, then increment the directory count.
+			if (g_sFileInfo.fattrib & AM_DIR) { ulDirCount++; }
+
+			 // Otherwise, it is a file.  Increment the file count, and add in the file size to the total.
+			else {
+				ulFileCount++;
+				ulTotalSize += g_sFileInfo.fsize;
+			}
+
+			 // Print the entry information on a single line with formatting to show
+			 // the attributes, date, time, size, and name.
+			printf("%c%c%c%c%c %u/%02u/%02u %02u:%02u %9u  %s\n",
+					(g_sFileInfo.fattrib & AM_DIR) ? 'D' : '-',
+					(g_sFileInfo.fattrib & AM_RDO) ? 'R' : '-',
+					(g_sFileInfo.fattrib & AM_HID) ? 'H' : '-',
+					(g_sFileInfo.fattrib & AM_SYS) ? 'S' : '-',
+					(g_sFileInfo.fattrib & AM_ARC) ? 'A' : '-',
+					(g_sFileInfo.fdate >> 9) + 1980,
+					(g_sFileInfo.fdate >> 5) & 15, g_sFileInfo.fdate & 31,
+					(g_sFileInfo.ftime >> 11),
+					(g_sFileInfo.ftime >> 5) & 63, g_sFileInfo.fsize,
+					g_sFileInfo.fname);
+		}
+
+		printf("\n%4u File(s),%10u bytes total\n%4u Dir(s)", ulFileCount, ulTotalSize, ulDirCount);
+	}
+	else
+	{
+		return DRIVER_ERROR;
+	}
+
 	return DRIVER_OK;
 }
 
