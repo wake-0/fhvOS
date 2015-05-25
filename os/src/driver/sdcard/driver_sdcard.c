@@ -8,6 +8,7 @@
 #include "driver_sdcard.h"
 #include "mmcsd_proto.h"
 #include "hs_mmcsd.h"
+#include "hs_mmcsdlib.h"
 
 #include "../../filesystem/ff.h"
 #include "../../hal/edma/hal_edma.h"
@@ -61,14 +62,8 @@ static void EDMA3AINTCConfigure(void);
 
 // HSMMCSD (High speed multi media ...)
 static void HSMMCSDControllerSetup(void);
-static unsigned int HSMMCSDControllerInit(mmcsdCtrlInfo *ctrl);
-static unsigned int HSMMCSDCardPresent(mmcsdCtrlInfo *ctrl);
-static void HSMMCSDIntEnable(mmcsdCtrlInfo *ctrl);
 static void HSMMCSDXferSetup(mmcsdCtrlInfo *ctrl, unsigned char rwFlag,
 		void *ptr, unsigned int blkSize, unsigned int nBlks);
-static int HSMMCSDBusFreqConfig(mmcsdCtrlInfo *ctrl, unsigned int busFreq);
-static void HSMMCSDBusWidthConfig(mmcsdCtrlInfo *ctrl, unsigned int busWidth);
-static unsigned int HSMMCSDCmdSend(mmcsdCtrlInfo *ctrl, mmcsdCmd *c);
 static unsigned int HSMMCSDCmdStatusGet(mmcsdCtrlInfo *ctrl);
 static unsigned int HSMMCSDXferStatusGet(mmcsdCtrlInfo *ctrl);
 static void HSMMCSDRxDmaConfig(void *ptr, unsigned int blkSize,
@@ -303,14 +298,6 @@ static void HSMMCSDControllerSetup(void) {
 	cmdTimeout = 0;
 }
 
-static unsigned int HSMMCSDCardPresent(mmcsdCtrlInfo *ctrl) {
-	return HSMMCSDIsCardInserted(ctrl->memBase);
-}
-
-static void HSMMCSDIntEnable(mmcsdCtrlInfo *ctrl) {
-	HSMMCSDIntrEnable(ctrl->memBase, ctrl->intrMask);
-}
-
 static void HSMMCSDXferSetup(mmcsdCtrlInfo *ctrl, unsigned char rwFlag,
 		void *ptr, unsigned int blkSize, unsigned int nBlks) {
 	if (rwFlag == 1) {
@@ -321,127 +308,6 @@ static void HSMMCSDXferSetup(mmcsdCtrlInfo *ctrl, unsigned char rwFlag,
 
 	ctrl->dmaEnable = 1;
 	HSMMCSDBlkLenSet(ctrl->memBase, blkSize);
-}
-
-static unsigned int HSMMCSDControllerInit(mmcsdCtrlInfo *ctrl) {
-	int status = 0;
-
-	/*Refer to the MMC Host and Bus configuration steps in TRM */
-	/* controller Reset */
-	status = HSMMCSDSoftReset(ctrl->memBase);
-
-	const char * txt1 = "HS MMC/SD Reset failed\n\r";
-	const char * txt2 = "HS MMC/SD Power on failed\n\r";
-	const char * txt3 = "HS MMC/SD Bus Frequency set failed\n\r";
-
-	if (status != 0) {
-		// TODO: fix write
-		//UartWrite(SOC_UART_0_REGS, txt1, strlen(txt1));
-	}
-
-	/* Lines Reset */
-	HSMMCSDLinesReset(ctrl->memBase, HS_MMCSD_ALL_RESET);
-
-	/* Set supported voltage list */
-	HSMMCSDSupportedVoltSet(ctrl->memBase, HS_MMCSD_SUPPORT_VOLT_1P8 |
-	HS_MMCSD_SUPPORT_VOLT_3P0);
-
-	HSMMCSDSystemConfig(ctrl->memBase, HS_MMCSD_AUTOIDLE_ENABLE);
-
-	/* Set the bus width */
-	HSMMCSDBusWidthSet(ctrl->memBase, HS_MMCSD_BUS_WIDTH_1BIT);
-
-	/* Set the bus voltage */
-	HSMMCSDBusVoltSet(ctrl->memBase, HS_MMCSD_BUS_VOLT_3P0);
-
-	/* Bus power on */
-	status = HSMMCSDBusPower(ctrl->memBase, HS_MMCSD_BUS_POWER_ON);
-
-	if (status != 0) {
-		// TODO: fix write
-		//UartWrite(SOC_UART_0_REGS, txt2, strlen(txt2));
-	}
-
-	/* Set the initialization frequency */
-	status = HSMMCSDBusFreqSet(ctrl->memBase, ctrl->ipClk, ctrl->opClk, 0);
-	if (status != 0) {
-		// TODO: fix write
-		//UartWrite(SOC_UART_0_REGS, txt3, strlen(txt3));
-	}
-
-	HSMMCSDInitStreamSend(ctrl->memBase);
-
-	status = (status == 0) ? 1 : 0;
-
-	return status;
-}
-
-static int HSMMCSDBusFreqConfig(mmcsdCtrlInfo *ctrl, unsigned int busFreq) {
-	return HSMMCSDBusFreqSet(ctrl->memBase, ctrl->ipClk, busFreq, 0);
-}
-
-static void HSMMCSDBusWidthConfig(mmcsdCtrlInfo *ctrl, unsigned int busWidth) {
-	if (busWidth == SD_BUS_WIDTH_1BIT) {
-		HSMMCSDBusWidthSet(ctrl->memBase, HS_MMCSD_BUS_WIDTH_1BIT);
-	} else {
-		HSMMCSDBusWidthSet(ctrl->memBase, HS_MMCSD_BUS_WIDTH_4BIT);
-	}
-}
-
-static unsigned int HSMMCSDCmdSend(mmcsdCtrlInfo *ctrl, mmcsdCmd *c) {
-	unsigned int cmdType = HS_MMCSD_CMD_TYPE_NORMAL;
-	unsigned int dataPresent;
-	unsigned int status = 0;
-	unsigned int rspType;
-	unsigned int cmdDir;
-	unsigned int nblks;
-	unsigned int cmd;
-
-	if (c->flags & SD_CMDRSP_STOP) {
-		cmdType = HS_MMCSD_CMD_TYPE_SUSPEND;
-	} else if (c->flags & SD_CMDRSP_FS) {
-		cmdType = HS_MMCSD_CMD_TYPE_FUNCSEL;
-	} else if (c->flags & SD_CMDRSP_ABORT) {
-		cmdType = HS_MMCSD_CMD_TYPE_ABORT;
-	}
-
-	cmdDir = (c->flags & SD_CMDRSP_READ) ?
-	HS_MMCSD_CMD_DIR_READ :
-											HS_MMCSD_CMD_DIR_WRITE;
-
-	dataPresent = (c->flags & SD_CMDRSP_DATA) ? 1 : 0;
-	nblks = (dataPresent == 1) ? c->nblks : 0;
-
-	if (c->flags & SD_CMDRSP_NONE) {
-		rspType = HS_MMCSD_NO_RESPONSE;
-	} else if (c->flags & SD_CMDRSP_136BITS) {
-		rspType = HS_MMCSD_136BITS_RESPONSE;
-	} else if (c->flags & SD_CMDRSP_BUSY) {
-		rspType = HS_MMCSD_48BITS_BUSY_RESPONSE;
-	} else {
-		rspType = HS_MMCSD_48BITS_RESPONSE;
-	}
-
-	cmd = HS_MMCSD_CMD(c->idx, cmdType, rspType, cmdDir);
-
-	if (dataPresent) {
-		HSMMCSDIntrStatusClear(ctrl->memBase, HS_MMCSD_STAT_TRNFCOMP);
-
-		HSMMCSDDataTimeoutSet(ctrl->memBase, HS_MMCSD_DATA_TIMEOUT(27));
-	}
-
-	HSMMCSDCommandSend(ctrl->memBase, cmd, c->arg, (void*) dataPresent, nblks,
-			ctrl->dmaEnable);
-
-	if (ctrl->cmdStatusGet) {
-		status = ctrl->cmdStatusGet(ctrl);
-	}
-
-	if (status == 1) {
-		HSMMCSDResponseGet(ctrl->memBase, c->rsp);
-	}
-
-	return status;
 }
 
 static unsigned int HSMMCSDCmdStatusGet(mmcsdCtrlInfo *ctrl) {
@@ -543,8 +409,6 @@ static unsigned int MMCSDCtrlInit(mmcsdCtrlInfo *ctrl) {
 
 static void MMCSDIntEnable(mmcsdCtrlInfo *ctrl) {
 	ctrl->intrEnable(ctrl);
-
-	return;
 }
 
 static void HSMMCSDFsMount(unsigned int driveNum, void *ptr) {
