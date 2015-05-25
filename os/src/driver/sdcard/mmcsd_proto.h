@@ -212,6 +212,9 @@ extern unsigned int MMCSDReadCmdSend(mmcsdCtrlInfo *ctrl, void *ptr, unsigned in
 extern unsigned int MMCSDTranSpeedSet(mmcsdCtrlInfo *ctrl);
 extern unsigned int MMCSDWriteCmdSend(mmcsdCtrlInfo *ctrl, void *ptr, unsigned int block,
         unsigned int nblks);
+extern unsigned int MMCSDCtrlInit(mmcsdCtrlInfo *ctrl);
+extern void MMCSDIntEnable(mmcsdCtrlInfo *ctrl);
+
 #ifdef __cplusplus
 }
 #endif

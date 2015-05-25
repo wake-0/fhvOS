@@ -68,8 +68,6 @@ static unsigned int HSMMCSDCmdStatusGet(mmcsdCtrlInfo *ctrl);
 static unsigned int HSMMCSDXferStatusGet(mmcsdCtrlInfo *ctrl);
 static void HSMMCSDRxDmaConfig(void *ptr, unsigned int blkSize,
 		unsigned int nblks);
-static unsigned int MMCSDCtrlInit(mmcsdCtrlInfo *ctrl);
-static void MMCSDIntEnable(mmcsdCtrlInfo *ctrl);
 static void HSMMCSDFsMount(unsigned int driveNum, void *ptr);
 
 #pragma DATA_ALIGN(g_sFatFs, SOC_CACHELINE_SIZE);
@@ -401,14 +399,6 @@ static void HSMMCSDRxDmaConfig(void *ptr, unsigned int blkSize,
 	/* Enable the transfer */
 	EDMA3EnableTransfer(EDMA_INST_BASE, MMCSD_RX_EDMA_CHAN,
 	EDMA3_TRIG_MODE_EVENT);
-}
-
-static unsigned int MMCSDCtrlInit(mmcsdCtrlInfo *ctrl) {
-	return ctrl->ctrlInit(ctrl);
-}
-
-static void MMCSDIntEnable(mmcsdCtrlInfo *ctrl) {
-	ctrl->intrEnable(ctrl);
 }
 
 static void HSMMCSDFsMount(unsigned int driveNum, void *ptr) {
