@@ -45,6 +45,8 @@
 #include "mmcsd_proto.h"
 #include "string.h"
 
+#define SOC_EDMA30CC_0_REGS                  (0x49000000)
+#define EDMA_INST_BASE 						 (SOC_EDMA30CC_0_REGS)
 
 /**
  * \brief    Check if the card is inserted and detected
@@ -260,3 +262,55 @@ int HSMMCSDBusFreqConfig(mmcsdCtrlInfo *ctrl, unsigned int busFreq)
     return HSMMCSDBusFreqSet(ctrl->memBase, ctrl->ipClk, busFreq, 0);
 }
 
+void HSMMCSDRxDmaConfig(void *ptr, unsigned int blkSize, unsigned int nblks, int memBase)
+{
+	EDMA3CCPaRAMEntry paramSet;
+
+	paramSet.srcAddr = memBase + MMCHS_DATA;
+	paramSet.destAddr = (unsigned int) ptr;
+	paramSet.srcBIdx = 0;
+	paramSet.srcCIdx = 0;
+	paramSet.destBIdx = 4;
+	paramSet.destCIdx = (unsigned short) blkSize;
+	paramSet.aCnt = 0x4;
+	paramSet.bCnt = (unsigned short) blkSize / 4;
+	paramSet.cCnt = (unsigned short) nblks;
+	paramSet.bCntReload = 0x0;
+	paramSet.linkAddr = 0xffff;
+	paramSet.opt = 0;
+
+	/* Set OPT */
+	paramSet.opt |= ((MMCSD_RX_EDMA_CHAN << EDMA3CC_OPT_TCC_SHIFT)
+			& EDMA3CC_OPT_TCC);
+
+	/* 1. Transmission complition interrupt enable */
+	paramSet.opt |= (1 << EDMA3CC_OPT_TCINTEN_SHIFT);
+
+	/* 2. Read FIFO : SRC Constant addr mode */
+	paramSet.opt |= (1 << 0);
+
+	/* 3. SRC FIFO width is 32 bit */
+	paramSet.opt |= (2 << 8);
+
+	/* 4.  AB-Sync mode */
+	paramSet.opt |= (1 << 2);
+
+	/* configure PaRAM Set */
+	EDMA3SetPaRAM(EDMA_INST_BASE, MMCSD_RX_EDMA_CHAN, &paramSet);
+
+	/* Enable the transfer */
+	EDMA3EnableTransfer(EDMA_INST_BASE, MMCSD_RX_EDMA_CHAN,
+	EDMA3_TRIG_MODE_EVENT);
+}
+
+void HSMMCSDXferSetup(mmcsdCtrlInfo *ctrl, unsigned char rwFlag,
+		void *ptr, unsigned int blkSize, unsigned int nBlks) {
+	if (rwFlag == 1) {
+		HSMMCSDRxDmaConfig(ptr, blkSize, nBlks, ctrl->memBase);
+	} else {
+		//HSMMCSDTxDmaConfig(ptr, blkSize, nBlks);
+	}
+
+	ctrl->dmaEnable = 1;
+	HSMMCSDBlkLenSet(ctrl->memBase, blkSize);
+}

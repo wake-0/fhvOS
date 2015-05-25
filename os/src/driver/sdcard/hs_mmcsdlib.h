@@ -53,6 +53,10 @@ extern unsigned int HSMMCSDCmdSend(mmcsdCtrlInfo *ctrl, mmcsdCmd *c);
 extern unsigned int HSMMCSDControllerInit(mmcsdCtrlInfo *ctrl);
 extern unsigned int HSMMCSDCardPresent(mmcsdCtrlInfo *ctrl);
 extern void HSMMCSDIntEnable(mmcsdCtrlInfo *ctrl);
+extern void HSMMCSDRxDmaConfig(void *ptr, unsigned int blkSize, unsigned int nblks, int memBase);
+extern void HSMMCSDXferSetup(mmcsdCtrlInfo *ctrl, unsigned char rwFlag,
+		void *ptr, unsigned int blkSize, unsigned int nBlks);
+
 #ifdef __cplusplus
 }
 #endif

@@ -31,7 +31,6 @@ struct _mmcsdCtrlInfo;
 
 #define EDMA_COMPLTN_INT_NUM 			     (SYS_INT_EDMACOMPINT)
 #define EDMA_ERROR_INT_NUM 					 (SYS_INT_EDMAERRINT)
-#define EDMA_INST_BASE 						 (SOC_EDMA30CC_0_REGS)
 #define EDMA3CC_OPT_TCC_CLR 				 (~EDMA3CC_OPT_TCC)
 #define EDMA3_TRIG_MODE_EVENT 				 (2u)
 #define EDMA3_TRIG_MODE_MANUAL 				 (0u)
@@ -44,6 +43,8 @@ struct _mmcsdCtrlInfo;
 #define HS_MMCSD_SUPPORT_VOLT_3P0       	 (MMCHS_CAPA_VS30)
 #define MMCSD_INST_BASE 					 (SOC_MMCHS_0_REGS)
 #define MMCSD_RX_EDMA_CHAN 					 (EDMA3_CHA_MMCSD0_RX)
+#define SOC_EDMA30CC_0_REGS                  (0x49000000)
+#define EDMA_INST_BASE 						 (SOC_EDMA30CC_0_REGS)
 
 #define PATH_BUF_SIZE   					 (512)
 
@@ -62,12 +63,8 @@ static void EDMA3AINTCConfigure(void);
 
 // HSMMCSD (High speed multi media ...)
 static void HSMMCSDControllerSetup(void);
-static void HSMMCSDXferSetup(mmcsdCtrlInfo *ctrl, unsigned char rwFlag,
-		void *ptr, unsigned int blkSize, unsigned int nBlks);
 static unsigned int HSMMCSDCmdStatusGet(mmcsdCtrlInfo *ctrl);
 static unsigned int HSMMCSDXferStatusGet(mmcsdCtrlInfo *ctrl);
-static void HSMMCSDRxDmaConfig(void *ptr, unsigned int blkSize,
-		unsigned int nblks);
 static void HSMMCSDFsMount(unsigned int driveNum, void *ptr);
 
 #pragma DATA_ALIGN(g_sFatFs, SOC_CACHELINE_SIZE);
@@ -245,18 +242,6 @@ static void HSMMCSDControllerSetup(void) {
 	cmdTimeout = 0;
 }
 
-static void HSMMCSDXferSetup(mmcsdCtrlInfo *ctrl, unsigned char rwFlag,
-		void *ptr, unsigned int blkSize, unsigned int nBlks) {
-	if (rwFlag == 1) {
-		HSMMCSDRxDmaConfig(ptr, blkSize, nBlks);
-	} else {
-		//HSMMCSDTxDmaConfig(ptr, blkSize, nBlks);
-	}
-
-	ctrl->dmaEnable = 1;
-	HSMMCSDBlkLenSet(ctrl->memBase, blkSize);
-}
-
 static unsigned int HSMMCSDCmdStatusGet(mmcsdCtrlInfo *ctrl) {
 	unsigned int status = 0;
 
@@ -307,47 +292,6 @@ static unsigned int HSMMCSDXferStatusGet(mmcsdCtrlInfo *ctrl) {
 	ctrlInfo.dmaEnable = 0;
 
 	return status;
-}
-
-static void HSMMCSDRxDmaConfig(void *ptr, unsigned int blkSize,
-		unsigned int nblks) {
-	EDMA3CCPaRAMEntry paramSet;
-
-	paramSet.srcAddr = ctrlInfo.memBase + MMCHS_DATA;
-	paramSet.destAddr = (unsigned int) ptr;
-	paramSet.srcBIdx = 0;
-	paramSet.srcCIdx = 0;
-	paramSet.destBIdx = 4;
-	paramSet.destCIdx = (unsigned short) blkSize;
-	paramSet.aCnt = 0x4;
-	paramSet.bCnt = (unsigned short) blkSize / 4;
-	paramSet.cCnt = (unsigned short) nblks;
-	paramSet.bCntReload = 0x0;
-	paramSet.linkAddr = 0xffff;
-	paramSet.opt = 0;
-
-	/* Set OPT */
-	paramSet.opt |= ((MMCSD_RX_EDMA_CHAN << EDMA3CC_OPT_TCC_SHIFT)
-			& EDMA3CC_OPT_TCC);
-
-	/* 1. Transmission complition interrupt enable */
-	paramSet.opt |= (1 << EDMA3CC_OPT_TCINTEN_SHIFT);
-
-	/* 2. Read FIFO : SRC Constant addr mode */
-	paramSet.opt |= (1 << 0);
-
-	/* 3. SRC FIFO width is 32 bit */
-	paramSet.opt |= (2 << 8);
-
-	/* 4.  AB-Sync mode */
-	paramSet.opt |= (1 << 2);
-
-	/* configure PaRAM Set */
-	EDMA3SetPaRAM(EDMA_INST_BASE, MMCSD_RX_EDMA_CHAN, &paramSet);
-
-	/* Enable the transfer */
-	EDMA3EnableTransfer(EDMA_INST_BASE, MMCSD_RX_EDMA_CHAN,
-	EDMA3_TRIG_MODE_EVENT);
 }
 
 static void HSMMCSDFsMount(unsigned int driveNum, void *ptr) {
