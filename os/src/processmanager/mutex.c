@@ -34,7 +34,14 @@ void MutexLock(mutex_t* mutex)
 		}
 
 		// Block the process
-		SchedulerBlockProcess(currentProc->id); // We do not return from this function until the mutex is unlocked
+		SchedulerBlockProcess(currentProc->id);
+
+		// TODO This works but decreases performance of the os
+		// We should immediately run the next thread by a software interrupt
+		while (currentProc->state == BLOCKED)
+		{
+			;
+		}
 
 		mutex->queueHead = newEntry->next;
 
