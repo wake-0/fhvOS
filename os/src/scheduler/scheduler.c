@@ -131,6 +131,8 @@ process_t* SchedulerStartProcess(processFunc func) {
 	// processes[freeProcess].context->registers[R13] = (void*) (STACK_START + freeProcess * STACK_SIZE);
 	// TODO: check this atomic end needed
 
+	processes[freeProcess].parent = (runningProcess == INVALID_PROCESS_ID) ? NULL : &processes[runningProcess];
+
 	if (MMUInitProcess(&processes[freeProcess]) == MMU_NOT_OK)
 	{
 		processes[freeProcess].state = FREE;
@@ -152,9 +154,11 @@ int SchedulerRunNextProcess(context_t* context) {
 
 	// TODO: Decide what should be done with a running process
 	// which is finished or blocked
-	if (processes[runningProcess].state == RUNNING) {
+	if (processes[runningProcess].state == RUNNING
+			|| processes[runningProcess].state == BLOCKED
+			|| processes[runningProcess].state == SLEEPING) {
 		// Set the running process to ready
-		processes[runningProcess].state = READY;
+		processes[runningProcess].state = (processes[runningProcess].state == RUNNING) ? READY : (processes[runningProcess].state);
 		// Save the current context to the running process
 		// and then change the running process
 		memcpy(processes[runningProcess].context, context, sizeof(context_t));
@@ -184,6 +188,13 @@ int SchedulerKillProcess(processId_t id) {
 	processes[id].state = FREE;
 	processes[id].func = NULL;
 
+	if (processes[id].blockedState && processes[id].parent != NULL)
+	{
+		processes[id].parent->state = READY;
+		processes[id].parent = NULL;
+		processes[id].blockedState = false;
+	}
+
 	MMUFreeAllPageFramesOfProcess(&processes[id]);
 	CPUAtomicEnd();
 	return SCHEDULER_OK;
@@ -201,13 +212,6 @@ process_t* SchedulerGetRunningProcess(void) {
 void SchedulerBlockProcess(processId_t process)
 {
 	processes[process].state = BLOCKED;
-
-	// TODO This works but decreases performance of the os
-	// We should immediately run the next thread by a software interrupt
-	while (processes[process].state == BLOCKED)
-	{
-		;
-	}
 }
 
 void SchedulerUnblockProcess(processId_t process)

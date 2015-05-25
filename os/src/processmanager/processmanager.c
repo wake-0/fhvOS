@@ -34,13 +34,13 @@ void ProcessManagerInit(void)
 }
 
 
-int ProcessManagerStartProcess(char * processName, void(*funcPtr)(int, char ** ))
+process_t* ProcessManagerStartProcess(char * processName, void(*funcPtr)(int, char ** ), boolean_t blocking, context_t* context)
 {
 	// Create new process info
 	process_t* ptr = SchedulerStartProcess(funcPtr); // TODO Add argc and argv
 	if (ptr == NULL)
 	{
-		return PROCESSMANAGER_FAILURE;
+		return NULL;
 	}
 
 	processes[processIdx].processScheduler = ptr;
@@ -50,7 +50,14 @@ int ProcessManagerStartProcess(char * processName, void(*funcPtr)(int, char ** )
 
 	SchedulerUnblockProcess(ptr->id);
 
-	return ptr->id;
+	if (blocking && context != NULL)
+	{
+		ptr->blockedState = TRUE;
+		SchedulerBlockProcess(ptr->parent->id);
+		SchedulerRunNextProcess(context);
+	}
+
+	return ptr;
 }
 
 void ProcessManagerKillProcess(int processId)

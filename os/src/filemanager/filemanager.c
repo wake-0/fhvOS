@@ -8,8 +8,9 @@
 #include "filemanager.h"
 #include "hardcoded_programs.h"
 #include "../processmanager/processmanager.h"
+#include "../systemapi/includes/system.h"
 
-int FileManagerOpenExecutable(char* name, boolean_t searchInGlobalBinPath, int argc, char** argv)
+int FileManagerOpenExecutable(char* name, boolean_t searchInGlobalBinPath, int argc, char** argv, boolean_t blocking, context_t* context)
 {
 	if (searchInGlobalBinPath)
 	{
@@ -17,7 +18,7 @@ int FileManagerOpenExecutable(char* name, boolean_t searchInGlobalBinPath, int a
 		void (*funcPtr)(int, char ** ) = HardCodedProgramsGetProgram(name);
 		if (funcPtr != NULL)
 		{
-			ProcessManagerStartProcess(name, funcPtr);
+			process_t* proc = ProcessManagerStartProcess(name, funcPtr, blocking, context);
 			return FILE_MANAGER_OK;
 		}
 	}

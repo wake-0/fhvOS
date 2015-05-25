@@ -9,6 +9,8 @@
 #ifndef KERNEL_KERNEL_H_
 #define KERNEL_KERNEL_H_
 
+#include "../scheduler/scheduler.h"
+
 #define	KERNEL_DEBUG_OUTPUT			0
 #define KERNEL_ERROR_OUTPUT			1
 #define KERNEL_INFO_OUTPUT			1
@@ -20,6 +22,6 @@ extern long KernelTick(int ticks);
 extern int	KernelInfo(const char *format, ...);
 extern int	KernelDebug(const char *format, ...);
 extern int	KernelError(const char *format, ...);
-extern void KernelExecute(char* command);
+extern void KernelExecute(char* command, context_t* context);
 
 #endif /* KERNEL_KERNEL_H_ */

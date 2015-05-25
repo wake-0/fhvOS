@@ -58,11 +58,11 @@ void KernelStart()
 	SchedulerDisableScheduling();
 
 	KernelInfo("Starting idle process\n");
-	ProcessManagerStartProcess("idle", &kernelIdleProcess);
+	ProcessManagerStartProcess("idle", &kernelIdleProcess, false, NULL);
 	KernelInfo("Idle process started\n");
 
 	KernelInfo("Starting console\n");
-	ProcessManagerStartProcess("tty", &ConsoleProcess);
+	ProcessManagerStartProcess("tty", &ConsoleProcess, false, NULL);
 	KernelInfo("Console Started\n");
 
 	SchedulerEnableScheduling();
@@ -95,7 +95,7 @@ long KernelTick(int ticks)
 	return (uptimeTicks += ticks);
 }
 
-void KernelExecute(char* inputCommand)
+void KernelExecute(char* inputCommand, context_t* context)
 {
 	// Parse the command
 	// TODO I'm not sure if we should parse the command and args in this function or directly in the console
@@ -112,9 +112,17 @@ void KernelExecute(char* inputCommand)
 	} while (ch != NULL);
 	argc--;
 
+	boolean_t blocking = true;
+	if (strlen(argv[argc-1]) == 1 && *argv[argc-1] == '&')
+	{
+		argv[argc-1] = '\0';
+		argc--;
+		blocking = false;
+	}
+
 	KernelDebug("Command=%s and has %i arguments\n", command, argc);
 
-	if (FILE_MANAGER_NOT_FOUND == FileManagerOpenExecutable(command, TRUE, argc, argv))
+	if (FILE_MANAGER_NOT_FOUND == FileManagerOpenExecutable(command, TRUE, argc, argv, blocking, context))
 	{
 		printf("Command %s not found\n", command);
 	}

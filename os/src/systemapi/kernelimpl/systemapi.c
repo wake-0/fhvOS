@@ -23,7 +23,7 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 		{
 			// Disassemble argument package
 			char* command = message->messageArgs.callBuf;
-			KernelExecute(command);
+			KernelExecute(command, context);
 			break;
 		}
 		case SYSTEM_CALL_YIELD:

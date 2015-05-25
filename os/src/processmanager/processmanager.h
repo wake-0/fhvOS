@@ -29,7 +29,7 @@ typedef struct
 } processInfoAPI_t;
 
 extern void ProcessManagerInit(void);
-extern int ProcessManagerStartProcess(char * processName, void (*funcPtr)(int, char ** ));
+extern process_t* ProcessManagerStartProcess(char * processName, void (*funcPtr)(int, char ** ), boolean_t, context_t*);
 extern void ProcessManagerKillProcess(int processId);
 extern int ProcessManagerGetRunningProcessesCount(void);
 extern void ProcessManagerListProcesses(processInfoAPI_t* processAPIPtr, int length);

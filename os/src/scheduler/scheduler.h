@@ -29,6 +29,7 @@ typedef int8_t processId_t;
 typedef void (*processFunc)(int, char**);
 
 typedef address_t* register_t;
+typedef struct process_t_struct process_t;
 
 /*
  * Enums for the process struct
@@ -52,7 +53,7 @@ typedef struct {
 } context_t;
 #pragma pack(pop)
 
-typedef struct {
+struct process_t_struct {
 	processId_t id;
 	processFunc func;
 	processState_t state;
@@ -61,7 +62,10 @@ typedef struct {
 	address_t* pageTableL1;
 
 	long wakeupTime;
-} process_t;
+
+	process_t* parent;
+	boolean_t blockedState;
+};
 
 /*
  * Scheduler functions
