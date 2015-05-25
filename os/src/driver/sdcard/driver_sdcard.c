@@ -77,21 +77,8 @@ static unsigned int MMCSDCtrlInit(mmcsdCtrlInfo *ctrl);
 static void MMCSDIntEnable(mmcsdCtrlInfo *ctrl);
 static void HSMMCSDFsMount(unsigned int driveNum, void *ptr);
 
-#ifdef __IAR_SYSTEMS_ICC__
-#pragma data_alignment=SOC_CACHELINE_SIZE
-static FATFS g_sFatFs;
-
-#elif defined(__TMS470__)
 #pragma DATA_ALIGN(g_sFatFs, SOC_CACHELINE_SIZE);
 static FATFS g_sFatFs;
-
-#elif defined(gcc)
-static FATFS g_sFatFs __attribute__ ((aligned (SOC_CACHELINE_SIZE)));
-
-#else
-#error "Unsupported Compiler. \r\n"
-
-#endif
 
 volatile unsigned int callbackOccured = 0;
 volatile unsigned int xferCompFlag = 0;
