@@ -10,12 +10,6 @@
 
 #include "../driver.h"
 
-/** @brief Base address of Channel controller  memory mapped registers        */
-#define SOC_EDMA30CC_0_REGS                  (0x49000000)
-
-/* EDMA3 Event queue number. */
-#define EVT_QUEUE_NUM                  		 (0)
-
 extern int SDCardInit	(uint16_t id);
 extern int SDCardOpen	(uint16_t id);
 extern int SDCardClose	(uint16_t id);
