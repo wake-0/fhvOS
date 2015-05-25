@@ -7,9 +7,9 @@
 
 #include "driver_sdcard.h"
 #include "mmcsd_proto.h"
-#include "hs_mmcsd.h"
 #include "hs_mmcsdlib.h"
 
+#include "../../hal/edma/hs_mmcsd.h"
 #include "../../filesystem/ff.h"
 #include "../../hal/edma/hal_edma.h"
 #include "../../hal/am335x/soc_AM335x.h"

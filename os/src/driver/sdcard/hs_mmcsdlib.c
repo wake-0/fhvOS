@@ -40,7 +40,7 @@
 */
 
 
-#include "hs_mmcsd.h"
+#include "../../hal/edma/hs_mmcsd.h"
 #include "../../hal/edma/hal_edma.h"
 #include "mmcsd_proto.h"
 #include "string.h"
