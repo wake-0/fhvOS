@@ -54,5 +54,7 @@ typedef uint32_t address_t;
 #define TRUE    1
 #define FALSE   0
 
+#define MAX(x,y)		((x > y) ? x : y)
+#define MIN(x,y)		((x < y) ? x : y)
 
 #endif /* HAL_PLATFORM_PLATFORM_H_ */
