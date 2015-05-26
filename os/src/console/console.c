@@ -15,6 +15,7 @@
 
 #define CONSOLE_SCREEN_HEIGHT_LINES			(40)
 #define CONSOLE_MAX_COMMAND_LENGTH			(255)
+#define CONSOLE_MAX_HISTORY					(15)
 #define CONSOLE_SCANF_FORMAT				"%254[^\r]"
 
 static boolean_t initialized = false;
@@ -25,8 +26,23 @@ static void printOSLogo();
 static void printPrompt();
 static boolean_t acceptChar(char ch);
 static void clearCommand(char*);
+static void createHistoryEntry(char* command);
+static void shiftCursorLeft(int count);
 
 int unchar[2] = { -1, -1 };
+
+typedef struct history_entry_struct history_entry_t;
+
+struct history_entry_struct {
+	history_entry_t* prev;
+	char command[CONSOLE_MAX_COMMAND_LENGTH];
+	history_entry_t* next;
+};
+
+static history_entry_t* history_curr;
+static history_entry_t* history_head;
+static history_entry_t* history_tail;
+static unsigned int 	history_count;
 
 void ConsoleInit(device_t device)
 {
@@ -37,6 +53,8 @@ void ConsoleInit(device_t device)
 	DeviceManagerOpen(consoleDevice);
 
 	initialized = true;
+
+	history_count = 0;
 
 	ConsoleClear();
 }
@@ -55,80 +73,127 @@ void ConsoleProcess(int argc, char** argv)
 	char command[CONSOLE_MAX_COMMAND_LENGTH];
 	int commandPos;
 	int commandPosMax;
+	char buf;
 	while(TRUE)
 	{
 		memset(&command[0], '\0', CONSOLE_MAX_COMMAND_LENGTH);
 		commandPos = 0;
 		commandPosMax = 0;
-		char buf;
+		buf = 0;
+		history_curr = NULL;
 		boolean_t endLine = false;
 		printPrompt();		// Prompt: root@fhvos#
 
-		// Read the command using scanf (Overriden through fgetc and ungetc)
-		//int res = scanf(CONSOLE_SCANF_FORMAT, command);
-
+		// Reading the line
 		do {
 			do {
 				DeviceManagerRead(consoleDevice, &buf, 1);
-				//printf("Input char: %d\n", buf);
 				switch(buf)
 				{
-				case 27:
-				{
-					DeviceManagerRead(consoleDevice, &buf, 1);
-					switch(buf)
-					{
-					case 91:
+					case 27:    // Escape character
 					{
 						DeviceManagerRead(consoleDevice, &buf, 1);
 						switch(buf)
 						{
-						case 68:
-							if (commandPos >= 1)
+						case 91:// [ character
+						{
+							DeviceManagerRead(consoleDevice, &buf, 1);
+							switch(buf)
 							{
-								DeviceManagerWrite(consoleDevice, "\x1B\x5B\x44", 3);
-								commandPos--;
-							}
-							break;
-						case 67:
-							if (commandPos < commandPosMax)
-							{
-								DeviceManagerWrite(consoleDevice, "\x1B\x5B\x43", 3);
-								commandPos++;
+							case 68:
+								// Left
+								if (commandPos >= 1)
+								{
+									DeviceManagerWrite(consoleDevice, "\x1B\x5B\x44", 3);
+									commandPos--;
+								}
+								break;
+							case 67:
+								// Right
+								if (commandPos < commandPosMax)
+								{
+									DeviceManagerWrite(consoleDevice, "\x1B\x5B\x43", 3);
+									commandPos++;
+								}
+								break;
+							case 66:
+								// Down
+								if (history_curr != NULL) {
+									history_curr = history_curr->next;
+									shiftCursorLeft(commandPos);
+									DeviceManagerWrite(consoleDevice, "\x1B[K", 3);
+									if (history_curr == NULL || history_curr == history_curr->next)
+									{
+										history_curr = NULL;
+										commandPos = 0;
+										commandPosMax = 0;
+									}
+									else
+									{
+										commandPos = strlen(history_curr->command);
+										commandPosMax = 0;
+										strcpy(command, history_curr->command);
+										DeviceManagerWrite(consoleDevice, command, commandPos);
+									}
+								}
+								break;
+							case 65:
+								// Up
+								if (history_curr == NULL)
+								{
+									history_curr = history_tail;
+								}
+								else if (history_curr != history_head)
+								{
+									history_curr = history_curr->prev;
+								}
+								if (history_curr != NULL)
+								{
+									shiftCursorLeft(commandPos);
+									DeviceManagerWrite(consoleDevice, "\x1B[K", 3);
+									commandPos = strlen(history_curr->command);
+									commandPosMax = 0;
+									strcpy(command, history_curr->command);
+									DeviceManagerWrite(consoleDevice, command, commandPos);
+								}
+								break;
 							}
 							break;
 						}
+						}
+						buf = 0;
 						break;
 					}
-					}
-					buf = 0;
-					break;
-				}
-				case '\r':
-				case '\0':
-					DeviceManagerWrite(consoleDevice, "\r\n", 2);
-					command[commandPos++] = '\0';
-					endLine = true;
-					break;
-				case 127:
-					if (commandPos < 1)
-					{
+					case 127:
+						// Backspace
+						if (commandPos < 1)
+						{
+							break;
+						}
+						DeviceManagerWrite(consoleDevice, "\x7F", 1);
+						command[--commandPos] = '\0';
 						break;
-					}
-					DeviceManagerWrite(consoleDevice, "\x7F", 1);
-					command[--commandPos] = '\0';
-					break;
+					case '\r':
+					case '\0':
+						DeviceManagerWrite(consoleDevice, "\r\n", 2);
+						command[commandPosMax++] = '\0';
+						endLine = true;
+						break;
 				}
+
 				commandPosMax = MAX(commandPos, commandPosMax);
 			} while (acceptChar(buf) == false && endLine == false);
+
 			if (endLine == false && commandPos < CONSOLE_MAX_COMMAND_LENGTH - 1)
 			{
 				DeviceManagerWrite(consoleDevice, &buf, 1);
 				command[commandPos++] = buf;
 			}
 			commandPosMax = MAX(commandPos, commandPosMax);
+
 		} while (endLine == false);
 
+		// Line read successfully - perform trivial check and trimming
 		clearCommand(command); // Re-ensure that no invalid characters are parsed
 
 		int cLen = strlen(command);
@@ -138,8 +203,10 @@ void ConsoleProcess(int argc, char** argv)
 		}
 		else
 		{
+			createHistoryEntry(command);
 			KernelDebug("Console: Input command received (length=%i): %s\n", cLen, command);
 
+			// Execute the command through system call
 			int pid = execute(command);
 
 			KernelDebug("Return value from execute(..) is=%d\n", pid);
@@ -236,6 +303,86 @@ static void clearCommand(char* command)
     while(*curr && isspace(*curr)) ++curr, --l;
 
     memmove(command, curr, l + 1);
+}
+
+void createHistoryEntry(char* command)
+{
+	// Search for duplicate entry
+	history_curr = history_head;
+	while (history_curr != NULL)
+	{
+		if (strcmp(history_curr->command, command) == 0)
+		{
+			// Duplicate
+			if (history_head == history_tail)
+			{
+				free(history_head);
+				history_head = NULL;
+				history_tail = NULL;
+			}
+			else if (history_curr == history_head)
+			{
+				history_head->next->prev = NULL;
+				history_head = history_curr->next;
+				free(history_curr);
+			}
+			else if (history_curr == history_tail)
+			{
+				return;
+			}
+			else
+			{
+				history_curr->next->prev = history_curr->prev;
+				history_curr->prev->next = history_curr->next;
+				free(history_curr);
+			}
+			history_count--;
+			break;
+		}
+		history_curr = (history_curr == history_curr->next) ? NULL : history_curr->next;
+	}
+
+	// Create memory for the history command
+	history_entry_t* new = malloc(sizeof(history_entry_t));
+	strcpy(&new->command[0], command);
+
+	if (history_head == NULL && history_tail == NULL)
+	{
+		history_head = new;
+		history_tail = new;
+		history_head->next = new;
+		history_head->prev = NULL;
+	}
+	else
+	{
+		new->prev = history_tail;
+		new->next = NULL;
+		history_tail->next = new;
+		history_tail = new;
+	}
+
+	history_count++;
+
+	if (history_count > CONSOLE_MAX_HISTORY)
+	{
+		history_entry_t* temp = history_head->next;
+		temp->prev = NULL;
+		free(history_head);
+		history_head = temp;
+		history_count--;
+	}
+}
+
+void shiftCursorLeft(int count)
+{
+	if (count <= 0 || count >= CONSOLE_MAX_COMMAND_LENGTH)
+	{
+		return;
+	}
+	char buf[10];
+	// <ESC>[{COUNT}D
+	int res = sprintf(&buf[0], "\x1B\x5B%d\x44", count);
+	DeviceManagerWrite(consoleDevice, &buf[0], res);
 }
 
 /*
