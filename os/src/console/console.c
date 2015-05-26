@@ -54,10 +54,12 @@ void ConsoleProcess(int argc, char** argv)
 
 	char command[CONSOLE_MAX_COMMAND_LENGTH];
 	int commandPos;
+	int commandPosMax;
 	while(TRUE)
 	{
 		memset(&command[0], '\0', CONSOLE_MAX_COMMAND_LENGTH);
 		commandPos = 0;
+		commandPosMax = 0;
 		char buf;
 		boolean_t endLine = false;
 		printPrompt();		// Prompt: root@fhvos#
@@ -68,8 +70,40 @@ void ConsoleProcess(int argc, char** argv)
 		do {
 			do {
 				DeviceManagerRead(consoleDevice, &buf, 1);
+				//printf("Input char: %d\n", buf);
 				switch(buf)
 				{
+				case 27:
+				{
+					DeviceManagerRead(consoleDevice, &buf, 1);
+					switch(buf)
+					{
+					case 91:
+					{
+						DeviceManagerRead(consoleDevice, &buf, 1);
+						switch(buf)
+						{
+						case 68:
+							if (commandPos >= 1)
+							{
+								DeviceManagerWrite(consoleDevice, "\x1B\x5B\x44", 3);
+								commandPos--;
+							}
+							break;
+						case 67:
+							if (commandPos < commandPosMax)
+							{
+								DeviceManagerWrite(consoleDevice, "\x1B\x5B\x43", 3);
+								commandPos++;
+							}
+							break;
+						}
+						break;
+					}
+					}
+					buf = 0;
+					break;
+				}
 				case '\r':
 				case '\0':
 					DeviceManagerWrite(consoleDevice, "\r\n", 2);
@@ -85,12 +119,14 @@ void ConsoleProcess(int argc, char** argv)
 					command[--commandPos] = '\0';
 					break;
 				}
+				commandPosMax = MAX(commandPos, commandPosMax);
 			} while (acceptChar(buf) == false && endLine == false);
 			if (endLine == false && commandPos < CONSOLE_MAX_COMMAND_LENGTH - 1)
 			{
 				DeviceManagerWrite(consoleDevice, &buf, 1);
 				command[commandPos++] = buf;
 			}
+			commandPosMax = MAX(commandPos, commandPosMax);
 		} while (endLine == false);
 
 		clearCommand(command); // Re-ensure that no invalid characters are parsed
