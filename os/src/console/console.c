@@ -53,18 +53,50 @@ void ConsoleProcess(int argc, char** argv)
 	printWelcomeMessage();
 
 	char command[CONSOLE_MAX_COMMAND_LENGTH];
+	int commandPos;
 	while(TRUE)
 	{
 		memset(&command[0], '\0', CONSOLE_MAX_COMMAND_LENGTH);
-
+		commandPos = 0;
+		char buf;
+		boolean_t endLine = false;
 		printPrompt();		// Prompt: root@fhvos#
 
 		// Read the command using scanf (Overriden through fgetc and ungetc)
-		int res = scanf(CONSOLE_SCANF_FORMAT, command);
+		//int res = scanf(CONSOLE_SCANF_FORMAT, command);
+
+		do {
+			do {
+				DeviceManagerRead(consoleDevice, &buf, 1);
+				switch(buf)
+				{
+				case '\r':
+				case '\0':
+					DeviceManagerWrite(consoleDevice, "\r\n", 2);
+					command[commandPos++] = '\0';
+					endLine = true;
+					break;
+				case 127:
+					if (commandPos < 1)
+					{
+						break;
+					}
+					DeviceManagerWrite(consoleDevice, "\x7F", 1);
+					command[--commandPos] = '\0';
+					break;
+				}
+			} while (acceptChar(buf) == false && endLine == false);
+			if (endLine == false && commandPos < CONSOLE_MAX_COMMAND_LENGTH - 1)
+			{
+				DeviceManagerWrite(consoleDevice, &buf, 1);
+				command[commandPos++] = buf;
+			}
+		} while (endLine == false);
+
 		clearCommand(command); // Re-ensure that no invalid characters are parsed
 
 		int cLen = strlen(command);
-		if (res <= 0 || cLen <= 0)
+		if (commandPos <= 0 || cLen <= 0)
 		{
 			KernelDebug("Empty command received\n");
 		}
