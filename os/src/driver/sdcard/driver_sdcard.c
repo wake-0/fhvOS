@@ -106,9 +106,10 @@ int SDCardWrite(uint16_t id, char* buf, uint16_t len) {
 int SDCardRead(uint16_t id, char* buf, uint16_t len) {
 	if ((HSMMCSDCardPresent(&ctrlInfo)) == 1) {
 		memcpy(buf, &sdCard, sizeof(mmcsdCardInfo));
+		return DRIVER_OK;
 	}
 
-	return DRIVER_OK;
+	return DRIVER_ERROR;
 }
 
 int SDCardIoctl(uint16_t id, uint16_t cmd, uint8_t mode, char* buf,
