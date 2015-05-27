@@ -65,10 +65,6 @@ static void EDMA3AINTCConfigure(void);
 static void HSMMCSDControllerSetup(void);
 static unsigned int HSMMCSDCmdStatusGet(mmcsdCtrlInfo *ctrl);
 static unsigned int HSMMCSDXferStatusGet(mmcsdCtrlInfo *ctrl);
-static void HSMMCSDFsMount(unsigned int driveNum, void *ptr);
-
-#pragma DATA_ALIGN(g_sFatFs, SOC_CACHELINE_SIZE);
-static FATFS g_sFatFs;
 
 volatile unsigned int callbackOccured = 0;
 volatile unsigned int xferCompFlag = 0;
@@ -77,28 +73,10 @@ volatile unsigned int cmdCompFlag = 0;
 volatile unsigned int cmdTimeout = 0;
 volatile unsigned int errFlag = 0;
 
-static DIR g_sDirObject;
-static FILINFO g_sFileInfo;
-// This buffer holds the full path to the current working directory.  Initially it is root ("/").
-static char g_cCwdBuf[PATH_BUF_SIZE] = "/";
 /* SD Controller info structure */
 static mmcsdCtrlInfo ctrlInfo;
 /* SD card info structure */
 static mmcsdCardInfo sdCard;
-
-/* Fat devices registered */
-typedef struct _fatDevice {
-	/* Pointer to underlying device/controller */
-	void *dev;
-
-	/* File system pointer */
-	FATFS *fs;
-
-	/* state */
-	unsigned int initDone;
-
-} fatDevice;
-extern fatDevice fat_devices[2];
 
 int SDCardInit(uint16_t id) {
 
@@ -114,12 +92,7 @@ int SDCardInit(uint16_t id) {
 }
 
 int SDCardOpen(uint16_t id) {
-	if ((HSMMCSDCardPresent(&ctrlInfo)) == 1) {
-		HSMMCSDFsMount(0, &sdCard);
-		return (f_opendir(&g_sDirObject, g_cCwdBuf) == FR_OK);
-	}
-
-	return DRIVER_ERROR;
+	return (HSMMCSDCardPresent(&ctrlInfo) == 1);
 }
 
 int SDCardClose(uint16_t id) {
@@ -131,53 +104,8 @@ int SDCardWrite(uint16_t id, char* buf, uint16_t len) {
 }
 
 int SDCardRead(uint16_t id, char* buf, uint16_t len) {
-	volatile unsigned int i = 0;
-	volatile FRESULT fresult;
-
-	volatile int ulTotalSize = 0;
-	volatile int ulFileCount = 0;
-	volatile int ulDirCount = 0;
-
 	if ((HSMMCSDCardPresent(&ctrlInfo)) == 1) {
-		while (1) {
-			// Read an entry from the directory.
-			fresult = f_readdir(&g_sDirObject, &g_sFileInfo);
-
-			// Check for error and return if there is a problem.
-			if (fresult != FR_OK) { return (fresult); }
-
-			// If the file name is blank, then this is the end of the listing.
-			if (!g_sFileInfo.fname[0]) { break; }
-
-			// If the attribute is directory, then increment the directory count.
-			if (g_sFileInfo.fattrib & AM_DIR) { ulDirCount++; }
-
-			 // Otherwise, it is a file.  Increment the file count, and add in the file size to the total.
-			else {
-				ulFileCount++;
-				ulTotalSize += g_sFileInfo.fsize;
-			}
-
-			 // Print the entry information on a single line with formatting to show
-			 // the attributes, date, time, size, and name.
-			printf("%c%c%c%c%c %u/%02u/%02u %02u:%02u %9u  %s\n",
-					(g_sFileInfo.fattrib & AM_DIR) ? 'D' : '-',
-					(g_sFileInfo.fattrib & AM_RDO) ? 'R' : '-',
-					(g_sFileInfo.fattrib & AM_HID) ? 'H' : '-',
-					(g_sFileInfo.fattrib & AM_SYS) ? 'S' : '-',
-					(g_sFileInfo.fattrib & AM_ARC) ? 'A' : '-',
-					(g_sFileInfo.fdate >> 9) + 1980,
-					(g_sFileInfo.fdate >> 5) & 15, g_sFileInfo.fdate & 31,
-					(g_sFileInfo.ftime >> 11),
-					(g_sFileInfo.ftime >> 5) & 63, g_sFileInfo.fsize,
-					g_sFileInfo.fname);
-		}
-
-		printf("\n%4u File(s),%10u bytes total\n%4u Dir(s)", ulFileCount, ulTotalSize, ulDirCount);
-	}
-	else
-	{
-		return DRIVER_ERROR;
+		memcpy(buf, &sdCard, sizeof(mmcsdCardInfo));
 	}
 
 	return DRIVER_OK;
@@ -292,14 +220,6 @@ static unsigned int HSMMCSDXferStatusGet(mmcsdCtrlInfo *ctrl) {
 	ctrlInfo.dmaEnable = 0;
 
 	return status;
-}
-
-static void HSMMCSDFsMount(unsigned int driveNum, void *ptr) {
-	// TODO: this is important
-	f_mount(driveNum, &g_sFatFs);
-	fat_devices[driveNum].dev = ptr;
-	fat_devices[driveNum].fs = &g_sFatFs;
-	fat_devices[driveNum].initDone = 0;
 }
 
 static void EDMA3AINTCConfigure(void) {
