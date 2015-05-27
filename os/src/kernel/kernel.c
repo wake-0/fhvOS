@@ -51,6 +51,12 @@ void KernelStart()
 	DeviceManagerWrite(led3, "1", 1);
 	KernelInfo("Turned on Power LED\n");
 
+	KernelInfo("Starting File Manager\n");
+	device_t sdcard = DeviceManagerGetDevice("SDCARD", 6);
+	FileManagerInit(sdcard);
+
+	KernelInfo("File Manager started\n");
+
 	KernelInfo("Starting Process Manager\n");
 	ProcessManagerInit();
 	KernelInfo("Process Manager started\n");
