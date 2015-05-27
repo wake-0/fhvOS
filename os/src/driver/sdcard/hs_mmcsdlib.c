@@ -262,11 +262,11 @@ int HSMMCSDBusFreqConfig(mmcsdCtrlInfo *ctrl, unsigned int busFreq)
     return HSMMCSDBusFreqSet(ctrl->memBase, ctrl->ipClk, busFreq, 0);
 }
 
-void HSMMCSDRxDmaConfig(void *ptr, unsigned int blkSize, unsigned int nblks, int memBase)
+void HSMMCSDRxDmaConfig(mmcsdCtrlInfo *ctrl, void *ptr, unsigned int blkSize, unsigned int nblks)
 {
 	EDMA3CCPaRAMEntry paramSet;
 
-	paramSet.srcAddr = memBase + MMCHS_DATA;
+	paramSet.srcAddr = ctrl->memBase + MMCHS_DATA;
 	paramSet.destAddr = (unsigned int) ptr;
 	paramSet.srcBIdx = 0;
 	paramSet.srcCIdx = 0;
@@ -306,7 +306,7 @@ void HSMMCSDRxDmaConfig(void *ptr, unsigned int blkSize, unsigned int nblks, int
 void HSMMCSDXferSetup(mmcsdCtrlInfo *ctrl, unsigned char rwFlag,
 		void *ptr, unsigned int blkSize, unsigned int nBlks) {
 	if (rwFlag == 1) {
-		HSMMCSDRxDmaConfig(ptr, blkSize, nBlks, ctrl->memBase);
+		HSMMCSDRxDmaConfig(ctrl, ptr, blkSize, nBlks);
 	} else {
 		//HSMMCSDTxDmaConfig(ptr, blkSize, nBlks);
 	}
