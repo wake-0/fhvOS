@@ -27,3 +27,15 @@ int FileManagerOpenExecutable(char* name, boolean_t searchInGlobalBinPath, int a
 
 	return FILE_MANAGER_NOT_FOUND;
 }
+
+int FileManagerInit(device_t device) {
+	return DeviceManagerInitDevice(device);
+}
+
+int FileManagerListDirectoryContent(const char* name, entryType_t* buf, int length) {
+	return FILE_MANAGER_OK;
+}
+
+int FileManagerOpenFile(const char* name, int startByte, char* buf, int length) {
+	return FILE_MANAGER_OK;
+}
