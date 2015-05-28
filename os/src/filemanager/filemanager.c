@@ -40,7 +40,7 @@ int FileManagerOpenExecutable(char* name, boolean_t searchInGlobalBinPath, int a
 		void (*funcPtr)(int, char ** ) = HardCodedProgramsGetProgram(name);
 		if (funcPtr != NULL)
 		{
-			process_t* proc = ProcessManagerStartProcess(name, funcPtr, blocking, context);
+			process_t* proc = ProcessManagerStartProcess(name, funcPtr, argc, argv, blocking, context);
 			return FILE_MANAGER_OK;
 		}
 	}
@@ -154,7 +154,7 @@ int FileManagerSetCurrentWorkingDirectory(char *name)
 		return FILE_MANAGER_NOT_FOUND;
 	}
 
-	strncpy(currentWorkingDirectory, name, len);
+	strncpy(currentWorkingDirectory, name, len + 1);
 
 	return FILE_MANAGER_OK;
 }
@@ -167,7 +167,7 @@ int FileManagerGetCurrentWorkingDirectory(char *buf, int len)
 		return FILE_MANAGER_BUFFER_TOO_SMALL;
 	}
 
-	strncpy(buf, currentWorkingDirectory, cwd_len);
+	strncpy(buf, currentWorkingDirectory, cwd_len + 1);
 
 	return FILE_MANAGER_OK;
 }

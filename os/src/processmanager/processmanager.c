@@ -6,6 +6,8 @@
  */
 
 #include "processmanager.h"
+#include <string.h>
+#include <stdlib.h>
 #include "../scheduler/scheduler.h"
 #include "../hal/cpu/hal_cpu.h"
 #include "../driver/cpu/driver_cpu.h"
@@ -34,14 +36,26 @@ void ProcessManagerInit(void)
 }
 
 
-process_t* ProcessManagerStartProcess(char * processName, void(*funcPtr)(int, char ** ), boolean_t blocking, context_t* context)
+process_t* ProcessManagerStartProcess(char * processName, void(*funcPtr)(int, char ** ), int argc, char** argv, boolean_t blocking, context_t* context)
 {
 	// Create new process info
-	process_t* ptr = SchedulerStartProcess(funcPtr); // TODO Add argc and argv
+	process_t* ptr = SchedulerStartProcess(funcPtr);
 	if (ptr == NULL)
 	{
 		return NULL;
 	}
+
+	// Add argc and argv to the process (TODO Maybe we have to copy at least argv somehwere into the process's space)
+	ptr->context->registers[0] = (register_t) argc;
+	char** argv_cpy = malloc(sizeof(char*) * argc);
+	unsigned int i = 0;
+	for (i = 0; i < argc; i++)
+	{
+		int len = strlen(argv[i]);
+		argv_cpy[i] = malloc(sizeof(char) * len);
+		strncpy(argv_cpy[i], argv[i], len + 1);
+	}
+	ptr->context->registers[1] = (register_t) argv_cpy;
 
 	processes[processIdx].processScheduler = ptr;
 	processes[processIdx].processName = malloc(strlen(processName) * sizeof(char));
