@@ -7,6 +7,7 @@
 
 #include "filemanager.h"
 #include "hardcoded_programs.h"
+#include "../devicemanager/devicemanager.h"
 #include "../processmanager/processmanager.h"
 #include "../systemapi/includes/system.h"
 #include "../filesystem/ff.h"
@@ -62,17 +63,24 @@ int FileManagerOpenExecutable(char* name, boolean_t searchInGlobalBinPath, int a
 }
 
 int FileManagerInit(device_t device) {
-	int returnValue = DeviceManagerInitDevice(device);
+	if (DeviceManagerInitDevice(device) != DRIVER_OK)
+	{
+		return FILE_MANAGER_NO_DEVICE_FOUND;
+	}
 	DeviceManagerOpen(device);
 
 	int length = sizeof(mmcsdCardInfo);
 	char* sdCard = (char*) malloc(length);
 
-	DeviceManagerRead(device, sdCard, length);
+	if (DeviceManagerRead(device, sdCard, length) != DRIVER_OK)
+	{
+		return FILE_MANAGER_NO_DEVICE_FOUND;
+	}
+
 	mmcsdCardInfo* card = (mmcsdCardInfo*)(sdCard);
 
 	// TODO: This function is not working because the &card
-	//HSMMCSDFsMount(0, &card);
+	HSMMCSDFsMount(0, card);
 
 	f_mount(0, &g_sFatFs);
 	fat_devices[0].dev = card;
@@ -84,7 +92,7 @@ int FileManagerInit(device_t device) {
 
 	f_opendir(&g_sDirObject, g_cCwdBuf);
 
-	return returnValue;
+	return FILE_MANAGER_OK;
 }
 
 int FileManagerListDirectoryContent(const char* name, entryType_t* buf, int length) {

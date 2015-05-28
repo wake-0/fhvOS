@@ -38,6 +38,7 @@ void KernelStart()
 		KernelError("Illegal call of KernelStart()\n");
 	}
 
+	int res = 0;
 
 	DeviceManagerInit();
 	device_t uart = DeviceManagerGetDevice("UART0", 5);
@@ -53,9 +54,15 @@ void KernelStart()
 
 	KernelInfo("Starting File Manager\n");
 	device_t sdcard = DeviceManagerGetDevice("SDCARD", 6);
-	FileManagerInit(sdcard);
-
-	KernelInfo("File Manager started\n");
+	if ((res = FileManagerInit(sdcard)) == FILE_MANAGER_OK)
+	{
+		KernelInfo("File Manager started\n");
+	}
+	else
+	{
+		KernelInfo("File Manager was not initialized\n");
+		KernelError("FileManagerInit returned %d\n", res);
+	}
 
 	KernelInfo("Starting Process Manager\n");
 	ProcessManagerInit();
