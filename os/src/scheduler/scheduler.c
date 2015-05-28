@@ -28,6 +28,7 @@
 /*
  * Global variables
  */
+static device_t stdoutDevice;
 static processId_t runningProcess;
 static process_t processes[PROCESSES_MAX];
 static device_t timer;
@@ -49,7 +50,7 @@ void dummyEnd() {
 /*
  * Functions from the .h file
  */
-int SchedulerInit(void) {
+int SchedulerInit(device_t stdDevice) {
 	memset((void*)STACK_START, 0, STACK_SIZE * 1);
 
 	int i;
@@ -61,6 +62,8 @@ int SchedulerInit(void) {
 
 	schedulingEnabled = true;
 
+	stdoutDevice = stdDevice;
+	DeviceManagerOpen(stdoutDevice);
 	// No process is running
 	runningProcess = INVALID_PROCESS_ID;
 	return SCHEDULER_OK;
@@ -286,7 +289,9 @@ void timerISR(address_t* context)
 
 	if (schedulingEnabled)
 	{
+		DeviceManagerWrite(stdoutDevice, "1", 1);
 		SchedulerRunNextProcess(procContext);
+		DeviceManagerWrite(stdoutDevice, "0", 1);
 	}
 
 	DeviceManagerWrite(timer, ENABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);

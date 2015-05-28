@@ -70,7 +70,7 @@ struct process_t_struct {
 /*
  * Scheduler functions
  */
-extern int SchedulerInit(void);
+extern int SchedulerInit(device_t stdoutDevice);
 extern int SchedulerStart(device_t timerDevice);
 extern process_t* SchedulerStartProcess(processFunc func);
 extern int SchedulerRunNextProcess(context_t* context);

@@ -20,7 +20,9 @@ static int processIdx = 0;
 
 void ProcessManagerInit(void)
 {
-	SchedulerInit();
+	device_t led0 = DeviceManagerGetDevice("LED0", 4);
+
+	SchedulerInit(led0);
 	MMUInit();
 
 	device_t timer = DeviceManagerGetDevice("TIMER2", 6);
