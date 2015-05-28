@@ -24,9 +24,11 @@ typedef struct {
  * Forward Declarations of test program functions
  */
 void HardCodedPrograms_HelloWorld(int, char**);
+void HardCodedPrograms_Cwd(int, char**);
 
 static command_program_entry_t mapping[HARDCODED_PROGRAMS_COUNT] = {
-		{ "hello" , HardCodedPrograms_HelloWorld }
+		{ "hello" , HardCodedPrograms_HelloWorld },
+		{ "cwd", HardCodedPrograms_Cwd }
 };
 
 void (*HardCodedProgramsGetProgram(char* name))(int, char**)
@@ -52,7 +54,21 @@ void (*HardCodedProgramsGetProgram(char* name))(int, char**)
  */
 void HardCodedPrograms_HelloWorld(int argc, char** argv)
 {
-	printf("Hello World!\n");
+	if (argc == 1)
+	{
+		printf("Hello %s!\n", argv[0]);
+	}
+	else
+	{
+		printf("Hello World!\n");
+	}
+}
+
+void HardCodedPrograms_Cwd(int argc, char** argv)
+{
+	char buf[255] = { 0 };
+	FileManagerGetCurrentWorkingDirectory(buf, 255);
+	printf("%s\n", buf);
 }
 
 #endif /* FILEMANAGER_HARDCODED_PROGRAMS_H_ */
