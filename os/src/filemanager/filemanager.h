@@ -32,6 +32,8 @@ extern int FileManagerInit(device_t device);
 extern int FileManagerListDirectoryContent(const char* name, entryType_t* buf, int length);
 extern int FileManagerOpenFile(const char* name, int startByte, char* buf, int length);
 extern int FileManagerOpenExecutable(char* name, boolean_t searchInGlobalBinPath, int argc, char** argv, boolean_t blocking, context_t* context);
+extern int FileManagerSetCurrentWorkingDirectory(char *name);
+extern int FileManagerGetCurrentWorkingDirectory(char *buf, int len);
 
 // TODO Add more functions see Bug #74
 

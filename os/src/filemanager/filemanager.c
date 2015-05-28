@@ -139,6 +139,39 @@ int FileManagerOpenFile(const char* name, int startByte, char* buf, int length) 
 	return FILE_MANAGER_OK;
 }
 
+int FileManagerSetCurrentWorkingDirectory(char *name)
+{
+	// Check if the given cwd is valid acc. string length
+	unsigned int len = strlen(name);
+	if (len > FILE_MANAGER_MAX_PATH_LENGTH)
+	{
+		return FILE_MANAGER_NOT_FOUND;
+	}
+
+	// Check if we can open the directory
+	if (f_opendir(&dir, name) != FR_OK)
+	{
+		return FILE_MANAGER_NOT_FOUND;
+	}
+
+	strncpy(currentWorkingDirectory, name, len);
+
+	return FILE_MANAGER_OK;
+}
+
+int FileManagerGetCurrentWorkingDirectory(char *buf, int len)
+{
+	unsigned int cwd_len = strlen(currentWorkingDirectory);
+	if (len < cwd_len)
+	{
+		return FILE_MANAGER_BUFFER_TOO_SMALL;
+	}
+
+	strncpy(buf, currentWorkingDirectory, cwd_len);
+
+	return FILE_MANAGER_OK;
+}
+
 static void mountFatDevice(unsigned int driveNum, void* ptr) {
 	f_mount(driveNum, &fatFileSystem);
 	fat_devices[driveNum].dev = ptr;
