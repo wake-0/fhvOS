@@ -46,7 +46,7 @@ struct _mmcsdCtrlInfo;
 #define SOC_EDMA30CC_0_REGS                  (0x49000000)
 #define EDMA_INST_BASE 						 (SOC_EDMA30CC_0_REGS)
 
-#define PATH_BUF_SIZE   					 (512)
+#define FILE_MANAGER_MAX_PATH_LENGTH   					 (512)
 
 // Callback functions
 static void Edma3CompletionIsr(void* params);

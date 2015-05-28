@@ -13,36 +13,24 @@
 #include "../filesystem/ff.h"
 #include "../driver/sdcard/mmcsd_proto.h"
 
-/* Cacheline size */
-#ifndef SOC_CACHELINE_SIZE
-#define SOC_CACHELINE_SIZE         128
-#endif
+#define FILE_MANAGER_MAX_PATH_LENGTH	(512)
 
-#define PATH_BUF_SIZE   					 (512)
-
-#pragma DATA_ALIGN(g_sFatFs, SOC_CACHELINE_SIZE);
-static FATFS g_sFatFs;
-
-/* Fat devices registered */
-typedef struct _fatDevice {
-	/* Pointer to underlying device/controller */
+// #pragma DATA_ALIGN(fatFileSystem, SOC_CACHELINE_SIZE);
+static FATFS fatFileSystem;
+typedef struct {
 	void *dev;
-
-	/* File system pointer */
 	FATFS *fs;
+	boolean_t initDone;
+} externalStorageDevice_t;
 
-	/* state */
-	unsigned int initDone;
+extern externalStorageDevice_t fat_devices[2];
 
-} fatDevice;
-extern fatDevice fat_devices[2];
+static DIR 			dir;
+static FILINFO 		fileInfo;
 
-static DIR g_sDirObject;
-static FILINFO g_sFileInfo;
-// This buffer holds the full path to the current working directory.  Initially it is root ("/").
-static char g_cCwdBuf[PATH_BUF_SIZE] = "/";
+static char currentWorkingDirectory[FILE_MANAGER_MAX_PATH_LENGTH];
 
-static void HSMMCSDFsMount(unsigned int driveNum, void *ptr);
+static void mountFatDevice(unsigned int driveNum, void*);
 
 int FileManagerOpenExecutable(char* name, boolean_t searchInGlobalBinPath, int argc, char** argv, boolean_t blocking, context_t* context)
 {
@@ -79,77 +67,81 @@ int FileManagerInit(device_t device) {
 
 	mmcsdCardInfo* card = (mmcsdCardInfo*)(sdCard);
 
-	// TODO: This function is not working because the &card
-	HSMMCSDFsMount(0, card);
+	mountFatDevice(0, card);
 
-	f_mount(0, &g_sFatFs);
+	f_mount(0, &fatFileSystem);
 	fat_devices[0].dev = card;
-	fat_devices[0].fs = &g_sFatFs;
-	fat_devices[0].initDone = 0;
+	fat_devices[0].fs = &fatFileSystem;
+	fat_devices[0].initDone = false;
 
-	// TODO: Remove this --> it is only for test purposes
-	mmcsdCardInfo *test = (mmcsdCardInfo *) fat_devices[0].dev;
-
-	f_opendir(&g_sDirObject, g_cCwdBuf);
+	strncpy(currentWorkingDirectory, FILE_MANAGER_ROOT_PATH, FILE_MANAGER_MAX_PATH_LENGTH);
 
 	return FILE_MANAGER_OK;
 }
 
 int FileManagerListDirectoryContent(const char* name, entryType_t* buf, int length) {
-	volatile unsigned int i = 0;
 	volatile FRESULT fresult;
 
-	volatile int ulTotalSize = 0;
-	volatile int ulFileCount = 0;
-	volatile int ulDirCount = 0;
-
-	while (1) {
-		// Read an entry from the directory.
-		fresult = f_readdir(&g_sDirObject, &g_sFileInfo);
-
-		// Check for error and return if there is a problem.
-		if (fresult != FR_OK) { return (fresult); }
-
-		// If the file name is blank, then this is the end of the listing.
-		if (!g_sFileInfo.fname[0]) { break; }
-
-		// If the attribute is directory, then increment the directory count.
-		if (g_sFileInfo.fattrib & AM_DIR) { ulDirCount++; }
-
-		 // Otherwise, it is a file.  Increment the file count, and add in the file size to the total.
-		else {
-			ulFileCount++;
-			ulTotalSize += g_sFileInfo.fsize;
-		}
-
-		 // Print the entry information on a single line with formatting to show
-		 // the attributes, date, time, size, and name.
-		printf("%c%c%c%c%c %u/%02u/%02u %02u:%02u %9u  %s\n",
-				(g_sFileInfo.fattrib & AM_DIR) ? 'D' : '-',
-				(g_sFileInfo.fattrib & AM_RDO) ? 'R' : '-',
-				(g_sFileInfo.fattrib & AM_HID) ? 'H' : '-',
-				(g_sFileInfo.fattrib & AM_SYS) ? 'S' : '-',
-				(g_sFileInfo.fattrib & AM_ARC) ? 'A' : '-',
-				(g_sFileInfo.fdate >> 9) + 1980,
-				(g_sFileInfo.fdate >> 5) & 15, g_sFileInfo.fdate & 31,
-				(g_sFileInfo.ftime >> 11),
-				(g_sFileInfo.ftime >> 5) & 63, g_sFileInfo.fsize,
-				g_sFileInfo.fname);
+	// Open directory
+	if (f_opendir(&dir, currentWorkingDirectory))
+	{
+		return FILE_MANAGER_NOT_FOUND;
 	}
 
-	printf("\n%4u File(s),%10u bytes total\n%4u Dir(s)", ulFileCount, ulTotalSize, ulDirCount);
+	while (1) {
+		if (f_readdir(&dir, &fileInfo) != FR_OK)
+		{
+			// Error occured while reading: Doing cleanup of the incomplete results and return
+			memset(buf, 0, sizeof(entryType_t) * length);
+			return FILE_MANAGER_NOT_FOUND;
+		}
+
+		// If the file name is blank, then this is the end of the listing.
+		if (!fileInfo.fname[0]) { break; }
+
+		// Print the entry information on a single line with formatting to show
+		// the attributes, date, time, size, and name.
+		printf("%c%c%c%c%c %u/%02u/%02u %02u:%02u %9u  %s\n",
+				(fileInfo.fattrib & AM_DIR) ? 'D' : '-',
+				(fileInfo.fattrib & AM_RDO) ? 'R' : '-',
+				(fileInfo.fattrib & AM_HID) ? 'H' : '-',
+				(fileInfo.fattrib & AM_SYS) ? 'S' : '-',
+				(fileInfo.fattrib & AM_ARC) ? 'A' : '-',
+				(fileInfo.fdate >> 9) + 1980,
+				(fileInfo.fdate >> 5) & 15, fileInfo.fdate & 31,
+				(fileInfo.ftime >> 11),
+				(fileInfo.ftime >> 5) & 63, fileInfo.fsize,
+				fileInfo.fname);
+	}
 
 	return FILE_MANAGER_OK;
 }
 
 int FileManagerOpenFile(const char* name, int startByte, char* buf, int length) {
+	FIL file;
+	if (f_open(&file, "/nico.txt", FA_READ) != FR_OK)
+	{
+		return FILE_MANAGER_NOT_FOUND;
+	}
+	char buffer[1000];
+	unsigned short read = 0;
+
+	if (f_read(&file, &buffer, 1000, &read) != FR_OK)
+	{
+		memset(buf, 0, sizeof(char) * length);
+		return FILE_MANAGER_NOT_FOUND;
+	}
+
+	f_close(&file);
+
+	printf("Opened file nico.txt: \n%s\n", buffer);
+
 	return FILE_MANAGER_OK;
 }
 
-static void HSMMCSDFsMount(unsigned int driveNum, void *ptr) {
-	// TODO: this is important
-	f_mount(driveNum, &g_sFatFs);
+static void mountFatDevice(unsigned int driveNum, void* ptr) {
+	f_mount(driveNum, &fatFileSystem);
 	fat_devices[driveNum].dev = ptr;
-	fat_devices[driveNum].fs = &g_sFatFs;
-	fat_devices[driveNum].initDone = 0;
+	fat_devices[driveNum].fs = &fatFileSystem;
+	fat_devices[driveNum].initDone = false;
 }

@@ -16,13 +16,15 @@
 #define FILE_MANAGER_BUFFER_TOO_SMALL (-2)
 #define FILE_MANAGER_NO_DEVICE_FOUND  (-4)
 
-#define FILE_MANAGER_BIN_PATH		"bin"
+#define FILE_MANAGER_ROOT_PATH		"/"
+#define FILE_MANAGER_BIN_PATH		FILE_MANAGER_ROOT_PATH "bin"
 #define FILE_MANAGER_MAX_FILE_LENGTH (5+1+3+1)
 
 typedef enum { TYPE_DIRECTORY, TYPE_FILE } entryType_t;
 
 typedef struct {
 	char name[FILE_MANAGER_MAX_FILE_LENGTH];
+	unsigned int size;
 	entryType_t type;
 } directoryEntry_t;
 
