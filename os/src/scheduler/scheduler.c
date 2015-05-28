@@ -32,7 +32,7 @@ static device_t stdoutDevice;
 static processId_t runningProcess;
 static process_t processes[PROCESSES_MAX];
 static device_t timer;
-static boolean_t schedulingEnabled;
+static volatile boolean_t schedulingEnabled;
 
 /*
  * Internal functions
@@ -86,11 +86,9 @@ int SchedulerStart(device_t initializedTimerDevice)
 }
 
 process_t* SchedulerStartProcess(processFunc func) {
-	KernelAtomicStart();
 
 	processId_t freeProcess = getNextFreeProcessId();
 	if (freeProcess == INVALID_PROCESS_ID) {
-		KernelAtomicEnd();
 		return NULL;
 	}
 
@@ -139,11 +137,9 @@ process_t* SchedulerStartProcess(processFunc func) {
 	if (MMUInitProcess(&processes[freeProcess]) == MMU_NOT_OK)
 	{
 		processes[freeProcess].state = FREE;
-		KernelAtomicEnd();
 		return NULL;
 	}
 
-	KernelAtomicEnd();
 	return &processes[freeProcess];
 }
 
@@ -243,7 +239,6 @@ processId_t getNextReadyProcessId(void) {
 }
 
 processId_t getNextProcessIdByState(processState_t state, int startId) {
-	KernelAtomicStart();
 	int i;
 
 	if(startId < 0 || startId >= PROCESSES_MAX)
@@ -259,12 +254,10 @@ processId_t getNextProcessIdByState(processState_t state, int startId) {
 			KernelDebug("Waking up pid=%d\n", (i + startId) % PROCESSES_MAX);
 		}
 		if (processes[(i + startId) % PROCESSES_MAX].state == state) {
-			KernelAtomicEnd();
 			return (i + startId) % PROCESSES_MAX;
 		}
 	}
 
-	KernelAtomicEnd();
 	return INVALID_PROCESS_ID;
 }
 
