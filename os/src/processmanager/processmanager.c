@@ -54,8 +54,9 @@ process_t* ProcessManagerStartProcess(char * processName, void(*funcPtr)(int, ch
 	for (i = 0; i < argc; i++)
 	{
 		int len = strlen(argv[i]);
-		argv_cpy[i] = malloc(sizeof(char) * len);
-		strncpy(argv_cpy[i], argv[i], len + 1);
+		argv_cpy[i] = malloc(sizeof(char) * len + 1);
+		strncpy(argv_cpy[i], argv[i], len);
+		argv_cpy[i][len] = '\0';
 	}
 	ptr->context->registers[1] = (register_t) argv_cpy;
 
