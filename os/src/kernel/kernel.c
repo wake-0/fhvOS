@@ -61,7 +61,7 @@ void KernelStart()
 	ProcessManagerInit();
 	KernelInfo("Process Manager started\n");
 
-	SchedulerDisableScheduling();
+	KernelAtomicStart();
 
 	KernelInfo("Starting idle process\n");
 	ProcessManagerStartProcess("idle", &kernelIdleProcess, false, NULL);
@@ -71,7 +71,7 @@ void KernelStart()
 	ProcessManagerStartProcess("tty", &ConsoleProcess, false, NULL);
 	KernelInfo("Console Started\n");
 
-	SchedulerEnableScheduling();
+	KernelAtomicEnd();
 
 	started = TRUE;
 
@@ -180,6 +180,16 @@ int	KernelError(const char *format, ...)
 #else
 	return 0;
 #endif
+}
+
+void KernelAtomicStart()
+{
+	SchedulerDisableScheduling();
+}
+
+void KernelAtomicEnd()
+{
+	SchedulerEnableScheduling();
 }
 
 static void kernelIdleProcess(int argc, char** argv)

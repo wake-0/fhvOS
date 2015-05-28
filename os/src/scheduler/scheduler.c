@@ -83,11 +83,11 @@ int SchedulerStart(device_t initializedTimerDevice)
 }
 
 process_t* SchedulerStartProcess(processFunc func) {
-	CPUAtomicStart();
+	KernelAtomicStart();
 
 	processId_t freeProcess = getNextFreeProcessId();
 	if (freeProcess == INVALID_PROCESS_ID) {
-		CPUAtomicEnd();
+		KernelAtomicEnd();
 		return NULL;
 	}
 
@@ -136,19 +136,20 @@ process_t* SchedulerStartProcess(processFunc func) {
 	if (MMUInitProcess(&processes[freeProcess]) == MMU_NOT_OK)
 	{
 		processes[freeProcess].state = FREE;
+		KernelAtomicEnd();
 		return NULL;
 	}
 
-	CPUAtomicEnd();
+	KernelAtomicEnd();
 	return &processes[freeProcess];
 }
 
 int SchedulerRunNextProcess(context_t* context) {
-	CPUAtomicStart();
+	KernelAtomicStart();
 
 	processId_t nextProcess = getNextReadyProcessId();
 	if (nextProcess == INVALID_PROCESS_ID) {
-		CPUAtomicEnd();
+		KernelAtomicEnd();
 		return SCHEDULER_ERROR;
 	}
 
@@ -171,14 +172,14 @@ int SchedulerRunNextProcess(context_t* context) {
 	// Update the context for the next running process
 	memcpy(context, processes[runningProcess].context, sizeof(context_t));
 	MMUSwitchToProcess(&processes[runningProcess]);
-	CPUAtomicEnd();
+	KernelAtomicEnd();
 	return SCHEDULER_OK;
 }
 
 int SchedulerKillProcess(processId_t id) {
-	CPUAtomicStart();
+	KernelAtomicStart();
 	if (id < 0 || id >= PROCESSES_MAX) {
-		CPUAtomicEnd();
+		KernelAtomicEnd();
 		return SCHEDULER_ERROR;
 	}
 
@@ -196,7 +197,7 @@ int SchedulerKillProcess(processId_t id) {
 	}
 
 	MMUFreeAllPageFramesOfProcess(&processes[id]);
-	CPUAtomicEnd();
+	KernelAtomicEnd();
 	return SCHEDULER_OK;
 }
 
@@ -239,6 +240,7 @@ processId_t getNextReadyProcessId(void) {
 }
 
 processId_t getNextProcessIdByState(processState_t state, int startId) {
+	KernelAtomicStart();
 	int i;
 
 	if(startId < 0 || startId >= PROCESSES_MAX)
@@ -254,10 +256,12 @@ processId_t getNextProcessIdByState(processState_t state, int startId) {
 			KernelDebug("Waking up pid=%d\n", (i + startId) % PROCESSES_MAX);
 		}
 		if (processes[(i + startId) % PROCESSES_MAX].state == state) {
+			KernelAtomicEnd();
 			return (i + startId) % PROCESSES_MAX;
 		}
 	}
 
+	KernelAtomicEnd();
 	return INVALID_PROCESS_ID;
 }
 

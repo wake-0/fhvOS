@@ -23,5 +23,7 @@ extern int	KernelInfo(const char *format, ...);
 extern int	KernelDebug(const char *format, ...);
 extern int	KernelError(const char *format, ...);
 extern void KernelExecute(char* command, context_t* context);
+extern void KernelAtomicStart(void);
+extern void KernelAtomicEnd(void);
 
 #endif /* KERNEL_KERNEL_H_ */
