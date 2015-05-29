@@ -71,11 +71,11 @@ void KernelStart()
 	KernelAtomicStart();
 
 	KernelInfo("Starting idle process\n");
-	ProcessManagerStartProcess("idle", &kernelIdleProcess, false, NULL);
+	ProcessManagerStartProcess("idle", &kernelIdleProcess, 0, NULL, false, NULL);
 	KernelInfo("Idle process started\n");
 
 	KernelInfo("Starting console\n");
-	ProcessManagerStartProcess("tty", &ConsoleProcess, false, NULL);
+	ProcessManagerStartProcess("tty", &ConsoleProcess, 0, NULL, false, NULL);
 	KernelInfo("Console Started\n");
 
 	KernelAtomicEnd();
