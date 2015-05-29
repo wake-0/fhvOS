@@ -43,3 +43,14 @@ int read_directory(char* name, directoryEntry_t* buf, int len)
 	SystemCall(&message);
 	return *message.messageArgs.returnArg;
 }
+
+int set_cwd(char* path)
+{
+	int res = 0;
+	systemCallMessage_t message;
+	message.systemCallNumber = SYSTEM_CALL_CHDIR;
+	message.messageArgs.callBuf = path;
+	message.messageArgs.returnArg = &res;
+	SystemCall(&message);
+	return *message.messageArgs.returnArg;
+}

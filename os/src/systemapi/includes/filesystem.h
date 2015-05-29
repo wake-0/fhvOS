@@ -8,7 +8,7 @@
 #ifndef SYSTEMAPI_INCLUDES_FILESYSTEM_H_
 #define SYSTEMAPI_INCLUDES_FILESYSTEM_H_
 
-#define FILE_MANAGER_MAX_FILE_LENGTH (5+1+3+1)
+#define FILE_MANAGER_MAX_FILE_LENGTH (9+1+3+1)
 
 typedef enum { TYPE_DIRECTORY, TYPE_FILE } entryType_t;
 
@@ -21,5 +21,6 @@ typedef struct {
 extern int read_cwd(char* buf, int len);
 extern int read_file(char* name, int start, char* buf, int len);
 extern int read_directory(char* name, directoryEntry_t* buf, int len);
+extern int set_cwd(char* path);
 
 #endif /* SYSTEMAPI_INCLUDES_FILESYSTEM_H_ */

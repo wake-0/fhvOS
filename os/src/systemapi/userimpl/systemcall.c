@@ -35,6 +35,9 @@ int SystemCall(systemCallMessage_t* message)
 	case SYSTEM_CALL_READ_DIR:
 		asm(SYSTEM_CALL_ASM(SYSTEM_CALL_READ_DIR));
 		break;
+	case SYSTEM_CALL_CHDIR:
+		asm(SYSTEM_CALL_ASM(SYSTEM_CALL_CHDIR));
+		break;
 	}
 
 	return SYSTEM_CALL_OK;

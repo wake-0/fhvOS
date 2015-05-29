@@ -72,6 +72,12 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 			*message->messageArgs.returnArg = res;
 			break;
 		}
+		case SYSTEM_CALL_CHDIR:
+		{
+			int res = FileManagerSetCurrentWorkingDirectory(message->messageArgs.callBuf);
+			*message->messageArgs.returnArg = res;
+			break;
+		}
 		default:
 			break;
 	}
