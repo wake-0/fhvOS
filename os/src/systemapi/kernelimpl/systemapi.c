@@ -6,8 +6,10 @@
  */
 
 #include "systemapi.h"
+#include "../../hal/cpu/hal_cpu.h"
 #include "../../kernel/kernel.h"
 #include "../../scheduler/scheduler.h"
+#include "../../filemanager/filemanager.h"
 #include <stdio.h>
 
 /**
@@ -16,6 +18,10 @@
  */
 void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumber, context_t* context)
 {
+	// We allow interrupts but disallow scheduling
+	SchedulerDisableScheduling();
+	CPUirqe();
+
 	//KernelDebug("Systemcall number=%i\n", message->systemCallNumber);
 	switch (message->systemCallNumber)
 	{
@@ -46,6 +52,12 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 			process_t* curr = SchedulerGetRunningProcess();
 			SchedulerSleepProcess(curr->id, millis);
 			SchedulerRunNextProcess(context);
+			break;
+		}
+		case SYSTEM_CALL_READ:
+		{
+			int res = FileManagerOpenFile(message->messageArgs.callBuf, message->messageArgs.callArg, message->messageArgs.returnBuf, *message->messageArgs.returnArg);
+			*message->messageArgs.returnArg = res;
 			break;
 		}
 		default:
