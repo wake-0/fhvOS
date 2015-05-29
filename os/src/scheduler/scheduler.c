@@ -51,7 +51,6 @@ void dummyEnd() {
  * Functions from the .h file
  */
 int SchedulerInit(device_t stdDevice) {
-	memset((void*)STACK_START, 0, STACK_SIZE * 1);
 
 	int i;
 	for (i = 0; i < PROCESSES_MAX; i++) {
