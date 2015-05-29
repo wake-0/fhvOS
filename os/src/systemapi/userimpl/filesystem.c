@@ -33,3 +33,13 @@ int read_file(char* name, int start, char* buf, int len)
 	return *message.messageArgs.returnArg;
 }
 
+int read_directory(char* name, directoryEntry_t* buf, int len)
+{
+	systemCallMessage_t message;
+	message.systemCallNumber = SYSTEM_CALL_READ_DIR;
+	message.messageArgs.callBuf = name;
+	message.messageArgs.returnBuf = buf;
+	message.messageArgs.returnArg = &len;
+	SystemCall(&message);
+	return *message.messageArgs.returnArg;
+}

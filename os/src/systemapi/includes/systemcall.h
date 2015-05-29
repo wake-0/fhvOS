@@ -64,6 +64,7 @@
 #define SYSTEM_CALL_YIELD				100
 #define SYSTEM_CALL_SLEEP				101
 #define SYSTEM_CALL_CWD					102
+#define SYSTEM_CALL_READ_DIR			103
 
 #define __SYSTEM_CALL_STR_HELPER(x) #x
 #define SYSTEM_CALL_ASM_PREFIX			"    SWI   #"

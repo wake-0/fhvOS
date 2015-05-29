@@ -9,7 +9,6 @@
 #include "hardcoded_programs.h"
 #include "../devicemanager/devicemanager.h"
 #include "../processmanager/processmanager.h"
-#include "../systemapi/includes/system.h"
 #include "../filesystem/ff.h"
 #include "../driver/sdcard/mmcsd_proto.h"
 #include "../kernel/kernel.h"
@@ -80,15 +79,17 @@ int FileManagerInit(device_t device) {
 	return FILE_MANAGER_OK;
 }
 
-int FileManagerListDirectoryContent(const char* name, entryType_t* buf, int length) {
+int FileManagerListDirectoryContent(const char* name, directoryEntry_t* buf, int length) {
+	KernelDebug("FileManager reading directory %s\n", name);
+
 	volatile FRESULT fresult;
 
-	// Open directory
 	if (f_opendir(&dir, currentWorkingDirectory))
 	{
 		return FILE_MANAGER_NOT_FOUND;
 	}
 
+	int cnt = 0;
 	while (1) {
 		if (f_readdir(&dir, &fileInfo) != FR_OK)
 		{
@@ -100,9 +101,7 @@ int FileManagerListDirectoryContent(const char* name, entryType_t* buf, int leng
 		// If the file name is blank, then this is the end of the listing.
 		if (!fileInfo.fname[0]) { break; }
 
-		// Print the entry information on a single line with formatting to show
-		// the attributes, date, time, size, and name.
-		printf("%c%c%c%c%c %u/%02u/%02u %02u:%02u %9u  %s\n",
+		/*printf("%c%c%c%c%c %u/%02u/%02u %02u:%02u %9u  %s\n",
 				(fileInfo.fattrib & AM_DIR) ? 'D' : '-',
 				(fileInfo.fattrib & AM_RDO) ? 'R' : '-',
 				(fileInfo.fattrib & AM_HID) ? 'H' : '-',
@@ -112,8 +111,18 @@ int FileManagerListDirectoryContent(const char* name, entryType_t* buf, int leng
 				(fileInfo.fdate >> 5) & 15, fileInfo.fdate & 31,
 				(fileInfo.ftime >> 11),
 				(fileInfo.ftime >> 5) & 63, fileInfo.fsize,
-				fileInfo.fname);
+				fileInfo.fname);*/
+
+		buf[cnt].type = (fileInfo.fattrib & AM_DIR) ? TYPE_DIRECTORY : TYPE_FILE;
+		buf[cnt].size = fileInfo.fsize;
+		strncpy(buf[cnt].name, fileInfo.fname, FILE_MANAGER_MAX_FILE_LENGTH);
+		cnt++;
+		if (cnt >= length) {
+			return FILE_MANAGER_BUFFER_TOO_SMALL;
+		}
 	}
+
+	KernelDebug("FileManager read %d directory entries\n", cnt);
 
 	return FILE_MANAGER_OK;
 }

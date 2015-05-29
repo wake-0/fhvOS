@@ -27,11 +27,13 @@ typedef struct {
 void HardCodedPrograms_HelloWorld(int, char**);
 void HardCodedPrograms_Cwd(int, char**);
 void HardCodedPrograms_More(int, char**);
+void HardCodedPrograms_Ls(int, char**);
 
 static command_program_entry_t mapping[HARDCODED_PROGRAMS_COUNT] = {
 		{ "hello" , HardCodedPrograms_HelloWorld },
 		{ "cwd", HardCodedPrograms_Cwd },
-		{ "more", HardCodedPrograms_More }
+		{ "more", HardCodedPrograms_More },
+		{ "ls", HardCodedPrograms_Ls }
 };
 
 void (*HardCodedProgramsGetProgram(char* name))(int, char**)
@@ -109,6 +111,43 @@ void HardCodedPrograms_More(int argc, char** argv)
 	else
 	{
 		printf("Error reading file\n");
+	}
+}
+
+void HardCodedPrograms_Ls(int argc, char** argv)
+{
+	char cwd[255-8] = { 0 };
+	FileManagerGetCurrentWorkingDirectory(cwd, 255-8);
+
+	directoryEntry_t* retBuf = malloc(sizeof(directoryEntry_t) * 30);
+	memset(retBuf, 0, sizeof(directoryEntry_t) * 30);
+
+	if (read_directory(cwd, retBuf, 30) > 0)
+	{
+		printf("\n");
+		int i = 0;
+		int files = 0;
+		int bytes = 0;
+		for (i = 0; i < 30; i++)
+		{
+			if (strlen(retBuf[i].name) == 0)
+			{
+				break;
+			}
+			if (retBuf[i].type == TYPE_FILE)
+			{
+				files++;
+				bytes += retBuf[i].size;
+			}
+			printf("\t <%c> \t %d \t %s \n", (retBuf[i].type == TYPE_DIRECTORY) ? 'D' : 'F', retBuf[i].size, retBuf[i].name);
+		}
+		printf("\n %d Entries total", i);
+		printf("\n %d Directories", i - files);
+		printf("\n %d Files \t %d\n\n", files, bytes);
+	}
+	else
+	{
+		printf("Error reading directory\n");
 	}
 }
 
