@@ -287,6 +287,7 @@ static boolean_t acceptChar(char ch)
 	case '\\':
 	case '<':
 	case '>':
+	case '~':
 		return true;
 	}
 	return false;
