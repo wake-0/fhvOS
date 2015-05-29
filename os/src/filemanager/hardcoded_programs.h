@@ -70,7 +70,7 @@ void HardCodedPrograms_HelloWorld(int argc, char** argv)
 void HardCodedPrograms_Cwd(int argc, char** argv)
 {
 	char buf[255] = { 0 };
-	FileManagerGetCurrentWorkingDirectory(buf, 255);
+	read_cwd(buf, 255);
 	printf("%s\n", buf);
 }
 
