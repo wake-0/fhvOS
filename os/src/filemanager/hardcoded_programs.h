@@ -28,12 +28,14 @@ void HardCodedPrograms_HelloWorld(int, char**);
 void HardCodedPrograms_Cwd(int, char**);
 void HardCodedPrograms_More(int, char**);
 void HardCodedPrograms_Ls(int, char**);
+void HardCodedPrograms_Cd(int argc, char** argv);
 
 static command_program_entry_t mapping[HARDCODED_PROGRAMS_COUNT] = {
 		{ "hello" , HardCodedPrograms_HelloWorld },
 		{ "cwd", HardCodedPrograms_Cwd },
 		{ "more", HardCodedPrograms_More },
-		{ "ls", HardCodedPrograms_Ls }
+		{ "ls", HardCodedPrograms_Ls },
+		{ "cd", HardCodedPrograms_Cd }
 };
 
 void (*HardCodedProgramsGetProgram(char* name))(int, char**)
@@ -83,7 +85,7 @@ void HardCodedPrograms_More(int argc, char** argv)
 		printf("No input file given\n");
 		return;
 	}
-	if (strlen(argv[0]) > 8)
+	if (strlen(argv[0]) > 13)
 	{
 		printf("Filename too long\n");
 		return;
@@ -148,6 +150,46 @@ void HardCodedPrograms_Ls(int argc, char** argv)
 	else
 	{
 		printf("Error reading directory\n");
+	}
+}
+
+void HardCodedPrograms_Cd(int argc, char** argv)
+{
+	if (argc != 1)
+	{
+		return;
+	}
+
+	char cwd[255-8] = { 0 };
+	FileManagerGetCurrentWorkingDirectory(cwd, 255-8);
+
+	char buf[255] = {0};
+	if (strcmp("..", argv[0]) == 0)
+	{
+		int i = strlen(cwd) - 1;
+		for (; i > 0 && cwd[i] != '/'; i--)
+		{
+			cwd[i] = '\0';
+		}
+		cwd[i] = (i > 0) ? '\0' : cwd[i];
+		strncpy(buf, cwd, i+1);
+	}
+	else
+	{
+		if (cwd[strlen(cwd) - 1] == '/')
+		{
+			sprintf(buf, "%s%s\0", cwd, argv[0]);
+		}
+		else
+		{
+			sprintf(buf, "%s/%s\0", cwd, argv[0]);
+		}
+	}
+
+	int res = set_cwd(buf);
+	if (res <= 0)
+	{
+		printf("Could not open directory\n");
 	}
 }
 

@@ -155,6 +155,8 @@ int FileManagerOpenFile(const char* name, int startByte, char* buf, int length) 
 
 int FileManagerSetCurrentWorkingDirectory(char *name)
 {
+	KernelDebug("FileManager setting cwd to %s\n", name);
+
 	// Check if the given cwd is valid acc. string length
 	unsigned int len = strlen(name);
 	if (len > FILE_MANAGER_MAX_PATH_LENGTH)
