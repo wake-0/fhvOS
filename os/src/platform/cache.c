@@ -210,7 +210,7 @@ void CacheDataInvalidateAll(void)
  **/
 void CacheDataCleanBuff(unsigned int startAddr, unsigned int numBytes)
 {
-    CP15DCacheCleanBuff(startAddr, numBytes);
+    //CP15DCacheCleanBuff(startAddr, numBytes);
 }
 
 /**
@@ -227,7 +227,7 @@ void CacheDataCleanBuff(unsigned int startAddr, unsigned int numBytes)
  **/
 void CacheDataInvalidateBuff(unsigned int startAddr, unsigned int numBytes)
 {
-    CP15DCacheFlushBuff(startAddr, numBytes);
+    //CP15DCacheFlushBuff(startAddr, numBytes);
 }
 
 /**
