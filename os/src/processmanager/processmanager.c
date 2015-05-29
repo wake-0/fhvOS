@@ -32,7 +32,7 @@ void ProcessManagerInit(void)
 
 	device_t cpu = DeviceManagerGetDevice("CPU", 3);
 	DeviceManagerIoctl(cpu, DRIVER_CPU_COMMAND_INTERRUPT_MASTER_IRQ_ENABLE, 0, NULL, 0);
-	DeviceManagerIoctl(cpu, DRIVER_CPU_COMMAND_INTERRUPT_RESET_AINTC, 0, NULL, 0);
+	//DeviceManagerIoctl(cpu, DRIVER_CPU_COMMAND_INTERRUPT_RESET_AINTC, 0, NULL, 0);
 
 	SchedulerStart(timer);
 }

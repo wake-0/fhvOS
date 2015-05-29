@@ -12,6 +12,7 @@
 #include "../systemapi/includes/system.h"
 #include "../filesystem/ff.h"
 #include "../driver/sdcard/mmcsd_proto.h"
+#include "../kernel/kernel.h"
 
 #define FILE_MANAGER_MAX_PATH_LENGTH	(512)
 
@@ -67,7 +68,7 @@ int FileManagerInit(device_t device) {
 
 	mmcsdCardInfo* card = (mmcsdCardInfo*)(sdCard);
 
-	mountFatDevice(0, card);
+	//mountFatDevice(0, card);
 
 	f_mount(0, &fatFileSystem);
 	fat_devices[0].dev = card;
@@ -118,25 +119,29 @@ int FileManagerListDirectoryContent(const char* name, entryType_t* buf, int leng
 }
 
 int FileManagerOpenFile(const char* name, int startByte, char* buf, int length) {
+	KernelDebug("FileManager opening file %s\n", name);
 	FIL file;
-	if (f_open(&file, "/nico.txt", FA_READ) != FR_OK)
+	if (f_open(&file, name, FA_READ) != FR_OK)
 	{
 		return FILE_MANAGER_NOT_FOUND;
 	}
-	char buffer[1000];
+
 	unsigned short read = 0;
 
-	if (f_read(&file, &buffer, 1000, &read) != FR_OK)
+	char* temp_buffer = malloc(sizeof(char) * length);
+	if (f_read(&file, temp_buffer, length, &read) != FR_OK)
 	{
-		memset(buf, 0, sizeof(char) * length);
 		return FILE_MANAGER_NOT_FOUND;
 	}
 
+	memset(buf, '\0', length);
+	memcpy(buf, temp_buffer, read);
 	f_close(&file);
 
-	printf("Opened file nico.txt: \n%s\n", buffer);
+	free(temp_buffer);
 
-	return FILE_MANAGER_OK;
+	KernelDebug("FileManager read %d in a buffer of %d\n", read, length);
+	return (read >= length) ? FILE_MANAGER_BUFFER_TOO_SMALL : FILE_MANAGER_OK;
 }
 
 int FileManagerSetCurrentWorkingDirectory(char *name)
