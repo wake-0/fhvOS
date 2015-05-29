@@ -54,6 +54,12 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 			SchedulerRunNextProcess(context);
 			break;
 		}
+		case SYSTEM_CALL_CWD:
+		{
+			int res = FileManagerGetCurrentWorkingDirectory(message->messageArgs.returnBuf, message->messageArgs.callArg);
+			*message->messageArgs.returnArg = res;
+			break;
+		}
 		case SYSTEM_CALL_READ:
 		{
 			int res = FileManagerOpenFile(message->messageArgs.callBuf, message->messageArgs.callArg, message->messageArgs.returnBuf, *message->messageArgs.returnArg);

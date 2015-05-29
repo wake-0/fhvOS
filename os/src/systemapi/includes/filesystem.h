@@ -8,6 +8,7 @@
 #ifndef SYSTEMAPI_INCLUDES_FILESYSTEM_H_
 #define SYSTEMAPI_INCLUDES_FILESYSTEM_H_
 
+extern int read_cwd(char* buf, int len);
 extern int read_file(char* name, int start, char* buf, int len);
 
 

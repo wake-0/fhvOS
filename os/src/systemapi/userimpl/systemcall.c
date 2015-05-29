@@ -29,6 +29,9 @@ int SystemCall(systemCallMessage_t* message)
 	case SYSTEM_CALL_READ:
 	    asm(SYSTEM_CALL_ASM(SYSTEM_CALL_READ));
 		break;
+	case SYSTEM_CALL_CWD:
+		asm(SYSTEM_CALL_ASM(SYSTEM_CALL_CWD));
+		break;
 	}
 
 	return SYSTEM_CALL_OK;
