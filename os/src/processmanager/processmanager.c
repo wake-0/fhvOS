@@ -74,12 +74,33 @@ process_t* ProcessManagerStartProcess(char * processName, void(*funcPtr)(int, ch
 		SchedulerRunNextProcess(context);
 	}
 
+	processIdx++;
+
 	return ptr;
 }
 
-void ProcessManagerKillProcess(int processId)
+void ProcessManagerKillProcess(processId_t processId)
 {
-	// TODO
+	int i = 0;
+	for (i = 0; i < PROCESSES_MAX; i++)
+	{
+		if (processes[i].processScheduler != NULL)
+		{
+			if (processes[i].processScheduler->id == processId)
+			{
+				break;
+			}
+		}
+	}
+	if (i < PROCESSES_MAX)
+	{
+		for (i = i + 1; i < PROCESSES_MAX; i++)
+		{
+			processes[i-1] = processes[i];
+		}
+		processIdx--;
+		SchedulerKillProcess(processId);
+	}
 }
 
 
@@ -91,6 +112,12 @@ int ProcessManagerGetRunningProcessesCount(void)
 
 void ProcessManagerListProcesses(processInfoAPI_t* processAPIPtr, int length)
 {
-	// TODO
+	unsigned int i = 0;
+	for (i = 0; i < processIdx && i < length; i++)
+	{
+		processAPIPtr[i].processID = processes[i].processScheduler->id;
+		processAPIPtr[i].startTime = processes[i].startTime;
+		processAPIPtr[i].state = processes[i].processScheduler->state;
+		strncpy(processAPIPtr[i].processName, processes[i].processName, PROCESS_MANAGER_MAX_PROCESS_LENGTH);
+	}
 }
-

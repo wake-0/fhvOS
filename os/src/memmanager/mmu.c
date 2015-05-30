@@ -161,7 +161,7 @@ void MMUHandleDataAbortException(context_t* context)
 	if(NULL == dabtAccessedVirtualAddress)
 	{
 		KernelError("NPE from process %d\n", runningProcess->id);
-		SchedulerKillProcess(runningProcess->id);
+		ProcessManagerKillProcess(runningProcess->id);
 		SchedulerRunNextProcess(context);
 		return;
 	}
@@ -172,7 +172,7 @@ void MMUHandleDataAbortException(context_t* context)
 	}
 	else if(NULL == runningProcess->pageTableL1)
 	{
-		SchedulerKillProcess(runningProcess->id);
+		ProcessManagerKillProcess(runningProcess->id);
 		SchedulerRunNextProcess(context);
 		return;
 	}
@@ -196,10 +196,10 @@ void MMUHandleDataAbortException(context_t* context)
 			mmuMapFreePageFrameIntoL2PageTable(dabtAccessedVirtualAddress, mmuGetAddressSpecificL2PageTable(runningProcess->pageTableL1, dabtAccessedVirtualAddress));
 			break;
 		case FIRST_LEVEL_PERMISSION_FAULT:
-			SchedulerKillProcess(runningProcess->id);
+			ProcessManagerKillProcess(runningProcess->id);
 			break;
 		case SECOND_LEVEL_PERMISSION_FAULT:
-			SchedulerKillProcess(runningProcess->id);
+			ProcessManagerKillProcess(runningProcess->id);
 			break;
 		case DEBUG_EVENT:
 			break;

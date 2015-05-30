@@ -35,11 +35,11 @@ typedef struct process_t_struct process_t;
  * Enums for the process struct
  */
 typedef enum {
-	READY,
-	RUNNING,
-	BLOCKED,
-	SLEEPING,
-	FREE
+	READY = 0,
+	RUNNING = 1,
+	BLOCKED = 2,
+	SLEEPING = 4,
+	FREE = 8
 } processState_t;
 
 // Process switch context
