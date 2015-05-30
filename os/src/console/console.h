@@ -11,11 +11,11 @@
 #include "../platform/platform.h"
 #include "../devicemanager/devicemanager.h"
 
+typedef enum {BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE} color_t;
+
 extern void ConsoleInit();
 extern void ConsoleProcess(int argc, char** argv);
 extern void ConsoleClear();
-extern void ConsoleDisplayInfo();
-extern void ConsoleDisplayDebug();
-extern void ConsoleDisplayError();
+extern void ConsoleColor(color_t color);
 
 #endif /* CONSOLE_CONSOLE_H_ */

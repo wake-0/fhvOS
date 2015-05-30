@@ -28,9 +28,7 @@
 #define CONSOLE_COLOR_CYAN				("\e[0;36m")
 #define CONSOLE_COLOR_WHITE				("\e[0;37m")
 
-#define CONSOLE_COLOR_ERROR				(CONSOLE_COLOR_RED)
-#define CONSOLE_COLOR_INFO				(CONSOLE_COLOR_WHITE)
-#define CONSOLE_COLOR_DEBUG				(CONSOLE_COLOR_GREEN)
+#define CONSOLE_COLOR_LENGTH			(8)
 
 static boolean_t initialized = false;
 static device_t consoleDevice;
@@ -230,7 +228,7 @@ void ConsoleProcess(int argc, char** argv)
 
 void printWelcomeMessage()
 {
-	ConsoleDisplayInfo();
+	ConsoleColor(WHITE);
 	DeviceManagerWrite(consoleDevice, "Welcome root...\r\nYou are logged in\r\n\r\n", 38); // TODO Extract this as a constant
 }
 void printOSLogo()
@@ -281,7 +279,7 @@ void printOSLogo()
 }
 void printPrompt()
 {
-	ConsoleDisplayInfo(),
+	ConsoleColor(WHITE);
 	DeviceManagerWrite(consoleDevice, "root@fhv-os# ", 13);
 }
 
@@ -491,14 +489,31 @@ int ungetc(int c, FILE *f)
     return (int )uc;
 }
 
-void ConsoleDisplayInfo() {
-	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_INFO, 8);
-}
-
-void ConsoleDisplayDebug() {
-	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_DEBUG, 8);
-}
-
-void ConsoleDisplayError() {
-	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_ERROR, 8);
+void ConsoleColor(color_t color) {
+	switch (color) {
+		case BLACK:
+			DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_BLACK, CONSOLE_COLOR_LENGTH);
+			break;
+		case RED:
+			DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_RED, CONSOLE_COLOR_LENGTH);
+			break;
+		case GREEN:
+			DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_GREEN, CONSOLE_COLOR_LENGTH);
+			break;
+		case YELLOW:
+			DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_YELLOW, CONSOLE_COLOR_LENGTH);
+			break;
+		case BLUE:
+			DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_BLUE, CONSOLE_COLOR_LENGTH);
+			break;
+		case MAGENTA:
+			DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_MAGENTA, CONSOLE_COLOR_LENGTH);
+			break;
+		case CYAN:
+			DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_CYAN, CONSOLE_COLOR_LENGTH);
+			break;
+		default:
+			DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_WHITE, CONSOLE_COLOR_LENGTH);
+			break;
+	}
 }
