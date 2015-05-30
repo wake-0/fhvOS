@@ -230,7 +230,7 @@ void ConsoleProcess(int argc, char** argv)
 
 void printWelcomeMessage()
 {
-	ConsoleChangeDisplayedInformationType(INFO);
+	ConsoleDisplayInfo();
 	DeviceManagerWrite(consoleDevice, "Welcome root...\r\nYou are logged in\r\n\r\n", 38); // TODO Extract this as a constant
 }
 void printOSLogo()
@@ -278,12 +278,10 @@ void printOSLogo()
 	DeviceManagerWrite(consoleDevice, "                           @<3@       \r\n", 40);
 	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_MAGENTA, 8);
 	DeviceManagerWrite(consoleDevice, "                            @@        \r\n", 40);
-
-	ConsoleChangeDisplayedInformationType(INFO);
 }
 void printPrompt()
 {
-	ConsoleChangeDisplayedInformationType(INFO);
+	ConsoleDisplayInfo(),
 	DeviceManagerWrite(consoleDevice, "root@fhv-os# ", 13);
 }
 
@@ -493,15 +491,14 @@ int ungetc(int c, FILE *f)
     return (int )uc;
 }
 
-void ConsoleChangeDisplayedInformationType(displayedInformationType_t type) {
-	switch (type) {
-		case ERROR:
-			DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_ERROR, 8);
-			break;
-		case DEBUG:
-			DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_DEBUG, 8);
-			break;
-		default:
-			DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_INFO, 8);
-	}
+void ConsoleDisplayInfo() {
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_INFO, 8);
+}
+
+void ConsoleDisplayDebug() {
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_DEBUG, 8);
+}
+
+void ConsoleDisplayError() {
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_ERROR, 8);
 }

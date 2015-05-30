@@ -147,7 +147,7 @@ int	KernelInfo(const char *format, ...)
 	va_list arg;
 	va_start (arg, format);
 	int res = 0;
-	ConsoleChangeDisplayedInformationType(INFO);
+	ConsoleDisplayInfo();
 	res += printf("[INFO  @ %i] ", KernelGetUptime());
 	res += vprintf(format, arg);
 	va_end(arg);
@@ -164,7 +164,7 @@ int	KernelDebug(const char *format, ...)
 	va_list arg;
 	va_start (arg, format);
 	int res = 0;
-	ConsoleChangeDisplayedInformationType(DEBUG);
+	ConsoleDisplayDebug();
 	res += printf("[DEBUG @ %i] ", KernelGetUptime());
 	res += vprintf(format, arg);
 	va_end(arg);
@@ -181,7 +181,7 @@ int	KernelError(const char *format, ...)
 	va_list arg;
 	va_start (arg, format);
 	int res = 0;
-	ConsoleChangeDisplayedInformationType(ERROR);
+	ConsoleDisplayError();
 	res += printf("[ERROR @ %i] ", KernelGetUptime());
 	res += vprintf(format, arg);
 	va_end(arg);

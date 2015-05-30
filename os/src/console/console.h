@@ -11,11 +11,11 @@
 #include "../platform/platform.h"
 #include "../devicemanager/devicemanager.h"
 
-typedef enum {ERROR, INFO, DEBUG} displayedInformationType_t;
-
 extern void ConsoleInit();
 extern void ConsoleProcess(int argc, char** argv);
-extern void ConsoleChangeDisplayedInformationType(displayedInformationType_t color);
 extern void ConsoleClear();
+extern void ConsoleDisplayInfo();
+extern void ConsoleDisplayDebug();
+extern void ConsoleDisplayError();
 
 #endif /* CONSOLE_CONSOLE_H_ */
