@@ -122,7 +122,7 @@ int FileManagerListDirectoryContent(const char* name, directoryEntry_t* buf, int
 		}
 	}
 
-	KernelDebug("FileManager read %d directory entries\n", cnt);
+	KernelInfo("FileManager read %d directory entries\n", cnt);
 
 	return FILE_MANAGER_OK;
 }
