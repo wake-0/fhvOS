@@ -18,6 +18,20 @@
 #define CONSOLE_MAX_HISTORY					(15)
 #define CONSOLE_SCANF_FORMAT				"%254[^\r]"
 
+//see http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
+#define CONSOLE_COLOR_BLACK				("\e[0;30m")
+#define CONSOLE_COLOR_RED				("\e[0;31m")
+#define CONSOLE_COLOR_GREEN				("\e[0;32m")
+#define CONSOLE_COLOR_YELLOW			("\e[0;33m")
+#define CONSOLE_COLOR_BLUE				("\e[0;34m")
+#define CONSOLE_COLOR_MAGENTA			("\e[0;35m")
+#define CONSOLE_COLOR_CYAN				("\e[0;36m")
+#define CONSOLE_COLOR_WHITE				("\e[0;37m")
+
+#define CONSOLE_COLOR_ERROR				(CONSOLE_COLOR_RED)
+#define CONSOLE_COLOR_INFO				(CONSOLE_COLOR_WHITE)
+#define CONSOLE_COLOR_DEBUG				(CONSOLE_COLOR_MAGENTA)
+
 static boolean_t initialized = false;
 static device_t consoleDevice;
 
@@ -216,6 +230,7 @@ void ConsoleProcess(int argc, char** argv)
 
 void printWelcomeMessage()
 {
+	ConsoleChangeDisplayedInformationType(INFO);
 	DeviceManagerWrite(consoleDevice, "Welcome root...\r\nYou are logged in\r\n\r\n", 38); // TODO Extract this as a constant
 }
 void printOSLogo()
@@ -224,31 +239,51 @@ void printOSLogo()
 	KernelVersion(&major, &minor, &patch);
 	char versionLine[43];
 
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_RED, 8);
 	DeviceManagerWrite(consoleDevice, "                            @'        \r\n", 40);
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_GREEN, 8);
 	DeviceManagerWrite(consoleDevice, "                           @@@'       \r\n", 40);
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_YELLOW, 8);
 	DeviceManagerWrite(consoleDevice, "                          @WA@@'      \r\n", 40);
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_BLUE, 8);
 	DeviceManagerWrite(consoleDevice, "                         @@@@@@@;     \r\n", 40);
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_MAGENTA, 8);
 	DeviceManagerWrite(consoleDevice, "                        @@@AS@@@@'               __           __       \r\n", 75);
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_CYAN, 8);
 	DeviceManagerWrite(consoleDevice, "                         @@@@@PR@@'             /\\ \\         / /\\      \r\n", 75);
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_WHITE, 8);
 	DeviceManagerWrite(consoleDevice, "                         @@@<3@@@@@'           /  \\ \\       / /  \\     \r\n", 75);
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_RED, 8);
 	DeviceManagerWrite(consoleDevice, "                        @@AS@@@@@@@@'         / /\\ \\ \\     / / /\\ \\__  \r\n", 75);
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_GREEN, 8);
 	DeviceManagerWrite(consoleDevice, " @@@+@@  @ @+  @       @@@AW@@@@WA@@@'       / / /\\ \\ \\   / / /\\ \\___\\ \r\n", 75);
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_YELLOW, 8);
 	DeviceManagerWrite(consoleDevice, " @   @@  @ +@ @@      @@@@@'+@@PR@@@@@      / / /  \\ \\_\\  \\ \\ \\ \\/___/ \r\n", 75);
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_BLUE, 8);
 	DeviceManagerWrite(consoleDevice, " @@@.@@@@@  @ @,     @@WA@'  @@@@@@@@      / / /   / / /   \\ \\ \\       \r\n", 75);
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_MAGENTA, 8);
 	DeviceManagerWrite(consoleDevice, " @   @@  @  @'@       @@@'  @@@@@WA@      / / /   / / /_    \\ \\ \\      \r\n", 75);
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_CYAN, 8);
 	DeviceManagerWrite(consoleDevice, " @   @@  @  :@@        @'  @@<3@@@@      / / /___/ / //_/\\__/ / /      \r\n", 75);
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_WHITE, 8);
 	DeviceManagerWrite(consoleDevice, " :   ;:  :   :            @@@WA@@@      / / /____\\/ / \\ \\/___/ /       \r\n", 75);
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_RED, 8);
 	DeviceManagerWrite(consoleDevice, " FHV OS                  @@@@@@@@       \\/_________/   \\_____\\/        \r\n", 75);
-
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_GREEN, 8);
 	// FIXME If a version number's length is >1 we'll face a formatting issue :)
 	sprintf(&versionLine[0], " Kernel v%i.%i.%i            @@@@@@      \r\n", major, minor, patch);
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_YELLOW, 8);
 	DeviceManagerWrite(consoleDevice, &versionLine[0], 40);
-
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_BLUE, 8);
 	DeviceManagerWrite(consoleDevice, "                           @<3@       \r\n", 40);
+	DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_MAGENTA, 8);
 	DeviceManagerWrite(consoleDevice, "                            @@        \r\n", 40);
+
+	ConsoleChangeDisplayedInformationType(INFO);
 }
 void printPrompt()
 {
+	ConsoleChangeDisplayedInformationType(INFO);
 	DeviceManagerWrite(consoleDevice, "root@fhv-os# ", 13);
 }
 
@@ -456,4 +491,17 @@ int ungetc(int c, FILE *f)
     if (uc == '\r')
     	return EOF;
     return (int )uc;
+}
+
+void ConsoleChangeDisplayedInformationType(displayedInformationType_t type) {
+	switch (type) {
+		case ERROR:
+			DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_ERROR, 8);
+			break;
+		case DEBUG:
+			DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_DEBUG, 8);
+			break;
+		default:
+			DeviceManagerWrite(consoleDevice, CONSOLE_COLOR_INFO, 8);
+	}
 }
