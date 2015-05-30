@@ -30,7 +30,7 @@
 
 #define CONSOLE_COLOR_ERROR				(CONSOLE_COLOR_RED)
 #define CONSOLE_COLOR_INFO				(CONSOLE_COLOR_WHITE)
-#define CONSOLE_COLOR_DEBUG				(CONSOLE_COLOR_MAGENTA)
+#define CONSOLE_COLOR_DEBUG				(CONSOLE_COLOR_GREEN)
 
 static boolean_t initialized = false;
 static device_t consoleDevice;
