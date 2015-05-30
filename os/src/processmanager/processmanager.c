@@ -61,8 +61,9 @@ process_t* ProcessManagerStartProcess(char * processName, void(*funcPtr)(int, ch
 	ptr->context->registers[1] = (register_t) argv_cpy;
 
 	processes[processIdx].processScheduler = ptr;
-	processes[processIdx].processName = malloc(strlen(processName) * sizeof(char));
+	processes[processIdx].processName = malloc(strlen(processName) * sizeof(char) + 1);
 	strcpy(processes[processIdx].processName, processName);
+	processes[processIdx].processName[strlen(processName)] = '\0';
 	processes[processIdx].startTime = KernelGetUptime();
 
 	SchedulerUnblockProcess(ptr->id);
@@ -94,6 +95,7 @@ void ProcessManagerKillProcess(processId_t processId)
 	}
 	if (i < PROCESSES_MAX)
 	{
+		free(processes[i].processName);
 		for (i = i + 1; i < PROCESSES_MAX; i++)
 		{
 			processes[i-1] = processes[i];
@@ -110,7 +112,7 @@ int ProcessManagerGetRunningProcessesCount(void)
 }
 
 
-void ProcessManagerListProcesses(processInfoAPI_t* processAPIPtr, int length)
+int ProcessManagerListProcesses(processInfoAPI_t* processAPIPtr, int length)
 {
 	unsigned int i = 0;
 	for (i = 0; i < processIdx && i < length; i++)
@@ -120,4 +122,5 @@ void ProcessManagerListProcesses(processInfoAPI_t* processAPIPtr, int length)
 		processAPIPtr[i].state = processes[i].processScheduler->state;
 		strncpy(processAPIPtr[i].processName, processes[i].processName, PROCESS_MANAGER_MAX_PROCESS_LENGTH);
 	}
+	return i;
 }

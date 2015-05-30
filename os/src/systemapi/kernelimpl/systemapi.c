@@ -85,6 +85,12 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 			*message->messageArgs.returnArg = res;
 			break;
 		}
+		case SYSTEM_CALL_GET_PROC_LIST:
+		{
+			int res = ProcessManagerListProcesses(message->messageArgs.returnBuf, message->messageArgs.returnArg);
+			*message->messageArgs.returnArg = res;
+			break;
+		}
 		default:
 			break;
 	}
