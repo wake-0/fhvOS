@@ -10,6 +10,7 @@
 #include "../../kernel/kernel.h"
 #include "../../scheduler/scheduler.h"
 #include "../../filemanager/filemanager.h"
+#include "../../processmanager/processmanager.h"
 #include <stdio.h>
 
 /**
@@ -42,7 +43,7 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 			int value = message->messageArgs.callArg;
 			(void)(value); // Get rid of unused warning TODO Use the return value of the proc
 			process_t* curr = SchedulerGetRunningProcess();
-			SchedulerKillProcess(curr->id);
+			ProcessManagerKillProcess(curr->id);
 			SchedulerRunNextProcess(context);
 			break;
 		}
@@ -75,6 +76,12 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 		case SYSTEM_CALL_CHDIR:
 		{
 			int res = FileManagerSetCurrentWorkingDirectory(message->messageArgs.callBuf);
+			*message->messageArgs.returnArg = res;
+			break;
+		}
+		case SYSTEM_CALL_GET_PROC_COUNT:
+		{
+			int res = ProcessManagerGetRunningProcessesCount();
 			*message->messageArgs.returnArg = res;
 			break;
 		}
