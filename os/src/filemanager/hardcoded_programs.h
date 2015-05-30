@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "../systemapi/includes/process.h"
 #include "../systemapi/includes/filesystem.h"
 
 #define	HARDCODED_PROGRAMS_COUNT			(10)
@@ -29,13 +30,15 @@ void HardCodedPrograms_Cwd(int, char**);
 void HardCodedPrograms_More(int, char**);
 void HardCodedPrograms_Ls(int, char**);
 void HardCodedPrograms_Cd(int argc, char** argv);
+void HardCodedPrograms_Ps(int argc, char** argv);
 
 static command_program_entry_t mapping[HARDCODED_PROGRAMS_COUNT] = {
 		{ "hello" , HardCodedPrograms_HelloWorld },
 		{ "cwd", HardCodedPrograms_Cwd },
 		{ "more", HardCodedPrograms_More },
 		{ "ls", HardCodedPrograms_Ls },
-		{ "cd", HardCodedPrograms_Cd }
+		{ "cd", HardCodedPrograms_Cd },
+		{ "ps", HardCodedPrograms_Ps }
 };
 
 void (*HardCodedProgramsGetProgram(char* name))(int, char**)
@@ -191,6 +194,38 @@ void HardCodedPrograms_Cd(int argc, char** argv)
 	{
 		printf("Could not open directory\n");
 	}
+}
+
+void HardCodedPrograms_Ps(int argc, char** argv)
+{
+	int count = get_process_count();
+
+	printf("\nRunning processes: %d\n", count);
+
+	processInfoAPI_t* buf = malloc(sizeof(processInfoAPI_t) * count);
+
+	count = read_processes(buf, count);
+
+	int i = 0;
+	printf("\t STATE \t PID \t STIME \t NAME\n");
+	for (i = 0; i < count; i++)
+	{
+		char state = 'R'; // Running and Ready
+		switch (buf[i].state) {
+			case SLEEPING:
+				state = 'S';
+				break;
+			case BLOCKED:
+				state = 'B';
+				break;
+			default:
+				break;
+		}
+		printf("\t %c \t %d \t %d \t %s\n", state, buf[i].processID, buf[i].startTime, buf[i].processName);
+	}
+	printf("\n");
+
+	free (buf);
 }
 
 #endif /* FILEMANAGER_HARDCODED_PROGRAMS_H_ */
