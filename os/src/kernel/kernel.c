@@ -141,15 +141,32 @@ void KernelExecute(char* inputCommand, context_t* context)
 	}
 }
 
+int	KernelPrint(const char *format, ...)
+{
+#if	KERNEL_DEFAULT_OUTPUT
+	va_list arg;
+	va_start (arg, format);
+	int res = 0;
+	ConsoleColor(WHITE);
+	res += vprintf(format, arg);
+	va_end(arg);
+
+	return res;
+#else
+	return 0;
+#endif
+}
+
 int	KernelInfo(const char *format, ...)
 {
 #if	KERNEL_INFO_OUTPUT
 	va_list arg;
 	va_start (arg, format);
 	int res = 0;
-	ConsoleDisplayInfo();
+	ConsoleColor(CYAN);
 	res += printf("[INFO  @ %i] ", KernelGetUptime());
 	res += vprintf(format, arg);
+	ConsoleColor(WHITE);
 	va_end(arg);
 
 	return res;
@@ -164,10 +181,10 @@ int	KernelDebug(const char *format, ...)
 	va_list arg;
 	va_start (arg, format);
 	int res = 0;
-	ConsoleDisplayDebug();
+	ConsoleColor(GREEN);
 	res += printf("[DEBUG @ %i] ", KernelGetUptime());
 	res += vprintf(format, arg);
-	ConsoleDisplayInfo();
+	ConsoleColor(WHITE);
 	va_end(arg);
 
 	return res;
@@ -182,10 +199,10 @@ int	KernelError(const char *format, ...)
 	va_list arg;
 	va_start (arg, format);
 	int res = 0;
-	ConsoleDisplayError();
+	ConsoleColor(RED);
 	res += printf("[ERROR @ %i] ", KernelGetUptime());
 	res += vprintf(format, arg);
-	ConsoleDisplayInfo();
+	ConsoleColor(WHITE);
 	va_end(arg);
 
 	return res;
