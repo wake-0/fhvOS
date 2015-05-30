@@ -167,6 +167,7 @@ int	KernelDebug(const char *format, ...)
 	ConsoleDisplayDebug();
 	res += printf("[DEBUG @ %i] ", KernelGetUptime());
 	res += vprintf(format, arg);
+	ConsoleDisplayInfo();
 	va_end(arg);
 
 	return res;
@@ -184,6 +185,7 @@ int	KernelError(const char *format, ...)
 	ConsoleDisplayError();
 	res += printf("[ERROR @ %i] ", KernelGetUptime());
 	res += vprintf(format, arg);
+	ConsoleDisplayInfo();
 	va_end(arg);
 
 	return res;
