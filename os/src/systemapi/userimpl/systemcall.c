@@ -12,33 +12,11 @@
 
 int SystemCall(systemCallMessage_t* message)
 {
-	switch(message->systemCallNumber)
+	if (message->systemCallNumber >= 0)
 	{
-	case SYSTEM_CALL_EXEC:
-	    asm(SYSTEM_CALL_ASM(SYSTEM_CALL_EXEC));
-		break;
-	case SYSTEM_CALL_YIELD:
-	    asm(SYSTEM_CALL_ASM(SYSTEM_CALL_YIELD));
-		break;
-	case SYSTEM_CALL_EXIT:
-	    asm(SYSTEM_CALL_ASM(SYSTEM_CALL_EXIT));
-		break;
-	case SYSTEM_CALL_SLEEP:
-	    asm(SYSTEM_CALL_ASM(SYSTEM_CALL_SLEEP));
-		break;
-	case SYSTEM_CALL_READ:
-	    asm(SYSTEM_CALL_ASM(SYSTEM_CALL_READ));
-		break;
-	case SYSTEM_CALL_CWD:
-		asm(SYSTEM_CALL_ASM(SYSTEM_CALL_CWD));
-		break;
-	case SYSTEM_CALL_READ_DIR:
-		asm(SYSTEM_CALL_ASM(SYSTEM_CALL_READ_DIR));
-		break;
-	case SYSTEM_CALL_CHDIR:
-		asm(SYSTEM_CALL_ASM(SYSTEM_CALL_CHDIR));
-		break;
+		asm(SYSTEM_CALL_ASM_PREFIX "1337");
+		return SYSTEM_CALL_OK;
 	}
 
-	return SYSTEM_CALL_OK;
+	return SYSTEM_CALL_FAILURE;
 }
