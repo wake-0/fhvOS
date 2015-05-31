@@ -21,7 +21,7 @@
 #define FILE_MANAGER_ROOT_PATH		"/"
 #define FILE_MANAGER_BIN_PATH		FILE_MANAGER_ROOT_PATH "bin"
 
-extern int FileManagerInit(device_t device);
+extern int FileManagerInit(device_t device, device_t indicatorDevice);
 extern int FileManagerListDirectoryContent(const char* name, directoryEntry_t* buf, int length);
 extern int FileManagerOpenFile(const char* name, int startByte, char* buf, int length);
 extern int FileManagerOpenExecutable(char* name, boolean_t searchInGlobalBinPath, int argc, char** argv, boolean_t blocking, context_t* context);

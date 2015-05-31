@@ -54,7 +54,8 @@ void KernelStart()
 
 	KernelInfo("Starting File Manager\n");
 	device_t sdcard = DeviceManagerGetDevice("SDCARD", 6);
-	if ((res = FileManagerInit(sdcard)) == FILE_MANAGER_OK)
+	device_t led1 = DeviceManagerGetDevice("LED1", 4);
+	if ((res = FileManagerInit(sdcard, led1)) == FILE_MANAGER_OK)
 	{
 		KernelInfo("File Manager started\n");
 	}

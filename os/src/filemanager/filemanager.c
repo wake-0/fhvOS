@@ -29,6 +29,7 @@ static DIR 			dir;
 static FILINFO 		fileInfo;
 
 static char currentWorkingDirectory[FILE_MANAGER_MAX_PATH_LENGTH];
+static device_t indicatorDevice;
 
 static void mountFatDevice(unsigned int driveNum, void*);
 
@@ -50,7 +51,12 @@ int FileManagerOpenExecutable(char* name, boolean_t searchInGlobalBinPath, int a
 	return FILE_MANAGER_NOT_FOUND;
 }
 
-int FileManagerInit(device_t device) {
+int FileManagerInit(device_t device, device_t indDevice) {
+	indicatorDevice = indDevice;
+	DeviceManagerOpen(indicatorDevice);
+
+	DeviceManagerWrite(indicatorDevice, "1", 1);
+
 	if (DeviceManagerInitDevice(device) != DRIVER_OK)
 	{
 		return FILE_MANAGER_NO_DEVICE_FOUND;
@@ -62,6 +68,7 @@ int FileManagerInit(device_t device) {
 
 	if (DeviceManagerRead(device, sdCard, length) != DRIVER_OK)
 	{
+		DeviceManagerWrite(indicatorDevice, "0", 1);
 		return FILE_MANAGER_NO_DEVICE_FOUND;
 	}
 
@@ -76,6 +83,7 @@ int FileManagerInit(device_t device) {
 
 	strncpy(currentWorkingDirectory, FILE_MANAGER_ROOT_PATH, FILE_MANAGER_MAX_PATH_LENGTH);
 
+	DeviceManagerWrite(indicatorDevice, "0", 1);
 	return FILE_MANAGER_OK;
 }
 
@@ -84,8 +92,10 @@ int FileManagerListDirectoryContent(const char* name, directoryEntry_t* buf, int
 
 	volatile FRESULT fresult;
 
+	DeviceManagerWrite(indicatorDevice, "1", 1);
 	if (f_opendir(&dir, currentWorkingDirectory))
 	{
+		DeviceManagerWrite(indicatorDevice, "0", 1);
 		return FILE_MANAGER_NOT_FOUND;
 	}
 
@@ -95,6 +105,7 @@ int FileManagerListDirectoryContent(const char* name, directoryEntry_t* buf, int
 		{
 			// Error occured while reading: Doing cleanup of the incomplete results and return
 			memset(buf, 0, sizeof(entryType_t) * length);
+			DeviceManagerWrite(indicatorDevice, "0", 1);
 			return FILE_MANAGER_NOT_FOUND;
 		}
 
@@ -118,20 +129,24 @@ int FileManagerListDirectoryContent(const char* name, directoryEntry_t* buf, int
 		strncpy(buf[cnt].name, fileInfo.fname, FILE_MANAGER_MAX_FILE_LENGTH);
 		cnt++;
 		if (cnt >= length) {
+			DeviceManagerWrite(indicatorDevice, "0", 1);
 			return FILE_MANAGER_BUFFER_TOO_SMALL;
 		}
 	}
 
+	DeviceManagerWrite(indicatorDevice, "0", 1);
 	KernelDebug("FileManager read %d directory entries\n", cnt);
 
 	return FILE_MANAGER_OK;
 }
 
 int FileManagerOpenFile(const char* name, int startByte, char* buf, int length) {
+	DeviceManagerWrite(indicatorDevice, "1", 1);
 	KernelDebug("FileManager opening file %s\n", name);
 	FIL file;
 	if (f_open(&file, name, FA_READ) != FR_OK)
 	{
+		DeviceManagerWrite(indicatorDevice, "0", 1);
 		return FILE_MANAGER_NOT_FOUND;
 	}
 
@@ -140,6 +155,7 @@ int FileManagerOpenFile(const char* name, int startByte, char* buf, int length) 
 	char* temp_buffer = malloc(sizeof(char) * length);
 	if (f_read(&file, temp_buffer, length, &read) != FR_OK)
 	{
+		DeviceManagerWrite(indicatorDevice, "0", 1);
 		return FILE_MANAGER_NOT_FOUND;
 	}
 
@@ -150,6 +166,7 @@ int FileManagerOpenFile(const char* name, int startByte, char* buf, int length) 
 	free(temp_buffer);
 
 	KernelDebug("FileManager read %d in a buffer of %d\n", read, length);
+	DeviceManagerWrite(indicatorDevice, "0", 1);
 	return (read >= length) ? FILE_MANAGER_BUFFER_TOO_SMALL : FILE_MANAGER_OK;
 }
 
