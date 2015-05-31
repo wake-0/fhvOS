@@ -31,6 +31,7 @@ void HardCodedPrograms_More(int, char**);
 void HardCodedPrograms_Ls(int, char**);
 void HardCodedPrograms_Cd(int argc, char** argv);
 void HardCodedPrograms_Ps(int argc, char** argv);
+void HardCodedPrograms_Kill(int argc, char** argv);
 
 static command_program_entry_t mapping[HARDCODED_PROGRAMS_COUNT] = {
 		{ "hello" , HardCodedPrograms_HelloWorld },
@@ -38,7 +39,8 @@ static command_program_entry_t mapping[HARDCODED_PROGRAMS_COUNT] = {
 		{ "more", HardCodedPrograms_More },
 		{ "ls", HardCodedPrograms_Ls },
 		{ "cd", HardCodedPrograms_Cd },
-		{ "ps", HardCodedPrograms_Ps }
+		{ "ps", HardCodedPrograms_Ps },
+		{ "kill", HardCodedPrograms_Kill }
 };
 
 void (*HardCodedProgramsGetProgram(char* name))(int, char**)
@@ -226,6 +228,38 @@ void HardCodedPrograms_Ps(int argc, char** argv)
 	printf("\n");
 
 	free (buf);
+}
+
+void HardCodedPrograms_Kill(int argc, char** argv)
+{
+	if (argc != 1)
+	{
+		printf("Unknown process id\n");
+		return;
+	}
+
+	char *end;
+	long value = strtol(argv[0], &end, 10);
+	if (end == argv[0] || *end != '\0')
+	{
+		printf("Invalid process id\n");
+		return;
+	}
+
+	int pid = (int) value;
+
+	if (pid >= 0)
+	{
+		printf("Kill signal was sent.\n");
+		if (kill_process(pid) >= 0)
+		{
+			printf("Signal was accepted.\n");
+		}
+		else
+		{
+			printf("Signal was not accepted.\n");
+		}
+	}
 }
 
 #endif /* FILEMANAGER_HARDCODED_PROGRAMS_H_ */
