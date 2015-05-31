@@ -24,5 +24,6 @@ typedef struct
 
 extern int get_process_count(void);
 extern int read_processes(processInfoAPI_t* buf, int len);
+extern int kill_process(int id);
 
 #endif /* SYSTEMAPI_INCLUDES_PROCESS_H_ */

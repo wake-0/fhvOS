@@ -30,4 +30,14 @@ int read_processes(processInfoAPI_t* buf, int len)
 	return *message.messageArgs.returnArg;
 }
 
+int kill_process(int id)
+{
+	int res = 0;
+	systemCallMessage_t message;
+	message.systemCallNumber = SYSTEM_CALL_KILL;
+	message.messageArgs.callArg = id;
+	message.messageArgs.returnArg = &res;
+	SystemCall(&message);
+	return *message.messageArgs.returnArg;
+}
 

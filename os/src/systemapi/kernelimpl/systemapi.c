@@ -91,8 +91,12 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 			*message->messageArgs.returnArg = res;
 			break;
 		}
-		default:
+		case SYSTEM_CALL_KILL:
+		{
+			int res = ProcessManagerKillProcess(message->messageArgs.callArg);
+			*message->messageArgs.returnArg = res;
 			break;
+		}
 	}
 	SchedulerEnableScheduling();
 }

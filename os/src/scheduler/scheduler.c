@@ -187,7 +187,7 @@ int SchedulerKillProcess(processId_t id) {
 	processes[id].state = FREE;
 	processes[id].func = NULL;
 
-	if (processes[id].blockedState && processes[id].parent != NULL)
+	if (processes[id].blockedState && processes[id].parent != NULL && processes[id].parent->state != FREE)
 	{
 		processes[id].parent->state = READY;
 		processes[id].parent = NULL;

@@ -80,7 +80,7 @@ process_t* ProcessManagerStartProcess(char * processName, void(*funcPtr)(int, ch
 	return ptr;
 }
 
-void ProcessManagerKillProcess(processId_t processId)
+int ProcessManagerKillProcess(processId_t processId)
 {
 	int i = 0;
 	for (i = 0; i < PROCESSES_MAX; i++)
@@ -102,7 +102,9 @@ void ProcessManagerKillProcess(processId_t processId)
 		}
 		processIdx--;
 		SchedulerKillProcess(processId);
+		return processId;
 	}
+	return -1;
 }
 
 
