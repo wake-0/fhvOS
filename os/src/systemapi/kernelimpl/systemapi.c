@@ -94,4 +94,5 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 		default:
 			break;
 	}
+	SchedulerEnableScheduling();
 }
