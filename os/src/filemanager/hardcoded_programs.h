@@ -117,6 +117,7 @@ void HardCodedPrograms_More(int argc, char** argv)
 	}
 	else
 	{
+		printf("%s\n", fileBuf);
 		printf("Error reading file\n");
 	}
 }

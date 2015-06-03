@@ -12,6 +12,7 @@
 #include "../filesystem/ff.h"
 #include "../driver/sdcard/mmcsd_proto.h"
 #include "../kernel/kernel.h"
+#include "../loader/loader.h"
 
 #define FILE_MANAGER_MAX_PATH_LENGTH	(512)
 
@@ -47,6 +48,39 @@ int FileManagerOpenExecutable(char* name, boolean_t searchInGlobalBinPath, int a
 	}
 
 	// TODO Search in current working directory
+	// Read file and copy it in the virtual memory
+
+	char fullPath[FILE_MANAGER_MAX_PATH_LENGTH + FILE_MANAGER_MAX_PATH_LENGTH];
+
+	if (currentWorkingDirectory[strlen(currentWorkingDirectory) - 1] == '/')
+	{
+		sprintf(fullPath, "%s%s\0", currentWorkingDirectory, name);
+	}
+	else
+	{
+		sprintf(fullPath, "%s/%s\0", currentWorkingDirectory, name);
+	}
+
+	KernelDebug("Opening file %s\n", fullPath);
+
+	int size = FileManagerGetFileSize(fullPath);
+	KernelDebug("File size = %d\n", size);
+	if (size <= 0)
+	{
+		KernelDebug("File not found\n");
+		return FILE_MANAGER_NOT_FOUND;
+	}
+
+	char* fileBuf = malloc(sizeof(char) * size);
+	if (FileManagerOpenFile(fullPath, 0, fileBuf, size) < 0)
+	{
+		KernelDebug("Error reading file\n");
+		free(fileBuf);
+		return FILE_MANAGER_NOT_FOUND;
+	}
+
+	// fileBuf contains the whole program
+	LoaderLoad(fileBuf, size);
 
 	return FILE_MANAGER_NOT_FOUND;
 }
@@ -155,6 +189,7 @@ int FileManagerOpenFile(const char* name, int startByte, char* buf, int length) 
 	char* temp_buffer = malloc(sizeof(char) * length);
 	if (f_read(&file, temp_buffer, length, &read) != FR_OK)
 	{
+		free(temp_buffer);
 		DeviceManagerWrite(indicatorDevice, "0", 1);
 		return FILE_MANAGER_NOT_FOUND;
 	}
@@ -167,7 +202,7 @@ int FileManagerOpenFile(const char* name, int startByte, char* buf, int length) 
 
 	KernelDebug("FileManager read %d in a buffer of %d\n", read, length);
 	DeviceManagerWrite(indicatorDevice, "0", 1);
-	return (read >= length) ? FILE_MANAGER_BUFFER_TOO_SMALL : FILE_MANAGER_OK;
+	return (read > length) ? FILE_MANAGER_BUFFER_TOO_SMALL : FILE_MANAGER_OK;
 }
 
 int FileManagerSetCurrentWorkingDirectory(char *name)
@@ -203,6 +238,23 @@ int FileManagerGetCurrentWorkingDirectory(char *buf, int len)
 	strncpy(buf, currentWorkingDirectory, cwd_len + 1);
 
 	return FILE_MANAGER_OK;
+}
+
+
+int FileManagerGetFileSize(char* name)
+{
+	DeviceManagerWrite(indicatorDevice, "1", 1);
+	KernelDebug("FileManager opening file %s\n", name);
+	FIL file;
+	if (f_open(&file, name, FA_READ) != FR_OK)
+	{
+		DeviceManagerWrite(indicatorDevice, "0", 1);
+		return -1;
+	}
+
+	f_close(&file);
+	DeviceManagerWrite(indicatorDevice, "0", 1);
+	return file.fsize;
 }
 
 static void mountFatDevice(unsigned int driveNum, void* ptr) {
