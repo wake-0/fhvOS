@@ -1,0 +1,5 @@
+*Debug
+*Release
+*Debug_*
+*.launches
+*.launches/*
