@@ -16,10 +16,18 @@ int UARTDriverInit(uint16_t id) {
 	UARTHalSoftwareReset(pins);
 
 	configuration_t config;
-	config.baudRate = UART_BAUDRATE_115200;
-	config.parity =  UART_PARITY_NONE;
-	config.charLength = UART_CHARLENGTH_8;
-	config.stopBit = UART_STOPBIT_1;
+	// TODO: pull out this settings which is only for DMX
+	if (id == 1) {
+		config.baudRate = UART_BAUDRATE_1200;
+		config.parity =  UART_PARITY_NONE;
+		config.charLength = UART_CHARLENGTH_8;
+		config.stopBit = UART_STOPBIT_2;
+	} else {
+		config.baudRate = UART_BAUDRATE_115200;
+		config.parity =  UART_PARITY_NONE;
+		config.charLength = UART_CHARLENGTH_8;
+		config.stopBit = UART_STOPBIT_1;
+	}
 
 	UARTHalFifoSettings(pins);
 	UARTHalSettings(pins, &config);
