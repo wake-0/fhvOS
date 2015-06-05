@@ -35,7 +35,8 @@ static device_map_entry_t deviceMap[MAX_DEVICES] = {
 		{ "UART3", DRIVER_ID_UART, 4, false },
 		{ "UART4", DRIVER_ID_UART, 5, false },
 		{ "TIMER2", DRIVER_ID_TIMER, 2, false },
-		{ "SDCARD", DRIVER_ID_SDCARD, 0, false }
+		{ "SDCARD", DRIVER_ID_SDCARD, 0, false },
+		{ "DMX", DRIVER_ID_DMX, 0, false }
 };
 
 void DeviceManagerInit()

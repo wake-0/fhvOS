@@ -14,6 +14,7 @@
 #include "../uart/driver_uart.h"
 #include "../timer/driver_timer.h"
 #include "../sdcard/driver_sdcard.h"
+#include "../dmx/driver_dmx.h"
 
 #define MAX_DRIVER		255
 
@@ -64,7 +65,6 @@ void DriverManagerInit()
 	drivers[DRIVER_ID_TIMER] = timer;
 
 	// SDCARD Driver
-
 	driver_t* sdcard = malloc(sizeof(driver_t));
 	sdcard->init = &SDCardInit;
 	sdcard->open = &SDCardOpen;
@@ -73,6 +73,16 @@ void DriverManagerInit()
 	sdcard->read = &SDCardRead;
 	sdcard->ioctl = &SDCardIoctl;
 	drivers[DRIVER_ID_SDCARD] = sdcard;
+
+	// DMX Driver
+	driver_t* dmx = malloc(sizeof(driver_t));
+	dmx->init = &DMXInit;
+	dmx->open = &DMXOpen;
+	dmx->close = &DMXClose;
+	dmx->write = &DMXWrite;
+	dmx->read = &DMXRead;
+	dmx->ioctl = &DMXIoctl;
+	drivers[DRIVER_ID_DMX] = dmx;
 }
 
 driver_t* DriverManagerGetDriver(driver_id_t driver_id)
