@@ -13,7 +13,7 @@ int UARTDriverInit(uint16_t id) {
 
 	//Setup the uart
 	uartPins_t pins = GetUARTPins(id);
-	UARTHalSoftwareReset(pins);
+	UARTHalEnable(pins);
 
 	configuration_t config;
 	// TODO: pull out this settings which is only for DMX
@@ -29,6 +29,7 @@ int UARTDriverInit(uint16_t id) {
 		config.stopBit = UART_STOPBIT_1;
 	}
 
+	UARTHalSoftwareReset(pins);
 	UARTHalFifoSettings(pins);
 	UARTHalSettings(pins, &config);
 	return DRIVER_OK;
