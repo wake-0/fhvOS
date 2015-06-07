@@ -8,6 +8,10 @@
 
 #include "../am335x/hw_types.h"
 #include "../am335x/hw_uart.h"
+#include "../am335x/hw_control_AM335x.h"
+#include "../am335x/soc_AM335x.h"
+#include "../am335x/hw_cm_per.h"
+#include "../am335x/hw_cm_wkup.h"
 
 /*
  * General defines
@@ -47,6 +51,30 @@ int UARTHalSoftwareReset(uartPins_t uartPins) {
 	// 2. Wait for the end of the reset operation
 	// Poll the UARTi.UART_SYSS[0] RESETDONE bit until it equals 1.
 	while (!HWREG_CHECK(baseAddress + UART_SYSS_OFF, UART_SYSS_SOFT_RESET)) {
+	}
+
+	return UART_HAL_OK;
+}
+
+int UARTHalEnable(uartPins_t uartPins) {
+	address_t baseAddress = getBaseAddressOfUART(uartPins);
+	if (baseAddress == UART_BASE_ADR_NOT_FOUND) {
+		return UART_HAL_ERROR;
+	}
+
+	// TODO: refactor code
+	switch (baseAddress) {
+	case UART1_BASE_ADR:
+		HWREG(SOC_CM_PER_REGS + CM_PER_UART1_CLKCTRL) =
+		CM_PER_UART1_CLKCTRL_MODULEMODE_ENABLE;
+
+		while ((HWREG(SOC_CM_PER_REGS + CM_PER_UART1_CLKCTRL) &
+		CM_PER_UART1_CLKCTRL_MODULEMODE) !=
+		CM_PER_UART1_CLKCTRL_MODULEMODE_ENABLE)
+			;
+		break;
+	default:
+		break;
 	}
 
 	return UART_HAL_OK;
@@ -260,14 +288,12 @@ int UARTHalFifoRead(uartPins_t uartPins, uint8_t* msg) {
 	return UART_HAL_OK;
 }
 
-boolean_t UARTHalIsFifoFull(uartPins_t uartPins)
-{
+boolean_t UARTHalIsFifoFull(uartPins_t uartPins) {
 	address_t baseAddress = getBaseAddressOfUART(uartPins);
 	return HWREG_CHECK(baseAddress + UART_SSR_OFF, UART_SSR_TXFIFOFULL);
 }
 
-boolean_t UARTHalIsCharAvailable(uartPins_t uartPins)
-{
+boolean_t UARTHalIsCharAvailable(uartPins_t uartPins) {
 	address_t baseAddress = getBaseAddressOfUART(uartPins);
 
 	unsigned int retVal = FALSE;
@@ -277,8 +303,7 @@ boolean_t UARTHalIsCharAvailable(uartPins_t uartPins)
 	switchToOperationalMode(baseAddress);
 
 	// Checking if the RHR(or RX FIFO) has atleast one byte to be read
-	if(HWREG(baseAddress + UART_LSR_OFF) & UART_LSR_RX_FIFO_E)
-	{
+	if (HWREG(baseAddress + UART_LSR_OFF) & UART_LSR_RX_FIFO_E) {
 		retVal = TRUE;
 	}
 

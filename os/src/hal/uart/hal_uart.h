@@ -73,6 +73,7 @@ typedef struct {
 /*
  * functions
  */
+extern int UARTHalEnable(uartPins_t uartPins);
 extern int UARTHalSoftwareReset(uartPins_t uartPins);
 extern int UARTHalFifoSettings(uartPins_t uartPins);
 extern int UARTHalSettings(uartPins_t uartPins, configuration_t* config);
