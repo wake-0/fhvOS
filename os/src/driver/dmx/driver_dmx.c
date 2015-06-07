@@ -6,6 +6,9 @@
  */
 
 #include "driver_dmx.h"
+#include "../../devicemanager/devicemanager.h"
+
+static device_t uart;
 
 int DMXInit(uint16_t id) {
 	return DRIVER_OK;
@@ -28,6 +31,9 @@ int DMXRead(uint16_t id, char* buf, uint16_t len) {
 }
 
 int DMXIoctl(uint16_t id, uint16_t cmd, uint8_t mode, char* buf, uint16_t len) {
+	// TODO: use the uart which is in the buffer
+	uart = *((device_t*)buf);
+
 	return DRIVER_OK;
 }
 
