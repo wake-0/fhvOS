@@ -34,6 +34,7 @@ static void switchToConfModeA(address_t baseAddress);
 static void switchToConfModeB(address_t baseAddress);
 static void switchToConfModeOp(address_t baseAddress);
 static void switchToOperationalMode(address_t baseAddress);
+static void pinMuxSetup(address_t baseAddress);
 
 /*
  * Implementations of the functions from the h file
@@ -82,6 +83,8 @@ int UARTHalEnable(uartPins_t uartPins) {
 	default:
 		break;
 	}
+
+	pinMuxSetup(baseAddress);
 
 	return UART_HAL_OK;
 }
@@ -415,4 +418,22 @@ static uint32_t getBaudRateOfUART(baudrate_t baudRate) {
 	}
 
 	return baud_rate;
+}
+
+void pinMuxSetup(address_t baseAddress) {
+	// TODO: add other UARTs
+	switch (baseAddress) {
+	case UART1_BASE_ADR:
+		/* RXD */
+		HWREG(SOC_CONTROL_REGS + CONTROL_CONF_UART_RXD(1)) =
+				(CONTROL_CONF_UART1_RXD_CONF_UART1_RXD_PUTYPESEL |
+				CONTROL_CONF_UART1_RXD_CONF_UART1_RXD_RXACTIVE);
+
+		/* TXD */
+		HWREG(SOC_CONTROL_REGS + CONTROL_CONF_UART_TXD(1)) =
+		CONTROL_CONF_UART1_TXD_CONF_UART1_TXD_PUTYPESEL;
+		break;
+	default:
+		break;
+	}
 }
