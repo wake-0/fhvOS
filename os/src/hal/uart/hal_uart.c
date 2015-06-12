@@ -34,6 +34,7 @@ static void switchToConfModeA(address_t baseAddress);
 static void switchToConfModeB(address_t baseAddress);
 static void switchToConfModeOp(address_t baseAddress);
 static void switchToOperationalMode(address_t baseAddress);
+//static void pinMuxSetup(address_t baseAddress);
 
 /*
  * Implementations of the functions from the h file
@@ -62,7 +63,7 @@ int UARTHalEnable(uartPins_t uartPins) {
 		return UART_HAL_ERROR;
 	}
 
-	// TODO: refactor code
+	// TODO: add other UARTs
 	switch (baseAddress) {
 	case UART1_BASE_ADR:
 		HWREG(SOC_CM_PER_REGS + CM_PER_UART1_CLKCTRL) =
@@ -72,10 +73,18 @@ int UARTHalEnable(uartPins_t uartPins) {
 		CM_PER_UART1_CLKCTRL_MODULEMODE) !=
 		CM_PER_UART1_CLKCTRL_MODULEMODE_ENABLE)
 			;
+
+		// Wait for full functionality
+		while ((HWREG(SOC_CM_PER_REGS + CM_PER_UART1_CLKCTRL) &
+		CM_PER_UART1_CLKCTRL_IDLEST) != CM_PER_UART1_CLKCTRL_IDLEST_FUNC)
+			;
+
 		break;
 	default:
 		break;
 	}
+
+	//pinMuxSetup(baseAddress);
 
 	return UART_HAL_OK;
 }
@@ -313,6 +322,19 @@ boolean_t UARTHalIsCharAvailable(uartPins_t uartPins) {
 	return retVal;
 }
 
+int UARTHalDisable(uartPins_t uartPins) {
+
+	//TODO: depending on UART pins disable the right uart
+	HWREG(SOC_CM_PER_REGS + CM_PER_UART1_CLKCTRL) =
+			CM_PER_UART1_CLKCTRL_MODULEMODE_DISABLED;
+
+	while ((HWREG(SOC_CM_PER_REGS + CM_PER_UART1_CLKCTRL) &
+	CM_PER_UART1_CLKCTRL_MODULEMODE) != CM_PER_UART1_CLKCTRL_MODULEMODE_DISABLED)
+		;
+
+	return UART_HAL_OK;
+}
+
 /*
  * Helper methods
  */
@@ -358,6 +380,9 @@ static address_t getBaseAddressOfUART(uartPins_t uartPins) {
 static uint32_t getBaudRateOfUART(baudrate_t baudRate) {
 	uint32_t baud_rate;
 	switch (baudRate) {
+	case UART_BAUDRATE_250000:
+		baud_rate = 250000;
+		break;
 	case UART_BAUDRATE_115200:
 		baud_rate = 115200;
 		break;
@@ -394,3 +419,5 @@ static uint32_t getBaudRateOfUART(baudrate_t baudRate) {
 
 	return baud_rate;
 }
+
+

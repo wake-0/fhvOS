@@ -18,6 +18,7 @@
  * UART baudrates
  */
 typedef enum {
+	UART_BAUDRATE_250000,
 	UART_BAUDRATE_115200,
 	UART_BAUDRATE_57600,
 	UART_BAUDRATE_38400,
@@ -74,6 +75,7 @@ typedef struct {
  * functions
  */
 extern int UARTHalEnable(uartPins_t uartPins);
+extern int UARTHalDisable(uartPins_t uartPins);
 extern int UARTHalSoftwareReset(uartPins_t uartPins);
 extern int UARTHalFifoSettings(uartPins_t uartPins);
 extern int UARTHalSettings(uartPins_t uartPins, configuration_t* config);
