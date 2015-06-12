@@ -80,6 +80,15 @@ int UARTDriverRead(uint16_t id, char* buf, uint16_t len) {
 }
 
 int UARTDriverIoctl(uint16_t id, uint16_t cmd, uint8_t mode, char* buf, uint16_t len) {
+	if (id > BOARD_UART_COUNT - 1) { return DRIVER_ERROR; }
+
+	uartPins_t pins = GetUARTPins(id);
+
+	if (cmd == 1) {
+		UARTHalEnable(pins);
+	} else if (cmd == 2) {
+		UARTHalDisable(pins);
+	}
 
 	return DRIVER_OK;
 }
