@@ -191,10 +191,13 @@ void MMUHandleDataAbortException(context_t* context)
 			mmuCreateAndFillL2PageTable(dabtAccessedVirtualAddress, runningProcess);
 			break;
 		case SECOND_LEVEL_TRANSLATION_FAULT:
-			// no page frame
-			//pageTablePointer_t l2PageTable = mmuGetAddressSpecificL2PageTable(runningProcess->pageTableL1, dabtAccessedVirtualAddress);
-			mmuMapFreePageFrameIntoL2PageTable(dabtAccessedVirtualAddress, mmuGetAddressSpecificL2PageTable(runningProcess->pageTableL1, dabtAccessedVirtualAddress));
+		{
+			// no page frame => see p. B3-1415, table B3-23 Short-descriptor format FSR encodings
+			// check if L2 page table already exists
+			pageTablePointer_t l2PageTable = mmuGetAddressSpecificL2PageTable(runningProcess->pageTableL1, dabtAccessedVirtualAddress);
+			mmuMapFreePageFrameIntoL2PageTable(dabtAccessedVirtualAddress, l2PageTable);
 			break;
+		}
 		case FIRST_LEVEL_PERMISSION_FAULT:
 			ProcessManagerKillProcess(runningProcess->id);
 			break;
@@ -783,9 +786,11 @@ static pageTablePointer_t mmuGetAddressSpecificL2PageTable(pageTablePointer_t pa
 {
 	int tableOffset = mmuGetTableIndex(virtualAddress, INDEX_OF_L2_PAGE_TABLE, TTBR0);
 
-	if(tableOffset == INVALID_PAGE_TABLE_OFFSET)
+	unsigned int pageTableEntry = *(pageTableL1 + tableOffset);
+
+	if(FAULT_PAGE_TABLE_ENTRY == pageTableEntry)
 	{
-		// no existing L2 page table, create one
+		// no L2 page table => create one
 		return mmuCreatePageTable(L2_PAGE_TABLE);
 	}
 	else
