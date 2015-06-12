@@ -52,7 +52,7 @@ int DMXIoctl(uint16_t id, uint16_t cmd, uint8_t mode, char* buf, uint16_t len) {
 	DeviceManagerWrite(uart, &DMXBuffer[0], 1);
 
 	// Write test data
-	for(i = 1; i < DMX_MAX; i = /*(i + 1) %*/ DMX_MAX) {
+	for(i = 1; i < DMX_MAX; i = (i + 1) /* % DMX_MAX */) {
 		DeviceManagerWrite(uart, &DMXBuffer[i], sizeof(char));
 
 	}
