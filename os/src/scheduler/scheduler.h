@@ -65,6 +65,8 @@ struct process_t_struct {
 
 	process_t* parent;
 	boolean_t blockedState;
+
+	address_t* temp_pc;
 };
 
 /*

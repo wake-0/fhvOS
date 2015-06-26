@@ -167,6 +167,17 @@ int SchedulerRunNextProcess(context_t* context) {
 	runningProcess = nextProcess;
 	processes[runningProcess].state = RUNNING;
 
+	// Check if something wants to change the PC
+	if (processes[runningProcess].temp_pc != NULL)
+	{
+		processes[runningProcess].context->pc = processes[runningProcess].temp_pc;
+		processes[runningProcess].context->sp = (address_t*) (0x10002000);
+		processes[runningProcess].context->registers[0] = 0;
+		processes[runningProcess].context->registers[1] = 0;
+		processes[runningProcess].context->lr = (address_t*)&dummyEnd;
+		processes[runningProcess].temp_pc = NULL;
+	}
+
 	// Update the context for the next running process
 	memcpy(context, processes[runningProcess].context, sizeof(context_t));
 	MMUSwitchToProcess(&processes[runningProcess]);
