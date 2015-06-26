@@ -136,9 +136,9 @@ void GPIOSetPinDirection(uint16_t pin, pin_direction_t dir)
     }
 }
 
-void GPIOSetPinValue(uint16_t pin, pin_value_t dir)
+void GPIOSetPinValue(uint16_t pin, pin_value_t value)
 {
-	switch (dir)
+	switch (value)
 	{
 		case PIN_VALUE_HIGH:
 			HWREG(getSOC_GPIO_x_REGS(pin) + GPIO_SETDATAOUT) = (1 << pin);
