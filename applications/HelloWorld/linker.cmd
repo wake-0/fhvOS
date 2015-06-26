@@ -1,18 +1,14 @@
--stack           0x00002000
--heap            0x00004000
-
-// set program starting point
--e Entry
-
+-stack           0x00010000
+-heap            0x00010000
 
 // surpress compiler warning that default starting point is different
 --diag_suppress=10063
 
 MEMORY
 {
-   virtual_memory:     ORIGIN 0x00020000 LENGTH = 0x01000000
-   stack_memory:       ORIGIN 0x10000000 LENGTH = 0x00002000
-   sysmem_memory:      ORIGIN 0x10002000 LENGTH = 0x00004000
+   virtual_memory:     ORIGIN 0x10020000 LENGTH = 0x10000000
+   stack_memory:       ORIGIN 0x10000000 LENGTH = 0x00010000
+   sysmem_memory:      ORIGIN 0x10010000 LENGTH = 0x00010000
 
 }
 
@@ -41,6 +37,5 @@ SECTIONS
    .sysmem     > sysmem_memory {
       sysmem = .;
    }
-
 
 }

@@ -11,4 +11,5 @@
 	<rts value="libc.a"/>
 	<createSlaveProjects value=""/>
 	<templateProperties value="id=com.ti.ccstudio.project.templates.helloWorld,"/>
+	<isTargetManual value="false"/>
 </projectOptions>
