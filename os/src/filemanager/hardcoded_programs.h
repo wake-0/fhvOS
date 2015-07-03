@@ -11,8 +11,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "../systemapi/includes/process.h"
-#include "../systemapi/includes/filesystem.h"
+#include <process.h>
+#include <filesystem.h>
 
 #define	HARDCODED_PROGRAMS_COUNT			(10)
 #define HARDCODED_PROGRAMS_MAX_NAME_LEN		(50)

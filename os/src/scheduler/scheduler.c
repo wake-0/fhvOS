@@ -9,7 +9,7 @@
 #include "../driver/timer/driver_timer.h"
 #include "../memmanager/mmu.h"
 #include "../kernel/kernel.h"
-#include "../systemapi/includes/system.h"
+#include <system.h>
 
 /*
  * Defines for the process stack start and size
