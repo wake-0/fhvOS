@@ -1,5 +1,4 @@
-#include "includes/system.h"
-
+#include <system.h>
 /*
  * main.c
  */

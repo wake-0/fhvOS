@@ -4,7 +4,7 @@
     .global ARGS_MAIN_RTN
     .global __TI_auto_init
     .global systemStack
-    .cdecls C,LIST,"includes/system.h" ;
+    .cdecls C,LIST,"system.h" ;
     .ref 	main
 	.ref	exit
 
