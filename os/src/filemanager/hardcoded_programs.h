@@ -245,7 +245,7 @@ void HardCodedPrograms_Dmx(int argc, char** argv)
 		DMXBuffer[channel+2] = 5;
 
 		for (i = 0; i < DMX_MAX; i++) {
-			DeviceManagerIoctl(dmx, 0, 0, &DMXBuffer, sizeof(DMXBuffer));
+			DeviceManagerIoctl(dmx, 0, 0, &DMXBuffer[0], sizeof(DMXBuffer));
 		}
 	}
 }
