@@ -38,7 +38,7 @@ int read_directory(char* name, directoryEntry_t* buf, int len)
 	systemCallMessage_t message;
 	message.systemCallNumber = SYSTEM_CALL_READ_DIR;
 	message.messageArgs.callBuf = name;
-	message.messageArgs.returnBuf = buf;
+	message.messageArgs.returnBuf = (char*) buf;
 	message.messageArgs.returnArg = &len;
 	SystemCall(&message);
 	return *message.messageArgs.returnArg;

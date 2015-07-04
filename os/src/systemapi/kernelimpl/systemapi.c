@@ -69,7 +69,7 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 		}
 		case SYSTEM_CALL_READ_DIR:
 		{
-			int res = FileManagerListDirectoryContent(message->messageArgs.callBuf, (char*)(message->messageArgs.returnBuf), *message->messageArgs.returnArg);
+			int res = FileManagerListDirectoryContent(message->messageArgs.callBuf, (directoryEntry_t*)(message->messageArgs.returnBuf), *message->messageArgs.returnArg);
 			*message->messageArgs.returnArg = res;
 			break;
 		}
@@ -87,7 +87,7 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 		}
 		case SYSTEM_CALL_GET_PROC_LIST:
 		{
-			int res = ProcessManagerListProcesses(message->messageArgs.returnBuf, message->messageArgs.returnArg);
+			int res = ProcessManagerListProcesses((processInfoAPI_t*) message->messageArgs.returnBuf, message->messageArgs.callArg);
 			*message->messageArgs.returnArg = res;
 			break;
 		}

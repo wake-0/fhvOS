@@ -9,6 +9,7 @@
 #include "mmu.h"
 #include "memmanager.h"
 #include "../kernel/kernel.h"
+#include "../processmanager/processmanager.h"
 
 #define MMU_DOMAIN_FULL_ACCESS 0xFFFFFFFF
 
@@ -405,6 +406,7 @@ static void mmuFreePageTablePageFrames(unsigned int pageTableType, pageTablePoin
 
 	unsigned int pageFrameNumber 	= ((unsigned int)pageTable - PAGE_TABLES_START_ADDRESS) / PAGE_SIZE_4KB;
 	unsigned int reservedPages 		= 0;
+	(void)(reservedPages); // Get rid of unused warning
 
 	switch(pageTableType)
 	{
@@ -807,9 +809,9 @@ static pageTablePointer_t mmuGetAddressSpecificL2PageTable(pageTablePointer_t pa
 		return newL2PageTable;
 	}
 
-	firstLevelDescriptor_t* res = (pageTableL1 + tableOffset);
+	firstLevelDescriptor_t* res = (firstLevelDescriptor_t*) (pageTableL1 + tableOffset);
 
-	return res->sectionBaseAddress & UPPER_22_BITS_MASK;
+	return (pageTablePointer_t) (res->sectionBaseAddress & UPPER_22_BITS_MASK);
 }
 
 

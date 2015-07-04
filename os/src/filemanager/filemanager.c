@@ -32,8 +32,6 @@ static FILINFO 		fileInfo;
 static char currentWorkingDirectory[FILE_MANAGER_MAX_PATH_LENGTH];
 static device_t indicatorDevice;
 
-static void mountFatDevice(unsigned int driveNum, void*);
-
 int FileManagerOpenExecutable(char* name, boolean_t searchInGlobalBinPath, int argc, char** argv, boolean_t blocking, context_t* context)
 {
 	if (searchInGlobalBinPath)
@@ -255,11 +253,4 @@ int FileManagerGetFileSize(char* name)
 	f_close(&file);
 	DeviceManagerWrite(indicatorDevice, "0", 1);
 	return file.fsize;
-}
-
-static void mountFatDevice(unsigned int driveNum, void* ptr) {
-	f_mount(driveNum, &fatFileSystem);
-	fat_devices[driveNum].dev = ptr;
-	fat_devices[driveNum].fs = &fatFileSystem;
-	fat_devices[driveNum].initDone = false;
 }

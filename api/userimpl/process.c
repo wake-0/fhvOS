@@ -21,10 +21,11 @@ int get_process_count()
 
 int read_processes(processInfoAPI_t* buf, int len)
 {
-	int res = len;
 	systemCallMessage_t message;
 	message.systemCallNumber = SYSTEM_CALL_GET_PROC_LIST;
-	message.messageArgs.returnBuf = buf;
+	message.messageArgs.returnBuf = (char*) buf;
+	message.messageArgs.callArg = len;
+	int res = 0;
 	message.messageArgs.returnArg = &res;
 	SystemCall(&message);
 	return *message.messageArgs.returnArg;
