@@ -118,20 +118,20 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 		case SYSTEM_CALL_IOCTL_DEVICE:
 		{
 			device_t* device = (device_t*)(message->messageArgs.callBuf[0]);
-			int mode = (*((int*)message->messageArgs.callBuf[1]));
-			int msg = (*((int*)message->messageArgs.callBuf[2]));
-			int len = (*((int*)message->messageArgs.callBuf[3]));
-			char* buf = (char*)(*((int*)message->messageArgs.callBuf[4]));
-			int res = DeviceManagerIoctl(*device, msg, mode, buf, len);
+			int* mode = (int*)message->messageArgs.callBuf[1];
+			int* msg = (int*)message->messageArgs.callBuf[2];
+			int* len = (int*)message->messageArgs.callBuf[3];
+			char* buf = ((char*)((int*)message->messageArgs.callBuf[4]));
+			int res = DeviceManagerIoctl(*device, *msg, *mode, buf, *len);
 			*message->messageArgs.returnArg = res;
 			break;
 		}
 		case SYSTEM_CALL_WRITE_DEVICE:
 		{
 			device_t* device = (device_t*)(message->messageArgs.callBuf[0]);
-			int len = (*((int*)message->messageArgs.callBuf[1]));
-			char* buf = (char*)(*((int*)message->messageArgs.callBuf[2]));
-			int res = DeviceManagerWrite(*device, buf, len);
+			int* len = (int*)message->messageArgs.callBuf[1];
+			char* buf = ((char*)((int*)message->messageArgs.callBuf[2]));
+			int res = DeviceManagerWrite(*device, buf, *len);
 			*message->messageArgs.returnArg = res;
 			break;
 		}

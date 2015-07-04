@@ -215,7 +215,7 @@ void HardCodedPrograms_Dmx(int argc, char** argv)
 	//int channel = atoi(argv[0]);
 	//int value = atoi(argv[1]);
 
-	int handle = open_device("DMX");
+	int* handle = open_device("DMX");
 	//device_t dmx = DeviceManagerGetDevice("DMX", 3);
 
 	char DMXBuffer[DMX_MAX];
