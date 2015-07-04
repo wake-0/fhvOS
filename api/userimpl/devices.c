@@ -21,6 +21,9 @@ int open_device(char* device) {
 int close_device(int handle) {
 	systemCallMessage_t message;
 	message.systemCallNumber = SYSTEM_CALL_CLOSE_DEVICE;
+	message.messageArgs.callArg = handle;
+	int res = 0;
+	message.messageArgs.returnArg = &res;
 	SystemCall(&message);
 	return *message.messageArgs.returnArg;
 }
