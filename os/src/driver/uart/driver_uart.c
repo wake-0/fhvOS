@@ -8,6 +8,11 @@
 
 #include "../beaglebone/hw_uart.h"
 
+static configuration_t createDmxConfig(void);
+static configuration_t createSlowConfig(void);
+static configuration_t createDefaultConfig(void);
+static void init(configuration_t* config, uartPins_t* pins);
+
 int UARTDriverInit(uint16_t id) {
 	if (id > BOARD_UART_COUNT - 1) { return DRIVER_ERROR; }
 
@@ -16,22 +21,14 @@ int UARTDriverInit(uint16_t id) {
 	UARTHalEnable(pins);
 
 	configuration_t config;
-	// TODO: pull out this settings which is only for DMX
+	// TODO: move this special stuff to Ioctl
 	if (id == 1) {
-		config.baudRate = UART_BAUDRATE_250000;
-		config.parity =  UART_PARITY_NONE;
-		config.charLength = UART_CHARLENGTH_8;
-		config.stopBit = UART_STOPBIT_2;
+		config = createDmxConfig();
 	} else {
-		config.baudRate = UART_BAUDRATE_115200;
-		config.parity =  UART_PARITY_NONE;
-		config.charLength = UART_CHARLENGTH_8;
-		config.stopBit = UART_STOPBIT_1;
+		config = createDefaultConfig();
 	}
 
-	UARTHalSoftwareReset(pins);
-	UARTHalFifoSettings(pins);
-	UARTHalSettings(pins, &config);
+	init(&config, &pins);
 	return DRIVER_OK;
 }
 
@@ -83,12 +80,50 @@ int UARTDriverIoctl(uint16_t id, uint16_t cmd, uint8_t mode, char* buf, uint16_t
 	if (id > BOARD_UART_COUNT - 1) { return DRIVER_ERROR; }
 
 	uartPins_t pins = GetUARTPins(id);
+	configuration_t config;
 
 	if (cmd == 1) {
-		UARTHalEnable(pins);
+		config = createDmxConfig();
 	} else if (cmd == 2) {
-		UARTHalDisable(pins);
+		config = createSlowConfig();
 	}
 
+	// call init functions
+	init(&config, &pins);
+
 	return DRIVER_OK;
+}
+
+static void init(configuration_t* config, uartPins_t* pins) {
+	UARTHalSoftwareReset(*pins);
+	UARTHalFifoSettings(*pins);
+	UARTHalSettings(*pins, config);
+}
+
+// TODO: this stuff should be handled by the input parameters from the Ioctl
+static configuration_t createDmxConfig(void) {
+	configuration_t config;
+	config.baudRate = UART_BAUDRATE_250000;
+	config.parity =  UART_PARITY_NONE;
+	config.charLength = UART_CHARLENGTH_8;
+	config.stopBit = UART_STOPBIT_2;
+	return config;
+}
+
+static configuration_t createSlowConfig(void) {
+	configuration_t config;
+	config.baudRate = UART_BAUDRATE_1;
+	config.parity =  UART_PARITY_NONE;
+	config.charLength = UART_CHARLENGTH_8;
+	config.stopBit = UART_STOPBIT_1;
+	return config;
+}
+
+static configuration_t createDefaultConfig(void) {
+	configuration_t config;
+	config.baudRate = UART_BAUDRATE_115200;
+	config.parity =  UART_PARITY_NONE;
+	config.charLength = UART_CHARLENGTH_8;
+	config.stopBit = UART_STOPBIT_1;
+	return config;
 }
