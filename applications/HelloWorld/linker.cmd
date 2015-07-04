@@ -4,6 +4,10 @@
 // surpress compiler warning that default starting point is different
 --diag_suppress=10063
 
+// Retarget printf output
+--symbol_map fputc=fputc_overriden
+--symbol_map fputs=fputs_overriden
+
 MEMORY
 {
    virtual_memory:     ORIGIN 0x10020000 LENGTH = 0x10000000

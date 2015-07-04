@@ -17,5 +17,4 @@ _c_int00: .asmfunc
     BL    	ARGS_MAIN_RTN
 
 	BL		overriden__exit
-
 .end

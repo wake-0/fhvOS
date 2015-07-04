@@ -65,3 +65,13 @@ void sleep(unsigned int milliseconds)
 
 	SystemCall(&message);
 }
+
+void print(const char* msg, int len)
+{
+	systemCallMessage_t message;
+	message.systemCallNumber = SYSTEM_CALL_PRINT;
+	message.messageArgs.callArg = len;
+	message.messageArgs.callBuf = (char*) msg;
+
+	SystemCall(&message);
+}

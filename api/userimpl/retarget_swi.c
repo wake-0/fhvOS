@@ -6,33 +6,33 @@
  */
 
 #include <stdio.h>
-
+#include <string.h>
+#include "../includes/system.h"
+#include "../includes/retarget_swi.h"
 
 FILE __stdout =     { 0 };
 FILE __stdin =      { 1 };
 
-int fputc(int ch, FILE *f)
+int fputc_overriden(int ch, FILE *f)
 {
     char tempch = ch;
     switch (tempch) {
     case '\n':
-    	//NOP
+    	print("\r\n", 2);
     	break;
     default:
-    	//NOP
+    	print(&tempch, 1);
     	break;
     }
     return ch;
 }
 
-int fputs(const char *s, FILE *f)
+int fputs_overriden(const char *s, FILE *f)
 {
-	int cnt = 0;
-	char tmpChar = s[cnt];
-	while (tmpChar != '\0') {
-		//NOP
-		cnt++;
-		tmpChar = s[cnt];
+	int len = strlen(s);
+	if (len > 0)
+	{
+		print(s, len);
 	}
 	return 0;
 }

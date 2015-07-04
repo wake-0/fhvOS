@@ -97,6 +97,9 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 			*message->messageArgs.returnArg = res;
 			break;
 		}
+		case SYSTEM_CALL_PRINT:
+			printf("%*.*s", message->messageArgs.callArg, message->messageArgs.callArg, message->messageArgs.callBuf);
+			break;
 	}
 	SchedulerEnableScheduling();
 }
