@@ -40,6 +40,7 @@ void GPIOEnable(uint16_t pin)
 	switch (gpio) {
 	case 0:
 		enableGPIO0();
+		break;
 	case 1:
 		enableGPIO1(pin);
 		break;
@@ -260,19 +261,21 @@ static void enableGPIO1(uint16_t pin) {
 static int getGPIOFromPin(uint16_t pinNo)
 {
 	switch (pinNo) {
+		case 17:
 		case 21:
 		case 22:
 		case 23:
 		case 24:
 			return 1;
 		default:
-			return -1;
+			return 0;
 	}
 }
 
 static int getCM_PER_GPIOx_CLKCTRL(uint16_t pinNo)
 {
 	switch (pinNo) {
+		case 17:
 		case 21:
 		case 22:
 		case 23:
@@ -285,6 +288,7 @@ static int getCM_PER_GPIOx_CLKCTRL(uint16_t pinNo)
 static int getCM_PER_GPIOx_CLKCTRL_MODULEMODE(uint16_t pinNo)
 {
 	switch (pinNo) {
+		case 17:
 		case 21:
 		case 22:
 		case 23:
@@ -297,6 +301,7 @@ static int getCM_PER_GPIOx_CLKCTRL_MODULEMODE(uint16_t pinNo)
 static int getCM_PER_GPIOx_CLKCTRL_MODULEMODE_ENABLE(uint16_t pinNo)
 {
 	switch (pinNo) {
+		case 17:
 		case 21:
 		case 22:
 		case 23:
@@ -310,6 +315,7 @@ static int getCM_PER_GPIOx_CLKCTRL_MODULEMODE_ENABLE(uint16_t pinNo)
 static int getCM_PER_GPIOx_CLKCTRL_OPTFCLKEN_GPIO_x_GDBCLK(uint16_t pinNo)
 {
 	switch (pinNo) {
+		case 17:
 		case 21:
 		case 22:
 		case 23:
@@ -323,6 +329,7 @@ static int getCM_PER_GPIOx_CLKCTRL_OPTFCLKEN_GPIO_x_GDBCLK(uint16_t pinNo)
 static int getCM_PER_GPIOx_CLKCTRL_IDLEST_FUNC(uint16_t pinNo)
 {
 	switch (pinNo) {
+		case 17:
 		case 21:
 		case 22:
 		case 23:
@@ -335,6 +342,7 @@ static int getCM_PER_GPIOx_CLKCTRL_IDLEST_FUNC(uint16_t pinNo)
 static int getCM_PER_GPIOx_CLKCTRL_IDLEST_SHIFT(uint16_t pinNo)
 {
 	switch (pinNo) {
+		case 17:
 		case 21:
 		case 22:
 		case 23:
@@ -347,6 +355,7 @@ static int getCM_PER_GPIOx_CLKCTRL_IDLEST_SHIFT(uint16_t pinNo)
 static int getCM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_GPIO_x_GDBCLK(uint16_t pinNo)
 {
 	switch (pinNo) {
+		case 17:
 		case 21:
 		case 22:
 		case 23:
@@ -359,6 +368,7 @@ static int getCM_PER_L4LS_CLKSTCTRL_CLKACTIVITY_GPIO_x_GDBCLK(uint16_t pinNo)
 static int getCM_PER_GPIOx_CLKCTRL_IDLEST(uint16_t pinNo)
 {
 	switch (pinNo) {
+		case 17:
 		case 21:
 		case 22:
 		case 23:
@@ -372,12 +382,13 @@ static int getCM_PER_GPIOx_CLKCTRL_IDLEST(uint16_t pinNo)
 static int getSOC_GPIO_x_REGS(uint16_t pinNo)
 {
 	switch (pinNo) {
+		case 17:
 		case 21:
 		case 22:
 		case 23:
 		case 24:
 			return SOC_GPIO_1_REGS;
 		default:
-			return -1;
+			return SOC_GPIO_0_REGS;
 	}
 }
