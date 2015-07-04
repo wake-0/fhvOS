@@ -80,9 +80,9 @@ int FileManagerOpenExecutable(char* name, boolean_t searchInGlobalBinPath, int a
 	}
 
 	// fileBuf contains the whole program
-	LoaderLoad(fileBuf, size);
+	LoaderLoad(fileBuf, size, blocking, context);
 
-	return FILE_MANAGER_NOT_FOUND;
+	return FILE_MANAGER_OK;
 }
 
 int FileManagerInit(device_t device, device_t indDevice) {

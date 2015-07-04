@@ -68,14 +68,14 @@ process_t* ProcessManagerStartProcess(char * processName, void(*funcPtr)(int, ch
 
 	SchedulerUnblockProcess(ptr->id);
 
+	processIdx++;
+
 	if (blocking && context != NULL)
 	{
 		ptr->blockedState = TRUE;
 		SchedulerBlockProcess(ptr->parent->id);
 		SchedulerRunNextProcess(context);
 	}
-
-	processIdx++;
 
 	return ptr;
 }

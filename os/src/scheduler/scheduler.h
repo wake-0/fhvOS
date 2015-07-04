@@ -49,7 +49,7 @@ typedef struct {
 	address_t* lr;
 	address_t* sp;
 	register_t registers[REGISTER_COUNT];
-	register_t* pc;
+	address_t* pc;
 } context_t;
 #pragma pack(pop)
 
@@ -67,6 +67,9 @@ struct process_t_struct {
 	boolean_t blockedState;
 
 	address_t* temp_pc;
+
+	char* programData;
+	unsigned int programDataLen;
 };
 
 /*

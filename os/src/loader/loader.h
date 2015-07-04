@@ -8,7 +8,10 @@
 #ifndef LOADER_LOADER_H_
 #define LOADER_LOADER_H_
 
-extern int LoaderLoad(char* programBuf, int length);
+#include "../platform/platform.h"
+#include "../processmanager/processmanager.h"
+
+extern int LoaderLoad(char* programBuf, int length, boolean_t blocking, context_t* context);
 
 
 

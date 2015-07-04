@@ -100,7 +100,7 @@ process_t* SchedulerStartProcess(processFunc func) {
 	// IMPORTANT: when a task which was interrupted by IRQ is scheduled by SWI the
 	// PC must be subtracted because PC was incremented but SWI will not repeat instruction thus decrement PC to repeat
 	// CONCLUSION: increment for SWI here and decrement according to systemstate in scheduleNextReady
-	processes[freeProcess].context->pc = (register_t*)func;
+	processes[freeProcess].context->pc = (address_t*)func;
 	processes[freeProcess].context->lr = (address_t*)&dummyEnd;
 	//processes[freeProcess].context->sp = (address_t*) (STACK_START + (freeProcess * STACK_SIZE));
 	processes[freeProcess].context->sp = (address_t*) (0x10002000);
