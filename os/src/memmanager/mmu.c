@@ -9,6 +9,7 @@
 #include "mmu.h"
 #include "memmanager.h"
 #include "../kernel/kernel.h"
+#include "../processmanager/processmanager.h"
 
 #define MMU_DOMAIN_FULL_ACCESS 0xFFFFFFFF
 
@@ -196,6 +197,7 @@ void MMUHandleDataAbortException(context_t* context)
 			// check if L2 page table already exists
 			pageTablePointer_t l2PageTable = mmuGetAddressSpecificL2PageTable(runningProcess->pageTableL1, dabtAccessedVirtualAddress);
 			mmuMapFreePageFrameIntoL2PageTable(dabtAccessedVirtualAddress, l2PageTable);
+			//mmuCreateAndFillL2PageTable(dabtAccessedVirtualAddress, runningProcess);
 			break;
 		}
 		case FIRST_LEVEL_PERMISSION_FAULT:
@@ -404,6 +406,7 @@ static void mmuFreePageTablePageFrames(unsigned int pageTableType, pageTablePoin
 
 	unsigned int pageFrameNumber 	= ((unsigned int)pageTable - PAGE_TABLES_START_ADDRESS) / PAGE_SIZE_4KB;
 	unsigned int reservedPages 		= 0;
+	(void)(reservedPages); // Get rid of unused warning
 
 	switch(pageTableType)
 	{
@@ -784,21 +787,31 @@ static void mmuSetTranslationTableSelectionBoundary(unsigned int selectionBounda
  */
 static pageTablePointer_t mmuGetAddressSpecificL2PageTable(pageTablePointer_t pageTableL1, unsigned int virtualAddress)
 {
-	int tableOffset = mmuGetTableIndex(virtualAddress, INDEX_OF_L2_PAGE_TABLE, TTBR0);
+	int tableOffset = mmuGetTableIndex(virtualAddress, INDEX_OF_L1_PAGE_TABLE, TTBR0);
 
 	unsigned int pageTableEntry = *(pageTableL1 + tableOffset);
 
 	if(FAULT_PAGE_TABLE_ENTRY == pageTableEntry)
 	{
 		// no L2 page table => create one
-		return mmuCreatePageTable(L2_PAGE_TABLE);
+		pageAddressPointer_t newL2PageTable = mmuCreatePageTable(L2_PAGE_TABLE);
+		KernelDebug("l2pageTable in createandfill(..)=%x\n", newL2PageTable);
+		firstLevelDescriptor_t pageTableEntry;
+		pageTableEntry.sectionBaseAddress 	= (unsigned int)newL2PageTable & UPPER_22_BITS_MASK;
+		pageTableEntry.descriptorType 		= DESCRIPTOR_TYPE_PAGE_TABLE;
+		pageTableEntry.cachedBuffered 		= NON_CACHED_NON_BUFFERED;
+		pageTableEntry.domain 				= DOMAIN_MANAGER_ACCESS;
+
+		uint32_t tableOffset = mmuGetTableIndex(virtualAddress, INDEX_OF_L1_PAGE_TABLE, TTBR0);
+		address_t *firstLevelDescriptorAddress = pageTableL1 + (tableOffset << 2)/sizeof(uint32_t);
+		*firstLevelDescriptorAddress = mmuCreateL1PageTableEntry(pageTableEntry);
+
+		return newL2PageTable;
 	}
-	else
-	{
-		// L2 page table exists
-		pageTablePointer_t l2PageTable = (pageTableL1 + tableOffset);
-		return l2PageTable;
-	}
+
+	firstLevelDescriptor_t* res = (firstLevelDescriptor_t*) (pageTableL1 + tableOffset);
+
+	return (pageTablePointer_t) (res->sectionBaseAddress & UPPER_22_BITS_MASK);
 }
 
 

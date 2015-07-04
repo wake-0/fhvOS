@@ -11,7 +11,7 @@
 #include <ctype.h>
 #include "../kernel/kernel.h"
 
-#include "../systemapi/includes/system.h"
+#include <system.h>
 
 #define CONSOLE_SCREEN_HEIGHT_LINES			(40)
 #define CONSOLE_MAX_COMMAND_LENGTH			(255)

@@ -18,5 +18,6 @@ extern int execute(char* command);
 extern void yield(void);
 extern void overriden__exit(int);
 extern void sleep(unsigned int);
+extern void print(const char* message, int len);
 
 #endif /* SYSTEMAPI_INCLUDES_SYSTEM_H_ */

@@ -9,7 +9,7 @@
 #define PROCESSMANAGER_PROCESSMANAGER_H_
 
 #include "../scheduler/scheduler.h"
-#include "../systemapi/includes/process.h"
+#include <process.h>
 
 #define PROCESSMANAGER_FAILURE			-1
 

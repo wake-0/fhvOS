@@ -9,7 +9,7 @@
 #include "../driver/timer/driver_timer.h"
 #include "../memmanager/mmu.h"
 #include "../kernel/kernel.h"
-#include "../systemapi/includes/system.h"
+#include <system.h>
 
 /*
  * Defines for the process stack start and size
@@ -100,7 +100,7 @@ process_t* SchedulerStartProcess(processFunc func) {
 	// IMPORTANT: when a task which was interrupted by IRQ is scheduled by SWI the
 	// PC must be subtracted because PC was incremented but SWI will not repeat instruction thus decrement PC to repeat
 	// CONCLUSION: increment for SWI here and decrement according to systemstate in scheduleNextReady
-	processes[freeProcess].context->pc = (register_t*)func;
+	processes[freeProcess].context->pc = (address_t*)func;
 	processes[freeProcess].context->lr = (address_t*)&dummyEnd;
 	//processes[freeProcess].context->sp = (address_t*) (STACK_START + (freeProcess * STACK_SIZE));
 	processes[freeProcess].context->sp = (address_t*) (0x10002000);
@@ -166,6 +166,17 @@ int SchedulerRunNextProcess(context_t* context) {
 	// Set the next processes to running
 	runningProcess = nextProcess;
 	processes[runningProcess].state = RUNNING;
+
+	// Check if something wants to change the PC
+	if (processes[runningProcess].temp_pc != NULL)
+	{
+		processes[runningProcess].context->pc = processes[runningProcess].temp_pc;
+		processes[runningProcess].context->sp = (address_t*) (0x10002000);
+		processes[runningProcess].context->registers[0] = 0;
+		processes[runningProcess].context->registers[1] = 0;
+		processes[runningProcess].context->lr = (address_t*)&dummyEnd;
+		processes[runningProcess].temp_pc = NULL;
+	}
 
 	// Update the context for the next running process
 	memcpy(context, processes[runningProcess].context, sizeof(context_t));

@@ -8,7 +8,7 @@
 #ifndef SYSTEMAPI_SYSTEMCALLFUNCTIONS_H_
 #define SYSTEMAPI_SYSTEMCALLFUNCTIONS_H_
 
-#include "../includes/systemcall.h"
+#include <systemcall.h>
 #include "../../scheduler/scheduler.h"
 
 extern void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumber, context_t* context);

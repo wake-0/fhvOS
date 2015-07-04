@@ -6,35 +6,35 @@
  */
 
 #include "loader.h"
+#include <stdio.h>
+#include <system.h>
 #include "../memmanager/memmanager.h"
-#include "../processmanager/processmanager.h"
+#include "../hal/cpu/hal_cpu.h"
+#include "../hal/am335x/hw_types.h"
 
-static char* progBuf;
-static int progBufLen;
+#define	LOADER_PROGRAM_START_ADDRESS	0x10020000
 
 void dummyStart(int argc, char** argv)
 {
-	int length = progBufLen;
-	char* programBuf = progBuf;
-	int pageSize = PAGE_SIZE_4KB;
-	int numPages = (length / pageSize) + 1;
-
-	//pageAddressPointer_t pages = MemoryManagerGetFreePagesInProcessRegion(numPages);
-	memcpy(0x10F00000, programBuf, length);
-	free(programBuf);
 	process_t* proc = SchedulerGetRunningProcess();
-	proc->context->pc = 0x0000;
-
+	void* virt_mem_start = (void*) LOADER_PROGRAM_START_ADDRESS;
+	memcpy(virt_mem_start, proc->programData, proc->programDataLen);
+	free(proc->programData);
+	proc->temp_pc = virt_mem_start;
+	yield();
 }
 
-int LoaderLoad(char* programBuf, int length)
+int LoaderLoad(char* programBuf, int length, boolean_t blocking, context_t* context)
 {
 
-	progBuf = programBuf;
-	progBufLen = length;
 	// See ticket #82 : pageAddressPointer_t MemoryManagerGetFreePagesInProcessRegion(unsigned int pagesToReserve)
-	process_t* proc = ProcessManagerStartProcess("new", dummyStart, 0, NULL, false, NULL);
+	process_t* proc = ProcessManagerStartProcess("new", dummyStart, 0, NULL, blocking, context);
 
+	if (proc != NULL)
+	{
+		proc->programData = programBuf;
+		proc->programDataLen = length;
+	}
 	return 0;
 }
 

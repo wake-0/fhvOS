@@ -10,8 +10,8 @@
 
 #include "../platform/platform.h"
 #include "../scheduler/scheduler.h"
-#include "../systemapi/includes/system.h"
-#include "../systemapi/includes/filesystem.h"
+#include <system.h>
+#include <filesystem.h>
 
 #define FILE_MANAGER_OK				  (1)
 #define FILE_MANAGER_NOT_FOUND		  (-1)

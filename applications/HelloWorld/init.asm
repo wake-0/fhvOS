@@ -1,26 +1,20 @@
-    .global  Entry
-
-    .asg    __args_main,   ARGS_MAIN_RTN
+    .armfunc _c_int00
+    .global  _c_int00
+    .asg    main,   ARGS_MAIN_RTN
     .global ARGS_MAIN_RTN
     .global __TI_auto_init
     .global systemStack
-	.ref main
+    .cdecls C,LIST,"system.h" ;
+    .ref 	main
+	.ref	exit
 
 c_r13_system    .long    systemStack
 
-Entry:
+_c_int00: .asmfunc
 
-    ; Perform all the required initilizations:
-    ;  - Process BINIT Table
-    ;  - Perform C auto initialization
-    ;  - Call global constructors)
-    BL    __TI_auto_init
+    BL    	__TI_auto_init
 
-    LDR   r10, _start_boot
-    MOV   lr,pc                           ; Dummy return from start_boot
-    BX    r10                             ; Branch to start_boot
-    SUB   pc, pc, #0x08                   ; looping
+    BL    	ARGS_MAIN_RTN
+
+	BL		overriden__exit
 .end
-
-_start_boot:
-    .word main
