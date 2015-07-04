@@ -32,6 +32,7 @@ void HardCodedPrograms_Ls(int, char**);
 void HardCodedPrograms_Cd(int argc, char** argv);
 void HardCodedPrograms_Ps(int argc, char** argv);
 void HardCodedPrograms_Kill(int argc, char** argv);
+void HardCodedPrograms_Dmx(int argc, char** argv);
 
 static command_program_entry_t mapping[HARDCODED_PROGRAMS_COUNT] = {
 		{ "hello" , HardCodedPrograms_HelloWorld },
@@ -40,6 +41,7 @@ static command_program_entry_t mapping[HARDCODED_PROGRAMS_COUNT] = {
 		{ "ls", HardCodedPrograms_Ls },
 		{ "cd", HardCodedPrograms_Cd },
 		{ "ps", HardCodedPrograms_Ps },
+		{ "dmx", HardCodedPrograms_Dmx },
 		{ "kill", HardCodedPrograms_Kill }
 };
 
@@ -197,6 +199,21 @@ void HardCodedPrograms_Cd(int argc, char** argv)
 	{
 		printf("Could not open directory\n");
 	}
+}
+
+void HardCodedPrograms_Dmx(int argc, char** argv)
+{
+	if (argc != 2) {
+		printf("Usage is dmx [channel] [value]\n");
+		return;
+	}
+
+	int channel = atoi(argv[0]);
+	int value = atoi(argv[1]);
+
+	device_t uart1 = DeviceManagerGetDevice("UART1", 5);
+	device_t dmx = DeviceManagerGetDevice("DMX", 3);
+	DeviceManagerIoctl(dmx, channel, value, &uart1, sizeof(device_t));
 }
 
 void HardCodedPrograms_Ps(int argc, char** argv)
