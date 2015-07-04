@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <process.h>
 #include <filesystem.h>
+#include <devices.h>
 
 #define	HARDCODED_PROGRAMS_COUNT			(10)
 #define HARDCODED_PROGRAMS_MAX_NAME_LEN		(50)
@@ -214,7 +215,8 @@ void HardCodedPrograms_Dmx(int argc, char** argv)
 	//int channel = atoi(argv[0]);
 	//int value = atoi(argv[1]);
 
-	device_t dmx = DeviceManagerGetDevice("DMX", 3);
+	int handle = open_device("DMX");
+	//device_t dmx = DeviceManagerGetDevice("DMX", 3);
 
 	char DMXBuffer[DMX_MAX];
 	// Set the default dmx buffer
@@ -248,7 +250,8 @@ void HardCodedPrograms_Dmx(int argc, char** argv)
 		}
 
 		for (i = 0; i < DMX_MAX; i++) {
-			DeviceManagerIoctl(dmx, 0, 0, &DMXBuffer[0], sizeof(DMXBuffer));
+			ioctl_device(handle,0,0,sizeof(DMXBuffer), &DMXBuffer[0]);
+			//DeviceManagerIoctl(dmx, 0, 0, &DMXBuffer[0], sizeof(DMXBuffer));
 			sleep(30);
 		}
 	}
@@ -262,16 +265,19 @@ void HardCodedPrograms_Dmx(int argc, char** argv)
 	DMXBuffer[0] = 0;
 	DMXBuffer[1] = 150;
 
-	DeviceManagerIoctl(dmx, 0, 0, &DMXBuffer[0], sizeof(DMXBuffer));
+	ioctl_device(handle, 0, 0, sizeof(DMXBuffer), &DMXBuffer[0]);
+	//DeviceManagerIoctl(dmx, 0, 0, &DMXBuffer[0], sizeof(DMXBuffer));
 
 	sleep(500);
 	DMXBuffer[0] = 127;
-	DeviceManagerIoctl(dmx, 0, 0, &DMXBuffer[0], sizeof(DMXBuffer));
+	ioctl_device(handle, 0, 0, sizeof(DMXBuffer), &DMXBuffer[0]);
+	//DeviceManagerIoctl(dmx, 0, 0, &DMXBuffer[0], sizeof(DMXBuffer));
 
 	sleep(500);
 	// close
 	DMXBuffer[3] = 0;
-	DeviceManagerIoctl(dmx, 0, 0, &DMXBuffer[0], sizeof(DMXBuffer));
+	ioctl_device(handle, 0, 0, sizeof(DMXBuffer), &DMXBuffer[0]);
+	//DeviceManagerIoctl(dmx, 0, 0, &DMXBuffer[0], sizeof(DMXBuffer));
 }
 
 void HardCodedPrograms_Ps(int argc, char** argv)
