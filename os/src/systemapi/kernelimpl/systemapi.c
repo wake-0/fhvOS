@@ -127,7 +127,14 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 			break;
 		}
 		case SYSTEM_CALL_WRITE_DEVICE:
+		{
+			device_t* device = (device_t*)(message->messageArgs.callBuf[0]);
+			int len = (*((int*)message->messageArgs.callBuf[1]));
+			char* buf = (char*)(*((int*)message->messageArgs.callBuf[2]));
+			int res = DeviceManagerWrite(*device, buf, len);
+			*message->messageArgs.returnArg = res;
 			break;
+		}
 	}
 	SchedulerEnableScheduling();
 }
