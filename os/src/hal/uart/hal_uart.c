@@ -95,8 +95,6 @@ int UARTHalDisable(uartPins_t uartPins) {
 		return UART_HAL_ERROR;
 	}
 
-	//HWREG_SET(baseAddress + UART_MDR1_OFF, UART_MODE_DISABLE_UART);
-
 	switchToConfModeB(baseAddress);
 	HWREG_SET(baseAddress + UART_LCR_EFR_OFF, UART_LCR_ENHANCED_EN);
 	HWREG_SET(baseAddress + UART_IER_OFF, (1 << 4));
