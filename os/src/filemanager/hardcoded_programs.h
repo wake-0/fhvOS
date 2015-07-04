@@ -17,6 +17,10 @@
 #define	HARDCODED_PROGRAMS_COUNT			(10)
 #define HARDCODED_PROGRAMS_MAX_NAME_LEN		(50)
 
+// TODO: this defines should be removed to the dmx function
+#define DMX_MAX 6 // Max. number of DMX data packages.
+#define channel 0
+
 typedef struct {
 	char commandName[HARDCODED_PROGRAMS_MAX_NAME_LEN];
 	void (*funcPtr)(int, char ** );
@@ -208,12 +212,42 @@ void HardCodedPrograms_Dmx(int argc, char** argv)
 		return;
 	}
 
-	int channel = atoi(argv[0]);
-	int value = atoi(argv[1]);
+	//int channel = atoi(argv[0]);
+	//int value = atoi(argv[1]);
 
-	device_t uart1 = DeviceManagerGetDevice("UART1", 5);
 	device_t dmx = DeviceManagerGetDevice("DMX", 3);
-	DeviceManagerIoctl(dmx, channel, value, &uart1, sizeof(device_t));
+
+	char DMXBuffer[DMX_MAX];
+	// Set the default dmx buffer
+	int i = 0;
+	for (i = 0; i < DMX_MAX; i++) {
+		DMXBuffer[i] = 0;
+	}
+
+	volatile int direction = 0;
+	while (true) {
+		// sample stuff
+		if (direction == 0) {
+			DMXBuffer[channel] = DMXBuffer[channel] += 5;
+			DMXBuffer[channel+1] = DMXBuffer[channel+1] += 5;
+			if (DMXBuffer[channel] == 200) {
+				direction = 1;
+			}
+		} else if (direction == 1) {
+			DMXBuffer[channel] = DMXBuffer[channel] -= 5;
+			DMXBuffer[channel+1] = DMXBuffer[channel+1] -= 5;
+			if (DMXBuffer[channel] == 0) {
+				direction = 0;
+			}
+		}
+
+		DMXBuffer[channel+3] = 5;
+		DMXBuffer[channel+2] = 5;
+
+		for (i = 0; i < DMX_MAX; i++) {
+			DeviceManagerIoctl(dmx, 0, 0, &DMXBuffer, sizeof(DMXBuffer));
+		}
+	}
 }
 
 void HardCodedPrograms_Ps(int argc, char** argv)
