@@ -21,14 +21,14 @@
 void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumber, context_t* context)
 {
 	// We allow interrupts but disallow scheduling
-	SchedulerDisableScheduling();
-	CPUirqe();
+	KernelAtomicStart();
 
 	//KernelDebug("Systemcall number=%i\n", message->systemCallNumber);
 	switch (message->systemCallNumber)
 	{
 		case SYSTEM_CALL_EXEC:
 		{
+			CPUirqe();
 			// Disassemble argument package
 			char* command = message->messageArgs.callBuf;
 			KernelExecute(command, context);
@@ -58,24 +58,28 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 		}
 		case SYSTEM_CALL_CWD:
 		{
+			CPUirqe();
 			int res = FileManagerGetCurrentWorkingDirectory(message->messageArgs.returnBuf, message->messageArgs.callArg);
 			*message->messageArgs.returnArg = res;
 			break;
 		}
 		case SYSTEM_CALL_READ:
 		{
+			CPUirqe();
 			int res = FileManagerOpenFile(message->messageArgs.callBuf, message->messageArgs.callArg, message->messageArgs.returnBuf, *message->messageArgs.returnArg);
 			*message->messageArgs.returnArg = res;
 			break;
 		}
 		case SYSTEM_CALL_READ_DIR:
 		{
+			CPUirqe();
 			int res = FileManagerListDirectoryContent(message->messageArgs.callBuf, (directoryEntry_t*)(message->messageArgs.returnBuf), *message->messageArgs.returnArg);
 			*message->messageArgs.returnArg = res;
 			break;
 		}
 		case SYSTEM_CALL_CHDIR:
 		{
+			CPUirqe();
 			int res = FileManagerSetCurrentWorkingDirectory(message->messageArgs.callBuf);
 			*message->messageArgs.returnArg = res;
 			break;
@@ -105,36 +109,37 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 		{
 			device_t device = DeviceManagerGetDevice(message->messageArgs.callBuf, strlen(message->messageArgs.callBuf));
 			DeviceManagerOpen(device);
-			message->messageArgs.returnArg = (int*)(&device);
+			*message->messageArgs.returnArg = device.device;
 			break;
 		}
 		case SYSTEM_CALL_CLOSE_DEVICE:
 		{
-			device_t* device = (device_t*)message->messageArgs.callArg;
-			int res = DeviceManagerClose(*device);
+			device_t device;
+			device.device = message->messageArgs.callArg;
+			int res = DeviceManagerClose(device);
 			*message->messageArgs.returnArg = res;
 			break;
 		}
 		case SYSTEM_CALL_IOCTL_DEVICE:
 		{
-			device_t* device = (device_t*)(message->messageArgs.callBuf[0]);
-			int* mode = (int*)message->messageArgs.callBuf[1];
-			int* msg = (int*)message->messageArgs.callBuf[2];
-			int* len = (int*)message->messageArgs.callBuf[3];
-			char* buf = ((char*)((int*)message->messageArgs.callBuf[4]));
-			int res = DeviceManagerIoctl(*device, *msg, *mode, buf, *len);
+			device_t device;
+			memcpy(&device.device, message->messageArgs.callBuf, sizeof(int));
+			char mode = message->messageArgs.callBuf[4];
+			char cmd  = message->messageArgs.callBuf[5];
+			char* buf = &message->messageArgs.callBuf[6];
+
+			int res = DeviceManagerIoctl(device, (int) cmd, (int) mode, buf, message->messageArgs.callArg - sizeof(int) - 2 * sizeof(char));
 			*message->messageArgs.returnArg = res;
 			break;
 		}
 		case SYSTEM_CALL_WRITE_DEVICE:
 		{
-			device_t* device = (device_t*)(message->messageArgs.callBuf[0]);
-			int* len = (int*)message->messageArgs.callBuf[1];
-			char* buf = ((char*)((int*)message->messageArgs.callBuf[2]));
-			int res = DeviceManagerWrite(*device, buf, *len);
+			device_t device;
+			device.device = *message->messageArgs.returnArg;
+			int res = DeviceManagerWrite(device, message->messageArgs.callBuf, message->messageArgs.callArg);
 			*message->messageArgs.returnArg = res;
 			break;
 		}
 	}
-	SchedulerEnableScheduling();
+	KernelAtomicEnd();
 }

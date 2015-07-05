@@ -36,7 +36,7 @@
 UND_STACK_SIZE 						.set 0x8
 ABT_STACK_SIZE 						.set 0x8
 FIQ_STACK_SIZE 						.set 0x8
-IRQ_STACK_SIZE 						.set 0x1000
+IRQ_STACK_SIZE 						.set 0x10000
 SVC_STACK_SIZE 						.set 0x8
 
 _int_vecs							.long 	int_vecs

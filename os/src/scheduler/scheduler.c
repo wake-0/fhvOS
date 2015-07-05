@@ -14,7 +14,6 @@
 /*
  * Defines for the process stack start and size
  */
-#define STACK_START		(0x8000FFFC)
 // 3840 Byte
 #define STACK_SIZE		(10000)
 
@@ -103,7 +102,7 @@ process_t* SchedulerStartProcess(processFunc func) {
 	processes[freeProcess].context->pc = (address_t*)func;
 	processes[freeProcess].context->lr = (address_t*)&dummyEnd;
 	//processes[freeProcess].context->sp = (address_t*) (STACK_START + (freeProcess * STACK_SIZE));
-	processes[freeProcess].context->sp = (address_t*) (0x10002000);
+	processes[freeProcess].context->sp = (address_t*) (0x10010000);
 
 	// CPSR
 	// N|Z|C|V|Q|IT|J| DNM| GE | IT   |E|A|I|F|T|  M  |
@@ -146,7 +145,8 @@ int SchedulerRunNextProcess(context_t* context) {
 	KernelAtomicStart();
 
 	processId_t nextProcess = getNextReadyProcessId();
-	if (nextProcess == INVALID_PROCESS_ID) {
+
+	if (nextProcess == INVALID_PROCESS_ID || nextProcess == runningProcess) {
 		KernelAtomicEnd();
 		return SCHEDULER_ERROR;
 	}
@@ -171,7 +171,7 @@ int SchedulerRunNextProcess(context_t* context) {
 	if (processes[runningProcess].temp_pc != NULL)
 	{
 		processes[runningProcess].context->pc = processes[runningProcess].temp_pc;
-		processes[runningProcess].context->sp = (address_t*) (0x10002000);
+		processes[runningProcess].context->sp = (address_t*) (0x10010000);
 		processes[runningProcess].context->registers[0] = 0;
 		processes[runningProcess].context->registers[1] = 0;
 		processes[runningProcess].context->lr = (address_t*)&dummyEnd;
@@ -188,7 +188,7 @@ int SchedulerRunNextProcess(context_t* context) {
 int SchedulerKillProcess(processId_t id) {
 	KernelAtomicStart();
 	if (id < 0 || id >= PROCESSES_MAX) {
-		KernelAtomicEnd();
+		//KernelAtomicEnd();
 		return SCHEDULER_ERROR;
 	}
 
@@ -292,9 +292,11 @@ void timerISR(address_t* context)
 
 	if (schedulingEnabled)
 	{
+		KernelAtomicStart();
 		DeviceManagerWrite(stdoutDevice, "1", 1);
 		SchedulerRunNextProcess(procContext);
 		DeviceManagerWrite(stdoutDevice, "0", 1);
+		KernelAtomicEnd();
 	}
 
 	DeviceManagerWrite(timer, ENABLE_INTERRUPTS, TIMER_IRQ_OVERFLOW);

@@ -215,7 +215,7 @@ void HardCodedPrograms_Dmx(int argc, char** argv)
 	//int channel = atoi(argv[0]);
 	//int value = atoi(argv[1]);
 
-	int* handle = open_device("DMX");
+	int handle = open_device("DMX");
 	//device_t dmx = DeviceManagerGetDevice("DMX", 3);
 
 	char DMXBuffer[DMX_MAX];
@@ -238,22 +238,23 @@ void HardCodedPrograms_Dmx(int argc, char** argv)
 	while (direction != 2) {
 		// sample stuff
 		if (direction == 0) {
-			DMXBuffer[pan] = DMXBuffer[pan] += 5;
+			DMXBuffer[pan] += 5;
 			if (DMXBuffer[pan] == 255) {
 				direction = 1;
 			}
 		} else if (direction == 1) {
-			DMXBuffer[pan] = DMXBuffer[pan] -= 5;
+			DMXBuffer[pan] -= 5;
 			if (DMXBuffer[pan] == 0) {
 				direction = 2;
 			}
 		}
 
 		for (i = 0; i < DMX_MAX; i++) {
-			ioctl_device(handle,0,0,sizeof(DMXBuffer), &DMXBuffer[0]);
+			ioctl_device(handle,0,0, &DMXBuffer[0], sizeof(DMXBuffer));
 			//DeviceManagerIoctl(dmx, 0, 0, &DMXBuffer[0], sizeof(DMXBuffer));
 			sleep(30);
 		}
+		printf("Sent DMX Buffer\n");
 	}
 
 	sleep(100);
@@ -265,19 +266,23 @@ void HardCodedPrograms_Dmx(int argc, char** argv)
 	DMXBuffer[0] = 0;
 	DMXBuffer[1] = 150;
 
-	ioctl_device(handle, 0, 0, sizeof(DMXBuffer), &DMXBuffer[0]);
+	ioctl_device(handle, 0, 0, &DMXBuffer[0], sizeof(DMXBuffer));
 	//DeviceManagerIoctl(dmx, 0, 0, &DMXBuffer[0], sizeof(DMXBuffer));
+	printf("Sent DMX Buffer 1\n");
 
 	sleep(500);
 	DMXBuffer[0] = 127;
-	ioctl_device(handle, 0, 0, sizeof(DMXBuffer), &DMXBuffer[0]);
+	ioctl_device(handle, 0, 0, &DMXBuffer[0], sizeof(DMXBuffer));
 	//DeviceManagerIoctl(dmx, 0, 0, &DMXBuffer[0], sizeof(DMXBuffer));
+	printf("Sent DMX Buffer 2\n");
 
 	sleep(500);
 	// close
 	DMXBuffer[3] = 0;
-	ioctl_device(handle, 0, 0, sizeof(DMXBuffer), &DMXBuffer[0]);
+	ioctl_device(handle, 0, 0, &DMXBuffer[0], sizeof(DMXBuffer));
 	//DeviceManagerIoctl(dmx, 0, 0, &DMXBuffer[0], sizeof(DMXBuffer));
+	printf("Sent DMX Buffer 3\n");
+
 }
 
 void HardCodedPrograms_Ps(int argc, char** argv)
