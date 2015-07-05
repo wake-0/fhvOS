@@ -13,12 +13,13 @@ MEMORY
    virtual_memory:     ORIGIN 0x10020000 LENGTH = 0x10000000
    stack_memory:       ORIGIN 0x10000000 LENGTH = 0x00010000
    sysmem_memory:      ORIGIN 0x10010000 LENGTH = 0x00010000
-
+   argc_argv_memory:   ORIGIN 0x00100000 LENGTH = 0x00010000
 }
 
 SECTIONS
 {
    ORDER
+   .init_args  > argc_argv_memory
    .text       > virtual_memory  {
       init.obj
       *(.text)
@@ -41,5 +42,4 @@ SECTIONS
    .sysmem     > sysmem_memory {
       sysmem = .;
    }
-
 }

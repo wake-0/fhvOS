@@ -3,16 +3,19 @@
     .asg    main,   ARGS_MAIN_RTN
     .global ARGS_MAIN_RTN
     .global __TI_auto_init
-    .global systemStack
     .cdecls C,LIST,"system.h" ;
     .ref 	main
 	.ref	exit
 
-c_r13_system    .long    systemStack
-
 _c_int00: .asmfunc
 
     BL    	__TI_auto_init
+
+	MOV		R10, #0x00100000
+	LDR		R0, [R10]
+
+	ADD		R1, R10, #0x10
+;	LDR		R1, R10
 
     BL    	ARGS_MAIN_RTN
 

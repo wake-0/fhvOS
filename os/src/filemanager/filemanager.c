@@ -78,7 +78,7 @@ int FileManagerOpenExecutable(char* name, boolean_t searchInGlobalBinPath, int a
 	}
 
 	// fileBuf contains the whole program
-	LoaderLoad(fileBuf, size, blocking, context);
+	LoaderLoad(fileBuf, size, argc, argv, blocking, context);
 
 	return FILE_MANAGER_OK;
 }
