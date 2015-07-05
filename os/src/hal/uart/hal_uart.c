@@ -89,6 +89,28 @@ int UARTHalEnable(uartPins_t uartPins) {
 	return UART_HAL_OK;
 }
 
+int UARTHalDisable(uartPins_t uartPins) {
+	address_t baseAddress = getBaseAddressOfUART(uartPins);
+	if (baseAddress == UART_BASE_ADR_NOT_FOUND) {
+		return UART_HAL_ERROR;
+	}
+
+	switchToConfModeB(baseAddress);
+	HWREG_SET(baseAddress + UART_LCR_EFR_OFF, UART_LCR_ENHANCED_EN);
+	HWREG_SET(baseAddress + UART_IER_OFF, (1 << 4));
+
+
+	//TODO: depending on UART pins disable the right uart
+	HWREG(SOC_CM_PER_REGS + CM_PER_UART1_CLKCTRL) =
+			CM_PER_UART1_CLKCTRL_MODULEMODE_DISABLED;
+
+	while ((HWREG(SOC_CM_PER_REGS + CM_PER_UART1_CLKCTRL) &
+	CM_PER_UART1_CLKCTRL_MODULEMODE) != CM_PER_UART1_CLKCTRL_MODULEMODE_DISABLED)
+		;
+
+	return UART_HAL_OK;
+}
+
 //TODO: add some logic to decide write/read, ...
 int UARTHalFifoSettings(uartPins_t uartPins) {
 	address_t baseAddress = getBaseAddressOfUART(uartPins);
@@ -320,19 +342,6 @@ boolean_t UARTHalIsCharAvailable(uartPins_t uartPins) {
 	HWREG(baseAddress + UART_LCR_OFF) = lcrRegValue;
 
 	return retVal;
-}
-
-int UARTHalDisable(uartPins_t uartPins) {
-
-	//TODO: depending on UART pins disable the right uart
-	HWREG(SOC_CM_PER_REGS + CM_PER_UART1_CLKCTRL) =
-			CM_PER_UART1_CLKCTRL_MODULEMODE_DISABLED;
-
-	while ((HWREG(SOC_CM_PER_REGS + CM_PER_UART1_CLKCTRL) &
-	CM_PER_UART1_CLKCTRL_MODULEMODE) != CM_PER_UART1_CLKCTRL_MODULEMODE_DISABLED)
-		;
-
-	return UART_HAL_OK;
 }
 
 /*

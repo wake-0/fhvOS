@@ -13,7 +13,7 @@
 #include "../devicemanager/devicemanager.h"
 #include "../console/console.h"
 #include "../filemanager/filemanager.h"
-#include "../systemapi/includes/system.h"
+#include <system.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -64,13 +64,6 @@ void KernelStart()
 		KernelInfo("File Manager was not initialized\n");
 		KernelError("FileManagerInit returned %d\n", res);
 	}
-
-	// TODO: remove this it is only for test purposes
-	KernelInfo("Starting DMX\n");
-	device_t uart1 = DeviceManagerGetDevice("UART1", 5);
-	device_t dmx = DeviceManagerGetDevice("DMX", 3);
-	DeviceManagerIoctl(dmx, "Hallo", 0, &uart1, sizeof(device_t));
-	KernelInfo("DMX started\n");
 
 	KernelInfo("Starting Process Manager\n");
 	ProcessManagerInit();

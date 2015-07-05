@@ -13,9 +13,13 @@
 #include <stdlib.h>
 #include <process.h>
 #include <filesystem.h>
+#include <devices.h>
 
 #define	HARDCODED_PROGRAMS_COUNT			(10)
 #define HARDCODED_PROGRAMS_MAX_NAME_LEN		(50)
+
+// TODO: this defines should be removed to the dmx function
+#define DMX_MAX 6 // Max. number of DMX data packages.
 
 typedef struct {
 	char commandName[HARDCODED_PROGRAMS_MAX_NAME_LEN];
@@ -32,6 +36,7 @@ void HardCodedPrograms_Ls(int, char**);
 void HardCodedPrograms_Cd(int argc, char** argv);
 void HardCodedPrograms_Ps(int argc, char** argv);
 void HardCodedPrograms_Kill(int argc, char** argv);
+void HardCodedPrograms_Dmx(int argc, char** argv);
 
 static command_program_entry_t mapping[HARDCODED_PROGRAMS_COUNT] = {
 		{ "hello" , HardCodedPrograms_HelloWorld },
@@ -40,6 +45,7 @@ static command_program_entry_t mapping[HARDCODED_PROGRAMS_COUNT] = {
 		{ "ls", HardCodedPrograms_Ls },
 		{ "cd", HardCodedPrograms_Cd },
 		{ "ps", HardCodedPrograms_Ps },
+		{ "dmx", HardCodedPrograms_Dmx },
 		{ "kill", HardCodedPrograms_Kill }
 };
 
@@ -197,6 +203,81 @@ void HardCodedPrograms_Cd(int argc, char** argv)
 	{
 		printf("Could not open directory\n");
 	}
+}
+
+void HardCodedPrograms_Dmx(int argc, char** argv)
+{
+	if (argc != 2) {
+		printf("Usage is dmx [channel] [value]\n");
+		return;
+	}
+
+	//int channel = atoi(argv[0]);
+	//int value = atoi(argv[1]);
+
+	int* handle = open_device("DMX");
+	//device_t dmx = DeviceManagerGetDevice("DMX", 3);
+
+	char DMXBuffer[DMX_MAX];
+	// Set the default dmx buffer
+	int i = 0;
+	for (i = 0; i < DMX_MAX; i++) {
+		DMXBuffer[i] = 0;
+	}
+
+	// set tilt
+	DMXBuffer[1] = 150;
+	// open
+	DMXBuffer[3] = 5;
+	// set gradient
+	DMXBuffer[2] = 125;
+
+	volatile int pan = 0;
+	volatile int direction = 0;
+
+	while (direction != 2) {
+		// sample stuff
+		if (direction == 0) {
+			DMXBuffer[pan] = DMXBuffer[pan] += 5;
+			if (DMXBuffer[pan] == 255) {
+				direction = 1;
+			}
+		} else if (direction == 1) {
+			DMXBuffer[pan] = DMXBuffer[pan] -= 5;
+			if (DMXBuffer[pan] == 0) {
+				direction = 2;
+			}
+		}
+
+		for (i = 0; i < DMX_MAX; i++) {
+			ioctl_device(handle,0,0,sizeof(DMXBuffer), &DMXBuffer[0]);
+			//DeviceManagerIoctl(dmx, 0, 0, &DMXBuffer[0], sizeof(DMXBuffer));
+			sleep(30);
+		}
+	}
+
+	sleep(100);
+
+	for (i = 0; i < DMX_MAX; i++) {
+		DMXBuffer[i] = 0;
+	}
+
+	DMXBuffer[0] = 0;
+	DMXBuffer[1] = 150;
+
+	ioctl_device(handle, 0, 0, sizeof(DMXBuffer), &DMXBuffer[0]);
+	//DeviceManagerIoctl(dmx, 0, 0, &DMXBuffer[0], sizeof(DMXBuffer));
+
+	sleep(500);
+	DMXBuffer[0] = 127;
+	ioctl_device(handle, 0, 0, sizeof(DMXBuffer), &DMXBuffer[0]);
+	//DeviceManagerIoctl(dmx, 0, 0, &DMXBuffer[0], sizeof(DMXBuffer));
+
+	sleep(500);
+	// close
+	DMXBuffer[3] = 0;
+	ioctl_device(handle, 0, 0, sizeof(DMXBuffer), &DMXBuffer[0]);
+	//DeviceManagerIoctl(dmx, 0, 0, &DMXBuffer[0], sizeof(DMXBuffer));
 }
 
 void HardCodedPrograms_Ps(int argc, char** argv)
