@@ -9,7 +9,7 @@
 
 
 -stack  0x0FFFFF                             /* SOFTWARE STACK SIZE           */
--heap   0x0FFFFF                             /* HEAP AREA SIZE                */
+-heap   0x4FFFFF                             /* HEAP AREA SIZE                */
 
 
 // set program starting point
