@@ -14,6 +14,7 @@
 #include <process.h>
 #include <filesystem.h>
 #include <devices.h>
+#include <ipc.h>
 
 #define	HARDCODED_PROGRAMS_COUNT			(10)
 #define HARDCODED_PROGRAMS_MAX_NAME_LEN		(50)
@@ -37,6 +38,9 @@ void HardCodedPrograms_Cd(int argc, char** argv);
 void HardCodedPrograms_Ps(int argc, char** argv);
 void HardCodedPrograms_Kill(int argc, char** argv);
 void HardCodedPrograms_Dmx(int argc, char** argv);
+void HardCodedPrograms_Ping(int argc, char** argv);
+void HardCodedPrograms_Pong(int argc, char** argv);
+
 
 static command_program_entry_t mapping[HARDCODED_PROGRAMS_COUNT] = {
 		{ "hello" , HardCodedPrograms_HelloWorld },
@@ -46,7 +50,9 @@ static command_program_entry_t mapping[HARDCODED_PROGRAMS_COUNT] = {
 		{ "cd", HardCodedPrograms_Cd },
 		{ "ps", HardCodedPrograms_Ps },
 		{ "dmx", HardCodedPrograms_Dmx },
-		{ "kill", HardCodedPrograms_Kill }
+		{ "kill", HardCodedPrograms_Kill },
+		{ "ping", HardCodedPrograms_Ping },
+		{ "pong", HardCodedPrograms_Pong }
 };
 
 void (*HardCodedProgramsGetProgram(char* name))(int, char**)
@@ -163,6 +169,7 @@ void HardCodedPrograms_Ls(int argc, char** argv)
 	{
 		printf("Error reading directory\n");
 	}
+	free(retBuf);
 }
 
 void HardCodedPrograms_Cd(int argc, char** argv)
@@ -216,7 +223,6 @@ void HardCodedPrograms_Dmx(int argc, char** argv)
 	//int value = atoi(argv[1]);
 
 	int handle = open_device("DMX");
-	//device_t dmx = DeviceManagerGetDevice("DMX", 3);
 
 	char DMXBuffer[DMX_MAX];
 	// Set the default dmx buffer
@@ -254,7 +260,9 @@ void HardCodedPrograms_Dmx(int argc, char** argv)
 			//DeviceManagerIoctl(dmx, 0, 0, &DMXBuffer[0], sizeof(DMXBuffer));
 			sleep(30);
 		}
-		printf("Sent DMX Buffer\n");
+		if (DMXBuffer[pan] == 0 || DMXBuffer[pan] == 255) {
+			printf("Sent DMX Buffer\n");
+		}
 	}
 
 	sleep(100);
@@ -347,6 +355,44 @@ void HardCodedPrograms_Kill(int argc, char** argv)
 			printf("Signal was not accepted.\n");
 		}
 	}
+}
+
+void HardCodedPrograms_Ping(int argc, char** argv)
+{
+	open_ipc_channel("at.fhv.ping");
+
+	while (has_ipc_message("at.fhv.ping") == FALSE)
+	{
+		yield();
+	}
+
+	char message[10] = { '\0' };
+	char sender[20];
+
+	if (get_next_ipc_message("at.fhv.ping", message, 10, sender, 20))
+	{
+		printf("I got a message from %s:\n-----------------\n%s\n------------------\n", sender, message);
+	}
+	else
+	{
+		printf("I got a message but failed to read\n");
+	}
+
+	close_ipc_channel("at.fhv.ping");
+}
+
+void HardCodedPrograms_Pong(int argc, char** argv)
+{
+	if (argc != 1)
+	{
+		printf("Usage is: pong [message]\n");
+		return;
+	}
+	open_ipc_channel("at.fhv.pong");
+
+	send_ipc_message("at.fhv.pong", "at.fhv.ping", argv[0], strlen(argv[0]));
+
+	close_ipc_channel("at.fhv.pong");
 }
 
 #endif /* FILEMANAGER_HARDCODED_PROGRAMS_H_ */
