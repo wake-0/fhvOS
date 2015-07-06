@@ -75,6 +75,13 @@
 #define SYSTEM_CALL_IOCTL_DEVICE		122
 #define SYSTEM_CALL_WRITE_DEVICE		123
 
+#define SYSTEM_CALL_IPC_OPEN			150
+#define SYSTEM_CALL_IPC_CLOSE			151
+#define SYSTEM_CALL_IPC_SEND			152
+#define SYSTEM_CALL_IPC_GET				153
+#define SYSTEM_CALL_IPC_CHECK			154
+
+
 #define __SYSTEM_CALL_STR_HELPER(x) #x
 #define SYSTEM_CALL_ASM_PREFIX			"    SWI   #"
 #define SYSTEM_CALL_ASM(x)				SYSTEM_CALL_ASM_PREFIX __SYSTEM_CALL_STR_HELPER(x)
@@ -82,6 +89,9 @@
 typedef struct
 {
 	int callArg;
+	int callArg2;
+	int callArg3;
+	int callArg4;
 	char* callBuf;
 	int* returnArg;
 	char* returnBuf;

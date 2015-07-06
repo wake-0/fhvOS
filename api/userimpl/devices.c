@@ -31,18 +31,15 @@ void close_device(int handle) {
 int ioctl_device(int handle, char mode, char cmd, char* buf, int len) {
 	systemCallMessage_t message;
 	message.systemCallNumber = SYSTEM_CALL_IOCTL_DEVICE;
-	message.messageArgs.callArg = len + sizeof(int) + sizeof(char) * 2; // Len of buf + mode + command + handle
-	char* callBuf = (char*) malloc(message.messageArgs.callArg);
-	memcpy(&callBuf[0], &handle, sizeof(int));
-	memcpy(&callBuf[4], &mode, sizeof(char));
-	memcpy(&callBuf[5], &cmd, sizeof(char));
-	memcpy(&callBuf[6], &buf[0], len);
-	message.messageArgs.callBuf = callBuf;
+	message.messageArgs.callArg = len;
+	message.messageArgs.callArg2 = handle;
+	message.messageArgs.callArg3 = mode;
+	message.messageArgs.callArg4 = cmd;
+	message.messageArgs.callBuf = buf;
 
-	int res = 0;
+	int res = handle;
 	message.messageArgs.returnArg = &res;
 	SystemCall(&message);
-	free(callBuf);
 
 	return res;
 }

@@ -11,6 +11,7 @@
 #include "../../scheduler/scheduler.h"
 #include "../../filemanager/filemanager.h"
 #include "../../processmanager/processmanager.h"
+#include "../../ipc/ipcmanager.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -123,12 +124,12 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 		case SYSTEM_CALL_IOCTL_DEVICE:
 		{
 			device_t device;
-			memcpy(&device.device, message->messageArgs.callBuf, sizeof(int));
-			char mode = message->messageArgs.callBuf[4];
-			char cmd  = message->messageArgs.callBuf[5];
-			char* buf = &message->messageArgs.callBuf[6];
-
-			int res = DeviceManagerIoctl(device, (int) cmd, (int) mode, buf, message->messageArgs.callArg - sizeof(int) - 2 * sizeof(char));
+			int cmd = message->messageArgs.callArg4;
+			int mode = message->messageArgs.callArg3;
+			device.device = message->messageArgs.callArg2;
+			char* buf = message->messageArgs.callBuf;
+			device.device = *message->messageArgs.returnArg;
+			int res = DeviceManagerIoctl(device, cmd, mode, buf, message->messageArgs.callArg );
 			*message->messageArgs.returnArg = res;
 			break;
 		}
@@ -138,6 +139,38 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 			device.device = *message->messageArgs.returnArg;
 			int res = DeviceManagerWrite(device, message->messageArgs.callBuf, message->messageArgs.callArg);
 			*message->messageArgs.returnArg = res;
+			break;
+		}
+		case SYSTEM_CALL_IPC_OPEN:
+		{
+			*message->messageArgs.returnArg = IpcManagerRegisterNamespace(message->messageArgs.callBuf);
+			break;
+		}
+		case SYSTEM_CALL_IPC_CLOSE:
+		{
+			*message->messageArgs.returnArg = IpcManagerCloseNamespace(message->messageArgs.callBuf);
+			break;
+		}
+		case SYSTEM_CALL_IPC_SEND:
+		{
+			char* buf = message->messageArgs.callBuf;
+			int len_sender = buf[0];
+			int len_receiver = buf[1];
+			(void)(len_receiver);
+			*message->messageArgs.returnArg = IpcManagerSendMessage(&message->messageArgs.callBuf[2], &message->messageArgs.callBuf[2 + len_sender + 1], message->messageArgs.returnBuf, *message->messageArgs.returnArg);
+			break;
+		}
+		case SYSTEM_CALL_IPC_GET:
+		{
+			char* buf = message->messageArgs.returnBuf;
+			int len_message = buf[0];
+			int len_sender = buf[1];
+			*message->messageArgs.returnArg = IpcManagerGetNextMessage(message->messageArgs.callBuf, &buf[2], len_message, &buf[2 + len_message], len_sender);
+			break;
+		}
+		case SYSTEM_CALL_IPC_CHECK:
+		{
+			*message->messageArgs.returnArg = IpcManagerHasMessage(message->messageArgs.callBuf);
 			break;
 		}
 	}
