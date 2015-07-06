@@ -39,11 +39,11 @@ void dummyStart(int argc, char** argv)
 	yield();
 }
 
-int LoaderLoad(char* programBuf, int length, int argc, char** argv, boolean_t blocking, context_t* context)
+int LoaderLoad(char* name, char* programBuf, int length, int argc, char** argv, boolean_t blocking, context_t* context)
 {
 
 	// See ticket #82 : pageAddressPointer_t MemoryManagerGetFreePagesInProcessRegion(unsigned int pagesToReserve)
-	process_t* proc = ProcessManagerStartProcess("new", dummyStart, argc, argv, blocking, context);
+	process_t* proc = ProcessManagerStartProcess(name, dummyStart, argc, argv, blocking, context);
 
 	if (proc != NULL)
 	{

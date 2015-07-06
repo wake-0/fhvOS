@@ -43,10 +43,25 @@ int FileManagerOpenExecutable(char* name, boolean_t searchInGlobalBinPath, int a
 			process_t* proc = ProcessManagerStartProcess(name, funcPtr, argc, argv, blocking, context);
 			return FILE_MANAGER_OK;
 		}
-	}
 
-	// TODO Search in current working directory
-	// Read file and copy it in the virtual memory
+
+		char fullPath[FILE_MANAGER_MAX_PATH_LENGTH];
+		sprintf(fullPath, "%s/%s%s\0", FILE_MANAGER_BIN_PATH, name, FILE_MANAGER_EXTENSION);
+
+		int size = FileManagerGetFileSize(fullPath);
+		if (size > 0)
+		{
+			char* file = malloc(sizeof(char) * size);
+			if (FileManagerOpenFile(fullPath, 0, file, size) < 0)
+			{
+				free(file);
+				return FILE_MANAGER_NOT_FOUND;
+			}
+			LoaderLoad(name, file, size, argc, argv, blocking, context);
+			return FILE_MANAGER_OK;
+		}
+		KernelVerbose("Did not find command in global bin path\n");
+	}
 
 	char fullPath[FILE_MANAGER_MAX_PATH_LENGTH + FILE_MANAGER_MAX_PATH_LENGTH];
 
@@ -78,7 +93,7 @@ int FileManagerOpenExecutable(char* name, boolean_t searchInGlobalBinPath, int a
 	}
 
 	// fileBuf contains the whole program
-	LoaderLoad(fileBuf, size, argc, argv, blocking, context);
+	LoaderLoad(name, fileBuf, size, argc, argv, blocking, context);
 
 	return FILE_MANAGER_OK;
 }
