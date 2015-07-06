@@ -75,3 +75,18 @@ void print(const char* msg, int len)
 
 	SystemCall(&message);
 }
+
+long uptime()
+{
+	systemCallMessage_t message;
+	message.systemCallNumber = SYSTEM_CALL_TIME;
+
+	char returnVal[4]; // 4 bytes to store long // TODO I don't know why long is only 32 bit but anyway this constant should be extracted
+	message.messageArgs.returnBuf = returnVal;
+
+	SystemCall(&message);
+
+	long result = 0;
+	memcpy(&result, message.messageArgs.returnBuf, 4);
+	return result;
+}

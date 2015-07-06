@@ -15,8 +15,9 @@
 #include <filesystem.h>
 #include <devices.h>
 #include <ipc.h>
+#include <system.h>
 
-#define	HARDCODED_PROGRAMS_COUNT			(10)
+#define	HARDCODED_PROGRAMS_COUNT			(15)
 #define HARDCODED_PROGRAMS_MAX_NAME_LEN		(50)
 
 // TODO: this defines should be removed to the dmx function
@@ -40,6 +41,7 @@ void HardCodedPrograms_Kill(int argc, char** argv);
 void HardCodedPrograms_Dmx(int argc, char** argv);
 void HardCodedPrograms_Ping(int argc, char** argv);
 void HardCodedPrograms_Pong(int argc, char** argv);
+void HardCodedPrograms_Uptime(int argc, char** argv);
 
 
 static command_program_entry_t mapping[HARDCODED_PROGRAMS_COUNT] = {
@@ -52,7 +54,8 @@ static command_program_entry_t mapping[HARDCODED_PROGRAMS_COUNT] = {
 		{ "dmx", HardCodedPrograms_Dmx },
 		{ "kill", HardCodedPrograms_Kill },
 		{ "ping", HardCodedPrograms_Ping },
-		{ "pong", HardCodedPrograms_Pong }
+		{ "pong", HardCodedPrograms_Pong },
+		{ "uptime", HardCodedPrograms_Uptime }
 };
 
 void (*HardCodedProgramsGetProgram(char* name))(int, char**)
@@ -393,6 +396,11 @@ void HardCodedPrograms_Pong(int argc, char** argv)
 	send_ipc_message("at.fhv.pong", "at.fhv.ping", argv[0], strlen(argv[0]));
 
 	close_ipc_channel("at.fhv.pong");
+}
+
+void HardCodedPrograms_Uptime(int argc, char** argv)
+{
+	printf("%d\n", uptime());
 }
 
 #endif /* FILEMANAGER_HARDCODED_PROGRAMS_H_ */

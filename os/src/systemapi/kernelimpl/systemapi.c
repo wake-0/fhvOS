@@ -57,6 +57,12 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 			SchedulerRunNextProcess(context);
 			break;
 		}
+		case SYSTEM_CALL_TIME:
+		{
+			long millis = KernelGetUptime();
+			memcpy(message->messageArgs.returnBuf, &millis, sizeof(long));
+			break;
+		}
 		case SYSTEM_CALL_CWD:
 		{
 			CPUirqe();
