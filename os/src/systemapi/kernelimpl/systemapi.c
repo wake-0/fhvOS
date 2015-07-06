@@ -14,6 +14,7 @@
 #include "../../ipc/ipcmanager.h"
 #include <stdio.h>
 #include <string.h>
+#include <ipc.h>
 
 /**
  * \brief	Handles system calls. This function is called by the assembler swi_handler function
@@ -177,6 +178,18 @@ void SystemCallHandler(systemCallMessage_t* message, unsigned int systemCallNumb
 		case SYSTEM_CALL_IPC_CHECK:
 		{
 			*message->messageArgs.returnArg = IpcManagerHasMessage(message->messageArgs.callBuf);
+			break;
+		}
+		case SYSTEM_CALL_IPC_LIST:
+		{
+			int count = IpcManagerChannelCount();
+			ipc_channel_list_entry_t* buffer = (ipc_channel_list_entry_t*) message->messageArgs.callBuf;
+			int i = 0;
+			for (i = 0; i < count && i < message->messageArgs.callArg; i++)
+			{
+				IpcManagerGetChannel(i, buffer[i].channel_name, IPC_MAX_NAMESPACE_NAME);
+			}
+			*message->messageArgs.returnArg = i;
 			break;
 		}
 	}

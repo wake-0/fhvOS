@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "../includes/ipc.h"
 #include "../includes/systemcall.h"
 
 int open_ipc_channel(char* namespace_name)
@@ -88,3 +89,16 @@ int get_next_ipc_message(char* namespace_name, char* message_buf, int len, char*
 	free(returnBuf);
 	return *message.messageArgs.returnArg;
 }
+
+int list_ipc_channels(ipc_channel_list_entry_t* buffer, int len)
+{
+	int res = 0;
+	systemCallMessage_t message;
+	message.systemCallNumber = SYSTEM_CALL_IPC_LIST;
+	message.messageArgs.callBuf = (char*) buffer;
+	message.messageArgs.callArg = len;
+	message.messageArgs.returnArg = &res;
+	SystemCall(&message);
+	return *message.messageArgs.returnArg;
+}
+

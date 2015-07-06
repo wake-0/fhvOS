@@ -11,7 +11,6 @@
 #include "../scheduler/scheduler.h"
 
 #define MAX_OPEN_DOMAINS			(100)
-#define MAX_NAMESPACE_NAME			(50)
 #define MAX_MESSAGE_LENGTH			(100)
 #define MAX_MESSAGE_INBOX			(100)
 
@@ -50,7 +49,7 @@ int IpcManagerRegisterNamespace(char* namespace_name)
 		return IPC_MANAGER_NOT_AUTHORISED;
 	}
 	size_t len = strlen(namespace_name);
-	if (len > MAX_NAMESPACE_NAME)
+	if (len > IPC_MAX_NAMESPACE_NAME)
 	{
 		return IPC_MANAGER_INVALID_NAME;
 	}
@@ -201,6 +200,27 @@ int IpcManagerCloseNamespace(char* namespace_name)
 
 	free(ns);
 	nsIdx--;
+	return IPC_MANAGER_OK;
+}
+
+int IpcManagerChannelCount()
+{
+	return nsIdx;
+}
+
+int IpcManagerGetChannel(int index, char* buf, int len)
+{
+	if (index > nsIdx)
+	{
+		return IPC_MANAGER_INVALID_NAME;
+	}
+	int name_len = strlen(namespaces[index]->name);
+	if (len < name_len + 1)
+	{
+		return IPC_MANAGER_BUFFER_TOO_SMALL;
+	}
+	memcpy(buf, namespaces[index]->name, name_len);
+	buf[name_len] = '\0';
 	return IPC_MANAGER_OK;
 }
 
