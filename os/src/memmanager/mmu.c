@@ -107,6 +107,8 @@ volatile uint32_t dabtFaultStatusRegisterValue;
 // bitmap used for allocating page frames
 static char pageFramesBitMap[BIT_MAP_LENGTH];
 
+static device_t indDevice;
+
 // for testing purposes
 // TODO: delete after testing
 volatile uint32_t currentAddressInTTBR0;
@@ -122,8 +124,10 @@ pageTablePointer_t kernelMasterPageTable;
 /**
  * \brief	Initialises the MMU for using. This includes creating a master page table and mapping it into the corresponding TTBR register.
  */
-int MMUInit()
+int MMUInit(device_t indicatorDevice)
 {
+	indDevice = indicatorDevice;
+
 	MemoryManagerInit();
 
 	MMUDisable();
@@ -151,6 +155,7 @@ int MMUInit()
  */
 void MMUHandleDataAbortException(context_t* context)
 {
+	DeviceManagerWrite(indDevice, "1", 1);
 	KernelDebug("Data Abort Interrupt occured\n");
 	// get mmu data abort details
 	dabtAccessedVirtualAddress 		= 0;
@@ -217,6 +222,7 @@ void MMUHandleDataAbortException(context_t* context)
 		default:
 			break;
 	}
+	DeviceManagerWrite(indDevice, "0", 1);
 }
 
 
@@ -319,6 +325,8 @@ int MMUInitProcess(process_t* process)
  */
 int MMUFreeAllPageFramesOfProcess(process_t* process)
 {
+	DeviceManagerWrite(indDevice, "1", 1);
+
 	unsigned int numberOfPageTableEntry;
 	unsigned int pageTableEntry = 0;
 
@@ -352,6 +360,7 @@ int MMUFreeAllPageFramesOfProcess(process_t* process)
 	mmuFreePageTablePageFrames(L1_PAGE_TABLE, process->pageTableL1);
 	KernelDebug("MMU finished freeing process page tables of pid=%d\n", process->id);
 
+	DeviceManagerWrite(indDevice, "0", 1);
 	return MMU_OK;
 }
 
