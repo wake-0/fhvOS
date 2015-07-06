@@ -197,6 +197,7 @@ int SchedulerKillProcess(processId_t id) {
 
 	processes[id].state = FREE;
 	processes[id].func = NULL;
+	memset(processes[id].context, 0, sizeof(context_t));
 
 	if (processes[id].blockedState && processes[id].parent != NULL && processes[id].parent->state != FREE)
 	{
@@ -233,7 +234,7 @@ void SchedulerSleepProcess(processId_t process, unsigned int millis)
 {
 	processes[process].state = SLEEPING;
 	processes[process].wakeupTime = KernelGetUptime() + millis;
-	KernelDebug("Set pid=%d to sleeping\n", process);
+	KernelVerbose("Set pid=%d to sleeping\n", process);
 }
 
 /*
@@ -261,7 +262,7 @@ processId_t getNextProcessIdByState(processState_t state, int startId) {
 				&& processes[(i + startId) % PROCESSES_MAX].wakeupTime <= KernelGetUptime())
 		{
 			processes[(i + startId) % PROCESSES_MAX].state = READY;
-			KernelDebug("Waking up pid=%d\n", (i + startId) % PROCESSES_MAX);
+			KernelVerbose("Waking up pid=%d\n", (i + startId) % PROCESSES_MAX);
 		}
 		if (processes[(i + startId) % PROCESSES_MAX].state == state) {
 			return (i + startId) % PROCESSES_MAX;
