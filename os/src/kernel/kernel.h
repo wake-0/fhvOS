@@ -12,7 +12,7 @@
 #include "../scheduler/scheduler.h"
 
 #define KERNEL_VERBOSE_OUTPUT		0
-#define	KERNEL_DEBUG_OUTPUT			1
+#define	KERNEL_DEBUG_OUTPUT			0
 #define KERNEL_ERROR_OUTPUT			1
 #define KERNEL_INFO_OUTPUT			1
 #define KERNEL_DEFAULT_OUTPUT		1
