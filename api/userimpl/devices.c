@@ -25,6 +25,8 @@ void close_device(int handle) {
 	systemCallMessage_t message;
 	message.systemCallNumber = SYSTEM_CALL_CLOSE_DEVICE;
 	message.messageArgs.callArg = handle;
+	int ret = 0;
+	message.messageArgs.returnArg = &ret;
 	SystemCall(&message);
 }
 
