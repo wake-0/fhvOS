@@ -196,10 +196,15 @@ int IpcManagerCloseNamespace(char* namespace_name)
 	// Delete from array
 	int cnt = 0;
 	while (namespaces[cnt] != ns) { cnt++; }
-	while (namespaces[cnt] != NULL && (cnt + 1) < MAX_OPEN_DOMAINS) { namespaces[cnt] = namespaces[cnt+1]; }
-
 	free(ns);
-	nsIdx--;
+	namespaces[cnt] = NULL;
+	while ( (cnt + 1) < MAX_OPEN_DOMAINS && namespaces[cnt+1] != NULL)
+	{
+		namespaces[cnt] = namespaces[cnt + 1];
+		cnt++;
+	}
+
+	namespaces[--nsIdx] = NULL;
 	return IPC_MANAGER_OK;
 }
 

@@ -2,10 +2,12 @@
 #include <string.h>
 #include <ipc.h>
 #include <stdlib.h>
+#include <system.h>
 
 #define CHANNEL_NAME "at.fhv.ipcdaemon"
 
 void printUsage();
+void checkResponse();
 
 int main(int argc, char** argv) {
 	if (argc == 0)
@@ -42,10 +44,12 @@ int main(int argc, char** argv) {
 			}
 			else
 			{
-				if (send_ipc_message(CHANNEL_NAME, argv[1], argv[2], strlen(argv[2])))
+				if (send_ipc_message(CHANNEL_NAME, argv[1], argv[2], strlen(argv[2]) + 1))
 				{
 					printf("Message %s was sent.\n", argv[2]);
 				}
+
+				checkResponse();
 			}
 		}
 		else if (strcmp(argv[0], "-c") == 0)
@@ -65,11 +69,30 @@ int main(int argc, char** argv) {
 					buf[i-2] = (char) num;
 				}
 				send_ipc_message(CHANNEL_NAME, channel_name, buf, i - 2);
+
+				checkResponse();
 			}
 		}
 	}
 
 	close_ipc_channel(CHANNEL_NAME);
+}
+
+void checkResponse()
+{
+	printf("Waiting 1s for response...\n");
+	sleep(1000);
+	if (has_ipc_message(CHANNEL_NAME))
+	{
+		char message[100];
+		char sender[IPC_MAX_NAMESPACE_NAME];
+		get_next_ipc_message(CHANNEL_NAME, message, 100, sender, IPC_MAX_NAMESPACE_NAME);
+		printf("Got response: %s\n", message);
+	}
+	else
+	{
+		printf("Did not get any response...\n");
+	}
 }
 
 void printUsage()
