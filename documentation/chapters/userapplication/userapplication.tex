@@ -5,17 +5,31 @@ Bei der BenutzerInnen-Anwendung handelt es sich um die Ansteuerung eines Moving 
 \subsection{Grundlegender Aufbau des DMX Protokolls}
 Es gibt mehrere verschiedene Spezifikationen für das DMX Protokoll. Im folgenden wird eine Spezifikation erläutert und anschließend zu Vergleichszwecken verwendet. Abbildung \ref{fig:DMX-512-Protocol} dient zur Veranschaulichung des DMX-512 Protokolls. 
 
+% http://mc.mikrocontroller.com/de/dmx512.php
+% TODO: add reference to this webside
+
 \begin{figure}[H]
 	\includegraphics[scale=0.60]{chapters/userapplication/figures/todo}
 	\caption{Memory Map des Betriebssystems}
 	\label{fig:DMX-512-Protocol}
 \end{figure}
 
+Tabelle \ref{table:DMX-512-Protocol} beschreibt die einzeln nummerierten Markierungen aus Abbildung \ref{fig:DMX-512-Protocol}.
+
 \begin{table}[H]
 \begin{tabular}{ l | l | l | l | l | l }
   \textbf{Nummer} & \textbf{Signalname} & \textbf{Min.} & \textbf{Typ.} & \textbf{Max.} & \textbf{Einheit} \\ 
   \hline
-  1 & Reset & 88 & 88 & - & $\mu$ s \\
+  1 & Reset & 88.0 & 88.0 & - & $\mu$s \\
+  2 & Mark zwischen Reset- und Startbyte & 8.0 & - & 1 s & $\mu$s \\
+  3 & Frame-Zeit & 43.12 & 44.0 & 44.48 & $\mu$s \\
+  4 & Startbit & 3.92 & 4.0 & 4.08 & $\mu$s \\
+  5 & LSB (niederwertigstes Datenbit) & 3.92 & 4.0 & 4.08 & $\mu$s \\
+  6 & MSB (höchstwertigstes Datenbit) & 3.92 & 4.0 & 4.08 & $\mu$s \\
+  7 & Stopbit & 3.92 & 4.0 & 4.08 & $\mu$s \\
+  8 & Mark zwischen Frames (Interdigit) & 0 & 0 & 1.0 & s \\
+  9 & Mark zwischen Paketen & 0 & 0 & 1.0 & s \\
+  - & Reset-Reset (Paketabstand) & 1094 & - & - & $\mu$s \\
  \end{tabular}
  \caption{Eigenschaften des DMX-512-Protokolls}
  \label{table:DMX-512-Protocol}
