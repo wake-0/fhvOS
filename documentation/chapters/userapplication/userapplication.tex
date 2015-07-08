@@ -1,7 +1,25 @@
 \section{BenutzerInnen-Anwendung}
-bla
 
-\subsection{Aufbau}
-bla
+Bei der BenutzerInnen-Anwendung handelt es sich um die Ansteuerung eines Moving Heads mittels DMX Protokoll.  
+
+\subsection{Grundlegender Aufbau des DMX Protokolls}
+Es gibt mehrere verschiedene Spezifikationen für das DMX Protokoll. Im folgenden wird eine Spezifikation erläutert und anschließend zu Vergleichszwecken verwendet. Abbildung \ref{fig:DMX-512-Protocol} dient zur Veranschaulichung des DMX-512 Protokolls. 
+
+\begin{figure}[H]
+	\includegraphics[scale=0.60]{chapters/userapplication/figures/todo}
+	\caption{Memory Map des Betriebssystems}
+	\label{fig:DMX-512-Protocol}
+\end{figure}
+
+\begin{table}[H]
+\begin{tabular}{ l | l | l | l | l | l }
+  \textbf{Nummer} & \textbf{Signalname} & \textbf{Min.} & \textbf{Typ.} & \textbf{Max.} & \textbf{Einheit} \\ 
+  \hline
+  1 & Reset & 88 & 88 & - & $\mu$ s \\
+ \end{tabular}
+ \caption{Eigenschaften des DMX-512-Protokolls}
+ \label{table:DMX-512-Protocol}
+\end{table}
+
 
 \pagebreak 
