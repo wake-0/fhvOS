@@ -1,16 +1,16 @@
 \section{BenutzerInnen-Anwendung}
 
-Bei der BenutzerInnen-Anwendung handelt es sich um die Ansteuerung eines Moving Heads mittels DMX Protokoll.  
+Bei der BenutzerInnen-Anwendung handelt es sich um die Ansteuerung eines Moving Heads mittels  Digital Multiplex (DMX) Protokoll.  
 
 \subsection{Grundlegender Aufbau des DMX Protokolls}
-Es gibt mehrere verschiedene Spezifikationen für das DMX Protokoll. Im folgenden wird eine Spezifikation erläutert und anschließend zu Vergleichszwecken verwendet. Abbildung \ref{fig:DMX-512-Protocol} dient zur Veranschaulichung des DMX-512 Protokolls. 
+Es gibt mehrere verschiedene Spezifikationen für das DMX Protokoll. Im folgenden wird eine dieser unterschiedlichen Spezifikation erläutert und anschließend zu Vergleichszwecken verwendet. Abbildung \ref{fig:DMX-512-Protocol} dient zur Veranschaulichung des DMX-512 Protokolls. 
 
 % http://mc.mikrocontroller.com/de/dmx512.php
 % TODO: add reference to this webside
 
 \begin{figure}[H]
 	\includegraphics[scale=0.60]{chapters/userapplication/figures/todo}
-	\caption{Memory Map des Betriebssystems}
+	\caption{DMX Protokoll}
 	\label{fig:DMX-512-Protocol}
 \end{figure}
 
@@ -35,5 +35,26 @@ Tabelle \ref{table:DMX-512-Protocol} beschreibt die einzeln nummerierten Markier
  \label{table:DMX-512-Protocol}
 \end{table}
 
+Die Übertragungsgeschwindigkeit ist bei allen Protokollarten identisch und beträgt 250 kBaud, d.h. jedes Bit hat eine Dauer von 4 $\mu$ s. Das DMX Protokoll besitzt 512 verschiedene Kanäle, wobei jeder Kanal mithilfe eines Datenbytes gesteuert wird. In Abbildung \ref{fig:DMX-512-Protocol} ist ersichtlich, dass jedes übertragene Datenbyte zusätzlich ein Startbit sowie zwei Stopbits besitzt. Somit ergeben sich für jeden Kanal genau elf Bits.
+
+\subsection{Messergebnisse des Implementierten DMX Protokolls}
+
+\begin{figure}[H]
+	\includegraphics[scale=0.7]{chapters/userapplication/figures/DMX-Edge}
+	\caption{DMX Protokoll: Problem fallende Flanke}
+	\label{fig:DMX-Edge}
+\end{figure}
+
+\begin{figure}[H]
+	\includegraphics[scale=0.7]{chapters/userapplication/figures/DMX-Offset-Byte}
+	\caption{DMX Protokoll: Problem Offset Byte}
+	\label{fig:DMX-Offset-Byte}
+\end{figure}
+
+\begin{figure}[H]
+	\includegraphics[scale=0.7]{chapters/userapplication/figures/DMX}
+	\caption{Funktionierendes DMX Protokoll}
+	\label{fig:DMX}
+\end{figure}
 
 \pagebreak 
