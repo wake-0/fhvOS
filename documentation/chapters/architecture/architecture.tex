@@ -1,11 +1,11 @@
 \section{Architektur}
 Die Architektur beschreibt den allgemeinen Aufbau des Betriebssystems. Die genauen Beschreibungen zu den einzelnen Teilen sind in weiteren Kapiteln in diesem Dokument zu finden.
 
-\subsection{Art des Kernel}
+\subsection{Art des Kernels}
 Das Betriebssystem ist ein Monolithischer Kernel. 
 
 \subsection{Allgemeiner Aufbau der Architektur}
-In Abbildung \ref{fig:general-Architecture} ist der allgemeine Aufbau der Architektur ersichtlich. 
+In Abbildung \ref{fig:general-Architecture} ist der allgemeine Aufbau mit den wesentlichen Teilen der Architektur ersichtlich. 
 
 \begin{figure}[H]
 	\includegraphics[scale=0.9]{chapters/architecture/figures/architecture}
@@ -13,6 +13,48 @@ In Abbildung \ref{fig:general-Architecture} ist der allgemeine Aufbau der Archit
 	\label{fig:general-Architecture}
 \end{figure}
 
-...
+Im folgenden wird eine kurze Erläuterung zu den einzelnen Komponenten der Abbildung \ref{fig:general-Architecture} gegeben. Für eine genauere Beschreibung wird auf die einzelnen Kapitel verwiesen. \\
+
+\textbf{Hardware Abstraction Layer (HAL) (Vgl. Kapitel XXX)}
+Der Hardware Abstraction Layer wird, wie der Name bereits beschreibt, zur Abstraktion der Hardware vom eigentlichen Betriebssystem verwendet. \\
+
+\textbf{Driver (Vgl. Kapitel XXX)}
+Ein Treiber ist eine abstrakte Schnittstelle zu der Hardware, sodass kein direkter Zugriff auf die HAL benötigt wird. \\
+
+\textbf{Driver Manager (Vgl. Kapitel XXX)}
+Der Driver Manager dient zum ansprechen der Treiber, welche vom Betriebssystem zur Verfügung gestellt werden. Sollte ein Treiber benötigt werden, muss dieser nicht erzeugt werden sondern kann über Driver Manager geholt werden. \\
+
+\textbf{Device Manager (Vgl. Kapitel XXX)}
+Der Device Manager dient wie bereits der Driver Manager zur Abstraktion der Treiber. D.h. eine Anwendung verwendet Geräte, welche vom Device Manager zur Verfügung gestellt werden. Ein Beispiel für Devices sind LEDs. Beim Ansprechen einer LED wird ein Treiber benötigt, ohne der Abstraktion auf Geräte müssten bei der Verwendung mehrerer LEDs auch mehrere LED Treiber geschrieben werden oder ein großer Treiber. Der Nachteil eines einzelnen Treibers ist, dass das Ansprechen einzelner LEDs viel Aufwand benötigt. \\
+
+\textbf{Kernel (Vgl. Kapitel XXX)}
+Der Kernel ist der Kern des Betriebssystems und enthält das Starten aller Prozesse und Managern. Dazu zählen: Konsole, Device Manager, Driver Manager, Process Manager, File Manager, IPC Manager, etc. \\
+
+\textbf{Process Manager (Vgl. Kapitel XXX)}
+Der Process Manager ist zuständig für das Hinzufügen und Löschen von Prozessen. Es besteht eine starke Kopplung zum Scheduler. \\
+
+\textbf{Scheduler (Vgl. Kapitel XXX)}
+Der Scheduler wechselt die Prozesse in fix definierten Zeitscheiben (10ms). Auch ist das Händeln der verschiedenen Zustände eines Prozesses Aufgabe vom Scheduler. Gültige Zustände sind: Ready, Running, Blocked, Sleeping und Free. \\
+
+\textbf{Memory Manager/MMU (Vgl. Kapitel XXX)}
+Zu den Aufgaben des Memory Manager zählen: Allokieren von Pages, XXX \\
+
+\textbf{File Manager (Vgl. Kapitel XXX)}
+Der File Manager dient zum Verarbeiten von dateiabhängigen Operationen. Auflisten der einzelnen Inhalte in einem Verzeichnis, Öffnen einer Datei, Setzen des aktuellen Verzeichnis, etc. sind die Hauptaufgaben dieses Managers. \\
+
+\textbf{Loader (Vgl. Kapitel XXX)}
+Der Loader ladet eine Anwendung XXX \\
+
+\textbf{IPC Manager (Vgl. Kapitel XXX)}
+Der IPC Manager ist für die Kommunikation zwischen verschiedenen User-Anwendungen zuständig. \\
+
+\textbf{System API (Vgl. Kapitel XXX)}
+Die System API stellt eine Schnittstelle für den Anwendungsentwickler/ die Anwendungsentwicklerin zur Verfügung. Dadurch sind die Betriebssystem Funktionen von der Anwendung entkoppelt. Es werden von der Anwendung nur System API Funktionen aufgerufen und keine System Funktionen. Dies führt zu einer höheren Sicherheit des Systems sowie zu einem einfacheren Implementieren von Endanwendungen. \\
+
+\textbf{User Application (Vgl. Kapitel XXX)}
+Bei der User Application handelt es sich um das Ansprechen eines Moving Heads mittels DMX Protokoll. \\
+
+\textbf{High Level Driver (Vgl. Kapitel XXX)}
+Der High Level Driver ist ein Treiber, welcher dazu dient der eigentlichen BenutzerInnen Anwendung eine verbesserte Schnittstelle zur Verfügung zu stellen. Ansonsten müsste ein Entwickler/ eine Entwicklerin wissen, dass das DMX Protokoll durchgehend sendet, somit wäre in der eigentlichen Anwendung Logik implementiert, welche gar nicht hinein gehört bzw. davon abstrahiert gehört. \\
 
 \pagebreak 
