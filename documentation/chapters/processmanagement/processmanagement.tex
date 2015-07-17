@@ -1,7 +1,45 @@
 \section{Prozessverwaltung}
-bla
+Als Prozessverwaltung wird hauptsächlich das Verwalten von Prozessen durch das Betriebssystem verstanden (Vgl. http://www.lowlevel.eu/wiki/Prozessverwaltung). Jeder Prozess besitzt eine eindeutige Identifikation (PID), durch welche dieser vom System angesprochen werden kann. 
 
-\subsection{Aufbau}
-bla
+\subsection{Prozesszustände}
+Jeder Prozess besitzt zu einem bestimmten Zeitpunkt einen fix definierten Zustand, d.h. es können keine Inkonsistenzen auftreten. Abbildung \ref{fig:Process-states} zeigt die verschiedenen Zustände eines Prozesses sowie die jeweilig erlaubten Übergänge zu einem anderen Zustand auf.
+
+\begin{figure}[H]
+	\includegraphics[scale=0.60]{chapters/processmanagement/figures/todo}
+	\caption{Erlaubte Prozesszustände und Prozessübergänge}
+	\label{fig:Process-states}
+\end{figure}
+
+Im folgenden wird eine detaillierte Erklärung zu den einzelnen Zuständen aus Abbildung \ref{fig:Process-states} gegeben.
+
+\begin{description}
+	\item[Free] \hfill \\
+	XXX
+	
+	\item[Running] \hfill \\
+	XXX
+	
+	\item[Blocked] \hfill \\
+	XXX
+	
+	\item[Finished] \hfill \\
+	XXX	
+\end{description}
+
+Es gibt unterschiedliche Zustandsübergänge, welche im Betriebssystem erlaubt sind. Tabelle \ref{table:State-transition} stellt die verschiedenen Übergänge mit einem dazu passenden Beispiel dar.
+
+\begin{table}[H]
+\begin{tabular}{p{2.5cm} | p{2.5cm} | p{8cm}}
+  \textbf{Ausgangszustand} & \textbf{Nächster Zustand} & \textbf{Beispiel} 
+  \\ \hline
+  Ready & Running & XXX \\
+  Running & Blocked & XXX \\
+  Running & Finised & XXX \\
+  XXX & XXX & XXX \\
+  
+ \end{tabular}
+ \caption{Erlaubte Zustandsübergänge mit Beispiel}
+ \label{table:State-transition}
+\end{table}
 
 \pagebreak 
