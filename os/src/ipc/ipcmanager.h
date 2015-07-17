@@ -9,6 +9,7 @@
 #define IPC_IPCMANAGER_H_
 
 #include "../platform/platform.h"
+#include <ipc.h>
 
 #define IPC_MANAGER_OK					(1)
 #define IPC_MANAGER_ALREADY_IN_USE		(-1)
@@ -21,8 +22,11 @@
 #define IPC_MANAGER_UKNOWN_ERROR		(-10)
 
 extern int IpcManagerRegisterNamespace(char* namespace_name);
-extern int IpcManagerSendMessage(char* sender_namespace, char* namespace_name, char* message);
+extern int IpcManagerSendMessage(char* sender_namespace, char* namespace_name, char* message, int len);
 extern int IpcManagerHasMessage(char* namespace_name);
 extern int IpcManagerGetNextMessage(char* namespace_name, char* message_buffer, int msg_buf_len, char* sender_namespace, int ns_buf_len);
+extern int IpcManagerCloseNamespace(char* namespace_name);
+extern int IpcManagerChannelCount();
+extern int IpcManagerGetChannel(int index, char* buf, int len);
 
 #endif /* IPC_IPCMANAGER_H_ */

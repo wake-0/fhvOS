@@ -20,6 +20,7 @@
 
 #define FILE_MANAGER_ROOT_PATH		"/"
 #define FILE_MANAGER_BIN_PATH		FILE_MANAGER_ROOT_PATH "bin"
+#define FILE_MANAGER_EXTENSION		".bin"
 
 extern int FileManagerInit(device_t device, device_t indicatorDevice);
 extern int FileManagerListDirectoryContent(const char* name, directoryEntry_t* buf, int length);

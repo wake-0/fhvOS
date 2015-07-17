@@ -63,7 +63,7 @@ typedef struct
 } secondLevelDescriptor_t;
 
 
-extern int MMUInit(void);
+extern int MMUInit(device_t indicatorDevice);
 extern int MMUSwitchToProcess(process_t* process);
 extern int MMUInitProcess(process_t* process);
 extern void MMUHandleDataAbortException(context_t* context);

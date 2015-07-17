@@ -1,7 +1,49 @@
 \section{Allgemein}
-bla
+Allgemeine Aspekte zum Betriebssystem werden in diesem Kapitel erläutert. Dazu zählen vorgegebene Anforderungen, eigene Anforderungen und das Ergebnis in Zusammenhang mit den zuvor definierten Anforderungen.
 
-\subsection{Aufbau}
-bla
+\subsection{Vorgegebene Anforderungen an das Betriebssystem}
+Eine Auflistung aller vorgegebenen Anforderungen an das Betriebssystem sind in Tabelle \ref{table:Prescribed-Requirements} angegeben.
+
+\begin{table}[H]
+\begin{tabular}{ p{5cm}| p{9cm} }
+  \textbf{Anforderung} & \textbf{Erklärung} \\ 
+  \hline
+  Single-User & Das Betriebssystem muss zu jedem Zeitpunkt nur einen Benutzer bzw. eine Benutzerin händeln. \\
+  Lauffähige Anwendung & Auf dem Betriebssystem muss sich eine lauffähige Anwendung befinden. \\
+  Präemptives Multitasking & Das Betriebssystem kann gleichzeitig mehrere Prozesse ausführen.\\
+  Konsole & Es muss ein Konsole zur Kommunikation mit dem Betriebssystem geben. \\
+  Interprozess-Kommunikation & Das Betriebssystem muss Möglichkeit zu Kommunikation zwischen Prozessen zur Verfügung stellen. \\
+  Sicherheit & Es muss eine strikte Trennung zwischen User- und Systemmode vorhanden sein. \\
+  Robustheit & Das Betriebssystem darf von Programmabstürzen nicht beeinflusst werden. \\
+  Virtueller Speicher & Memory Management muss für größere Anwendungen vorhanden sein. \\
+  SD-Karte & Externe Anwendungen sollten von der SD-Karte geladen werden können. \\
+  Dateisystem & Das Betriebssystem muss ein Dateisystem (FAT oer FAT32) besitzen. \\
+  Portierbarkeit & Für eine Portierbarkeit des Systems muss ein HAL umgesetzt werden. \\
+  Integration von Geräten & Das Betriebssystem muss eine einfache Integration von verschiedenen Geräten gewährleisten. \\
+  Performanztests & Es müssen Performanztests zur Leistungsfeststellung des Systems durchgeführt werden. \\  
+ \end{tabular}
+ \caption{Vorgegebene Anforderungen}
+ \label{table:Prescribed-Requirements}
+\end{table}
+
+\subsection{Eigene Anforderungen an das Betriebssystem}
+Eine Auflistung aller eigenen Anforderungen an das Betriebssystem sind in Tabelle \ref{table:Own-Requirements} angegeben.
+
+\begin{table}[H]
+\begin{tabular}{ p{5cm}| p{9cm} }
+  \textbf{Anforderung} & \textbf{Erklärung} \\ 
+  \hline
+  Hoher Abstraktionsgrad & Alle Komponenten sollten voneinander abstrahiert sein. \\
+  Intuitiver Aufbau & Die Komponenten des Betriebssystem sollten möglichst selbsterklärend sein. \\
+  Leichte Erweiterbarkeit & Laufende Erweiterungen sollten ohne große Veränderungen umgesetzt werden können. \\
+  Einfache Wartung & Das Betriebssystem sollte so Aufgebaut sein, dass eventuelle Ausbesserungen am Betriebssystem nur an einer dafür zuständigen Komponente vorgenommen werden müssen. \\
+ \end{tabular}
+ \caption{Vorgegebene Anforderungen}
+ \label{table:Own-Requirements}
+\end{table}
+
+\subsection{Resultat des Betriebssystems}
+Im Allgemeinen wurden alle zuvor erwähnten Anforderungen an das Betriebssystem erfüllt. Einzelne Verbesserungs- bzw. Erweiterungsvorschläge können aus Kapitel XXX - Ausblick entnommen werden. \\
+Stabilitätstests, welche während dem Projekt durchgeführt wurden, haben aufgezeigt, dass das System über zwölf Stunden fehlerlos durchläuft.
 
 \pagebreak 

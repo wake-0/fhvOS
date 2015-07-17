@@ -11,7 +11,7 @@
 #include "../platform/platform.h"
 #include "../processmanager/processmanager.h"
 
-extern int LoaderLoad(char* programBuf, int length, int argc, char** argv, boolean_t blocking, context_t* context);
+extern int LoaderLoad(char* name, char* programBuf, int length, int argc, char** argv, boolean_t blocking, context_t* context);
 
 
 

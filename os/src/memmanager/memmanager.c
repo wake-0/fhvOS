@@ -18,7 +18,6 @@ static int memoryManagerLookupSectionForFreePagesInRow(memoryRegionPointer_t reg
 static void memoryManagerReservePagesInARow(memoryRegionPointer_t region, unsigned int pageNumber, unsigned int pagesToReserve);
 static void memoryManagerReserveDirectMappedRegion(unsigned int memoryRegion);
 static int memoryManagerReserveSinglePage(memoryRegionPointer_t region, unsigned int pageNumber);
-static int memoryManagerReserveSinglePage(memoryRegionPointer_t region, unsigned int pageNumber);
 static void memoryManagerReserveAllPagesOfRegion(memoryRegionPointer_t region);
 
 // contains the regions of the virtual memory

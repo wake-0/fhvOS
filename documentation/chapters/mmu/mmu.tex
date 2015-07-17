@@ -1,4 +1,4 @@
-\section{Virtelle Speicherverwaltung}
+\section{Virtuelle Speicherverwaltung}
 
 Bei der virtuellen Speicherverwaltung erfolgt die Umwandlung von vom ARM Prozessor generierten, virtuellen Adressen in physikalische Adressen durch die \ac{MMU}. Dieses Kapitel enthält die Beschreibung des Designs und der Implementierung der virtuellen Speicherverwaltung des Betriebssystems sowie der Einstellungen der MMU.\\
 
@@ -12,7 +12,7 @@ Die \ac{VMSAv7} definiert zwei unabhängige Formate für translation tables \cit
 		\item zweistufige Seitentabelle 
 		\item 32-bit Deskriptoren (PTE)
 		\item 32-bit virtuelle Eingangsadresse 
-		\item bis zu 40-bit große physikalische Ausgangsaddresse
+		\item bis zu 40-bit große physikalische Ausgangsadresse
 	\end{itemize}
 	\item \emph{Long-descriptor format}:
 	\begin{itemize}
@@ -20,7 +20,7 @@ Die \ac{VMSAv7} definiert zwei unabhängige Formate für translation tables \cit
 		\item 64-bit Deskriptoren (\acs{PTE})
 		\item verwendet \emph{Large Physical Address Extension} (LPAE)
 		\item bis zu 40-bit große virtuelle Eingangsadresse 
-		\item bis zu 40-bit große physikalische Ausgangsaddresse
+		\item bis zu 40-bit große physikalische Ausgangsadresse
 	\end{itemize}
 \end{itemize}
 
@@ -42,7 +42,7 @@ Um die Anforderungen an das Betriebssystem zu erfüllen, reicht das zweistufige 
  \label{table:GeneralVirtualMemory}
 \end{table}
 
-Generiert die ARM CPU einen Speicherzugriff, wird von der MMU ein Suchlauf durchgeführt. Dieser Suchlauf wird \emph{translation table lookup} genannt. Dabei wird zuerst im \ac{TLB} nachgesehen, ob einer der 64 Einträge des TLB die zur virtuellen Adresse korrespondierente physikalische Adresse enthält. Ist dies der Fall (so genannter \emph{TLB hit}), wird der Suchlauf an dieser Stelle erfolgreich beendet.\\
+Generiert die ARM CPU einen Speicherzugriff, wird von der MMU ein Suchlauf durchgeführt. Dieser Suchlauf wird \emph{translation table lookup} genannt. Dabei wird zuerst im \ac{TLB} nachgesehen, ob einer der 64 Einträge des TLB die zur virtuellen Adresse korrespondierende physikalische Adresse enthält. Ist dies der Fall (so genannter \emph{TLB hit}), wird der Suchlauf an dieser Stelle erfolgreich beendet.\\
 
 Ist die angeforderte virtuelle Adresse nicht im TLB enthalten (TLB miss), wird ein page table walk durchgeführt. Das Funktionsprinzip des zweistufigen Seitentabellensystems zeigt Abbildung \ref{fig:2levelTableSystem}. Aus einem der zwei Seitentabellenregister wird die Basisadresse der darin zuvor abgelegten L1-Seitentabelle geholt. Das Format der PTE bestimmt dann, um welchen Typ von Verweis es sich handelt. Seitentabellen und ihre Einträge werden im nachfolgenden Abschnitt \ref{subsect:pageTables} genauer beschrieben.\\
 
@@ -100,7 +100,7 @@ Der verwendete ARM Prozessor verfügt über zwei Register (\acf{TTBR}, \emph{TTB
 
 Das Beschreiben der Seitentabellenregister erfolgt, wie bei nahezu jeder MMU-Funktionalität, mittels Assemblerbefehlen, die auf die CP15 Coprozessor Register zugreifen.\\
 
-Beim Füllen der Seitentabllen sind vorgegebene Formate für die beiden Typen von Deskriptoren unbedingt zu beachten. Die Abbildungen \ref{fig:firstLevelDescriptor} und \ref{fig:secondLevelDescriptor} fassen die Formate für first-level und second-level Deskriptoren zusammen. Beiden Deskriptortypen gleich ist die vorgeschriebene Länge von 32 bit.\\
+Beim Füllen der Seitentabellen sind vorgegebene Formate für die beiden Typen von Deskriptoren unbedingt zu beachten. Die Abbildungen \ref{fig:firstLevelDescriptor} und \ref{fig:secondLevelDescriptor} fassen die Formate für first-level und second-level Deskriptoren zusammen. Beiden Deskriptortypen gleich ist die vorgeschriebene Länge von 32 Bit.\\
 
 \subsubsection*{First-level Deskriptoren}
 
@@ -128,14 +128,14 @@ In der Speicherverwaltung des Betriebssystems werden ausschließlich small pages
 
 \begin{itemize}
 	\item small pages müssen nur einmal in die L2-Seitentabelle eingetragen werden, large pages hingegen 16 mal
-	\item L1- und L2-Seitentabellen, die 16 kB bzw. 1 kB Speicher benötigen, belegen bei ihrer Erzeugung nur vier volle page frames bzw. ein page frame physikalischen Speichers zu einem Viertel. Dadurch wird die Speicherfragmentierung vergliechen mit large pages stark verringert
+	\item L1- und L2-Seitentabellen, die 16 kB bzw. 1 kB Speicher benötigen, belegen bei ihrer Erzeugung nur vier volle page frames bzw. ein page frame physikalischen Speichers zu einem Viertel. Dadurch wird die Speicherfragmentierung verglichen mit large pages stark verringert
 \end{itemize}
 
 Die Zusammensetzung der Struktur für second-level Deskriptoren ist in Listing \ref{codeSecondLevelDescriptor} dargestellt.\\
 
 \begin{figure}[H]
 	\includegraphics[scale=0.7]{figures/secondLevelDescriptor}
-	\caption{Secondt-Level Deskriptorformate \cite[S. B3-1327]{ARM:ARM}}
+	\caption{Second-Level Deskriptorformate \cite[S. B3-1327]{ARM:ARM}}
 	\label{fig:secondLevelDescriptor}
 \end{figure}
 
@@ -184,7 +184,7 @@ Bei der Initialisierung eines Prozesses wird für den Prozess eine L1 page, die 
 
 Das nachfolgende Listing \ref{codeMemoryRegion} zeigt die Struktur, mit welcher Regionen im virtuellen Speicher erstellt und verwaltet werden. Sie bieten die Möglichkeit, unterschiedlich große Bereiche des virtuellen Speichers mit denselben Eigenschaften und Zugriffsrechten zu versehen.\\
 
-Erstellt werden solche Speicherregionen sämtliche in Abbildung \ref{fig:MemoryMap} gezeigten Bereiche. Sie enthalten die virtuelle Anfangs- und Endadresse der Region sowie Pagegröße und zugriffsrechte auf die Region. Weiters enthalten sie eine verkettete Liste von Strukturen, die den Status(reserviert oder nicht reserviert) der einzelnen Pages verwaltet.\\
+Erstellt werden solche Speicherregionen sämtliche in Abbildung \ref{fig:MemoryMap} gezeigten Bereiche. Sie enthalten die virtuelle Anfangs- und Endadresse der Region sowie Pagegröße und Zugriffsrechte auf die Region. Weiters enthalten sie eine verkettete Liste von Strukturen, die den Status(reserviert oder nicht reserviert) der einzelnen Pages verwaltet.\\
 
 \lstinputlisting[language=C, caption=Struktur für die Verwaltung von Speicherregionen, label=codeMemoryRegion]{codefiles/region.c}
 \vspace{0.5cm}

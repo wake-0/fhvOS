@@ -17,8 +17,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#define KERNEL_VERSION_MAJOR		(0)
-#define KERNEL_VERSION_MINOR		(1)
+#define KERNEL_VERSION_MAJOR		(1)
+#define KERNEL_VERSION_MINOR		(0)
 #define KERNEL_VERSION_PATCH		(0)
 
 #define	KERNEL_MAX_COMMAND_ARGS		(64)
@@ -176,6 +176,23 @@ int	KernelInfo(const char *format, ...)
 #endif
 }
 
+int	KernelVerbose(const char *format, ...)
+{
+#if KERNEL_VERBOSE_OUTPUT
+	va_list arg;
+	va_start (arg, format);
+	int res = 0;
+	ConsoleColor(MAGENTA);
+	res += printf("[VERBOSE @ %i] ", KernelGetUptime());
+	res += vprintf(format, arg);
+	ConsoleColor(WHITE);
+	va_end(arg);
+
+	return res;
+#else
+	return 0;
+#endif
+}
 int	KernelDebug(const char *format, ...)
 {
 #if KERNEL_DEBUG_OUTPUT

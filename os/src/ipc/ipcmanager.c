@@ -11,12 +11,12 @@
 #include "../scheduler/scheduler.h"
 
 #define MAX_OPEN_DOMAINS			(100)
-#define MAX_NAMESPACE_NAME			(50)
 #define MAX_MESSAGE_LENGTH			(100)
 #define MAX_MESSAGE_INBOX			(100)
 
 typedef struct {
 	char* message;
+	int msg_len;
 	char* sender_namespace;
 } ipc_message_t;
 
@@ -49,7 +49,7 @@ int IpcManagerRegisterNamespace(char* namespace_name)
 		return IPC_MANAGER_NOT_AUTHORISED;
 	}
 	size_t len = strlen(namespace_name);
-	if (len > MAX_NAMESPACE_NAME)
+	if (len > IPC_MAX_NAMESPACE_NAME)
 	{
 		return IPC_MANAGER_INVALID_NAME;
 	}
@@ -69,7 +69,7 @@ int IpcManagerRegisterNamespace(char* namespace_name)
 	return IPC_MANAGER_OK;
 }
 
-int IpcManagerSendMessage(char* sender_namespace, char* namespace_name, char* message)
+int IpcManagerSendMessage(char* sender_namespace, char* namespace_name, char* message, int msg_len)
 {
 	// Get sender
 	namespace_t* sender = getNamespaceByName(sender_namespace);
@@ -91,8 +91,7 @@ int IpcManagerSendMessage(char* sender_namespace, char* namespace_name, char* me
 		return IPC_MANAGER_INVALID_NAME;
 	}
 
-	size_t msgLen = strlen(message);
-	if (msgLen > MAX_MESSAGE_LENGTH)
+	if (msg_len > MAX_MESSAGE_LENGTH)
 	{
 		return IPC_MANAGER_MESSAGE_TOO_LONG;
 	}
@@ -105,9 +104,9 @@ int IpcManagerSendMessage(char* sender_namespace, char* namespace_name, char* me
 	// Add new message
 	ipc_message_t* newMessage = malloc(sizeof(ipc_message_t));
 	newMessage->sender_namespace = sender->name;
-	newMessage->message = malloc((msgLen + 1) * sizeof(char));
-	strcpy(newMessage->message, message);
-	newMessage->message[msgLen] = '\0';
+	newMessage->msg_len = msg_len;
+	newMessage->message = malloc((msg_len) * sizeof(char));
+	memcpy(newMessage->message, message, msg_len);
 
 	// TODO Add a mutex/semaphore
 	receiver->messageQueue[receiver->messageCount++] = newMessage;
@@ -144,16 +143,6 @@ int IpcManagerGetNextMessage(char* namespace_name, char* message_buffer, int msg
 		return IPC_MANAGER_NOT_AUTHORISED;
 	}
 
-	if (msg_buf_len < MAX_MESSAGE_LENGTH)
-	{
-		return IPC_MANAGER_BUFFER_TOO_SMALL;
-	}
-
-	if (sender_ns_len < MAX_NAMESPACE_NAME)
-	{
-		return IPC_MANAGER_BUFFER_TOO_SMALL;
-	}
-
 	if (receiver->messageCount <= 0)
 	{
 		return IPC_MANAGER_NO_MESSAGE_AVAIL;
@@ -161,7 +150,18 @@ int IpcManagerGetNextMessage(char* namespace_name, char* message_buffer, int msg
 	// TODO Mutex
 
 	ipc_message_t* message = receiver->messageQueue[0];
-	strcpy(message_buffer, message->message);
+
+	if (msg_buf_len < message->msg_len)
+	{
+		return IPC_MANAGER_BUFFER_TOO_SMALL;
+	}
+
+	if (sender_ns_len < strlen(message->sender_namespace) + 1)
+	{
+		return IPC_MANAGER_BUFFER_TOO_SMALL;
+	}
+
+	memcpy(message_buffer, message->message, message->msg_len);
 	strcpy(sender_namespace, message->sender_namespace);
 
 	// Remove message from queue and shift entries
@@ -179,10 +179,61 @@ int IpcManagerGetNextMessage(char* namespace_name, char* message_buffer, int msg
 	return IPC_MANAGER_OK;
 }
 
+int IpcManagerCloseNamespace(char* namespace_name)
+{
+	namespace_t* ns = getNamespaceByName(namespace_name);
+	if (ns == NULL)
+	{
+		return IPC_MANAGER_INVALID_NAME;
+	}
+
+	process_t* proc = SchedulerGetRunningProcess();
+	if (proc == NULL || proc->id != ns->procId)
+	{
+		return IPC_MANAGER_NOT_AUTHORISED;
+	}
+
+	// Delete from array
+	int cnt = 0;
+	while (namespaces[cnt] != ns) { cnt++; }
+	free(ns);
+	namespaces[cnt] = NULL;
+	while ( (cnt + 1) < MAX_OPEN_DOMAINS && namespaces[cnt+1] != NULL)
+	{
+		namespaces[cnt] = namespaces[cnt + 1];
+		cnt++;
+	}
+
+	namespaces[--nsIdx] = NULL;
+	return IPC_MANAGER_OK;
+}
+
+int IpcManagerChannelCount()
+{
+	return nsIdx;
+}
+
+int IpcManagerGetChannel(int index, char* buf, int len)
+{
+	if (index > nsIdx)
+	{
+		return IPC_MANAGER_INVALID_NAME;
+	}
+	int name_len = strlen(namespaces[index]->name);
+	if (len < name_len + 1)
+	{
+		return IPC_MANAGER_BUFFER_TOO_SMALL;
+	}
+	memcpy(buf, namespaces[index]->name, name_len);
+	buf[name_len] = '\0';
+	return IPC_MANAGER_OK;
+}
+
+
 namespace_t* getNamespaceByName(char* name)
 {
 	int idx = 0;
-	while (namespaces[idx] != 0)
+	while (namespaces[idx] != NULL)
 	{
 		int res = strcmp(namespaces[idx]->name, name);
 		if (res == 0)
