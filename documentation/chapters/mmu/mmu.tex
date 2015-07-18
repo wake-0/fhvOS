@@ -47,7 +47,7 @@ Generiert die ARM CPU einen Speicherzugriff, wird von der MMU ein Suchlauf durch
 Ist die angeforderte virtuelle Adresse nicht im TLB enthalten (TLB miss), wird ein page table walk durchgeführt. Das Funktionsprinzip des zweistufigen Seitentabellensystems zeigt Abbildung \ref{fig:2levelTableSystem}. Aus einem der zwei Seitentabellenregister wird die Basisadresse der darin zuvor abgelegten L1-Seitentabelle geholt. Das Format der PTE bestimmt dann, um welchen Typ von Verweis es sich handelt. Seitentabellen und ihre Einträge werden im nachfolgenden Abschnitt \ref{subsect:pageTables} genauer beschrieben.\\
 
 \begin{figure}[H]
-	\includegraphics[scale=0.7]{figures/addressTranslation}
+	\includegraphics[scale=0.7]{chapters/mmu/figures/addressTranslation}
 	\caption{Zweistufiges Seitentabellensystem \cite[S. B3-1325]{ARM:ARM}}
 	\label{fig:2levelTableSystem}
 \end{figure}
@@ -63,13 +63,13 @@ Der genaue Vorgang der Umwandlung einer vom ARM Prozessor erzeugten virtuellen A
 
 
 \begin{figure}[H]
-	\includegraphics[scale=0.8]{figures/sectionTranslation}
+	\includegraphics[scale=0.8]{chapters/mmu/figures/sectionTranslation}
 	\caption{1 MB Section Translation durch die ARM CPU \cite[S. B3-1335]{ARM:ARM}}
 	\label{fig:sectionTranslation}
 \end{figure}
 
 \begin{figure}[H]
-	\includegraphics[scale=0.8]{figures/smallPageTranslation}
+	\includegraphics[scale=0.8]{chapters/mmu/figures/smallPageTranslation}
 	\caption{Small Page Translation durch die ARM CPU \cite[S. B3-1337]{ARM:ARM}}
 	\label{fig:smallPageTranslation}
 \end{figure}
@@ -86,14 +86,14 @@ Der verwendete ARM Prozessor verfügt über zwei Register (\acf{TTBR}, \emph{TTB
 
 
 \begin{figure}[H]
-	\includegraphics[scale=0.8]{figures/ttbr0format}
+	\includegraphics[scale=0.8]{chapters/mmu/figures/ttbr0format}
 	\caption{TTBR0 Format \cite[S. B4-1726]{ARM:ARM}}
 	\label{fig:TTBR0Format}
 \end{figure}
 
 
 \begin{figure}[H]
-	\includegraphics[scale=0.8]{figures/ttbr1format}
+	\includegraphics[scale=0.8]{chapters/mmu/figures/ttbr1format}
 	\caption{TTBR1 Format \cite[S. B4-1730]{ARM:ARM}}
 	\label{fig:TTBR1Format}
 \end{figure}
@@ -114,13 +114,13 @@ Die First-Level Deskriptortypen werden auf folgende Weise verwendet:
 Für die Erstellung von first-level Deskriptoren wurde eine Struktur erstellt, welche in Listing \ref{codeFirstLevelDescriptor} aufgeführt ist. Diese Struktur und jene des second-level Deskriptors wird bei den nachfolgenden Erläuterungen zur MMU benötigt.\\
 
 \begin{figure}[H]
-	\includegraphics[scale=0.7]{figures/firstLevelDescriptor}
+	\includegraphics[scale=0.7]{chapters/mmu/figures/firstLevelDescriptor}
 	\caption{First-Level Deskriptorformate \cite[S. B3-1326]{ARM:ARM}}
 	\label{fig:firstLevelDescriptor}
 \end{figure}
 
 
-\lstinputlisting[language=C, caption=Struktur für first-level Deskriptoren, label=codeFirstLevelDescriptor]{codefiles/firstLevelDescriptor.c}
+\lstinputlisting[language=C, caption=Struktur für first-level Deskriptoren, label=codeFirstLevelDescriptor]{chapters/mmu/codefiles/firstLevelDescriptor.c}
 
 \subsection*{Second-level Deskriptoren}
 
@@ -134,13 +134,13 @@ In der Speicherverwaltung des Betriebssystems werden ausschließlich small pages
 Die Zusammensetzung der Struktur für second-level Deskriptoren ist in Listing \ref{codeSecondLevelDescriptor} dargestellt.\\
 
 \begin{figure}[H]
-	\includegraphics[scale=0.7]{figures/secondLevelDescriptor}
+	\includegraphics[scale=0.7]{chapters/mmu/figures/secondLevelDescriptor}
 	\caption{Second-Level Deskriptorformate \cite[S. B3-1327]{ARM:ARM}}
 	\label{fig:secondLevelDescriptor}
 \end{figure}
 
 
-\lstinputlisting[language=C, caption=Struktur für second-level Deskriptoren, label=codeSecondLevelDescriptor]{codefiles/secondLevelDescriptor.c}
+\lstinputlisting[language=C, caption=Struktur für second-level Deskriptoren, label=codeSecondLevelDescriptor]{chapters/mmu/codefiles/secondLevelDescriptor.c}
 
 
 \subsection{Aufteilung des virtuellen Speichers und Mapping}
@@ -160,7 +160,7 @@ Bei der Initialisierung eines Prozesses wird für den Prozess eine L1 page, die 
 
 
 \begin{figure}[H]
-	\includegraphics[scale=0.60]{figures/MemoryMap}
+	\includegraphics[scale=0.60]{chapters/mmu/figures/MemoryMap}
 	\caption{Memory Map des Betriebssystems}
 	\label{fig:MemoryMap}
 \end{figure}
@@ -186,7 +186,7 @@ Das nachfolgende Listing \ref{codeMemoryRegion} zeigt die Struktur, mit welcher 
 
 Erstellt werden solche Speicherregionen sämtliche in Abbildung \ref{fig:MemoryMap} gezeigten Bereiche. Sie enthalten die virtuelle Anfangs- und Endadresse der Region sowie Pagegröße und Zugriffsrechte auf die Region. Weiters enthalten sie eine verkettete Liste von Strukturen, die den Status(reserviert oder nicht reserviert) der einzelnen Pages verwaltet.\\
 
-\lstinputlisting[language=C, caption=Struktur für die Verwaltung von Speicherregionen, label=codeMemoryRegion]{codefiles/region.c}
+\lstinputlisting[language=C, caption=Struktur für die Verwaltung von Speicherregionen, label=codeMemoryRegion]{chapters/mmu/codefiles/region.c}
 \vspace{0.5cm}
 
 Zusammengefasst dargestellt sind in Tabelle \ref{table:MemoryRegions} alle Speicherregionen des Betriebssystems. Ein direktes Mapping bedeutet dabei, dass die virtuelle Adresse der physikalischen entspricht.\\
@@ -214,7 +214,7 @@ Um das Mapping der \ac{MPT} verstehen zu können, wird nochmals auf den Adresstr
 Die Adresse eines Eintrags in der page table setzt sich zusammen aus der Basisadresse der entspreche page table und einem Index. Nach dem setzen der Attribute des page table Eintrags wird durch die Funktion \emph{mmuGetTableIndex} aus den obersten Bits der physikalischen Adresse der Intex in der page table berechnet. Der Index muss um 2 bit nach links geshiftet werden, um das Alignment von 4 Byte einzuhalten. Schließlich wird der geshiftete Index noch durch die Datentypgröße von 4 Byte geteilt. Damit wird die korrekte Adresse des zu schreibenden Tabelleneintrags durch Pointerarithmetik ermittelt. An diese Adresse wird nun der Eintrag geschrieben, der zuvor durch die Funktion \emph{mmuCreateL1PageTableEntry} aus der übergebenen first-level Deskriptorstruktur erstellt wurde. Listing \ref{codeMasterPageTableMapping} zeigt die praktische Ausführung des direkten Mappings in die \ac{MPT}.\\ 
 
 
-\lstinputlisting[language=C, caption=Funktion für direktes Mapping in die master page table, label=codeMasterPageTableMapping]{codefiles/directMapIntoMasterPageTable.c}
+\lstinputlisting[language=C, caption=Funktion für direktes Mapping in die master page table, label=codeMasterPageTableMapping]{chapters/mmu/codefiles/directMapIntoMasterPageTable.c}
 
 \subsection{Allokierung der Page Frames}
 
@@ -226,7 +226,7 @@ Die Bitsmap wird durch ein Array der Länge N/8 Bytes realisiert. N steht hier f
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=1]{figures/BitsMap}
+	\includegraphics[scale=1]{chapters/mmu/figures/BitsMap}
 	\caption{Beispiel einer Bitsmap zur Verwaltung der Page Frames}
 	\label{fig:BitsMap}
 \end{figure}
@@ -241,14 +241,14 @@ Bevor die MMU erfolgreich aktiviert werden kann, muss vorher eine Reihe von Eins
 
 Listing \ref{codeMMUInit} zeigt den kompletten Ablauf zur Aktivierung der MMU.
 
-\lstinputlisting[language=C, caption=Aktivierung der MMU, label=codeMMUInit]{codefiles/MMUInit.c}
+\lstinputlisting[language=C, caption=Aktivierung der MMU, label=codeMMUInit]{chapters/mmu/codefiles/MMUInit.c}
 
 
 \subsection{Interaktion der MMU mit Prozessen}
 
 Die Schnittstelle der Softwareimplementierung der MMU zeigt Listing \ref{codeMMUFunctions}.\\
 
-\lstinputlisting[language=C, caption=Softwareschnittstelle der MMU, label=codeMMUFunctions]{codefiles/MMUFunctions.c}
+\lstinputlisting[language=C, caption=Softwareschnittstelle der MMU, label=codeMMUFunctions]{chapters/mmu/codefiles/MMUFunctions.c}
 \vspace{0.5cm}
 
 Die Schnittstellenfunktionen werden auf die folgende Weise verwendet: 
