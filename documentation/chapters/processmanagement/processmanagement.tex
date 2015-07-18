@@ -13,17 +13,20 @@ Jeder Prozess besitzt zu einem bestimmten Zeitpunkt einen fix definierten Zustan
 Im folgenden wird eine detaillierte Erklärung zu den einzelnen Zuständen aus Abbildung \ref{fig:Process-states} gegeben.
 
 \begin{description}
-	\item[Free] \hfill \\
-	XXX
+	\item[Ready] \hfill \\
+	Der Zustand ready tritt ein, wenn ein Prozess bereit wäre um ausgeführt zu werden. 
 	
 	\item[Running] \hfill \\
-	XXX
+	Ein Prozess weist diesen Zustand auf, wenn er gerade ausgeführt wird. Es gibt immer nur einen running Prozess zu einem bestimmten Zeitpunkt.
 	
 	\item[Blocked] \hfill \\
 	XXX
 	
-	\item[Finished] \hfill \\
+	\item[Sleeping] \hfill \\
 	XXX	
+	
+	\item[Free] \hfill \\
+	XXX
 \end{description}
 
 Es gibt unterschiedliche Zustandsübergänge, welche im Betriebssystem erlaubt sind. Tabelle \ref{table:State-transition} stellt die verschiedenen Übergänge mit einem dazu passenden Beispiel dar.
@@ -34,7 +37,7 @@ Es gibt unterschiedliche Zustandsübergänge, welche im Betriebssystem erlaubt s
   \\ \hline
   Ready & Running & XXX \\
   Running & Blocked & XXX \\
-  Running & Finised & XXX \\
+  Running & XXX & XXX \\
   XXX & XXX & XXX \\
   
  \end{tabular}
