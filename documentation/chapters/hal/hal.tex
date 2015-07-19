@@ -1,8 +1,12 @@
-\section{HAL}
-bla
+\section{Hardware Abstraction Layer (HAL)}
+Der Hardware Abstraction Layer (HAL) dient zur Abstraktion von der eigentlichen Hardware. Dies wird dann benötigt, wenn das Betriebssystem portierbar sein sollte. Ein weiterer Vorteil ist, dass nicht mehr auf die Hardware direkt zugegriffen werden muss, d.h. das Mapping auf Hardwareadressen wird von der HAL abgenommen und es kann mittels abstrakter Komponenten bzw. Ids oder Pins gearbeitet werden. 
 
-\subsection{Aufbau}
-bla
+\subsection{Aufbau der HAL Schnittstelle}
+Die HAL Schnittstelle ist für jede Hardwarekomponente unterschiedlich, dies ist in Listening \ref{hal-gpio} und Listening \ref{hal-uart} dargestellt. Das zuvor erwähnte abstrakte Ansprechen der Komponenten über die Pins ist ebenfalls in den Listenings ersichtlich.
+
+\lstinputlisting[language=C, caption=HAL Schnittstelle für die GPIOs, label=hal-gpio]{chapters/hal/codefiles/hal-gpio.c}
+
+\lstinputlisting[language=C, caption=Schnittstelle für die UART, label=hal-uart]{chapters/hal/codefiles/hal-uart.c}
 
 \subsection{Interrupts}
 bla

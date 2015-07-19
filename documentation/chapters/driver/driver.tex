@@ -1,12 +1,21 @@
 \section{Treiber}
 Die Treiber stellen eine abstrakte Schnittstelle auf den Hardware Abstraction Layer dar. Dadurch muss nicht mehr direkt auf die einzelnen Hardwarekomponenten zugegriffen werden. Ein wesentlicher Aspekt bei der Architektur der Treiber war Abstraktion. Dadurch wird gewährleistet, dass jeder Treiber über die selbe Schnittstelle angesprochen werden kann. Zudem ist die Verwaltung durch den Driver Manager erleichtert.
 
-\subsection{Aufbau eines Treibers}
-In Listening \ref{generalDriverInterface} ist die allgemeine Schnittstelle für jeden Treiber ersichtlich. Jeder implementierte Treiber muss diese vorweisen können, ein Beispiel (LED Treiber) dazu ist in Listening \ref{ledDriver} zu sehen.
+\subsection{Allgemeiner Aufbau eines Treibers}
+In Listening \ref{generalDriverInterface} ist die allgemeine Schnittstelle für jeden Treiber ersichtlich. 
 
 \lstinputlisting[language=C, caption=Allgemeine Schnittstelle für einen Treiber, label=generalDriverInterface]{chapters/driver/codefiles/generalDriverInterface.c}
 
+\subsection{Beispiel Implementierung eines Treibers}
+Jeder implementierte Treiber muss diese vorweisen können, ein Beispiel (LED Treiber) dazu ist in Listening \ref{ledDriver} zu sehen.
+
 \lstinputlisting[language=C, caption=Implementierung der allgemeinen Treiberschnittstelle (LED Beispiel), label=ledDriver]{chapters/driver/codefiles/ledDriver.c}
 
+\subsection{DriverManager}
+Der DriverManager hat die Aufgabe die Treiber zu initialisieren sowie diese dann nach außen hin anzubieten. In Listening \ref{driverManagerInterface} ist die Schnittstelle des DriverManagers dargestellt. Eine Implementierung dieser Schnittstelle für das LED Beispiel ist in Listening \ref{driverManagerImplementation} aufgezeigt. Für das Hinzufügen eines weiteren Treibers beim DriverManager, muss nur die \textit{DriverManagerInit} Funktion angepasst werden. D.h. es muss ein zusätzlicher Treiber mit den seinen zugehörigen Funktionspointern in das \textit{drivers} Array eingefügt werden.\footnote{Die Verwendung von \textit{malloc} ist hier nicht nötig und könnte durch eine nicht dynamische Allokierung ersetzt werden.}
+
+\lstinputlisting[language=C, caption=Allgemeine Schnittstelle des DriverManagers, label=driverManagerInterface]{chapters/driver/codefiles/driverManager-interface.c}
+
+\lstinputlisting[language=C, caption=Implementierung der DriverManager Schnittstelle für den LED Treiber, label=driverManagerImplementation]{chapters/driver/codefiles/driverManager-implementation.c}
 
 \pagebreak 
