@@ -1,7 +1,12 @@
 \section{Interprozesskommunikation}
-bla
+Interprozesskommunikation dient zur Kommunikation zwischen verschiedenen Prozessen. Dabei ist entscheidend, dass beiden zu kommunizierenden Prozesse in unterschiedlichen Speicherbereichen bzw. in strikt voneinander getrennten Speicherbereichen sind. 
 
 \subsection{Aufbau}
 bla
+
+\subsection{IpcManager}
+Der IpcManager händelt die Interprozesskommunikation zwischen Prozessen. Listening \ref{ipcManagerInterface} zeigt die Schnittstelle des Managers.
+
+\lstinputlisting[language=C, caption=Schnittstelle des IpcManagers, label=ipcManagerInterface]{chapters/ipc/codefiles/ipcmanager-interface.c}
 
 \pagebreak 
