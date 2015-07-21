@@ -45,4 +45,8 @@ Es gibt unterschiedliche Zustandsübergänge, welche im Betriebssystem erlaubt s
  \label{table:State-transition}
 \end{table}
 
+\subsection{Scheduler Eigenschaften}
+Der Scheduler weißt eine Zeitscheibe von $10ms$ auf, d.h. jeder Prozess hat $10ms$ bevor er gewechselt wird. Sollte ein anderer Prozess zur Verfügung stehen wird dieser genommen ansonsten bekommt der gleicher Prozesse erneut eine Zeitscheibe von $10ms$. Diese Zeitscheibendauer wurde aufgrund mehrerer Aspekte gewählt: eine zu große Zeitscheibe $>$ $100ms$ würde merkbaren Verzögerungen im Betriebssystem führen, bei einer zu kleinen Zeitscheibe $<$ $1ms$ würde die benötigte Zeit für einen Wechsel im Vergleich zu lange dauern. Durchgeführte Performanztests sind im Kapitel XXX aufgeführt. \\ \\
+Das verwendete Schedulingverfahren ist Round Robin. Bei der Verwendung eines Verfahrens mit Prioritäten hätte der Fall mit einem hoch priorisierten Prozesse beachtet werden müssen. Ein Beispiel dazu: Es gibt drei Prioritäten (hoch, mittel und niedrig). Die Konsole wird als hoch eingestuft alle anderen Prozesse sind niedriger priorisiert. Wie bekommt nun ein mittel/niedrig priorisierter Prozess eine Zeitscheibe?
+
 \pagebreak 
