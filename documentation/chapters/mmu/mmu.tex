@@ -120,7 +120,7 @@ Für die Erstellung von first-level Deskriptoren wurde eine Struktur erstellt, w
 \end{figure}
 
 
-\lstinputlisting[language=C, caption=Struktur für first-level Deskriptoren, label=codeFirstLevelDescriptor]{chapters/mmu/codefiles/firstLevelDescriptor.c}
+\lstinputlisting[language=C, caption=Struktur für first-level Deskriptoren, captionpos=b, label=codeFirstLevelDescriptor]{chapters/mmu/codefiles/firstLevelDescriptor.c}
 
 \subsection*{Second-level Deskriptoren}
 
@@ -140,7 +140,7 @@ Die Zusammensetzung der Struktur für second-level Deskriptoren ist in Listing \
 \end{figure}
 
 
-\lstinputlisting[language=C, caption=Struktur für second-level Deskriptoren, label=codeSecondLevelDescriptor]{chapters/mmu/codefiles/secondLevelDescriptor.c}
+\lstinputlisting[language=C, caption=Struktur für second-level Deskriptoren, captionpos=b, label=codeSecondLevelDescriptor]{chapters/mmu/codefiles/secondLevelDescriptor.c}
 
 
 \subsection{Aufteilung des virtuellen Speichers und Mapping}
@@ -186,7 +186,7 @@ Das nachfolgende Listing \ref{codeMemoryRegion} zeigt die Struktur, mit welcher 
 
 Erstellt werden solche Speicherregionen sämtliche in Abbildung \ref{fig:MemoryMap} gezeigten Bereiche. Sie enthalten die virtuelle Anfangs- und Endadresse der Region sowie Pagegröße und Zugriffsrechte auf die Region. Weiters enthalten sie eine verkettete Liste von Strukturen, die den Status(reserviert oder nicht reserviert) der einzelnen Pages verwaltet.\\
 
-\lstinputlisting[language=C, caption=Struktur für die Verwaltung von Speicherregionen, label=codeMemoryRegion]{chapters/mmu/codefiles/region.c}
+\lstinputlisting[language=C, caption=Struktur für die Verwaltung von Speicherregionen, captionpos=b, label=codeMemoryRegion]{chapters/mmu/codefiles/region.c}
 \vspace{0.5cm}
 
 Zusammengefasst dargestellt sind in Tabelle \ref{table:MemoryRegions} alle Speicherregionen des Betriebssystems. Ein direktes Mapping bedeutet dabei, dass die virtuelle Adresse der physikalischen entspricht.\\
@@ -214,7 +214,7 @@ Um das Mapping der \ac{MPT} verstehen zu können, wird nochmals auf den Adresstr
 Die Adresse eines Eintrags in der page table setzt sich zusammen aus der Basisadresse der entspreche page table und einem Index. Nach dem setzen der Attribute des page table Eintrags wird durch die Funktion \emph{mmuGetTableIndex} aus den obersten Bits der physikalischen Adresse der Intex in der page table berechnet. Der Index muss um 2 bit nach links geshiftet werden, um das Alignment von 4 Byte einzuhalten. Schließlich wird der geshiftete Index noch durch die Datentypgröße von 4 Byte geteilt. Damit wird die korrekte Adresse des zu schreibenden Tabelleneintrags durch Pointerarithmetik ermittelt. An diese Adresse wird nun der Eintrag geschrieben, der zuvor durch die Funktion \emph{mmuCreateL1PageTableEntry} aus der übergebenen first-level Deskriptorstruktur erstellt wurde. Listing \ref{codeMasterPageTableMapping} zeigt die praktische Ausführung des direkten Mappings in die \ac{MPT}.\\ 
 
 
-\lstinputlisting[language=C, caption=Funktion für direktes Mapping in die master page table, label=codeMasterPageTableMapping]{chapters/mmu/codefiles/directMapIntoMasterPageTable.c}
+\lstinputlisting[language=C, caption=Funktion für direktes Mapping in die master page table, captionpos=b, label=codeMasterPageTableMapping]{chapters/mmu/codefiles/directMapIntoMasterPageTable.c}
 
 \subsection{Allokierung der Page Frames}
 
@@ -241,14 +241,14 @@ Bevor die MMU erfolgreich aktiviert werden kann, muss vorher eine Reihe von Eins
 
 Listing \ref{codeMMUInit} zeigt den kompletten Ablauf zur Aktivierung der MMU.
 
-\lstinputlisting[language=C, caption=Aktivierung der MMU, label=codeMMUInit]{chapters/mmu/codefiles/MMUInit.c}
+\lstinputlisting[language=C, caption=Aktivierung der MMU, captionpos=b, label=codeMMUInit]{chapters/mmu/codefiles/MMUInit.c}
 
 
 \subsection{Interaktion der MMU mit Prozessen}
 
 Die Schnittstelle der Softwareimplementierung der MMU zeigt Listing \ref{codeMMUFunctions}.\\
 
-\lstinputlisting[language=C, caption=Softwareschnittstelle der MMU, label=codeMMUFunctions]{chapters/mmu/codefiles/MMUFunctions.c}
+\lstinputlisting[language=C, caption=Softwareschnittstelle der MMU, captionpos=b,  label=codeMMUFunctions]{chapters/mmu/codefiles/MMUFunctions.c}
 \vspace{0.5cm}
 
 Die Schnittstellenfunktionen werden auf die folgende Weise verwendet: 
