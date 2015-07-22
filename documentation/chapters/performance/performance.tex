@@ -1,7 +1,20 @@
 \section{Performanz}
 bla
 
-\subsection{Aufbau}
-bla
+\subsection{Messergebnisse}
+Es wurden einen Messungen der Performanz mit dem Oszilloskop durchgeführt. Die erhaltenen Messergebnisse sind in Tabelle XXX aufgelistet.
+
+\begin{table}[H]
+\begin{tabular}{p{7cm} | p{7cm}}
+  \textbf{Testfall} & \textbf{Durchschnittliche Zeit} \\ \hline
+  	MMU Fault State 5 & $~18.90 ms$ \\
+  	MMU Fault State 7 & $~11.80 ms$ \\
+  	MMU Freeing Page Frame & $~19.80 ms$ \\
+  	Zeitscheibe (effektiv) & $~10.04 ms$ \\
+  	Context Switch & $~375 \mu s$ \\
+ \end{tabular}
+ \caption{Performanz-Messergebnisse}
+ \label{table:SpecifiedVirtualMemory}
+\end{table}
 
 \pagebreak 
