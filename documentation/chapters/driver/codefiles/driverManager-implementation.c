@@ -1,6 +1,6 @@
 static driver_t* drivers[MAX_DRIVER];
 
-void DriverManagerInit()
+void DriverManagerInit(void)
 {
 	// LED Driver
 	driver_t* led = malloc(sizeof(driver_t));
@@ -18,7 +18,7 @@ driver_t* DriverManagerGetDriver(driver_id_t driver_id)
 	return drivers[driver_id];
 }
 
-void DriverManagerDestruct()
+void DriverManagerDestruct(void)
 {
 	int i;
 	for (i = 0; i < MAX_DRIVER; i++) {
