@@ -53,7 +53,7 @@ Das verwendete Schedulingverfahren ist Round Robin. Bei der Verwendung eines Ver
 Das Vorgehen bei der Prozessverwaltung wird im Sequenzdiagramm von Figure \ref{Sequencediagram} dargestellt. Ein Client übergibt dem ProcessManager die Aufgabe einen Prozess zu erzeugen. Dieser delegiert das Erzeugen des Prozesses an den Scheduler weiter. Hierbei ist zu beachten, dass die Metadaten vom Prozess nicht weitergegeben werden. Der Scheduler speichert sich diesen neuen Prozess in seiner Prozesstabelle ab. Das MemoryManagement dient zum Allokieren von benötigtem Speicherplatz für den neuen Prozess. Der erzeugte Prozess wird an den ProcessManager zurückgegeben, wobei dieser noch MetaInformationen beifügt (z.B. den Namen des Prozesses). Dem Client wird am Ende mitgeteilt, ob das Erzeugen erfolgreich war. Ein alternativer Rückgabeparameter wäre die PID, wobei hier darauf zu achten ist, dass im Fehlerfall eine ungültige PID zurückgeliefert wird.
 
 \begin{figure}[H]
-	\includegraphics[scale=0.60]{chapters/processmanagement/figures/processmanagement-sequence-diagram}
+	\includegraphics[scale=0.70]{chapters/processmanagement/figures/processmanagement-sequence-diagram}
 	\caption{Sequenzdiagramm der Prozessverwaltung}
 	\label{fig:Sequencediagram}
 \end{figure}
