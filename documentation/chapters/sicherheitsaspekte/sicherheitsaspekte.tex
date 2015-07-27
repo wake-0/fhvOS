@@ -1,0 +1,15 @@
+\section{Sicherheitsaspekte}
+
+Hinsichtlich der Sicherheit werden an das Betriebssystems die Anforderungen der strikten Trennung von Prozessadressräumen und der Trennung von privilegierten und nichtprivilegierten Modi gestellt. Mögliche Sicherheitsrisiken und deren Vermeidung werden nachfolgend beschrieben.
+
+ 
+
+\subsection{Sicherheitsrisiken}
+
+Aufschluss über mögliche Sicherheitsrisiken ergibt eine nähere Betrachung des Speichermodells in Abbildung \ref{fig:MemoryMap}. Wie die Abbildung zeigt, beginnt im virtuellen Speicher der Adressbereich für Prozesse ab der Adresse 0x00000000. Gleichzeitig befindet sich die Startadresse für die ROM exception vector table an der Adresse 0x00020000.
+
+
+\subsection{Trennung der Adressräume}
+
+\subsection{Trennung der Modi}
+\pagebreak 
