@@ -482,6 +482,9 @@ static void mmuInitializeKernelMasterPageTable(void)
 
 	memoryRegion = MemoryManagerGetRegion(BOOT_ROM_EXCEPTIONS_REGION);
 	mmuMapDirectRegionToKernelMasterPageTable(memoryRegion, table);
+
+	memoryRegion = MemoryManagerGetRegion(HIVECS_REGION);
+	mmuMapDirectRegionToKernelMasterPageTable(memoryRegion, table);
 }
 
 
@@ -506,6 +509,15 @@ static void mmuMapDirectRegionToKernelMasterPageTable(memoryRegionPointer_t memo
 		// see Format of first-level Descriptor on p. B3-1335 in ARM Architecture Reference Manual ARMv7 edition
 		uint32_t *firstLevelDescriptorAddress = table + (tableOffset << 2)/sizeof(uint32_t);
 		*firstLevelDescriptorAddress = mmuCreateL1PageTableEntry(pageTableEntry);
+
+
+		// this is necessary because adding 0x100000 to the HIVECS_START_ADDRESS leads to an value overflow,
+		// meaning the next value of HIVECS_START_ADDRESS + 0x100000 is 0x000F0000. this in return would lead to
+		// writing everything into the master page table
+		if(memoryRegion->startAddress == HIVECS_START_ADDRESS)
+		{
+			break;
+		}
 	}
 }
 
