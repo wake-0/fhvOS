@@ -12,7 +12,7 @@
 
 #define PAGE_SIZE_64KB						0x10000
 #define PAGE_SIZE_4KB						0x1000
-#define MEMORY_REGIONS						7
+#define MEMORY_REGIONS						8
 #define L1_PAGE_TABLE						1
 #define L2_PAGE_TABLE						2
 #define L2_PAGE_TABLE_SIZE_1KB				0x400
@@ -55,6 +55,9 @@ static pageStatus_t sramRegion[15];
 #define BOOT_ROM_EXCEPTIONS_REGION			6
 static pageStatus_t romExceptionsRegion[1];
 
+#define HIVECS_REGION						7
+static pageStatus_t hivecsRegion[1];
+
 #define BOOT_ROM_EXCEPTIONS_START_ADDRESS	0x20000
 #define BOOT_ROM_EXCEPTIONS_END_ADDRESS		0x2001C
 #define BOOT_ROM_START_ADDRESS				0x40000000
@@ -69,6 +72,8 @@ static pageStatus_t romExceptionsRegion[1];
 #define KERNEL_END_ADDRESS					0x80FFFFFF
 #define PAGE_TABLES_START_ADDRESS			0x81000000
 #define PAGE_TABLES_END_ADDRESS				0x814FFFFF
+#define HIVECS_START_ADDRESS				0xFFFF0000
+#define HIVECS_END_ADDRESS					0xFFFF001C
 #define PAGE_TABLE_SPACE					PAGE_TABLES_END_ADDRESS - PAGE_TABLES_START_ADDRESS
 #define PROCESS_PAGES_START_ADDRESS			0x00000004				// address changed to prevent null pointer exception
 #define PROCESS_PAGES_END_ADDRESS			0x3EAFFFFF

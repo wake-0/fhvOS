@@ -53,6 +53,9 @@ int MemoryManagerInit()
 	memoryManagerInitializeRegion(&memorySections[BOOT_ROM_EXCEPTIONS_REGION], BOOT_ROM_EXCEPTIONS_START_ADDRESS, BOOT_ROM_EXCEPTIONS_END_ADDRESS);
 	memorySections[BOOT_ROM_EXCEPTIONS_REGION].pageStatus = &romExceptionsRegion[0];
 
+	memoryManagerInitializeRegion(&memorySections[HIVECS_REGION], HIVECS_START_ADDRESS, HIVECS_END_ADDRESS);
+	memorySections[HIVECS_REGION].pageStatus = &hivecsRegion[0];
+
 	return MEMORY_OK;
 }
 
