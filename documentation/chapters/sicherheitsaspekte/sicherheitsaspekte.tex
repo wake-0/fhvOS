@@ -19,6 +19,8 @@ Die Lösung für diese beiden Sicherheitsrisiken wird im Folgenden vorgestellt.
 
 \subsection{Vermeidung des Nulladressenproblems}
 
+Die Lösung des Nulladressenproblems kann mit relativ wenig Aufwand erreicht werden. In der Memory Region für den Prozessadressbereich wird die erste Page für alle Prozesse bereits beim Erstellen reserviert. Dadurch wird vermieden, dass bei einer Speicherallokation die Nulladresse oder eine non-aligned Adresse ausgegeben wird. Zusätzlich werden im DABT-Handler, der für die Einlagerung von Adressen von page frames in die page tables von Prozessen zuständig ist, diese nun nicht erlaubten Adressen abgefangen. Tritt aus welchem Grund auch immer eine Adresse aus dem Adressbereich der ersten page im DABT-Handler auf, wird der entsprechende Prozess gekillt und der nächste bereite Prozess zur Ausführung gebracht.
+
 \subsection{Implementierung der Hivecs}
 
 \pagebreak 

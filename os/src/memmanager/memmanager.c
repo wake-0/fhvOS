@@ -46,6 +46,7 @@ int MemoryManagerInit()
 
 	memoryManagerInitializeRegion(&memorySections[PROCESS_REGION], PROCESS_PAGES_START_ADDRESS, PROCESS_PAGES_END_ADDRESS);
 	memorySections[PROCESS_REGION].pageStatus = &procRegion[0];
+	procRegion->reserved = TRUE;
 
 	memoryManagerInitializeRegion(&memorySections[INTERNAL_SRAM_REGION], INTERNAL_SRAM_START_ADDRESS, INTERNAL_SRAM_END_ADDRESS);
 	memorySections[INTERNAL_SRAM_REGION].pageStatus = &sramRegion[0];
