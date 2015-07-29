@@ -6,8 +6,18 @@ Hinsichtlich der Sicherheit werden an das Betriebssystems die Anforderungen der 
 
 \subsection{Sicherheitsrisiken}
 
-Aufschluss über mögliche Sicherheitsrisiken ergibt eine nähere Betrachung des Speichermodells in Abbildung \ref{fig:MemoryMap}. Wie die Abbildung zeigt, beginnt im virtuellen Speicher der Adressbereich für Prozesse ab der Adresse 0x00000000. Gleichzeitig befindet sich die Startadresse für die ROM exception vector table an der Adresse 0x00020000.
+Aufschluss über mögliche Sicherheitsrisiken ergibt eine nähere Betrachung des Speichermodells in Abbildung \ref{fig:MemoryMap}. Wie die Abbildung zeigt, beginnt im virtuellen Speicher der Adressbereich für Prozesse ab der Adresse 0x00000000. Gleichzeitig befindet sich die Startadresse für die ROM exception vector table an der Adresse 0x00020000. Durch diese Gegebenheiten bestehen zwei grundsätzliche Sicherheitsrisiken:
 
+\begin{enumerate}
+	\item Nulladressenproblem: Adresse 0x00000000 ist im Regelfall reserviert für Nullpointer
+	\item Anfälligkeit für Hacking durch unsaubere Adressraumtrennung: ROM exception vector table muss bei dieser Konstellation in den page tables für Prozesse direkt, d.h. eins zu eins, gemappt sein
+\end{enumerate}
+
+Letzteres Sicherheitsrisiko bietet Hackern die Möglichkeit, durch sukzessives Erhöhen der angesprochenen Adresse vom User Mode in den System Mode zu gelangen. Damit wäre eine Hackeranwendung in der Lage, mit voller Befugnis auf die Hardware zuzugreifen und Programmteile des Kernels auszuführen.
+
+Die Lösung für diese beiden Sicherheitsrisiken wird im Folgenden vorgestellt.
+
+\subsection{Vermeidung des Nulladressenproblems}
 
 \subsection{Implementierung der Hivecs}
 
