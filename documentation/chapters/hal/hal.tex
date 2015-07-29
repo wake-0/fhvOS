@@ -25,6 +25,7 @@ Die in der HAL implementierten Interruptfunktionalitäten dienen als Grundlage f
 
 Die Verarbeitungsprozedur sowohl von IRQs als auch von FIQs zeigt Abbildung \ref{fig:interruptProcedure}. Im Betriebssystem codiert sind die Behandlungsschritte 5 (Ablegen des aktuellen Kontextes auf den Stack), 6(Aufruf des zugewiesenen Interrupthandlers), 7(Erlauben neuer Interruptauftritte) und 8(Wiederherstellung des ursprünglichen Kontextes vom Stack).\\
 
+Eine häufige Fehlerquelle stellt das versehentliche Weglassen von Schritt 7. Das \emph{NEWIRQAGR} (new IRQ agreement) ist dafür zuständig dem System anzuzeigen, dass ein unbehandelter Interruptrequest vorliegt. Wird Schritt 7 ausgelassen, wird beim erstmaligen Auftritt eines Interrupts der Interrupthandler wie erwartet aufgerufen. Nach dem Abarbeiten des Interrupthandlers wird die Programmausführung aber sofort wieder in den Interrupthandler springen, da das NEWIRQAGR nicht zurückgesetzt wurde und einen nicht behandelten Request anzeigt. Um dieses Problem zu umgehen wurde die Funktion \emph{InterruptAllowNewIrqGeneration} erstellt. Diese ist immer am Ende der jeweiligen Interrupthandler aufzurufen.
 
 \begin{figure}[H]
 	\includegraphics[scale=1]{chapters/hal/figures/interruptProcedure}
@@ -32,4 +33,13 @@ Die Verarbeitungsprozedur sowohl von IRQs als auch von FIQs zeigt Abbildung \ref
 	\label{fig:interruptProcedure}
 \end{figure}
 
+
+Die Verarbeitung eines Interrupts im Betriebssystem ist in Abbildung \ref{fig:interruptProcessing} schematisch dargestellt. Sichern und Wiederherstellen des Kontextes, d.h. der Register R0-R13 und der Rücksprungadresse, wird durch den in Assembler geschriebenen \emph{IRQ\_Handler} vorgenommen. Dieser ruft nach dem Sichern des Kontextes den dem Interrupt zugewiesenen Handler auf. Danach wird der ursprüngliche Kontext wiederhergestellt und das Programm an der unterbrochenen Stelle fortgesetzt.
+
+
+\begin{figure}[H]
+	\includegraphics[scale=0.55]{chapters/hal/figures/InterruptProcessing}
+	\caption{Interruptverarbeitung im Betriebssystem}
+	\label{fig:interruptProcessing}
+\end{figure}
 \pagebreak 
