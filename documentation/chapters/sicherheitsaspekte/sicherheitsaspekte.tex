@@ -23,4 +23,14 @@ Die Lösung des Nulladressenproblems kann mit relativ wenig Aufwand erreicht wer
 
 \subsection{Implementierung der Hivecs}
 
+Das Problem der sauberen Trennung der Adressräume for Prozesse und für den Kernel sowie der sauberen Trennung der Benutzermodi wird durch die Implementierung der high vectors oder auch \emph{Hivecs} erreicht.
+
+Die Implementierung der Hivecs versetzt die Basisadresse der Exceptions auf die Adresse 0xFFFF0000. Damit liegt die Basisadresse über der festgelegten Adressbereichsgrenze eindeutig im Kernelbereich, siehe dazu den physikalischen Bereich in Abbilung \ref{fig:MemoryMap}. Bei den \emph{low vecs} mussten bei der Erstellung eines jeden Prozesses die Adressen der exception vector table ab 0x00020000 bis 0x0002001C in die page table der Prozesse direkt gemappt werden. Bei den Hivecs werden die Adressen 0xFFFF0000 bis 0xFFFF001C in die Kernel master page table direkt gemappt. Damit ist ein Hackangriff durch eine Anwendung wie oben beschrieben nicht mehr möglich. Die Adressen 0x00000000 bis exklusive 0x40000000 stellen nun ausschließlich den Prozessbereich und die Adressen 0x40000000 bis 0xFFFFFFFF ausschließlich den Kernelbereich dar.
+Insgesamt müssen für die Implementierung der Hivecs folgende Schritte unternommen werden:
+
+\begin{description}
+	\item[Laden der exception vecotrs]: Im Linker Script müssen die Startaddressen der RAM Exceptions (siehe \cite[S. 4100]{ARM:TRM}) an die Basisadresse 0xFFFF0000 gelegt werden
+	\item[Mappen der Hivecs]: Die Basisadresse der Hivecs muss in die Kernel master page table direkt gemapped werden
+	\item[Enablen der Hivecs]: Im System Control Register \textbf{SCTLR} muss das 13. Bit (V-bit) gesetzt werden \cite[S. 1164]{ARM:ARM} 
+\end{description}
 \pagebreak 
