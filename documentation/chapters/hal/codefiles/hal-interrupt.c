@@ -1,0 +1,17 @@
+extern void InterruptResetAINTC(void);
+extern void InterruptPrioritySet(unsigned int intrNum, unsigned int priority);
+extern void InterruptHandlerEnable(unsigned int intrNum);
+extern void InterruptHandlerDisable(unsigned int intrNum);
+extern void InterruptAllowNewIrqGeneration();
+extern void InterruptHandlerRegister(unsigned int interruptNumber, intHandler_t fnHandler);
+extern void InterruptUnRegister(unsigned int interruptNumber);
+extern void InterruptSetGlobalMaskRegister(unsigned int interruptMaskRegister, unsigned int mask);
+extern void InterruptClearGlobalMaskRegister(unsigned int interruptMaskRegister, unsigned int mask);
+extern unsigned int InterruptActiveIrqNumberGet(void);
+extern intHandler_t InterruptGetHandler(unsigned int interruptNumber);
+extern void InterruptSaveUserContext(void);
+extern void InterruptRestoreUserContext(void);
+extern void InterruptMasterIRQEnable(void);
+extern void InterruptMasterIRQDisable(void);
+extern void InterruptMasterFIQEnable(void);
+extern void InterruptMasterFIQDisable(void);
