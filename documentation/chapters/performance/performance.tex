@@ -1,22 +1,25 @@
 \section{Performanzuntersuchungen}
 \label{Performanz}
 
-In diesem Kapitel werden Performanceaspekte des Betriebssystems disskutiert. Dazu wurden Messungen vorgenommen, deren Resultate nachfolgend präsentiert werden.
+In diesem Kapitel werden Performanzeaspekte des Betriebssystems dokumentiert und diskutiert. Die Performanz des Betriebssystems wurde mittels verschiedener Experimente und Messungen untersucht, deren Resultate im Folgenden beschrieben sind.
 
-\subsection{Messergebnisse}
-Um die Performance des Betriebssystems beurteilen zu können, wurden zeitliche Messungen der wichtigsten Unterbrechungen vorgenommen. Diese Messungen wurden mit Hilfe eines Oszilloskops durchgeführt und sind in Tabelle \ref{table:osciResults} aufgelistet. Von Interesse sind speziell die beiden Fälle der Einlagerung eines page frame. \emph{MMU Fault State 5} stellt dabei den Fall der Erstellung einer Level2 page table samt Einlagerung einer page frame dar, \emph{MMU Page Fault 7} dagegen lediglich die bloße Einlagerung einer page frame in eine Level2 page table. Zusätzlich wurde der Kontextwechsel zwischen den Prozessen und die tatsächliche Dauer der Zeitscheibe untersucht. Die Ermittlung der Zeit erfolgte durch die arithmetische Mittelung von jeweils zehn Messversuchen.\\
+\subsection{Messung und Ergebnisse}
+Um die Performanz des Betriebssystems beurteilen zu können, wurden zeitliche Messungen der relevanten Unterbrechungen vorgenommen. Die Messungen der einzelnen Unterbrechungen wurden mit Hilfe eines Oszilloskops durchgeführt, wobei alle Messungen jeweils zehn mal vorgenommen wurden und schließlich der Durchschnitt über alle Messungen als Resultat herangezogen wurden. In Tabelle \ref{table:osciResults} sind die einzelnen Messungen und Resultate aufgelistet.
 
 \begin{table}[H]
 \begin{tabular}{p{7cm} | p{7cm}}
-  \textbf{Testfall} & \textbf{Durchschnittliche Zeit} \\ \hline
-  	MMU Fault State 5 & $~18.90 ms$ \\
-  	MMU Fault State 7 & $~11.80 ms$ \\
-  	MMU Freeing Page Frame & $~19.80 ms$ \\
+  \textbf{Testfall} & \textbf{Durchschnittszeit ($n=10$)} \\ \hline
+  	\ac{MMU} Fault State 5 & $~18.90 ms$ \\
+  	\ac{MMU} Fault State 7 & $~11.80 ms$ \\
+  	\ac{MMU} Freeing Page Frame & $~19.80 ms$ \\
   	Zeitscheibe (effektiv) & $~10.04 ms$ \\
-  	Context Switch & $~375 \mu s$ \\
+  	\textit{Context Switch} & $~375 \mu s$ \\
  \end{tabular}
  \caption{Performanz-Messergebnisse}
  \label{table:osciResults}
 \end{table}
+
+Interessant ist vor allem die vergleichsweise lange Unterbrechung eines \textit{Context Switch}, welcher knapp $3\%$ der gesamten Zeitscheibe eines Prozesses in Anspruch nimmt. In Anbetracht dieser Messergebnisse wäre für die Gesamtperformanz des Betriebssystems durchaus zu überlegen, entweder die Zeitscheibe eines Prozesses zu verlängern oder aber die Logik für den \textit{Context Switch} zu optimieren.\\
+Von Interesse sind auch die beiden Fälle der Einlagerung eines page frame. \ac{MMU} \emph{Fault State 5} stellt dabei den Fall der Erstellung einer \textit{Level 2 page table} samt Einlagerung eines \textit{page frame} dar, \ac{MMU} \emph{Fault State 7} stellt dagegen lediglich die bloße Einlagerung eines \textit{page frame} in eine \textit{Level 2 page table} dar. Nachdem diese Unterbrechungen vergleichsweise selten auftreten, sind hier Optimierungen nicht unbedingt hochprior anzunehmen.
 
 \pagebreak 

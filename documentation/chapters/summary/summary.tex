@@ -7,17 +7,16 @@ In diesem Kapitel werden die erreichten Ergebnisse zusammengefasst. Weiters wird
 
 Das primäre Ziel dieses Projektes war die Erlangung tiefergehende Kenntnisse in Bezug auf die Systemprogrammierung von Systemen mit beschränkten Ressourcen. Dabei sollten vor allem die theoretische Grundlagen von Betriebssystemen praktisch umgesetzt werden. \\
  
-Implementiert und getestet wurde ein Betriebssystem welches sich auch in Langzeittests als stabil erwiesen hat. Das Betriebssystem ist durch die HAL flexibel und ohne größere Aufwände protierbar. Zudem ist es möglich, von einer MicroSD-Karte Applikationen zu laden und auszuführen. 
-Bei der Implementierung wurden sämtliche Grundaspekte moderner Betriebssysteme, wie beispielsweise die Interprozesskommunikation oder die virtuelle Speicherverwaltung, behandelt. Zudem wurden die Sicherheitsrisiken durch das saubere Trennen der Adressräume und Benutzermodi stark verringert. \\
+Implementiert und getestet wurde ein Betriebssystem welches sich auch in Langzeittests als stabil erwiesen hat. Das Betriebssystem ist durch den \ac{HAL} flexibel und ohne größere Aufwände protierbar. Zudem ist es möglich, von einem externen Speichermedium, respektive einer SD-Karte, Applikationen zu laden und auszuführen. 
+Bei der Implementierung wurden sämtliche Grundaspekte moderner Betriebssysteme, wie beispielsweise die Interprozesskommunikation oder die virtuelle Speicherverwaltung, behandelt und umgesetzt. Zudem wurden die Sicherheitsrisiken durch das saubere Trennen der Adressräume und Benutzermodi stark verringert. \\
  
 Es ist zu erwähnen, dass während des Entwicklungsprozesses erwartete wie auch nichterwartete Probleme aufgetreten sind. Diese betreffen in erster Linie Komplikationen, die durch falsches Setzen der Hardwareregister entstanden sind. \\
  
-Für das entworfene Betriebssystem wird kein Anspruch auf Vollständigkeit erhoben, da seine Entwicklung agil vorgenommen wurde. So wurden aus Zeitgründen bei der Erstellung der HAL nur die für die vorgesehene DMX-Applikation benötigten Funktionen implementiert. \\
- 
+Für das entworfene Betriebssystem wird kein Anspruch auf Vollständigkeit erhoben, da seine Entwicklung agil vorgenommen wurde. So wurden aus Zeitgründen bei der Erstellung des \ac{HAL} nur die für das Betriebssystem selbst und die vorgesehene \ac{DMX}-Applikation benötigten Funktionen implementiert. \\
 
 \subsection{Ausblick}
 
-Das Betriebssystem ist in der vorliegenden Form voll einsatzbereit und erfüllt alle gesetzten Anforderungen. Daher wird an dieser Stelle seine Entwicklung seitens des Projektteams eingestellt. Unter dem in der Einleitung angegebenen Repository auf GitHub kann es frei zugänglich heruntergeladen werden. Nachfolgend werden Ansatzpunkte für Verbesserungen bzw. Weiterentwicklungen augelistet.
+Das Betriebssystem ist in der vorliegenden Form voll einsatzfähig und erfüllt alle gesetzten Anforderungen. Durchaus sind aber noch einige essentielle Anforderungen an ein Betriebssystem nicht erfüllt, respektive sind einige Implementierungsdetails noch nicht ganz ausgereift.
 
 \subsubsection{Punkte mit Verbesserungspotential}
 Einige Punkte des Betriebssystem konnten nicht vollständig abgedeckt werden. Diese Punkte mit Verbesserungspotential werden in Tabelle \ref{table:points-to-improve} kurz beschrieben.
@@ -26,8 +25,12 @@ Einige Punkte des Betriebssystem konnten nicht vollständig abgedeckt werden. Di
 \begin{tabular}{p{5cm} | p{9cm}}
   \textbf{Sachverhalt} & \textbf{Beschreibung}
   \\ \hline
-  Caching & Die aktuelle Speicherverwaltung ist ein non-caching System. Eine Einführung des Cachings für Daten hätte eine Verbesserung der Performance zur Folge. \\
-  
+  Caching & Die aktuelle Speicherverwaltung verwendet über den \ac{TLB} hinausgehend kein weiteres Caching. Eine Einführung des Cachings hätte eine Verbesserung der Performanz zur Folge.
+  \\
+  \textit{Watchdog} & Derzeit lässt durch das forcierte Beenden aller laufenden Prozesse (einschließlich des Leerlaufsprozesses) das Betriebssystem in einen Absturz führen. Ein \textit{Watchdog} könnte für das Wiederherstellen des Leerlaufprozesses bei unerwartetem Beenden verwantwortlich sein.
+  \\
+  \textit{Erweiterung der Konsole} & Derzeit ist es nicht möglich einen im Vordergrund gestarteten Prozess durch eine Tastenkombination zu Beenden.
+  \\
  \end{tabular}
  \caption{Übersicht der Punkte mit Verbesserungspotential}
  \label{table:points-to-improve}
@@ -40,8 +43,8 @@ Das Betriebssystem weist einige wenige Punkte auf, welche noch nicht implementie
 \begin{tabular}{p{5cm} | p{9cm}}
   \textbf{Fehlender Punkt} & \textbf{Beschreibung}
   \\ \hline
-  ResourceManager & Dieser Manager ist für die Verwaltung von Ressourcen zuständig. Dazu zählen XXX\\
-  
+  \textit{ResourceManager} & Derzeit findet im Betriebssystem keine erweiterte Verwaltung von Ressourcen, respektive Dateien, Geräten usw. statt. Damit ist es grundsätzlich möglich, dass mehrere Prozesse dieselbe Ressource gleichzeitig verwenden und damit Konflikte und unerwartete Ergebnisse auftreten. Ein \textit{ResourceManager} würde hinsichtlich dieser Problematik die von einem Prozess verwendeten Ressourcen verwalten und ggf. den Zugriff durch andere Prozesse sperren.
+  \\
  \end{tabular}
  \caption{Übersicht der fehlenden Punkte}
  \label{table:missing-points}
