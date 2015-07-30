@@ -3,17 +3,17 @@
 	
 \section*{Kurzfassung}
 
-Diese Arbeit befasst sich mit der Entwicklung eines Embedded-Betriebssystems basierend auf der Hardware des Einplatinencomputers BeagleBone von Texas Instruments. Zielstellung der Arbeit ist es, ein voll funktionsfähiges Betriebssystem zu erstellen, mit welchem über eine Applikation Scheinwerfer über das DMX512-Kommunikationsprotokoll gesteuert werden können.\\  
+Diese Arbeit befasst sich mit der Entwicklung eines Embedded-Betriebssystems basierend auf der Hardware des Einplatinencomputers \textit{BeagleBone} von \textit{Texas Instruments}. Zielstellung der Arbeit ist es, ein voll funktionsfähiges Betriebssystem zu erstellen, mit welchem über eine Applikation Scheinwerfer über das DMX512-Kommunikationsprotokoll gesteuert werden können.\\  
  
 Zu Beginn werden die zu erfüllenden Anforderungen an das Betriebssystem vorgestellt. Es werden neben von den Betreuern vordefinierten Zielen auch eigene Ziele des Projektteams genannt. Danach wird der Leser mit der Hardware des Systems und mit den spezifischen Eigenschaften einiger Komponenten bekannt gemacht. \\ 
  
-Nach dem Projektmanagement wird im dritten Kapitel die Architektur des Betriebssystems als Schichtenmodell erläutert. Dies beinhaltet eine kurze Beschreibung des Kernels sowie der angedachten Abstraktion des Kernels. Dem Architekturentwurf folgt die Erstellung eines Hardware Abstraction Layer (HAL), welcher die Protabilität des Betriebssystems ermöglicht. \\ 
+Nach dem Projektmanagement wird im dritten Kapitel die Architektur des Betriebssystems als Schichtenmodell erläutert. Dies beinhaltet eine kurze Beschreibung des Kernels, sowie der angedachten Abstraktion des Kernels. Dem Architekturentwurf folgt die Erstellung eines \textit{Hardware Abstraction Layer} (HAL), welcher die Protabilität des Betriebssystems ermöglicht. \\ 
  
 Aufbauend auf die HAL wird das Treiberkonzept des Betriebssystem und die Verwendung des Device Managers präsentiert. Unter Prozessverwaltung werden die  Prozesszustände, deren Transitionen und die Eigenschaften des Schedulers aufgezeigt. \\ 
  
-Die Implementierung der virtuellen Speicherverwaltung stellt einen der Kernpunkte der Arbeit an diesem Betriebssystem dar. Zuerst wird die allgemeine Funktionsweise eines Tabellensystems und die Umwandlung von virtuellen in physikalische Adressen im ARM Cortex-A8 erklärt. Es folgen die Spezifikation des Speichermodells des Betriebssystems sowie die Vorstellung der Funktionsschnittstelle der Memory Management Unit (MMU). \\ 
+Die Implementierung der virtuellen Speicherverwaltung stellt einen der Kernpunkte der Arbeit an diesem Betriebssystem dar. Zuerst wird die allgemeine Funktionsweise eines Tabellensystems und die Umwandlung von virtuellen in physikalische Adressen des \textit{ARM Cortex-A8} erklärt. Es folgen die Spezifikation des Speichermodells des Betriebssystems sowie die Vorstellung der Funktionsschnittstelle der \textit{Memory Management Unit} (MMU). \\ 
  
-Die Interprozesskommunikation sowie die System API und die Funktionsweise der Systemcalls werden kurz umrissen. Sicherheitskritische Aspekte bezüglich des Nulladressenproblems und der sauberen Trennung von Prozess- und Kerneladressbereichen sowie der Benutzermodi werden ebenfalls behandelt. Im Anschluss wird die Benutzerapplikation disskutiert, welche die Steuerung von Scheinwerfern über das DMX512-Protokoll vornimmt. \\ 
+Die Interprozesskommunikation sowie die Systemschnittstelle und die Funktionsweise der \textit{System Calls} werden kurz umrissen. Sicherheitskritische Aspekte bezüglich des Nulladressenproblems und der sauberen Trennung von Prozess- und Kerneladressbereichen sowie der Benutzermodi werden ebenfalls behandelt. Im Anschluss wird die Benutzerapplikation diskutiert, welche die Steuerung von Scheinwerfern über das DMX512-Protokoll vornimmt. \\ 
  
 Abschließend werden die Resultate der Performanceauswertung des Betriebssystems sowie eine Zusammenfassung der Ergebnisse dieses Projektes vorgestellt. \\ 
 
