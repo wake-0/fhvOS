@@ -1,37 +1,38 @@
 \section{Sicherheitsaspekte}
 \label{chapSecurity}
 
-Hinsichtlich der Sicherheit werden an das Betriebssystems die Anforderungen der strikten Trennung von Prozessadressräumen und der Trennung von privilegierten und nichtprivilegierten Modi gestellt. Mögliche Sicherheitsrisiken und deren Vermeidung werden nachfolgend beschrieben.
-
- 
+Hinsichtlich der Sicherheit wurden an das Betriebssystems die Anforderungen der strikten Trennung von Prozessadressräumen und der Trennung von privilegierten und nichtprivilegierten Modi gestellt. Mögliche Sicherheitsrisiken und deren Vermeidung werden nachfolgend beschrieben.
 
 \subsection{Sicherheitsrisiken}
 
-Aufschluss über mögliche Sicherheitsrisiken ergibt eine nähere Betrachung des Speichermodells in Abbildung \ref{fig:MemoryMap}. Wie die Abbildung zeigt, beginnt im virtuellen Speicher der Adressbereich für Prozesse ab der Adresse 0x00000000. Gleichzeitig befindet sich die Startadresse für die ROM exception vector table an der Adresse 0x00020000. Durch diese Gegebenheiten bestehen zwei grundsätzliche Sicherheitsrisiken:
+Aufschluss über mögliche Sicherheitsrisiken ergibt eine nähere Betrachung des Speichermodells in Abbildung \ref{fig:MemoryMap}. Wie die Abbildung zeigt, beginnt im virtuellen Speicher der Adressbereich für Prozesse ab der Adresse \texttt{0x00000000}. Gleichzeitig befindet sich die Startadresse für die \textit{ROM Exception Vector Table} an der Adresse \texttt{0x00020000}. Durch diese Gegebenheiten bestehen zwei grundsätzliche Sicherheitsrisiken:
 
 \begin{enumerate}
-	\item Nulladressenproblem: Adresse 0x00000000 ist im Regelfall reserviert für Nullpointer
-	\item Anfälligkeit für Hacking durch unsaubere Adressraumtrennung: ROM exception vector table muss bei dieser Konstellation in den page tables für Prozesse direkt, d.h. eins zu eins, gemappt sein
+	\item Nulladressenproblem: Adresse \texttt{0x00000000} ist im Regelfall reserviert für \textit{Nullpointer}.
+	\item Anfälligkeit für Hacking durch unsaubere Adressraumtrennung: Die \textit{ROM Exception Vector Table} muss bei dieser Konstellation in den \textit{Page Tables} für Prozesse direkt, d.h. eins-zu-eins, gemappt sein.
 \end{enumerate}
 
-Letzteres Sicherheitsrisiko bietet Hackern die Möglichkeit, durch sukzessives Erhöhen der angesprochenen Adresse vom User Mode in den System Mode zu gelangen. Damit wäre eine Hackeranwendung in der Lage, mit voller Befugnis auf die Hardware zuzugreifen und Programmteile des Kernels auszuführen.
+Letzteres Sicherheitsrisiko bietet Hackern die Möglichkeit, durch sukzessives Erhöhen der angesprochenen Adresse vom \textit{User Mode} in den \textit{System Mode} zu gelangen. Damit wäre eine Hackeranwendung in der Lage, mit voller Befugnis auf die Hardware zuzugreifen und Programmteile des Kernels auszuführen.
 
 Die Lösung für diese beiden Sicherheitsrisiken wird im Folgenden vorgestellt.
 
 \subsection{Vermeidung des Nulladressenproblems}
 
-Die Lösung des Nulladressenproblems kann mit relativ wenig Aufwand erreicht werden. In der Memory Region für den Prozessadressbereich wird die erste Page für alle Prozesse bereits beim Erstellen reserviert. Dadurch wird vermieden, dass bei einer Speicherallokation die Nulladresse oder eine non-aligned Adresse ausgegeben wird. Zusätzlich werden im DABT-Handler, der für die Einlagerung von Adressen von page frames in die page tables von Prozessen zuständig ist, diese nun nicht erlaubten Adressen abgefangen. Tritt aus welchem Grund auch immer eine Adresse aus dem Adressbereich der ersten page im DABT-Handler auf, wird der entsprechende Prozess gekillt und der nächste bereite Prozess zur Ausführung gebracht.
+Die Lösung des Nulladressenproblems kann mit relativ wenig Aufwand erreicht werden. In der \textit{Memory Region} für den Prozessadressbereich wird die erste \textit{Page} für alle Prozesse bereits beim Erstellen reserviert. Dadurch wird vermieden, dass bei einer Speicherallokation die Nulladresse oder eine \textit{non-aligned} Adresse ausgegeben wird. Zusätzlich werden im \textit{DABT-Handler}, der für die Einlagerung von Adressen von \textit{Page Frames} in die \textit{Page Tables} von Prozessen zuständig ist, diese nun nicht erlaubten Adressen abgefangen. Tritt aus welchem Grund auch immer eine Adresse aus dem Adressbereich der ersten \textit{Page} im \textit{DABT-Handler} auf, wird der entsprechende Prozess beendet und der nächste bereite Prozess zur Ausführung gebracht.
 
-\subsection{Implementierung der Hivecs}
+\subsection{Implementierung der \textit{High Vectors}}
 
-Das Problem der sauberen Trennung der Adressräume for Prozesse und für den Kernel sowie der sauberen Trennung der Benutzermodi wird durch die Implementierung der high vectors oder auch \emph{Hivecs} erreicht.
+Das Problem der sauberen Trennung der Adressräume für Prozesse und für den Kernel sowie der sauberen Trennung der Benutzermodi wird durch die Implementierung der \textit{High Vectors} oder auch \textit{Hivecs} erreicht.
 
-Die Implementierung der Hivecs versetzt die Basisadresse der Exceptions auf die Adresse 0xFFFF0000. Damit liegt die Basisadresse über der festgelegten Adressbereichsgrenze eindeutig im Kernelbereich, siehe dazu den physikalischen Bereich in Abbilung \ref{fig:MemoryMap}. Bei den \emph{low vecs} mussten bei der Erstellung eines jeden Prozesses die Adressen der exception vector table ab 0x00020000 bis 0x0002001C in die page table der Prozesse direkt gemappt werden. Bei den Hivecs werden die Adressen 0xFFFF0000 bis 0xFFFF001C in die Kernel master page table direkt gemappt. Damit ist ein Hackangriff durch eine Anwendung wie oben beschrieben nicht mehr möglich. Die Adressen 0x00000000 bis exklusive 0x40000000 stellen nun ausschließlich den Prozessbereich und die Adressen 0x40000000 bis 0xFFFFFFFF ausschließlich den Kernelbereich dar.
-Insgesamt müssen für die Implementierung der Hivecs folgende Schritte unternommen werden:
+Die Implementierung der \textit{Hivecs} versetzt die Basisadresse der Exceptions auf die Adresse \texttt{0xFFFF0000}. Damit liegt die Basisadresse über der festgelegten Adressbereichsgrenze eindeutig im Kernelbereich, siehe dazu den physikalischen Bereich in Abbilung \ref{fig:MemoryMap}. Bei den \textit{low vecs} mussten bei der Erstellung eines jeden Prozesses die Adressen der \textit{Exception Vector Table} ab \texttt{0x00020000} bis \texttt{0x0002001C} in die \textit{Page Table} der Prozesse direkt gemappt werden. Bei den \textit{Hivecs} werden die Adressen \texttt{0xFFFF0000} bis \texttt{0xFFFF001C} in die \textit{Kernel Master Page Table} direkt gemappt. Damit ist ein Hackangriff durch eine Anwendung wie oben beschrieben nicht mehr möglich. Die Adressen \texttt{0x00000000} bis exklusive \texttt{0x40000000} stellen nun ausschließlich den Prozessbereich und die Adressen \texttt{0x40000000} bis \texttt{0xFFFFFFFF} ausschließlich den Kernelbereich dar.
+Insgesamt müssen für die Implementierung der \textit{Hivecs} folgende Schritte unternommen werden:
 
 \begin{description}
-	\item[Laden der exception vecotrs]: Im Linker Script müssen die Startaddressen der RAM Exceptions (siehe \cite[S. 4100]{ARM:TRM}) an die Basisadresse 0xFFFF0000 gelegt werden
-	\item[Mappen der Hivecs]: Die Basisadresse der Hivecs muss in die Kernel master page table direkt gemapped werden
-	\item[Enablen der Hivecs]: Im System Control Register \textbf{SCTLR} muss das 13. Bit (V-bit) gesetzt werden \cite[S. 1164]{ARM:ARM} 
+	\item[Laden der \textit{Exception Vecotrs}]: Im \textit{Linker Script} müssen die Startaddressen der \textit{RAM Exceptions} (siehe \cite[S. 4100]{ARM:TRM}) an die Basisadresse \texttt{0xFFFF0000} gelegt werden
+	\item[Mappen der \textit{Hivecs}]: Die Basisadresse der \textit{Hivecs} muss in die \textit{Kernel Master Page Table} direkt gemapped werden
+	\item[Einschalten der \textit{Hivecs}]: Im \ac{SCTLR} muss das 13. Bit (V-bit) gesetzt werden \cite[S. 1164]{ARM:ARM} 
 \end{description}
+
+\subsection{Umgesetzte Sicherheitsaspekte}
+In der aktuellen Implementierung wurden die oben angeführten Sicherheitsaspekte vollumfänglich umgesetzt, allerdings wurde das Mapping der \textit{High Vectors}, aufgrund fehlender Testzeit, vorläufig deaktivert.
 \pagebreak 
