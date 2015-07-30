@@ -1,4 +1,5 @@
 \section{Treiber}
+\label{chapDriver}
 Die Treiber stellen eine abstrakte Schnittstelle auf den Hardware Abstraction Layer dar. Dadurch muss nicht mehr direkt auf die einzelnen Hardwarekomponenten zugegriffen werden. Ein wesentlicher Aspekt bei der Architektur der Treiber war Abstraktion. Dadurch wird gewährleistet, dass jeder Treiber über die selbe Schnittstelle angesprochen werden kann. Zudem ist die Verwaltung durch den Driver Manager erleichtert.
 
 \subsection{Allgemeiner Aufbau eines Treibers}
@@ -12,6 +13,7 @@ Jeder implementierte Treiber muss diese vorweisen können, ein Beispiel (LED Tre
 \lstinputlisting[language=C, caption=Implementierung der allgemeinen Treiberschnittstelle (LED Beispiel), captionpos=b, label=ledDriver]{chapters/driver/codefiles/ledDriver.c}
 
 \subsection{DriverManager}
+\label{secDriverManager}
 Der DriverManager hat die Aufgabe die Treiber zu initialisieren sowie diese dann nach außen hin anzubieten. In Listening \ref{driverManagerInterface} ist die Schnittstelle des DriverManagers dargestellt. Eine Implementierung dieser Schnittstelle für das LED Beispiel ist in Listening \ref{driverManagerImplementation} aufgezeigt. Für das Hinzufügen eines weiteren Treibers beim DriverManager, muss nur die \textit{DriverManagerInit} Funktion angepasst werden. D.h. es muss ein zusätzlicher Treiber mit den seinen zugehörigen Funktionspointern in das \textit{drivers} Array eingefügt werden.\footnote{Die Verwendung von \textit{malloc} ist hier nicht nötig und könnte durch eine nicht dynamische Allokierung ersetzt werden.}
 
 \lstinputlisting[language=C, caption=Allgemeine Schnittstelle des DriverManagers, captionpos=b, label=driverManagerInterface]{chapters/driver/codefiles/driverManager-interface.c}
