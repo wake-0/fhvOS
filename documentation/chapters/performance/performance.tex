@@ -1,8 +1,10 @@
 \section{Performanz}
 \label{Performanz}
 
+In diesem Kapitel werden Performanceaspekte des Betriebssystems disskutiert. Dazu wurden Messungen vorgenommen, deren Resultate nachfolgend präsentiert werden.
+
 \subsection{Messergebnisse}
-Es wurden einen Messungen der Performanz mit dem Oszilloskop durchgeführt. Die erhaltenen Messergebnisse sind in Tabelle XXX aufgelistet.
+Um die Performance des Betriebssystems beurteilen zu können, wurden zeitliche Messungen der wichtigsten Unterbrechungen vorgenommen. Diese Messungen wurden mit Hilfe eines Oszilloskops durchgeführt und sind in Tabelle \ref{table:osciResults} aufgelistet. Von Interesse sind speziell die beiden Fälle der Einlagerung eines page frame. \emph{MMU Fault State 5} stellt dabei den Fall der Erstellung einer Level2 page table samt Einlagerung einer page frame dar, \emph{MMU Page Fault 7} dagegen lediglich die bloße Einlagerung einer page frame in eine Level2 page table. Zusätzlich wurde der Kontextwechsel zwischen den Prozessen und die tatsächliche Dauer der Zeitscheibe untersucht. Die Ermittlung der Zeit erfolgte durch die arithmetische Mittelung von jeweils zehn Messversuchen.\\
 
 \begin{table}[H]
 \begin{tabular}{p{7cm} | p{7cm}}
@@ -14,7 +16,7 @@ Es wurden einen Messungen der Performanz mit dem Oszilloskop durchgeführt. Die 
   	Context Switch & $~375 \mu s$ \\
  \end{tabular}
  \caption{Performanz-Messergebnisse}
- \label{table:SpecifiedVirtualMemory}
+ \label{table:osciResults}
 \end{table}
 
 \pagebreak 
