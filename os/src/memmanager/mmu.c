@@ -312,8 +312,12 @@ int MMUInitProcess(process_t* process)
 		return MMU_NOT_OK;
 	}
 
+	// TODO: comment the following two lines out when using hivecs
+	// commenting these two lines out segregates the address spaces clearly
 	memoryRegionPointer_t region 	= MemoryManagerGetRegion(BOOT_ROM_EXCEPTIONS_REGION);
 	mmuMapDirectRegionToProcesPageTable(region, l1PageTable);
+
+
 	process->pageTableL1 = l1PageTable;
 	KernelDebug("Assigned l1pagetable for pid=%d is %x\n", process->id, l1PageTable);
 	return MMU_OK;
