@@ -47,7 +47,7 @@ Im folgenden wird eine kurze Erläuterung zu den einzelnen Komponenten der Abbil
 	\item[Driver Manager (Vgl. Kapitel \ref{secDriverManager})] \hfill \\
 	Der Driver Manager dient zum ansprechen der Treiber, welche vom Betriebssystem zur Verfügung gestellt werden. Sollte ein Treiber benötigt werden, muss dieser nicht erzeugt werden sondern kann über Driver Manager geholt werden. 
 	
-	\item[Device Manager (Vgl. Kapitel XXX)] \hfill \\
+	\item[Device Manager] \hfill \\
 	Der Device Manager dient wie bereits der Driver Manager zur Abstraktion der Treiber. D.h. eine Anwendung verwendet Geräte, welche vom Device Manager zur Verfügung gestellt werden. Ein Beispiel für Devices sind LEDs. Beim Ansprechen einer LED wird ein Treiber benötigt, ohne der Abstraktion auf Geräte müssten bei der Verwendung mehrerer LEDs auch mehrere LED Treiber geschrieben werden oder ein großer Treiber. Der Nachteil eines einzelnen Treibers ist, dass das Ansprechen einzelner LEDs viel Aufwand benötigt.
 	
 	\item[Kernel] \hfill \\
@@ -56,16 +56,16 @@ Im folgenden wird eine kurze Erläuterung zu den einzelnen Komponenten der Abbil
 	\item[Process Manager (Vgl. Kapitel \ref{chapProcess})] \hfill \\
 	Der Process Manager ist zuständig für das Starten und Stoppen (Killen) von Prozessen. Es besteht eine starke Kopplung zum Scheduler.
 	
-	\item[Scheduler (Vgl. Kapitel XXX)] \hfill \\
+	\item[Scheduler (Vgl. Kapitel \ref{secScheduler})] \hfill \\
 	Der Scheduler wechselt die Prozesse in fix definierten Zeitscheiben (10ms). Auch ist das Händeln der verschiedenen Zustände eines Prozesses Aufgabe vom Scheduler. Gültige Zustände sind: Ready, Running, Blocked, Sleeping und Free.
 	
 	\item[Memory Manager/MMU (Vgl. Kapitel \ref{chapVirtualMemory})] \hfill \\
 	Über den Memory Manager können freie Pages in der Prozessregion allokiert werden sowie die eine bestehende Region zurückgeliefert werden.
 
-	\item[File Manager (Vgl. Kapitel XXX)] \hfill \\
+	\item[File Manager] \hfill \\
 	Der File Manager dient zum Verarbeiten von dateiabhängigen Operationen. Auflisten der einzelnen Inhalte in einem Verzeichnis, Öffnen einer Datei, Setzen des aktuellen Verzeichnis, etc. sind die Hauptaufgaben dieses Managers.
 	
-	\item[Loader (Vgl. Kapitel XXX)] \hfill \\
+	\item[Loader] \hfill \\
 	Der Loader ist dafür zuständig ein existierendes Programm in die Prozessregion zu laden. D.h. der Loader ladet ein auszuführendes Programm in den Speicher, sodass dieses Programm als Prozess ausgeführt werden kann.
 	
 	\item[IPC Manager (Vgl. Kapitel \ref{chapIPC})] \hfill \\
@@ -77,7 +77,7 @@ Im folgenden wird eine kurze Erläuterung zu den einzelnen Komponenten der Abbil
 	\item[User Application (Vgl. Kapitel \ref{chapApp})] \hfill \\
 	Bei der User Application handelt es sich um das Ansprechen eines Moving Heads mittels DMX Protokoll. Vergleichbare Projekte wären das Ansprechen von Komponenten die zur Kommunikation KNX oder DALI verwenden.
 	
-	\item[High Level Driver (Vgl. Kapitel XXX)] \hfill \\
+	\item[High Level Driver] \hfill \\
 	Der High Level Driver ist ein Treiber, welcher dazu dient der eigentlichen BenutzerInnen Anwendung eine verbesserte Schnittstelle zur Verfügung zu stellen. Ansonsten müsste ein Entwickler/ eine Entwicklerin wissen, dass das DMX Protokoll durchgehend sendet, somit wäre in der eigentlichen Anwendung Logik implementiert, welche gar nicht hinein gehört bzw. davon abstrahiert gehört.
 \end{description}
 
