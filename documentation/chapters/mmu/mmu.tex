@@ -229,10 +229,13 @@ Die Bitsmap wird durch ein Array der Länge N/8 Bytes realisiert. N steht hier f
 
 \subsubsection{Allokation von Page Frames bei Data Abort Exception}
 
+Der Vorgang der Einlagerung von page frames durch den Data Abort (DABT) Handler ist in Abbildung \ref{fig:dabthandler} dargestellt. Zuerst werden aus dem \emph{Data Fault State Register} (DFAR) der Fehlerzustand und aus dem \emph{Data Fault Address Register} (DFAR) die zugegriffene virtuelle Adresse geladen. Eine Liste aller möglichen Fehlerzustände kann unter \cite[B3-1415]{ARM:ARM} eingesehen werden.
+
+Ohne Ausnahme wird bei alle Zustände außer den Zuständen 5 und 7 der jeweilige Prozess gekillt. Zustand 5 betrifft die Erstellung einer L2 page table und die Einlagerung eines page frame. Zustand 7 betrifft die bloße Einlagerung einer page frame. Die Einlagerung der page frame erfolgt dabei auf sehr ähnliche Weise wie in Listing \ref{codeMasterPageTableMapping} vorgenommen.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.7]{chapters/mmu/figures/DABTHandler}
+	\includegraphics[scale=0.75]{chapters/mmu/figures/DABTHandler}
 	\caption{Einlagerung von page frames duch den DABT-Handler}
 	\label{fig:dabthandler}
 \end{figure}
