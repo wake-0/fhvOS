@@ -52,10 +52,6 @@ Ist die angeforderte virtuelle Adresse nicht im TLB enthalten (TLB miss), wird e
 	\label{fig:2levelTableSystem}
 \end{figure}
 
-\vspace{2cm}
-\subsubsection{Einlagerungsvorgang und Data Abort Handler}
-DATA ABORT HANDLER BESCHREIBEN
-\vspace{2cm}
 
 \subsection{Umwandlung virtueller Adressen zu physikalische Adressen}
 
@@ -232,6 +228,15 @@ Die Bitsmap wird durch ein Array der Länge N/8 Bytes realisiert. N steht hier f
 \end{figure}
 
 \subsubsection{Allokation von Page Frames bei Data Abort Exception}
+
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.7]{chapters/mmu/figures/DABTHandler}
+	\caption{Einlagerung von page frames duch den DABT-Handler}
+	\label{fig:dabthandler}
+\end{figure}
+
 
 \subsection{Aktivieren der MMU}
 \label{subsect:activateMMU}
