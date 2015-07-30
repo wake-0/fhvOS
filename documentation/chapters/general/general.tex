@@ -1,24 +1,24 @@
 \section{Allgemein}
-Allgemeine Aspekte zum Betriebssystem werden in diesem Kapitel erläutert. Dazu zählen vorgegebene Anforderungen, eigene Anforderungen und das Ergebnis in Zusammenhang mit den zuvor definierten Anforderungen.
+In diesem Kapitel werden allgemeine Aspekte zum Betriebsystem erläutert. Dazu zählen insbesondere die durch das Studienprojekt definierten Anforderungen, zusätzlich durch die Studierenden gesetzte Anforderungen und die erreichten Ergebnisse hinsichtlich dieser Anforderungen.
 
 \subsection{Vorgegebene Anforderungen an das Betriebssystem}
-Eine Auflistung aller vorgegebenen Anforderungen an das Betriebssystem sind in Tabelle \ref{table:Prescribed-Requirements} angegeben.
+Eine Auflistung aller vorgegebenen Anforderungen, insbesondere funktionale Anforderungen, an das Betriebssystem sind in Tabelle \ref{table:Prescribed-Requirements} angegeben.
 
 \begin{table}[H]
 \begin{tabular}{ p{5cm}| p{9cm} }
   \textbf{Anforderung} & \textbf{Erklärung} \\ 
   \hline
-  Single-User & Das Betriebssystem muss zu jedem Zeitpunkt nur einen Benutzer bzw. eine Benutzerin händeln. \\
-  Lauffähige Anwendung & Auf dem Betriebssystem muss sich eine lauffähige Anwendung befinden. \\
-  Präemptives Multitasking & Das Betriebssystem kann gleichzeitig mehrere Prozesse ausführen.\\
-  Konsole & Es muss ein Konsole zur Kommunikation mit dem Betriebssystem geben. \\
-  Interprozess-Kommunikation & Das Betriebssystem muss Möglichkeit zu Kommunikation zwischen Prozessen zur Verfügung stellen. \\
-  Sicherheit & Es muss eine strikte Trennung zwischen User- und Systemmode vorhanden sein. \\
-  Robustheit & Das Betriebssystem darf von Programmabstürzen nicht beeinflusst werden. \\
-  Virtueller Speicher & Memory Management muss für größere Anwendungen vorhanden sein. \\
-  SD-Karte & Externe Anwendungen sollten von der SD-Karte geladen werden können. \\
-  Dateisystem & Das Betriebssystem muss ein Dateisystem (FAT oer FAT32) besitzen. \\
-  Portierbarkeit & Für eine Portierbarkeit des Systems muss ein HAL umgesetzt werden. \\
+  Single-User & Das Betriebssystem muss zu jedem Zeitpunkt nur eine Benutzerin bzw. einen Benutzer verwalten. \\
+  Lauffähige Anwendung & Auf dem Betriebssystem muss zumindest eine lauffähige Anwendung ausführbar sein. \\
+  Präemptives Multitasking & Das Betriebssystem muss gleichzeitig mehrere Prozesse ausführen können, wobei für jeden Prozess eine bestimmte Zeitscheibe vorgesehen ist.\\
+  Konsole & Es muss ein Konsole zum Absetzen von Befehlen vorhanden sein. \\
+  Interprozess-Kommunikation & Das Betriebssystem muss eine Möglichkeit zur Kommunikation zwischen Prozessen zur Verfügung stellen. \\
+  Sicherheit & Es muss eine strikte Trennung zwischen User- und Systemmodus vorhanden sein. \\
+  Robustheit & Das Betriebssystem, respektive dessen Stabilität, darf von Programmabstürzen nicht beeinflusst werden. \\
+  Virtueller Speicher & \textit{Memory Management} muss für größere Anwendungen vorhanden sein. \\
+  SD-Karte & Externe Anwendungen sollen von der SD-Karte nachgeladen werden können. \\
+  Dateisystem & Das Betriebssystem muss ein beliebiges Dateisystem verwalten können.\\
+  Portierbarkeit & Für eine Portierbarkeit des Systems muss ein \textit{Hardware Abstraction Layer} (HAL) umgesetzt werden. \\
   Integration von Geräten & Das Betriebssystem muss eine einfache Integration von verschiedenen Geräten gewährleisten. \\
   Performanztests & Es müssen Performanztests zur Leistungsfeststellung des Systems durchgeführt werden. \\  
  \end{tabular}
@@ -27,23 +27,24 @@ Eine Auflistung aller vorgegebenen Anforderungen an das Betriebssystem sind in T
 \end{table}
 
 \subsection{Eigene Anforderungen an das Betriebssystem}
-Eine Auflistung aller eigenen Anforderungen an das Betriebssystem sind in Tabelle \ref{table:Own-Requirements} angegeben.
+Zusätzlich zu den oben angeführten Anforderungen wurden weitere, nicht-funktionale Anforderungen an das Betriebssystem, durch die an der Entwicklung beteiligten Studierenden definiert. Eine Auflistung aller eigenen Anforderungen an das Betriebssystem sind in Tabelle \ref{table:Own-Requirements} angegeben.
 
 \begin{table}[H]
 \begin{tabular}{ p{5cm}| p{9cm} }
   \textbf{Anforderung} & \textbf{Erklärung} \\ 
   \hline
-  Hoher Abstraktionsgrad & Alle Komponenten sollten voneinander abstrahiert sein. \\
-  Intuitiver Aufbau & Die Komponenten des Betriebssystem sollten möglichst selbsterklärend sein. \\
-  Leichte Erweiterbarkeit & Laufende Erweiterungen sollten ohne große Veränderungen umgesetzt werden können. \\
-  Einfache Wartung & Das Betriebssystem sollte so Aufgebaut sein, dass eventuelle Ausbesserungen am Betriebssystem nur an einer dafür zuständigen Komponente vorgenommen werden müssen. \\
+  Hoher Abstraktionsgrad & Alle Komponenten des Betriebssystems sollen einen hohen Abstraktionsgrad aufweisen. \\
+  Intuitiver Aufbau & Die Komponenten des Betriebssystem sollen eine intuitive Programmierschnittstelle aufweisen. \\
+  Leichte Erweiterbarkeit & Mögliche Erweiterungen sollen ohne große Veränderungen an der Architektur umgesetzt werden können. \\
+  Einfache Wartung & Das Betriebssystem soll eine einfache Wartbarkeit hinsichtlich Fehlern aufweisen. \\
  \end{tabular}
  \caption{Vorgegebene Anforderungen}
  \label{table:Own-Requirements}
 \end{table}
 
-\subsection{Resultat des Betriebssystems}
-Im Allgemeinen wurden alle zuvor erwähnten Anforderungen an das Betriebssystem erfüllt. Einzelne Verbesserungs- bzw. Erweiterungsvorschläge können aus Kapitel \ref{Ausblick} - Ausblick entnommen werden. \\
-Stabilitätstests, welche während dem Projekt durchgeführt wurden, haben aufgezeigt, dass das System über zwölf Stunden fehlerlos durchläuft.
+\subsection{Erfüllung der Anforderungen}
+Im Allgemeinen wurden alle zuvor erwähnten funktionalen Anforderungen an das Betriebssystem erfüllt. Einzelne Verbesserungs- bzw. Erweiterungsmöglichkeiten können aus Kapitel \ref{Ausblick} werden. \\
+Die Performanz des Betriebssystems wurde in Kapitel \ref{Performanz} dokumentiert.
+Hinsichtlich der Stabilität wurden keine konkreten Experimente durchgeführt, allerdings haben verschiedene Benutzungstests gezeigt, dass das Betriebssystem über mehrere Stunden ohne Abstürze lauffähig ist.
 
 \pagebreak 
