@@ -122,9 +122,12 @@ contextId: .field currentContextIdRegisterValue, 32
 ; see p. B4-1711, accessing SCTLR register
 MMUEnable:
     STMFD	SP!, {R0}
+    MOV 	R0, #0
 	MRC 	p15, #0, R0, C1, C0, #0
 	; add SCTLR_ICACHE | SCTLR_DCACHE | SCTLR_PREDICT | SCTLR_MMUEN = 0x1805
 	ORR 	R0, R0, #1
+	; comment in for hivecs
+	; ORR	R0, R0, #0x2000			; turns on hivecs, bit 13 (V)
     DSB
 	MCR		p15, #0, R0, C1, C0, #0
 	ISB
