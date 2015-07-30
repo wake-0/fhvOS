@@ -1,33 +1,32 @@
 \section{Architektur}
 \label{chapArch}
-Die Architektur beschreibt den allgemeinen Aufbau des Betriebssystems. Eine genaue Beschreibung zu den einzelnen Teilen sind in weiteren Kapiteln in diesem Dokument enthalten.
+Dieses Kapitel beschreibt die entwickelte Architektur des Betriebssystems und gibt einen groben Überblick über die einzelnen Komponenten. Detailliertere Informationen zu den einzelnen Komponenten werden in den folgenden Kapiteln beschrieben.
 
 \subsection{Art des Kernels}
-Das Betriebssystem ist ein Monolithischer Kernel. Darunter versteht man einen Kernel, welcher neben Funktionen für Speicherverwaltung, Prozessverwaltung und Kommunikation zwischen Prozessen auch Treiber sowie weitere Komponenten (z.B. Dateisystem) enthält. Durch das Beinhalten dieser Komponenten hat der Monolithische Kernel einen Geschwindigkeitsvorteil gegenüber einem Mikrokernel (Vgl. XXX).
-%https://de.wikipedia.org/wiki/Monolithischer_Kernel  
-Ein weiterer Grund für einen Monolithischen Kernel ist das entfallen der aufwändigen Kommunikationen zwischen den verschiedenen Komponenten des Betriebssystems.
+Das Betriebssystem wurde als Monolithischer Kernel umgesetzt, respektive wurden die Speicherverwaltung, Prozessverwaltung, Treiber und andere Kernelkomponenten in einem einzelnen Kernelprozess implementiert. Durch die Zusammenführung dieser Komponenten verliert das Betriebssystem zwar die Eigenschaft, nach einem Absturz einer einzelnen Komponente weiter lauffähig zu sein, allerdings darf mit diesem Konzept durchaus von einer höheren Performanz ausgegangen werden.
+Ein weiterer Grund für einen Monolithischen Kernel ist das entfallen der aufwändigen Kommunikationen zwischen den verschiedenen Komponenten des Betriebssystems, welche besonders in der Anfangsphase der Entwicklungsarbeiten zu Problemen führen kann.
 
 \subsection{Ansatz für die Abstraktionen im Betriebssystem}
-Um eine möglichst gute Abstraktionen im Betriebssystem zu gewährleisten werden Manager für die einzelnen Komponenten verwendet. Eine Übersicht der einzelnen Manager sowie eine bzw. mehrere zugehörige Funktionen, zum besseren Verständnis, ist in Tabelle \ref{table:Manager-function} gegeben. Eine kurze Beschreibung zu den einzelnen Managern ist unter \ref{section:generalArchitecture} gegeben.
+Um eine möglichst gute Abstraktionen der Betriebssystem-Implementierung zu gewährleisten, wurden für die Verwaltung einzelner Kernelkomponenten \textit{Manager} verwendet. Im Allgemeinen gilt, dass die einzelnen \textit{Manager} jeweils die Schnittstelle für eine Komponente darstellen. Die Kommunikation zwischen zwei Komponenten erfolgt ausschließlich über die bereitgestellte Schnittstelle des \textit{Managers}. Eine Übersicht der einzelnen \textit{Manager} sowie eine bzw. mehrere zugehörige Funktionen, ist in Tabelle \ref{table:Manager-function} angegeben.
 
 \begin{table}[H]
 \begin{tabular}{p{4cm} | p{9cm}}
   \textbf{Managername} & \textbf{Beispiel Funktion(en)} \\ 
   \hline
-  DeviceManager & InitDevice, OpenDevice, ReadDevice \\
-  DriverManager & GetDriver \\
-  FileManager & ListDirectoryContent, OpenFile, OpenExecutable \\
-  MemManager & GetFreePagesInProcessRegion, GetRegion \\
-  ProcessManager & StartProcess, KillProcess, ListProcesses \\
-  IpcManager & RegisterNamespace, SendMessage, HasMessage \\
+  \textit{DeviceManager} & \texttt{InitDevice}, \texttt{OpenDevice}, \texttt{ReadDevice} \\
+  \textit{DriverManager} & \texttt{GetDriver} \\
+  \textit{FileManager} & \texttt{OpenFile}, \texttt{OpenExecutable} \\
+  \textit{MemManager} & \texttt{GetFreePagesInProcessRegion}, \texttt{GetRegion} \\
+  \textit{ProcessManager} & \texttt{StartProcess}, \texttt{KillProcess} \\
+  \textit{IpcManager} & \texttt{RegisterNamespace}, \texttt{SendMessage} \\
  \end{tabular}
- \caption{Übersicht der Manager mit zugehöriger Funktion}
+ \caption{Übersicht der Manager mit beispielhaften Funktionen}
  \label{table:Manager-function}
 \end{table}
 
 \subsection{Allgemeiner Aufbau der Architektur}
 \label{section:generalArchitecture}
-In Abbildung \ref{fig:general-Architecture} ist der allgemeine Aufbau mit den wesentlichen Teilen der Architektur ersichtlich. 
+In Abbildung \ref{fig:general-Architecture} ist der allgemeine Aufbau mit den wesentlichen Kernelkomponenten ersichtlich. Zusätzlich zu den einzelnen Komponenten ist ebenfalls der Informationsfluss dargestellt.
 
 \begin{figure}[H]
 	\includegraphics[scale=0.9]{chapters/architecture/figures/architecture}
@@ -35,50 +34,50 @@ In Abbildung \ref{fig:general-Architecture} ist der allgemeine Aufbau mit den we
 	\label{fig:general-Architecture}
 \end{figure}
 
-Im folgenden wird eine kurze Erläuterung zu den einzelnen Komponenten der Abbildung \ref{fig:general-Architecture} gegeben. Für eine genauere Beschreibung wird auf die einzelnen Kapitel verwiesen. \\
+Die oben angeführten Komponenten und deren Verantwortlichkeiten sind im Folgenden grob beschrieben: \\
 
 \begin{description}
-	\item[Hardware Abstraction Layer (HAL) (Vgl. Kapitel \ref{chapHAL})] \hfill \\
-	Der Hardware Abstraction Layer wird, wie der Name bereits beschreibt, zur Abstraktion der Hardware vom eigentlichen Betriebssystem verwendet.
+	\item[Hardware Abstraction Layer (HAL)] \hfill \\
+	Der \ac{HAL} abstrahiert sämtlichen Hardwarezugriff des Betriebssystems und erlaubt so eine einfache Portierbarkeit auf andere Plattformen. Der Aufbau des \ac{HAL} wird in Kapitel \ref{chapHAL} beschrieben.
 	
-	\item[Driver (Vgl. Kapitel \ref{chapDriver})] \hfill \\
-	Ein Treiber ist eine abstrakte Schnittstelle zu der Hardware, sodass kein direkter Zugriff auf die HAL benötigt wird.
+	\item[Driver] \hfill \\
+	Ein Treiber bietet eine abstrakte Schnittstelle zur jeweiligen Hardware, respektive implementiert dieser die konkrete Ansteuerung. Der Aufbau der Treiber ist in Kapitel \ref{chapDriver} dokumentiert. 
 	
-	\item[Driver Manager (Vgl. Kapitel \ref{secDriverManager})] \hfill \\
-	Der Driver Manager dient zum ansprechen der Treiber, welche vom Betriebssystem zur Verfügung gestellt werden. Sollte ein Treiber benötigt werden, muss dieser nicht erzeugt werden sondern kann über Driver Manager geholt werden. 
+	\item[\textit{DriverManager}] \hfill \\
+	Der \textit{DriverManager} dient zur Verwaltung der Treiber, welche vom Betriebssystem zur Verfügung gestellt werden. Sollte ein Treiber benötigt werden, kann über die Schnittstelle des \textit{DriverManagers} der Zugriff auf den Treiber erfolgen. Der detaillierte Aufbau des \textit{DriverManager} ist in Kapitel \ref{secDriverManager} erläutert.
 	
-	\item[Device Manager] \hfill \\
-	Der Device Manager dient wie bereits der Driver Manager zur Abstraktion der Treiber. D.h. eine Anwendung verwendet Geräte, welche vom Device Manager zur Verfügung gestellt werden. Ein Beispiel für Devices sind LEDs. Beim Ansprechen einer LED wird ein Treiber benötigt, ohne der Abstraktion auf Geräte müssten bei der Verwendung mehrerer LEDs auch mehrere LED Treiber geschrieben werden oder ein großer Treiber. Der Nachteil eines einzelnen Treibers ist, dass das Ansprechen einzelner LEDs viel Aufwand benötigt.
+	\item[\textit{DeviceManager}] \hfill \\
+	Der \textit{DeviceManager} ist eine weitere Abstraktion zur Verwaltung von Treibern, respektive einzelnen Geräten. So sind beispielsweise auf Treiberebene alle vier Board-LEDs als identisch anzusehen, allerdings stellen sie auf Geräteebene jeweils vier unterschiedliche Geräte dar, welche aber vom selben Treiber angesprochen werden können.
 	
 	\item[Kernel] \hfill \\
-	Der Kernel ist der Kern des Betriebssystems und enthält das Starten aller Prozesse und Managern. Dazu zählen: Konsole, Device Manager, Driver Manager, Process Manager, File Manager, IPC Manager, etc.
+	Der Kernel weist die Verantwortlichkeit für das Starten der einzelnen Komponenten auf und stellt grundlegende Funktionsschnittstellen für die einzelnen Komponenten zur Verfügung. Beispielsweise werden sämtliche Fehler oder Ausgaben von Kernelkomponenten an den Kernel selbst propagiert.
 	
-	\item[Process Manager (Vgl. Kapitel \ref{chapProcess})] \hfill \\
-	Der Process Manager ist zuständig für das Starten und Stoppen (Killen) von Prozessen. Es besteht eine starke Kopplung zum Scheduler.
+	\item[\textit{ProcessManager}] \hfill \\
+	Der \textit{ProcessManager} stellt eine Schnittstelle für den Zugriff auf Prozesse zur Verfügung. Weiters verwaltet der \textit{ProcessManager} Meta-Daten zu den einzelnen Prozessen, wie Prozessname, Startzeit usw. Implementierungsdetails zum \textit{ProcessManager} werden in Kapitel \ref{chapProcess} beschrieben.
 	
-	\item[Scheduler (Vgl. Kapitel \ref{secScheduler})] \hfill \\
-	Der Scheduler wechselt die Prozesse in fix definierten Zeitscheiben (10ms). Auch ist das Händeln der verschiedenen Zustände eines Prozesses Aufgabe vom Scheduler. Gültige Zustände sind: Ready, Running, Blocked, Sleeping und Free.
+	\item[\textit{Scheduler}] \hfill \\
+	Der \textit{Scheduler} verwaltet die Prozesse auf einer abstrakten Ebene, respektive hinsichtlich ihrer Zustände, ihres Kontexts usw. Weiters ist der \textit{Scheduler}für die Umsetzung des präemptiven Multi-Taskings verantwortlich. Die konkrete Implementierung ist in Kapitel \ref{secScheduler} beschrieben.
 	
-	\item[Memory Manager/MMU (Vgl. Kapitel \ref{chapVirtualMemory})] \hfill \\
-	Über den Memory Manager können freie Pages in der Prozessregion allokiert werden sowie die eine bestehende Region zurückgeliefert werden.
+	\item[\textit{MemoryManager}/\ac{MMU}] \hfill \\
+	Der \textit{MemoryManager} stellt die Schnittstelle zum virtuellen Speichermanagement zur Verfügung. Diese Komponente übernimmt ebenfalls die Verwantwortlichkeit für die Verwaltung des virtuellen und physischen Speichers. Der \textit{MemoryManager} bzw. das Speichermanagement im Allgemeinen ist im Kapitel \ref{chapVirtualMemory} beschrieben.
 
-	\item[File Manager] \hfill \\
-	Der File Manager dient zum Verarbeiten von dateiabhängigen Operationen. Auflisten der einzelnen Inhalte in einem Verzeichnis, Öffnen einer Datei, Setzen des aktuellen Verzeichnis, etc. sind die Hauptaufgaben dieses Managers.
+	\item[\textit{FileManager}] \hfill \\
+	Der \textit{FileManager} stellt die Schnittstelle zum Zugriff auf das Dateisystem, respektive Dateien und Ordner zur Verfügung. Der \textit{FileManager} verwaltet ebenfalls die \ac{CWD} des Benutzers bzw. der Benutzerin.
 	
-	\item[Loader] \hfill \\
-	Der Loader ist dafür zuständig ein existierendes Programm in die Prozessregion zu laden. D.h. der Loader ladet ein auszuführendes Programm in den Speicher, sodass dieses Programm als Prozess ausgeführt werden kann.
+	\item[\textit{Loader}] \hfill \\
+	Der \textit{Loader} ist für das Laden von Anwendungen verantwortlich, respektive lädt der \textit{Loader} eine Anwendung von einem externen Speichermedium in den Arbeitsspeicher, sodass dieser als Prozess ausgeführt werden kann.
 	
-	\item[IPC Manager (Vgl. Kapitel \ref{chapIPC})] \hfill \\
-	Der IPC Manager ist für die Kommunikation zwischen verschiedenen User-Anwendungen zuständig.
+	\item[\textit{IPCManager}] \hfill \\
+	Der \textit{IPCManager} ist für die Kommunikation zwischen verschiedenen User-Anwendungen zuständig. Die Dokumentation der Interprozesskommunikation ist in Kapitel \ref{chapIPC} festgehalten.
 	
-	\item[System API (Vgl. Kapitel \ref{chapAPI})] \hfill \\
-	Die System API stellt eine Schnittstelle für den Anwendungsentwickler/ die Anwendungsentwicklerin zur Verfügung. Dadurch sind die Betriebssystem Funktionen von der Anwendung entkoppelt. Es werden von der Anwendung nur System API Funktionen aufgerufen und keine System Funktionen. Dies führt zu einer höheren Sicherheit des Systems sowie zu einem einfacheren Implementieren von Endanwendungen.
+	\item[System-API] \hfill \\
+	Die System-API stellt eine Schnittstelle zum Betriebssystem für Anwendungen zur Verfügung. Hierdurch sind die Betriebssystemfunktionen von der Anwendung selbst entkoppelt. Dies erlaubt einen sicheren Zugriff auf Geräte und Ressourcen. Die System-API ist in Kapitel \ref{chapAPI} beschrieben.
 	
-	\item[User Application (Vgl. Kapitel \ref{chapApp})] \hfill \\
-	Bei der User Application handelt es sich um das Ansprechen eines Moving Heads mittels DMX Protokoll. Vergleichbare Projekte wären das Ansprechen von Komponenten die zur Kommunikation KNX oder DALI verwenden.
+	\item[\textit{User Application}] \hfill \\
+	\textit{User Applications} (dt. Anwendung) sind Prozesse welche von einem externen Speichermedium geladen werden. Diese können mittels Interprozesskommunikation mit anderen Anwendungen oder mittels der System-API mit anderen Komponenten kommunizieren. Im Kapitel \ref{chapApp} ist eine konkrete Implementierung einer Anwendung dokumentiert.
 	
-	\item[High Level Driver] \hfill \\
-	Der High Level Driver ist ein Treiber, welcher dazu dient der eigentlichen BenutzerInnen Anwendung eine verbesserte Schnittstelle zur Verfügung zu stellen. Ansonsten müsste ein Entwickler/ eine Entwicklerin wissen, dass das DMX Protokoll durchgehend sendet, somit wäre in der eigentlichen Anwendung Logik implementiert, welche gar nicht hinein gehört bzw. davon abstrahiert gehört.
+	\item[\textit{High Level Driver}] \hfill \\
+	\textit{High Level Driver} sind Treiber, welche einer Anwendung eine breitere Schnittstelle als Kernel-interne Treiber anbieten und unter anderem auch erweiterte Funktionen implementieren. Beispielswiese wird durch den \textit{High Level Driver} für das Ansteuern eines \textit{Moving Heads} über das \ac{DMX}-Protokoll das zyklische Senden des aktuellen Zustands realisiert. 
 \end{description}
 
 \pagebreak 
