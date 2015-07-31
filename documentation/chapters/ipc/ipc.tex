@@ -1,13 +1,20 @@
 \section{Interprozesskommunikation}
 \label{chapIPC}
-Interprozesskommunikation dient zur Kommunikation zwischen verschiedenen Prozessen. Dabei ist entscheidend, dass beiden zu kommunizierenden Prozesse in unterschiedlichen Speicherbereichen bzw. in strikt voneinander getrennten Speicherbereichen sind. 
+Die Interprozesskommunikation dient zur Kommunikation zwischen verschiedenen Prozessen. Dabei ist zu berücksichtigen, dass sich die jeweiligen Prozesse in unterschiedlichen Speicherbereichen befinden und damit keinen gemeinsamen Adressraum teilen. Die Interprozesskommunikation erfolgt deshalb grundsätzlich über die in Kapitel \ref{chapAPI} beschriebene System-API. Innerhalb des Kernels ist allerdings die Komponente \textit{IpcManager} für die Verwaltung der Interprozesskommunikation verantwortlich. Im Folgenden wird der Aufbau und das Konzept der Interprozesskommunikation vorgestellt.
 
 \subsection{Aufbau}
-bla
+Die Interprozesskommunikation im Betriebssystem richtet sich nach dem Konzept des in \textit{Linux} implementierten \textit{D-Bus}. Grundlegendes Konstrukt der Interprozesskommunikation stellt ein sogenannter \textit{Namespace} dar, welcher erlaubt an selbst definierte Namen Nachrichten zu senden, respektive zu empfangen. \textit{Namespaces} können von Prozessen zu einem beliebigen Zeitpunkt und in beliebiger Anzahl geöffnet und wieder geschlossen werden. Durch die Möglichkeit des multiplen Öffnens verschiedener \textit{Namespaces} und ohne die Möglichkeit zum Starten von \textit{Threads} kann das Empfangen der Nachrichten den empfangenden Prozess nicht blockieren.\\
+Das Verhindern des \textit{Hijacking} von \textit{Namespaces} durch andere Prozesse, wurde durch eine einfache Autorisierung, respektive dem Abgleich zwischen \textit{Namespace} und Prozess-ID, umgesetzt.
 
 \subsection{IpcManager}
-Der IpcManager händelt die Interprozesskommunikation zwischen Prozessen. Listening \ref{ipcManagerInterface} zeigt die Schnittstelle des Managers.
+Der \textit{IpcManager} ist zuständig für die Verwaltung der Interprozesskommunikation zwischen Prozessen. Listing \ref{ipcManagerInterface} zeigt die zugehörige Schnittstelle.\\
 
 \lstinputlisting[language=C, caption=Schnittstelle des IpcManagers, captionpos=b,  label=ipcManagerInterface]{chapters/ipc/codefiles/ipcmanager-interface.c}
+
+Die Verwendung der vom \textit{IpcManager} zur Verfügung gestellten Funktionen ist aus der beispielhaft gehaltenen Implementierung aus Listing \ref{ipcexample} ersichtlich.\\
+
+\lstinputlisting[language=C, caption=Verwendung des IpcManagers, captionpos=b,  label=ipcexample]{chapters/ipc/codefiles/ipc-example.c}
+
+
 
 \pagebreak 

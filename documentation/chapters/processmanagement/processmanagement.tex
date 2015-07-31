@@ -18,7 +18,7 @@ Im folgenden wird eine detaillierte Erklärung zu den einzelnen Zuständen aus A
 	Der Zustand \textit{Ready} tritt ein, wenn ein Prozess zur Ausführung bereit ist. Neu erstellte Prozesse befinden sich in jedem Fall im Zustand \textit{Ready}.
 	
 	\item[\textit{Running}] \hfill \\
-	Ein Prozess weist diesen Zustand auf, wenn er sich in Ausführung befindet, respektive der Prozessselbst die aktuelle Zeitscheibe in Anspruch nimmt.
+	Ein Prozess weist diesen Zustand auf, wenn er sich in Ausführung befindet, respektive der Prozess selbst die aktuelle Zeitscheibe in Anspruch nimmt.
 	
 	\item[\textit{Blocked}] \hfill \\
 	Ein Prozess weist den Zustand \textit{Blocked} auf, wenn dieser von der Ausführung durch ein bestimmtes Ereignis abgehalten wird, beispielsweise wartet der blockierte Prozess auf das Beenden eines anderen Prozesses.
@@ -41,7 +41,7 @@ Die Zeitscheibe von $10ms$ wurde auf Basis verschiedener Experimente gewählt un
 \label{secProcessManager}
 Der \textit{ProcessManager} ist eine dem \textit{Scheduler} übergeordnete Komponente, welche eine weitere Verwaltung der Prozesse realisiert. Der \textit{ProcessManager} fügt den abstrakten Eigenschaften der Prozesse des \textit{Schedulers} zusätzlich noch Meta-Informationen, wie Prozessname, Startzeit usw. hinzu. Der \textit{ProcessManager} stellt dabei die Schnittstelle für andere Kernelkomponenten zur Verfügung um Prozesse zu starten und zu beenden.\\
 
-Das Vorgehen bei der Prozessverwaltung wird im Sequenzdiagramm von Figure \ref{Sequencediagram} dargestellt. Ein Client übergibt dem \textit{ProcessManager} die Aufgabe einen Prozess zu erzeugen. Dieser delegiert das Erzeugen des Prozesses an den Scheduler weiter. Hierbei ist zu beachten, dass die Meta-Informationen vom \textit{ProcessManager} nicht weitergegeben werden. Der Scheduler speichert sich diesen neuen Prozess in seiner Prozesstabelle ab. Der \textit{MemoryManager} allokiert nun den vom Prozess benötigtem Speicherplatz. Der erzeugte Prozess wird an den \textit{ProcessManager} zurückgegeben. Dem Client wird nun der Erfolg der Prozesserstellung mitgeteilt, respektive wird diesem die erzeute Prozess-ID zurück geliefert.
+Das Vorgehen bei der Prozessverwaltung wird im Sequenzdiagramm von Figure \ref{fig:Sequencediagram} dargestellt. Ein Client übergibt dem \textit{ProcessManager} die Aufgabe einen Prozess zu erzeugen. Dieser delegiert das Erzeugen des Prozesses an den Scheduler weiter. Hierbei ist zu beachten, dass die Meta-Informationen vom \textit{ProcessManager} nicht weitergegeben werden. Der Scheduler speichert sich diesen neuen Prozess in seiner Prozesstabelle ab. Der \textit{MemoryManager} allokiert nun den vom Prozess benötigtem Speicherplatz. Der erzeugte Prozess wird an den \textit{ProcessManager} zurückgegeben. Dem Client wird nun der Erfolg der Prozesserstellung mitgeteilt, respektive wird diesem die erzeugte Prozess-ID zurück geliefert.
 
 \begin{figure}[H]
 	\includegraphics[scale=0.70]{chapters/processmanagement/figures/processmanagement-sequence-diagram}

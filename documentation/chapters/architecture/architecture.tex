@@ -56,10 +56,10 @@ Die oben angeführten Komponenten und deren Verantwortlichkeiten sind im Folgend
 	Der \textit{ProcessManager} stellt eine Schnittstelle für den Zugriff auf Prozesse zur Verfügung. Weiters verwaltet der \textit{ProcessManager} Meta-Daten zu den einzelnen Prozessen, wie Prozessname, Startzeit usw. Implementierungsdetails zum \textit{ProcessManager} werden in Kapitel \ref{secProcessManager} beschrieben.
 	
 	\item[\textit{Scheduler}] \hfill \\
-	Der \textit{Scheduler} verwaltet die Prozesse auf einer abstrakten Ebene, respektive hinsichtlich ihrer Zustände, ihres Kontexts usw. Weiters ist der \textit{Scheduler}für die Umsetzung des präemptiven Multi-Taskings verantwortlich. Die konkrete Implementierung ist in Kapitel \ref{secScheduler} beschrieben.
+	Der \textit{Scheduler} verwaltet die Prozesse auf einer abstrakten Ebene, respektive hinsichtlich ihrer Zustände, ihres Kontexts usw. Weiters ist der \textit{Scheduler} für die Umsetzung des präemptiven Multi-Taskings verantwortlich. Die konkrete Implementierung ist in Kapitel \ref{secScheduler} beschrieben.
 	
 	\item[\textit{MemoryManager}/\ac{MMU}] \hfill \\
-	Der \textit{MemoryManager} stellt die Schnittstelle zum virtuellen Speichermanagement zur Verfügung. Diese Komponente übernimmt ebenfalls die Verwantwortlichkeit für die Verwaltung des virtuellen und physischen Speichers. Der \textit{MemoryManager} bzw. das Speichermanagement im Allgemeinen ist im Kapitel \ref{chapVirtualMemory} beschrieben.
+	Der \textit{MemoryManager} stellt die Schnittstelle zum virtuellen Speichermanagement zur Verfügung. Diese Komponente übernimmt ebenfalls die Verwantwortlichkeit für die Verwaltung des virtuellen und physischen Speichers. Der \textit{MemoryManager} bzw. das Speichermanagement im Allgemeinen ist in Kapitel \ref{chapVirtualMemory} beschrieben.
 
 	\item[\textit{FileManager}] \hfill \\
 	Der \textit{FileManager} stellt die Schnittstelle zum Zugriff auf das Dateisystem, respektive Dateien und Ordner zur Verfügung. Der \textit{FileManager} verwaltet ebenfalls die \ac{CWD} des Benutzers bzw. der Benutzerin.
@@ -74,10 +74,10 @@ Die oben angeführten Komponenten und deren Verantwortlichkeiten sind im Folgend
 	Die System-API stellt eine Schnittstelle zum Betriebssystem für Anwendungen zur Verfügung. Hierdurch sind die Betriebssystemfunktionen von der Anwendung selbst entkoppelt. Dies erlaubt einen sicheren Zugriff auf Geräte und Ressourcen. Die System-API ist in Kapitel \ref{chapAPI} beschrieben.
 	
 	\item[\textit{User Application}] \hfill \\
-	\textit{User Applications} (dt. Anwendung) sind Prozesse welche von einem externen Speichermedium geladen werden. Diese können mittels Interprozesskommunikation mit anderen Anwendungen oder mittels der System-API mit anderen Komponenten kommunizieren. Im Kapitel \ref{chapApp} ist eine konkrete Implementierung einer Anwendung dokumentiert.
+	\textit{User Applications} (dt. Anwendung) sind Prozesse welche von einem externen Speichermedium geladen werden. Diese können mittels Interprozesskommunikation mit anderen Anwendungen oder mittels der System-API mit anderen Komponenten kommunizieren. In Kapitel \ref{chapApp} sind die implementierten Anwendungen dokumentiert.
 	
 	\item[\textit{High Level Driver}] \hfill \\
-	\textit{High Level Driver} sind Treiber, welche einer Anwendung eine breitere Schnittstelle als Kernel-interne Treiber anbieten und unter anderem auch erweiterte Funktionen implementieren. Beispielswiese wird durch den \textit{High Level Driver} für das Ansteuern eines \textit{Moving Heads} über das \ac{DMX}-Protokoll das zyklische Senden des aktuellen Zustands realisiert. 
+	\textit{High Level Driver} sind Treiber, welche einer Anwendung eine breitere Schnittstelle als Kernel-interne Treiber anbieten und unter anderem auch erweiterte Funktionen implementieren. Beispielswiese wird durch den \textit{High Level Driver} für das Ansteuern eines \textit{Moving Heads} über das \ac{DMX}-Protokoll das zyklische Senden des aktuellen Zustands realisiert. Die Kommunikation zu einem \textit{High Level Driver} erfolgt ebenfalls mittels Interprozesskommunikation. 
 \end{description}
 
 \pagebreak 

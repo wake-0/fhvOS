@@ -22,7 +22,7 @@ Die im \ac{HAL} implementierten Interruptfunktionalitäten dienen als Grundlage 
 Die Verarbeitungsprozedur sowohl von IRQs als auch von FIQs zeigt Abbildung \ref{fig:interruptProcedure}. Im Betriebssystem codiert sind die Behandlungsschritte 5 (Ablegen des aktuellen Kontextes auf den Stack), 6 (Aufruf des zugewiesenen Interrupthandlers), 7 (Erlauben neuer Interruptauftritte) und 8 (Wiederherstellung des ursprünglichen Kontextes vom Stack).\\
 
 Eine häufige Fehlerquelle stellt das versehentliche Weglassen von Schritt 7 dar. Das \textit{NEWIRQAGR} (new IRQ agreement) ist dafür zuständig dem System anzuzeigen, dass ein unbehandelter Interruptrequest vorliegt. Wird Schritt 7 ausgelassen, wird beim erstmaligen Auftritt eines Interrupts der Interrupthandler wie erwartet aufgerufen. Nach dem Abarbeiten des Interrupthandlers wird die Programmausführung aber sofort wieder in den Interrupthandler springen, da das NEWIRQAGR nicht zurückgesetzt wurde und einen nicht behandelten Request anzeigt. Um dieses Problem zu umgehen wurde die Funktion
-\texttt{InterruptAllowNew\-IrqGeneration} erstellt. Diese Funktion ist immer am Ende der eines behandleten Interrupts aufzurufen.
+\texttt{InterruptAllowNew\-IrqGeneration} erstellt. Diese Funktion ist immer am Funktionsende eines behandelten Interrupts aufzurufen.
 
 \begin{figure}[H]
 	\includegraphics[scale=1]{chapters/hal/figures/interruptProcedure}

@@ -20,7 +20,7 @@ Der \textit{DriverManager} ist verantwortlich für die Initialisierung und Verwa
 
 \lstinputlisting[language=C, caption=Allgemeine Schnittstelle des DriverManagers, captionpos=b, label=driverManagerInterface]{chapters/driver/codefiles/driverManager-interface.c}
 
-Eine Implementierung dieser Schnittstelle für den Treiber der \textit{Board LEDs} ist in Listing \ref{driverManagerImplementation} aufgezeigt. Für das Hinzufügen eines weiteren Treibers zum \textit{DriverManager} muss so nur die \texttt{DriverManagerInit}-Funktion angepasst werden, respektive muss ein zusätzlicher Treiber mit seinen zugehörigen Funktionspointern in das \texttt{drivers}-Array eingefügt werden. Es ist zum angeführten Listing anzumerken, dass die Verwendung von \texttt{malloc} hier nicht zwingend notwendig wäre und diese auch durch eine statische Allokierung implementiert werden kann.\\
+Eine Implementierung dieser Schnittstelle für den Treiber der \textit{Board LEDs} ist in Listing \ref{driverManagerImplementation} aufgezeigt. Für das Hinzufügen eines weiteren Treibers zum \textit{DriverManager} muss so nur die \texttt{DriverManagerInit}-Funktion angepasst werden, respektive muss ein zusätzlicher Treiber mit seinen zugehörigen Funktionspointern in das Array \texttt{drivers} eingefügt werden. Es ist zum angeführten Listing anzumerken, dass die Verwendung von \texttt{malloc} hier nicht zwingend notwendig wäre und diese auch durch eine statische Allokierung implementiert werden kann.\\
 
 \lstinputlisting[language=C, caption=Implementierung der DriverManager Schnittstelle für den LED Treiber, captionpos=b, label=driverManagerImplementation]{chapters/driver/codefiles/driverManager-implementation.c}
 

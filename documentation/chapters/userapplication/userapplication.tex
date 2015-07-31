@@ -1,17 +1,78 @@
-\section{BenutzerInnen-Anwendung}
+\section{Anwendungen}
 \label{chapApp}
+Für das Betriebssystem wurde eine Reihe von Anwendungen entwickelt, welche teilweise in das Betriebssystem kompiliert wurden, teilweise aber auch für das Starten von einem externen Speichermedium vorgesehen sind. Einige der implementierten Anwendung steuern einen \textit{Moving Head} über das \ac{DMX}-Protokoll. Im Folgenden werden die Anwendungen und teilweise Implementierungsdetails erläutert.
 
-Bei der BenutzerInnen-Anwendung handelt es sich um die Ansteuerung eines Moving Heads mittels  Digital Multiplex (DMX) Protokoll.  
+\subsection{Implementierte Anwendungen}
+Die folgende Tabelle \ref{table:apps} zeigt eine Auflistung der implementierten Anwendungen, welche in den Kernel kompiliert wurden und jeweils eine kurze Beschreibung.
 
-\subsection{Grundlegender Aufbau des DMX Protokolls}
-Es gibt mehrere verschiedene Spezifikationen für das DMX Protokoll. Im folgenden wird eine dieser unterschiedlichen Spezifikation erläutert und anschließend zu Vergleichszwecken verwendet. Abbildung \ref{fig:DMX-512-Protocol} dient zur Veranschaulichung des DMX-512 Protokolls. 
+\begin{table}[H]
+\begin{tabular}{p{4cm} | p{10cm}}
+  \textbf{Name} & \textbf{Beschreibung}
+  \\ \hline
+  \textit{hello} & Eine \textit{HelloWorld}-Applikation. Die Anwendung nimmt ebenfalls einen Parameter entgegen, welcher die Ausgabe beeinflußt
+  \\
+  \textit{cwd} & Ausgabe der aktuellen \ac{CWD}.
+  \\
+  \textit{more} & Ausgabe einer Textdatei.\newline
+  Verwendung: \texttt{more <filename>}
+  \\
+  \textit{cd} & Wechseln der aktuellen \ac{CWD}.\newline
+  Verwendung: \texttt{cd [.. | <directory>]}
+  \\
+  \textit{ps} & Ausgabe der aktuell laufenden Prozesse
+  \\
+  \textit{kill} & Forciertes Beenden eines Prozesses. \newline Verwendung: \texttt{kill <pid>}
+  \\
+  \textit{ping} & Demonstrationsanwendung für die Interprozesskommunikation (Empfänger). \newline Verwendung: \texttt{ping \&} (Für das Starten im Hintergrund)
+  \\
+  \textit{pong} & Demonstrationsanwendung für die Interprozesskommunikation (Sender). \newline Verwendung: \texttt{pong <message>}
+  \\
+  \textit{uptime} & Gibt die aktuelle Laufzeit des Betriebssystems in Millisekunden aus.
+  \\
+  \textit{dmx} & Demonstrationsanwendung für die Ansteuerung eines \textit{Moving Heads}.
+  \\
+  
+ \end{tabular}
+ \caption{Übersicht der implementierten Anwendungen}
+ \label{table:apps}
+\end{table}
+
+Tabelle \ref{table:extapps} zeigt eine Auflistung der Anwendungen, welche von einem externen Speichermedium gestartet werden können, sowie eine kurze Beschreibung.
+Für Anwendungen welche von einem externen Speichermedium gestartet werden gilt grundsätzlich, dass diese mit vollem Anwendungsnamen und Dateiendung, beispielsweise also \texttt{app.bin}, gestartet werden müssen. Liegen Anwendungen im Verzeichnis \texttt{/bin} können diese ohne Dateiendung gestartet werden, beispielsweise also \texttt{app}.
+
+\begin{table}[H]
+\begin{tabular}{p{4cm} | p{10cm}}
+  \textit{empty.bin} & Eine Anwendung ohne jegliche Ausgabe.\newline Verwendung: \texttt{empty.bin}
+  \\
+  \textit{nptest.bin} & Demonstriert die Abhandlung des Nulladressenproblems.\newline Verwendung: \texttt{nptest.bin}
+  \\
+  \textit{hellow~1.bin} & Eine erweiterte "Hallo, Welt"-Anwendung.\newline Verwendung: \texttt{hellow~1.bin [<name>]}
+    \\
+  \textit{dmxtest.bin} & Eine Demonstration der Ansteuerung von \textit{Moving Heads}.\newline Verwendung: \texttt{dmxtest.bin}
+    \\
+  \textit{echo} & Kommando zum Ausgeben eines beliebigen Texts. \newline Verwendung: \texttt{echo <param1> [<param2>, ...]}
+    \\
+  \textit{dd} & Ein \textit{High-Level}-Treiber für die Ansteuerung von \textit{Moving Heads}, welcher mehrere \textit{Namespaces} für die Interprozesskommunikation öffnet und Befehle abarbeitet. \newline Verwendung: \texttt{dd \&} (Zum Starten als Hintergrundprozess)
+  \\
+  \textit{ipcd} & Eine Hilfsanwendung für die Auflistung und das Ansprechen von Prozessen mittels Interprozesskommunikation. \newline Verwendung:\newline \texttt{ipcd -l} (Zum Ausgeben aller offenen \textit{Namespaces})
+  \newline \texttt{ipcd -s <channel> <string>} (Sendet den gegebenen Parameter an den \textit{Namespace})
+  \newline \texttt{ipcd -c <channel> <num> [<num>, ...]} (Sendet die gegebenen Parameter als Rohdaten zum gegebenen \textit{Namespace})
+  \\
+ \end{tabular}
+ \caption{Übersicht der implementierten externen Anwendungen}
+ \label{table:extapps}
+\end{table}
+
+
+\subsection{Implementierte \ac{DMX}-Anwendung}
+Im Allgemeinen gibt es mehrere verschiedene Spezifikationen für das \ac{DMX}-Protokoll. Im folgenden wird eine dieser unterschiedlichen Spezifikation erläutert und anschließend zu Vergleichszwecken verwendet. Abbildung \ref{fig:DMX-512-Protocol} dient zur Veranschaulichung des \ac{DMX}-512 Protokolls. Die hier ersichtliche Spezifikation wurde als Treiber für die \ac{DMX}-Anwendung implementiert.
 
 % http://mc.mikrocontroller.com/de/dmx512.php
 % TODO: add reference to this webside
 
 \begin{figure}[H]
-	\includegraphics[scale=0.60]{chapters/userapplication/figures/todo}
-	\caption{DMX Protokoll}
+	\includegraphics[scale=0.60]{chapters/userapplication/figures/dmxproto}
+	\caption{DMX Protokoll \cite{dmx}}
 	\label{fig:DMX-512-Protocol}
 \end{figure}
 
@@ -36,24 +97,24 @@ Tabelle \ref{table:DMX-512-Protocol} beschreibt die einzeln nummerierten Markier
  \label{table:DMX-512-Protocol}
 \end{table}
 
-Die Übertragungsgeschwindigkeit ist bei allen Protokollarten identisch und beträgt 250 kBaud, d.h. jedes Bit hat eine Dauer von 4 $\mu$ s. Das DMX Protokoll besitzt 512 verschiedene Kanäle, wobei jeder Kanal mithilfe eines Datenbytes gesteuert wird. In Abbildung \ref{fig:DMX-512-Protocol} ist ersichtlich, dass jedes übertragene Datenbyte zusätzlich ein Startbit sowie zwei Stopbits besitzt. Somit ergeben sich für jeden Kanal genau elf Bits.
+Die Übertragungsgeschwindigkeit ist bei allen Protokollarten identisch und beträgt $250kBaud$, d.h. jedes Bit hat eine Dauer von $4\mu s$. Das \ac{DMX}-Protokoll besitzt $512$ verschiedene Kanäle, wobei jeder Kanal mithilfe eines Datenbytes gesteuert wird. In Abbildung \ref{fig:DMX-512-Protocol} ist ersichtlich, dass jedes übertragene Datenbyte zusätzlich ein Startbit sowie zwei Stopbits besitzt. Somit ergeben sich für jeden Kanal genau elf Bits.\\
 
-\subsection{Messergebnisse des Implementierten DMX Protokolls}
-
+Die Implementierung des oben erläuterten Protokolls stellt sich teilweise als herausfordernd dar. In Abbildung \ref{fig:DMX-Edge} und Abbildung \ref{fig:DMX-Offset-Byte} sind jeweils zwei Messergebnisse ersichtlich, welche von den \ac{DMX}-Geräten nicht korrekt interpretiert werden konnten.\\
 \begin{figure}[H]
-	\includegraphics[scale=0.7]{chapters/userapplication/figures/DMX-Edge}
+	\includegraphics[scale=0.6]{chapters/userapplication/figures/DMX-Edge}
 	\caption{DMX Protokoll: Problem fallende Flanke}
 	\label{fig:DMX-Edge}
 \end{figure}
 
 \begin{figure}[H]
-	\includegraphics[scale=0.7]{chapters/userapplication/figures/DMX-Offset-Byte}
+	\includegraphics[scale=0.6]{chapters/userapplication/figures/DMX-Offset-Byte}
 	\caption{DMX Protokoll: Problem Offset Byte}
 	\label{fig:DMX-Offset-Byte}
 \end{figure}
 
+Abbildung \ref{fig:DMX} zeigt schließlich das Messergebnis des erfolgreich und funktionierenden \ac{DMX}-Protokolls.
 \begin{figure}[H]
-	\includegraphics[scale=0.7]{chapters/userapplication/figures/DMX}
+	\includegraphics[scale=0.6]{chapters/userapplication/figures/DMX}
 	\caption{Funktionierendes DMX Protokoll}
 	\label{fig:DMX}
 \end{figure}

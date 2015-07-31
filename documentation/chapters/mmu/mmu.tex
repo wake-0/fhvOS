@@ -1,6 +1,6 @@
 \section{Virtuelle Speicherverwaltung}
 \label{chapVirtualMemory}
-Bei der virtuellen Speicherverwaltung erfolgt die Umwandlung von vom ARM Prozessor generierten, virtuellen Adressen in physikalische Adressen durch die \ac{MMU}. Dieses Kapitel enthält die Beschreibung des Designs und der Implementierung der virtuellen Speicherverwaltung des Betriebssystems sowie der Einstellungen der \ac{MMU}.\\
+Bei der virtuellen Speicherverwaltung erfolgt die Umwandlung von vom \textit{ARM}-Prozessor generierten, virtuellen Adressen in physikalische Adressen durch die \ac{MMU}. Dieses Kapitel enthält die Beschreibung des Designs und der Implementierung der virtuellen Speicherverwaltung des Betriebssystems sowie der Einstellungen der \ac{MMU}.\\
 
 \subsection{Grundlegende Funktionsweise}
 
@@ -18,7 +18,7 @@ Die \ac{VMSAv7} definiert zwei unabhängige Formate für \textit{Translation Tab
 	\begin{itemize}
 		\item dreistufige Seitentabelle
 		\item 64-bit Deskriptoren (\acs{PTE})
-		\item verwendet \emph{Large Physical Address Extension} (LPAE)
+		\item verwendet \ac{LPAE}
 		\item bis zu 40-bit große virtuelle Eingangsadresse 
 		\item bis zu 40-bit große physikalische Ausgangsadresse
 	\end{itemize}

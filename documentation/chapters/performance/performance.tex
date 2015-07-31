@@ -20,6 +20,6 @@ Um die Performanz des Betriebssystems beurteilen zu können, wurden zeitliche Me
 \end{table}
 
 Interessant ist vor allem die vergleichsweise lange Unterbrechung eines \textit{Context Switch}, welcher knapp $3\%$ der gesamten Zeitscheibe eines Prozesses in Anspruch nimmt. In Anbetracht dieser Messergebnisse wäre für die Gesamtperformanz des Betriebssystems durchaus zu überlegen, entweder die Zeitscheibe eines Prozesses zu verlängern oder aber die Logik für den \textit{Context Switch} zu optimieren.\\
-Von Interesse sind auch die beiden Fälle der Einlagerung eines page frame. \ac{MMU} \emph{Fault State 5} stellt dabei den Fall der Erstellung einer \textit{Level 2 page table} samt Einlagerung eines \textit{page frame} dar, \ac{MMU} \emph{Fault State 7} stellt dagegen lediglich die bloße Einlagerung eines \textit{page frame} in eine \textit{Level 2 page table} dar. Nachdem diese Unterbrechungen vergleichsweise selten auftreten, sind hier Optimierungen nicht unbedingt hochprior anzunehmen.
+Von Interesse sind auch die beiden Fälle der Einlagerung eines \textit{Page Frame}. \ac{MMU} \emph{Fault State 5} stellt dabei den Fall der Erstellung einer \textit{Level 2 Page Table} samt Einlagerung eines \textit{Page Frame} dar, \ac{MMU} \emph{Fault State 7} stellt dagegen lediglich die bloße Einlagerung eines \textit{Page Frame} in eine \textit{Level 2 Page Table} dar. Nachdem diese Unterbrechungen vergleichsweise selten auftreten, sind hier Optimierungen nicht unbedingt hochprior anzunehmen.
 
 \pagebreak 
