@@ -38,7 +38,7 @@ Die \textit{Scheduler}-Funktion \texttt{SchedulerRunNextProcess(..)} kann zu jed
 Die Zeitscheibe von $10ms$ wurde auf Basis verschiedener Experimente gewählt und hat sich, aufgrund dessen dass keine Priorisierung der Prozesse erfolgt, als annehmbar herausgestellt. Die durchgeführten Experimente in Kapitel \ref{Performanz} haben aber gezeigt, dass möglicherweise eine längere Zeitscheibe zu einer besseren Gesamtperformanz geführt hätten.
 
 \subsection{ProcessManager}
-
+\label{secProcessManager}
 Der \textit{ProcessManager} ist eine dem \textit{Scheduler} übergeordnete Komponente, welche eine weitere Verwaltung der Prozesse realisiert. Der \textit{ProcessManager} fügt den abstrakten Eigenschaften der Prozesse des \textit{Schedulers} zusätzlich noch Meta-Informationen, wie Prozessname, Startzeit usw. hinzu. Der \textit{ProcessManager} stellt dabei die Schnittstelle für andere Kernelkomponenten zur Verfügung um Prozesse zu starten und zu beenden.\\
 
 Das Vorgehen bei der Prozessverwaltung wird im Sequenzdiagramm von Figure \ref{Sequencediagram} dargestellt. Ein Client übergibt dem \textit{ProcessManager} die Aufgabe einen Prozess zu erzeugen. Dieser delegiert das Erzeugen des Prozesses an den Scheduler weiter. Hierbei ist zu beachten, dass die Meta-Informationen vom \textit{ProcessManager} nicht weitergegeben werden. Der Scheduler speichert sich diesen neuen Prozess in seiner Prozesstabelle ab. Der \textit{MemoryManager} allokiert nun den vom Prozess benötigtem Speicherplatz. Der erzeugte Prozess wird an den \textit{ProcessManager} zurückgegeben. Dem Client wird nun der Erfolg der Prozesserstellung mitgeteilt, respektive wird diesem die erzeute Prozess-ID zurück geliefert.

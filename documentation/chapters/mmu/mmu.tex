@@ -1,20 +1,20 @@
 \section{Virtuelle Speicherverwaltung}
 \label{chapVirtualMemory}
-Bei der virtuellen Speicherverwaltung erfolgt die Umwandlung von vom ARM Prozessor generierten, virtuellen Adressen in physikalische Adressen durch die \ac{MMU}. Dieses Kapitel enthält die Beschreibung des Designs und der Implementierung der virtuellen Speicherverwaltung des Betriebssystems sowie der Einstellungen der MMU.\\
+Bei der virtuellen Speicherverwaltung erfolgt die Umwandlung von vom ARM Prozessor generierten, virtuellen Adressen in physikalische Adressen durch die \ac{MMU}. Dieses Kapitel enthält die Beschreibung des Designs und der Implementierung der virtuellen Speicherverwaltung des Betriebssystems sowie der Einstellungen der \ac{MMU}.\\
 
 \subsection{Grundlegende Funktionsweise}
 
-Die \ac{VMSAv7} definiert zwei unabhängige Formate für translation tables \cite[S. B3-1318]{ARM:ARM}:
+Die \ac{VMSAv7} definiert zwei unabhängige Formate für \textit{Translation Tables} \cite[S. B3-1318]{ARM:ARM}:
 
 \begin{itemize}
-	\item \emph{Short-descriptor format}:
+	\item \emph{Short-descriptor Format}:
 	\begin{itemize}
 		\item zweistufige Seitentabelle 
 		\item 32-bit Deskriptoren (PTE)
 		\item 32-bit virtuelle Eingangsadresse 
 		\item bis zu 40-bit große physikalische Ausgangsadresse
 	\end{itemize}
-	\item \emph{Long-descriptor format}:
+	\item \emph{Long-descriptor Format}:
 	\begin{itemize}
 		\item dreistufige Seitentabelle
 		\item 64-bit Deskriptoren (\acs{PTE})
@@ -24,7 +24,7 @@ Die \ac{VMSAv7} definiert zwei unabhängige Formate für translation tables \cit
 	\end{itemize}
 \end{itemize}
 
-Um die Anforderungen an das Betriebssystem zu erfüllen, reicht das zweistufige Seitentabellensystem vollkommen aus. Tabelle \ref{table:GeneralVirtualMemory} fasst die wichtigsten gegebenen Eigenschaften unter Verwendung des Short-descriptor format zusammen.\\
+Um die Anforderungen an das Betriebssystem zu erfüllen, reicht das zweistufige Seitentabellensystem durchaus aus. Tabelle \ref{table:GeneralVirtualMemory} fasst die wichtigsten gegebenen Eigenschaften unter Verwendung des \textit{Short-descriptor Format} zusammen.\\
 
 \begin{table}[H]
 \begin{tabular}{p{7cm} | p{7cm}}
@@ -42,9 +42,9 @@ Um die Anforderungen an das Betriebssystem zu erfüllen, reicht das zweistufige 
  \label{table:GeneralVirtualMemory}
 \end{table}
 
-Generiert die ARM CPU einen Speicherzugriff, wird von der MMU ein Suchlauf durchgeführt. Dieser Suchlauf wird \emph{translation table lookup} genannt. Dabei wird zuerst im \ac{TLB} nachgesehen, ob einer der 64 Einträge des TLB die zur virtuellen Adresse korrespondierende physikalische Adresse enthält. Ist dies der Fall (so genannter \emph{TLB hit}), wird der Suchlauf an dieser Stelle erfolgreich beendet.\\
+Generiert der \textit{ARM}-Prozessor einen Speicherzugriff, wird von der \ac{MMU} ein Suchlauf durchgeführt. Dieser Suchlauf wird \textit{Translation Table Lookup} genannt. Dabei wird zuerst im \ac{TLB} geprüft, ob einer der 64 Einträge des \ac{TLB} die zur virtuellen Adresse korrespondierende physikalische Adresse enthält. Ist dies der Fall (so genannter \textit{TLB hit}), wird der Suchlauf an dieser Stelle erfolgreich beendet.\\
 
-Ist die angeforderte virtuelle Adresse nicht im TLB enthalten (TLB miss), wird ein page table walk durchgeführt. Das Funktionsprinzip des zweistufigen Seitentabellensystems zeigt Abbildung \ref{fig:2levelTableSystem}. Aus einem der zwei Seitentabellenregister wird die Basisadresse der darin zuvor abgelegten L1-Seitentabelle geholt. Das Format der PTE bestimmt dann, um welchen Typ von Verweis es sich handelt. Seitentabellen und ihre Einträge werden im nachfolgenden Abschnitt \ref{subsect:pageTables} genauer beschrieben.\\
+Ist die angeforderte virtuelle Adresse nicht im \ac{TLB} enthalten (\textit{TLB miss}), wird ein \textit{Page Table Walk} durchgeführt. Das Funktionsprinzip des zweistufigen Seitentabellensystems zeigt Abbildung \ref{fig:2levelTableSystem}. Aus einem der zwei Seitentabellenregister wird die Basisadresse der darin zuvor abgelegten Level-1-Seitentabelle geholt. Das Format des \ac{PTE} bestimmt dann, um welchen Typ von Verweis es sich handelt. Seitentabellen und ihre Einträge werden im nachfolgenden Abschnitt \ref{subsect:pageTables} genauer beschrieben.\\
 
 \begin{figure}[H]
 	\includegraphics[scale=0.7]{chapters/mmu/figures/addressTranslation}
@@ -55,7 +55,7 @@ Ist die angeforderte virtuelle Adresse nicht im TLB enthalten (TLB miss), wird e
 
 \subsection{Umwandlung virtueller Adressen zu physikalische Adressen}
 
-Der genaue Vorgang der Umwandlung einer vom ARM Prozessor erzeugten virtuellen Adresse in eine physikalische Speicheradresse zeigen die nachfolgenden beiden Abbildungen. Abbildung  \ref{fig:sectionTranslation} zeigt die Umwandlung einer virtuellen Adresse in die physikalische Adresse einer 1 MB Section ohne Verwendung einer L2-Seitentabelle, Abbildung \ref{fig:smallPageTranslation} diejenige einer virtuellen Adresse in ein 4 kB page frame unter Verwendung einer L2-Seitentabelle.   Die Umwandlung wird vollständig durch die Prozessor-Hardware durchgeführt.\\
+Der genaue Vorgang der Umwandlung einer vom \textit{ARM}-Prozessor erzeugten virtuellen Adresse in eine physikalische Speicheradresse zeigen die nachfolgenden beiden Abbildungen. Abbildung  \ref{fig:sectionTranslation} zeigt die Umwandlung einer virtuellen Adresse in die physikalische Adresse einer $1MB$ Section ohne Verwendung einer Level-2-Seitentabelle, Abbildung \ref{fig:smallPageTranslation} diejenige einer virtuellen Adresse in ein $4kB$ \textit{Page Frame} unter Verwendung einer Level-2-Seitentabelle. Die Umwandlung wird vollständig durch die Prozessor-Hardware durchgeführt.\\
 
 
 \begin{figure}[H]
@@ -73,11 +73,11 @@ Der genaue Vorgang der Umwandlung einer vom ARM Prozessor erzeugten virtuellen A
 \subsection{Seitentabellen und Seitentabelleneinträge}
 \label{subsect:pageTables}
 
-Der verwendete ARM Prozessor verfügt über zwei Register (\acf{TTBR}, \emph{TTBR0} und \emph{TTBR1}), welche Startadressen von Seitentabellen enthalten  \cite[S. B3-1320]{ARM:ARM}. Ihre Formate sind nahezu identisch und in den Abbildungen \ref{fig:TTBR0Format} und \ref{fig:TTBR1Format} zu sehen. Diese Register übernehmen im Betriebssystem die folgende Funktion:
+Der verwendete \textit{ARM}-Prozessor verfügt über zwei Register (\acf{TTBR}, \textit{TTBR0} und \textit{TTBR1}), welche Startadressen von Seitentabellen enthalten  \cite[S. B3-1320]{ARM:ARM}. Ihre Formate sind nahezu identisch und in den Abbildungen \ref{fig:TTBR0Format} und \ref{fig:TTBR1Format} zu sehen. Diese Register übernehmen im Betriebssystem die folgende Funktion:
 
 \begin{itemize}
-	\item TTBR0: Wird für prozessspezifische Adressen verwendet. Jeder Prozess enthält bei seiner Initialisierung eine eigene L1-Seitentabelle. Bei einem Kontextwechsel erhält das TTBR0 eine Referenz auf L1-Seitentabelle des neuen Kontextes/Prozesses.
-	\item TTBR1: Wird für das Betriebssystem selbst und für memory-mapped I/O verwendet. Diese ändern sich bei einem Kontextwechsel nicht.
+	\item TTBR0: Wird für prozessspezifische Adressen verwendet. Jeder Prozess enthält bei seiner Initialisierung eine eigene Level-1-Seitentabelle. Bei einem Kontextwechsel erhält das \textit{TTBR0} eine Referenz auf Level-1-Seitentabelle des neuen Kontexts/Prozesses.
+	\item \textit{TTBR1}: Wird für das Betriebssystem selbst und für \textit{Memory-Mapped I/O} verwendet. Diese ändern sich bei einem Kontextwechsel nicht.
 \end{itemize}
 
 
@@ -94,20 +94,20 @@ Der verwendete ARM Prozessor verfügt über zwei Register (\acf{TTBR}, \emph{TTB
 	\label{fig:TTBR1Format}
 \end{figure}
 
-Das Beschreiben der Seitentabellenregister erfolgt, wie bei nahezu jeder MMU-Funktionalität, mittels Assemblerbefehlen, die auf die CP15 Coprozessor Register zugreifen.\\
+Das Beschreiben der Seitentabellenregister erfolgt, wie bei nahezu jeder \ac{MMU}-Funktionalität, mittels Assemblerbefehlen, die auf die CP15-Coprozessor-Register zugreifen.\\
 
-Beim Füllen der Seitentabellen sind vorgegebene Formate für die beiden Typen von Deskriptoren unbedingt zu beachten. Die Abbildungen \ref{fig:firstLevelDescriptor} und \ref{fig:secondLevelDescriptor} fassen die Formate für first-level und second-level Deskriptoren zusammen. Beiden Deskriptortypen gleich ist die vorgeschriebene Länge von 32 Bit.\\
+Beim Füllen der Seitentabellen sind vorgegebene Formate für die beiden Typen von Deskriptoren unbedingt zu beachten. Die Abbildungen \ref{fig:firstLevelDescriptor} und \ref{fig:secondLevelDescriptor} fassen die Formate für \textit{First-Level}- und \textit{Second-Level}-Deskriptoren zusammen. Beiden Deskriptortypen gleich ist die vorgeschriebene Länge von $32$ Bit.\\
 
-\subsubsection*{First-level Deskriptoren}
+\subsubsection*{First-Level-Deskriptoren}
 
-Die First-Level Deskriptortypen werden auf folgende Weise verwendet:
+Die \textit{First-Level}-Deskriptortypen werden auf folgende Weise verwendet:
 
 \begin{itemize}
-	\item sections für die \ac{MPT} (siehe Abschnitt \ref{subsect:memoryMapping}) 
-	\item page table für L1-Seitentabellen von Prozessen (siehe Abschnitt \ref{subsect:memoryMapping})
+	\item \textit{Sections} für die \ac{MPT} (siehe Abschnitt \ref{subsect:memoryMapping}) 
+	\item \textit{Page Table} für Level-1-Seitentabellen von Prozessen (siehe Abschnitt \ref{subsect:memoryMapping})
 \end{itemize}
 
-Für die Erstellung von first-level Deskriptoren wurde eine Struktur erstellt, welche in Listing \ref{codeFirstLevelDescriptor} aufgeführt ist. Diese Struktur und jene des second-level Deskriptors wird bei den nachfolgenden Erläuterungen zur MMU benötigt.\\
+Für die Erstellung von \textit{First-Level}-Deskriptoren wurde eine Struktur erstellt, welche in Listing \ref{codeFirstLevelDescriptor} aufgeführt ist. Diese Struktur und jene des \textit{Second-Level}-Deskriptors wird bei den nachfolgenden Erläuterungen zur \ac{MMU} benötigt.\\
 
 \begin{figure}[H]
 	\includegraphics[scale=0.7]{chapters/mmu/figures/firstLevelDescriptor}
@@ -118,16 +118,16 @@ Für die Erstellung von first-level Deskriptoren wurde eine Struktur erstellt, w
 
 \lstinputlisting[language=C, caption=Struktur für first-level Deskriptoren, captionpos=b, label=codeFirstLevelDescriptor]{chapters/mmu/codefiles/firstLevelDescriptor.c}
 
-\subsubsection*{Second-level Deskriptoren}
+\subsubsection*{Second-Level-Deskriptoren}
 
-In der Speicherverwaltung des Betriebssystems werden ausschließlich small pages verwendet. Ausschlaggebende Gründe, warum small pages den Vorzug gegenüber large pages erhielten, sind die folgenden:
+In der Speicherverwaltung des Betriebssystems werden ausschließlich \textit{Small Pages} verwendet. Ausschlaggebende Gründe, warum \textit{Small Pages} den Vorzug gegenüber \textit{Large Pages} erhielten, sind die folgenden:
 
 \begin{itemize}
-	\item small pages müssen nur einmal in die L2-Seitentabelle eingetragen werden, large pages hingegen 16 mal
-	\item L1- und L2-Seitentabellen, die 16 kB bzw. 1 kB Speicher benötigen, belegen bei ihrer Erzeugung nur vier volle page frames bzw. ein page frame physikalischen Speichers zu einem Viertel. Dadurch wird die Speicherfragmentierung verglichen mit large pages stark verringert
+	\item \textit{Small Pages} müssen nur einmal in die Level-2-Seitentabelle eingetragen werden, \textit{Large Pages} hingegen 16 mal
+	\item Level-1- und Level-2-Seitentabellen, die $16kB$ bzw. $1kB$ Speicher benötigen, belegen bei ihrer Erzeugung nur vier volle \textit{Page Frames} bzw. ein \textit{Page Frame} physikalischen Speichers zu einem Viertel. Dadurch wird die Speicherfragmentierung verglichen mit \textit{Large Pages} stark verringert
 \end{itemize}
 
-Die Zusammensetzung der Struktur für second-level Deskriptoren ist in Listing \ref{codeSecondLevelDescriptor} dargestellt.\\
+Die Zusammensetzung der Struktur für \textit{Second-Level}-Deskriptoren ist in Listing \ref{codeSecondLevelDescriptor} dargestellt.\\
 
 \begin{figure}[H]
 	\includegraphics[scale=0.7]{chapters/mmu/figures/secondLevelDescriptor}
@@ -142,17 +142,17 @@ Die Zusammensetzung der Struktur für second-level Deskriptoren ist in Listing \
 \subsection{Aufteilung des virtuellen Speichers und Mapping}
 \label{subsect:memoryMapping}
 
-Die Speicherverwaltung des Betriebssystems kann Abbildung \ref{fig:MemoryMap} entnommen werden. Die rechte Seite stellt das physikalische Speichermapping dar und wurde dem Datenblatt des ARM \cite[S. 155]{ARM:TRM} entnommen. Die linke Seite zeigt die Aufteilung des virtuellen Speichers.\\
+Die Speicherverwaltung des Betriebssystems kann Abbildung \ref{fig:MemoryMap} entnommen werden. Die rechte Seite stellt dabei das physikalische Speichermapping dar und wurde dem Datenblatt des \textit{ARM} \cite[S. 155]{ARM:TRM} entnommen. Die linke Seite zeigt die Aufteilung des virtuellen Speichers.\\
 
-Organisiert ist der virtuelle Speicher in Speicherregionen. Eine zusätzliche Aufteilung betrifft die Zuständigkeitsbereiche für die Seitentabellenregister TTBR0 und TTBR1. Der ARM Cortex-A8 bietet die Möglichkeit, den virtuellen Speicher in einen \emph{Prozessbereich} und einen \emph{Kernelbereich} aufzuteilen. Der Prozessbereich enthält dabei alle virtuellen Adressen, die für Prozesse zugänglich sind. Der Kernelbereich enthält Komponenten, die sich bei Prozesswechseln nicht ändern. Dazu zählen das Betriebssystem selbst sowie die memory-mapped I/O. \\ 
+Organisiert ist der virtuelle Speicher in Speicherregionen. Eine zusätzliche Aufteilung betrifft die Zuständigkeitsbereiche für die Seitentabellenregister \textit{TTBR0} und \textit{TTBR1}. Der \textit{ARM Cortex-A8} bietet die Möglichkeit, den virtuellen Speicher in einen Prozess- und einen Kernelbereich aufzuteilen. Der Prozessbereich enthält dabei alle virtuellen Adressen, die für Prozesse zugänglich sind. Der Kernelbereich enthält Komponenten, die sich bei Prozesswechseln nicht ändern. Dazu zählen das Betriebssystem selbst sowie die \textit{Memory-Mapped I/O}. \\ 
 
-Die Einstellungen zur Aufteilung des virtuellen Speichers werden im  TTBCR (Translation Table Base Control Register) vorgenommen. Die möglichen Aufteilungsbereiche finden sich in Tabelle B3-1, \cite[S. B3-1330]{ARM:ARM}.\\
+Die Einstellungen zur Aufteilung des virtuellen Speichers werden im \ac{TTBCR} vorgenommen. Die möglichen Aufteilungsbereiche finden sich in Tabelle B3-1, \cite[S. B3-1330]{ARM:ARM}.\\
 
-Physikalisch steht 1 GB Speicher für die page frames zur Verfügung. Dieser wird im virtuellen Speicher an die Adressen 0x00000000 bis 0x3FFFFFFF gemapped. Die Komponenten der Kernelregion, die sich bei Prozesswechseln nicht ändern, beginnen bei Adressen ab 0x40000000. Damit ergibt sich eine Aufteilung des virtuellen Speichers, wie sie in Abbildung \ref{fig:MemoryMap} dargestellt ist, mit der Bereichsgrenze 0x40000000.\\
+Physikalisch steht $1GB$ Speicher für die \textit{Page Frames} zur Verfügung. Dieser wird im virtuellen Speicher an die Adressen \texttt{0x00000000} bis \texttt{0x3FFFFFFF} gemapped. Die Komponenten der Kernelregion, die sich bei Prozesswechseln nicht ändern, beginnen bei Adressen ab \texttt{0x40000000}. Damit ergibt sich eine Aufteilung des virtuellen Speichers, wie sie in Abbildung \ref{fig:MemoryMap} dargestellt ist, mit der Bereichsgrenze \texttt{0x40000000}.\\
 
-Die Adressen ab der Bereichsgrenze bis zu den vollen 4 GB virtuellem Speicher bei der Adresse 0xFFFFFFFF werden in eine so genannte L1 \ac{MPT} gemapped. Bei der Aktivierung der MMU wird die Adresse dieser master page table in das Register TTBR1 geschrieben. Danach wird TTBR1 während der Laufzeit des Betriebssystems nicht mehr verändert.\\
+Die Adressen ab der Bereichsgrenze bis zu den vollen $4GB$ virtuellem Speicher bei der Adresse \texttt{0xFFFFFFFF} werden in eine so genannte \textit{L1} \ac{MPT} gemapped. Bei der Aktivierung der \ac{MMU} wird die Adresse dieser \textit{Master Page Table} in das Register \textit{TTBR1} geschrieben. Danach wird \textit{TTBR1} während der Laufzeit des Betriebssystems nicht mehr verändert.\\
 
-Bei der Initialisierung eines Prozesses wird für den Prozess eine L1 page, die den Prozessbereich abdeckt, angelegt. Soll ein Prozess zur Ausführung gebracht werden, muss seine L1 page table in das TTBR0 geschrieben werden. Das TTBR0 muss zur Laufzeit des Betriebssystems bei Kontextwechseln von Prozessen aktualisiert werden.\\
+Bei der Initialisierung eines Prozesses wird für den Prozess eine \textit{L1 Page}, die den Prozessbereich abdeckt, angelegt. Soll ein Prozess zur Ausführung gebracht werden, muss seine \textit{L1 Page Table} in das \textit{TTBR0} geschrieben werden. Das \textit{TTBR0} muss zur Laufzeit des Betriebssystems bei Kontextwechseln von Prozessen aktualisiert werden.\\
 
 
 \begin{figure}[H]
@@ -161,16 +161,13 @@ Bei der Initialisierung eines Prozesses wird für den Prozess eine L1 page, die 
 	\label{fig:MemoryMap}
 \end{figure}
 
-
-
-
 \begin{table}[H]
 \begin{tabular}{p{7cm} | p{7cm}}
   \textbf{Eigenschaft} & \textbf{Beschreibung} \\ \hline
-  Größe der Pages & 4 kB\\
-  Virtueller Speicher für Prozesse & 1003 MB\\
-  Max. Anzahl von L1 und L2 Page Tables & 320 L1 Page Tables oder 1 L1 Page Table + 1276 L2 Page  Table\\
-  Theoretisch Max. Anzahl von Prozessen & 320\\
+  Größe der Pages & $4kB$\\
+  Virtueller Speicher für Prozesse & $1003MB$\\
+  Max. Anzahl von \textit{L1} und \textit{L2 Page Tables} & $320$ \textit{L1 Page Tables} oder $1$ \textit{L1 Page Table} + $1276$ \textit{L2 Page Tables}\\
+  Theoretisch Max. Anzahl von Prozessen & $320$\\
  \end{tabular}
  \caption{Eigenschaften der virtuellen Speicherverwaltung des OS}
  \label{table:SpecifiedVirtualMemory}
@@ -190,13 +187,13 @@ Zusammengefasst dargestellt sind in Tabelle \ref{table:MemoryRegions} alle Speic
 \begin{table}[H]
 \begin{tabular}{p{4cm} | p{1.5cm} | p{1.5cm} | p{6cm}}
   \textbf{Region} & \textbf{Mapping} & \textbf{Größe} & \textbf{Beschreibung} \\ \hline
-  Page Tables & direkt & 5 MB & Speicherort für L1 und L2 page tables\\
-  Kernel & direkt & 16 MB & Speicherort für das Betriebssystem\\
-  Memory-Mapped I/O & direkt &  1 GB & Peripheriemodule\\
-  Exception Handlers & direkt &  4 kB & Enthält die Exception vector table\\
-  Internal SRAM & direkt & 64 kB & Enthält die Exception handler\\
-  BOOT ROM & direkt & 192 kB & für zukünftige Erweiterungen \\ 
-  Process memory space & virtuell & 1 GB & Speicherbereich für Prozesse
+  Page Tables & direkt & $5MB$ & Speicherort für L1 und L2 Page Tables\\
+  Kernel & direkt & $16MB$ & Speicherort für das Betriebssystem\\
+  Memory-Mapped I/O & direkt &  $1GB$ & Peripheriemodule\\
+  Exception Handlers & direkt &  $4kB$ & Enthält die Exception vector table\\
+  Internal SRAM & direkt & $64kB$ & Enthält die Exception handler\\
+  BOOT ROM & direkt & $192kB$ & für zukünftige Erweiterungen \\ 
+  Process memory space & virtuell & $1GB$ & Speicherbereich für Prozesse
  \end{tabular}
  \caption{Angelegte Speicherregionen}
  \label{table:MemoryRegions}
@@ -205,20 +202,17 @@ Zusammengefasst dargestellt sind in Tabelle \ref{table:MemoryRegions} alle Speic
 
 \subsubsection{Master Page Table}
 
-Um das Mapping der \ac{MPT} verstehen zu können, wird nochmals auf den Adresstranslationsablauf in Abbildung \ref{fig:sectionTranslation} verwiesen. Alle direkt gemappten Regions aus Tabelle \ref{table:MemoryRegions} werden in die L1 \ac{MPT} als 1 MB Sections gemapped.\\
+Um das Mapping der \ac{MPT} verstehen zu können, wird nochmals auf den Adresstranslationsablauf in Abbildung \ref{fig:sectionTranslation} verwiesen. Alle direkt gemappten \textit{Regions} aus Tabelle \ref{table:MemoryRegions} werden in die L1 \ac{MPT} als $1MB$ \textit{Sections} gemapped.\\
 
-Die Adresse eines Eintrags in der page table setzt sich zusammen aus der Basisadresse der entspreche page table und einem Index. Nach dem setzen der Attribute des page table Eintrags wird durch die Funktion \emph{mmuGetTableIndex} aus den obersten Bits der physikalischen Adresse der Intex in der page table berechnet. Der Index muss um 2 bit nach links geshiftet werden, um das Alignment von 4 Byte einzuhalten. Schließlich wird der geshiftete Index noch durch die Datentypgröße von 4 Byte geteilt. Damit wird die korrekte Adresse des zu schreibenden Tabelleneintrags durch Pointerarithmetik ermittelt. An diese Adresse wird nun der Eintrag geschrieben, der zuvor durch die Funktion \emph{mmuCreateL1PageTableEntry} aus der übergebenen first-level Deskriptorstruktur erstellt wurde. Listing \ref{codeMasterPageTableMapping} zeigt die praktische Ausführung des direkten Mappings in die \ac{MPT}.\\ 
+Die Adresse eines Eintrags in der \textit{Page Table} setzt sich zusammen aus der Basisadresse der entsprechenden \textit{Page Table} und einem Index. Nach dem setzen der Attribute des \textit{Page-Table}-Eintrags wird durch die Funktion \texttt{MMUGetTableIndex} aus den obersten Bits der physikalischen Adresse der Index in der \textit{Page Table} berechnet. Der Index muss um $2$ Bit nach links geshiftet werden, um das \textit{Alignment} von $4$ Byte einzuhalten. Schließlich wird der geshiftete Index noch durch die Datentypgröße von $4$ Byte geteilt. Damit wird die korrekte Adresse des zu schreibenden Tabelleneintrags durch Pointerarithmetik ermittelt. An diese Adresse wird nun der Eintrag geschrieben, der zuvor durch die Funktion \emph{MMUCreateL1PageTableEntry} aus der übergebenen \textit{First-Level}-Deskriptorstruktur erstellt wurde. Listing \ref{codeMasterPageTableMapping} zeigt die praktische Ausführung des direkten Mappings in die \ac{MPT}.\\ 
 
 
 \lstinputlisting[language=C, caption=Funktion für direktes Mapping in die master page table, captionpos=b, label=codeMasterPageTableMapping]{chapters/mmu/codefiles/directMapIntoMasterPageTable.c}
 
 \subsection{Allokierung der Page Frames}
 
-Für die Verwaltung der page frames wurde eine Bitsmap verwendet. Abbildung \ref{fig:BitsMap} zeigt das Prinzip.
-Die Bitsmap wird durch ein Array der Länge N/8 Bytes realisiert. N steht hier für die Anzahl der page frames. Das i-te Bit im n-ten Byte der Bitsmap definiert den Verwendungsstatus des (n*8 + i) –ten page frame.
-
-
-
+Für die Verwaltung der \textit{Page Frames} wurde eine Bitsmap verwendet. Abbildung \ref{fig:BitsMap} zeigt das Prinzip.
+Die Bitsmap wird durch ein Array der Länge $N/8$ Bytes realisiert. $N$ steht hier für die Anzahl der page frames. Das $i$-te Bit im $n$-ten Byte der Bitsmap definiert den Verwendungsstatus des $(n*8 + i)$–ten \textit{Page Frame}.
 
 \begin{figure}[H]
 	\centering
@@ -229,9 +223,9 @@ Die Bitsmap wird durch ein Array der Länge N/8 Bytes realisiert. N steht hier f
 
 \subsubsection{Allokation von Page Frames bei Data Abort Exception}
 
-Der Vorgang der Einlagerung von page frames durch den Data Abort (DABT) Handler ist in Abbildung \ref{fig:dabthandler} dargestellt. Zuerst werden aus dem \emph{Data Fault State Register} (DFAR) der Fehlerzustand und aus dem \emph{Data Fault Address Register} (DFAR) die zugegriffene virtuelle Adresse geladen. Eine Liste aller möglichen Fehlerzustände kann unter \cite[B3-1415]{ARM:ARM} eingesehen werden.
+Der Vorgang der Einlagerung von \textit{Page Frames} durch den \textit{Data Abort Handler} ist in Abbildung \ref{fig:dabthandler} dargestellt. Zuerst werden aus dem \ac{DFSR} der Fehlerzustand und aus dem \ac{DFAR} die zugegriffene virtuelle Adresse geladen. Eine Liste aller möglichen Fehlerzustände kann unter \cite[B3-1415]{ARM:ARM} eingesehen werden.
 
-Ohne Ausnahme wird bei alle Zustände außer den Zuständen 5 und 7 der jeweilige Prozess gekillt. Zustand 5 betrifft die Erstellung einer L2 page table und die Einlagerung eines page frame. Zustand 7 betrifft die bloße Einlagerung einer page frame. Die Einlagerung der page frame erfolgt dabei auf sehr ähnliche Weise wie in Listing \ref{codeMasterPageTableMapping} vorgenommen.
+Ohne Ausnahme wird bei allen Zustände außer den Zuständen 5 und 7 der jeweilige Prozess beendet. Zustand betrifft die Erstellung einer \textit{L2 Page Table} und die Einlagerung eines \textit{Page Frame}. Zustand 7 betrifft die bloße Einlagerung eines \textit{Page Frame}. Die Einlagerung der \textit{Page Frames} erfolgt dabei auf sehr ähnliche Weise wie in Listing \ref{codeMasterPageTableMapping} vorgenommen.
 
 \begin{figure}[H]
 	\centering
@@ -244,29 +238,31 @@ Ohne Ausnahme wird bei alle Zustände außer den Zuständen 5 und 7 der jeweilig
 \subsection{Aktivieren der MMU}
 \label{subsect:activateMMU}
 
-Bevor die MMU erfolgreich aktiviert werden kann, muss vorher eine Reihe von Einstellungen gesetzt werden.\\
+Bevor die \ac{MMU} erfolgreich aktiviert werden kann, muss vorher eine Reihe von Einstellungen gesetzt werden.\\
 
 
-Listing \ref{codeMMUInit} zeigt den kompletten Ablauf zur Aktivierung der MMU.
+Listing \ref{codeMMUInit} zeigt den kompletten Ablauf zur Aktivierung der \ac{MMU}.
 
 \lstinputlisting[language=C, caption=Aktivierung der MMU, captionpos=b, label=codeMMUInit]{chapters/mmu/codefiles/MMUInit.c}
 
 
 \subsection{Interaktion der MMU mit Prozessen}
 
-Die Schnittstelle der Softwareimplementierung der MMU zeigt Listing \ref{codeMMUFunctions}.\\
+Die Schnittstelle des \textit{MemoryManagers}, welche die \ac{MMU}-Funktionalitäten implementiert, zeigt Listing \ref{codeMMUFunctions}.\\
 
-\lstinputlisting[language=C, caption=Softwareschnittstelle der MMU, captionpos=b,  label=codeMMUFunctions]{chapters/mmu/codefiles/MMUFunctions.c}
+\lstinputlisting[language=C, caption=Softwareschnittstelle der MMU und des MemoryManagers, captionpos=b,  label=codeMMUFunctions]{chapters/mmu/codefiles/MMUFunctions.c}
 \vspace{0.5cm}
 
 Die Schnittstellenfunktionen werden auf die folgende Weise verwendet: 
 
 \begin{description}
-	\item[MMUInit] \hfill \\ Initialisiert die Regionen des virtuellen Speichers und die MMU für die Verwendung. Nach dem Ausführen dieser Funktion ist die MMU eingeschaltet. Bei nach erfolgreichem Ausführen wird als Rückgabewert 1 zurückgeliefert. Diese Funktion wird bei der Initialisierung des Prozess Managers aufgerufen.
-	\item[MMUSwitchToProcess] \hfill \\ Bringt den als Parameter übergebenen Prozess zur Ausführung. Dabei wird der TLB geflusht und die Adresse der L1 page table des Prozesses in das TTBR0 geschrieben. 
-	\item[MMUInitProcess] \hfill \\ Erstellt beim Erzeugen eines neuen Prozesses eine L1 page table für diesen Prozess. Die page table wird mit fault entries initialisiert.
-	\item[MMUHandleDataAbortException] \hfill \\ Diese Funktion wird bei jeder Data Abort Exception ausgeführt. Sie wird durch einen in Assembler implementierten Dabt Handler aufgerufen. Die Funktion lädt die virtuelle Adresse, bei deren Zugriff die Data Abort Exception ausgelöst wurde aus dem \acf{DFAR} sowie den Fehlerstatus aus dem \acf{DFSR}. Die weitere Vorgehensweise wird in Abhängigkeit vom Fehlerstatus durchgeführt.
-	\item[MMUFreeAllPageFramesOfProcess] \hfill \\ Beim Killen eines Prozesses gibt diese Funktion sämtliche von diesem Prozess belegten page frames in der zur Verwaltung der page frames eingesetzten Bitsmap wieder frei.
+	\item[\texttt{MMUInit}] \hfill \\ Initialisiert die Regionen des virtuellen Speichers und die MMU für die Verwendung. Nach dem Ausführen dieser Funktion ist die MMU eingeschaltet. Bei nach erfolgreichem Ausführen wird als Rückgabewert 1 zurückgeliefert. Diese Funktion wird bei der Initialisierung des Prozess Managers aufgerufen.
+	\item[\texttt{MMUSwitchToProcess}] \hfill \\ Bringt den als Parameter übergebenen Prozess zur Ausführung. Dabei wird der TLB geflusht und die Adresse der L1 page table des Prozesses in das TTBR0 geschrieben. 
+	\item[\texttt{MMUInitProcess}] \hfill \\ Erstellt beim Erzeugen eines neuen Prozesses eine L1 page table für diesen Prozess. Die page table wird mit fault entries initialisiert.
+	\item[\texttt{MMUHandleDataAbortException}] \hfill \\ Diese Funktion wird bei jeder Data Abort Exception ausgeführt. Sie wird durch einen in Assembler implementierten Dabt Handler aufgerufen. Die Funktion lädt die virtuelle Adresse, bei deren Zugriff die Data Abort Exception ausgelöst wurde aus dem \acf{DFAR} sowie den Fehlerstatus aus dem \acf{DFSR}. Die weitere Vorgehensweise wird in Abhängigkeit vom Fehlerstatus durchgeführt.
+	\item[\texttt{MMUFreeAllPageFramesOfProcess}] \hfill \\ Beim Killen eines Prozesses gibt diese Funktion sämtliche von diesem Prozess belegten page frames in der zur Verwaltung der page frames eingesetzten Bitsmap wieder frei.
 \end{description}
+
+Die Funktionen des \textit{MemoryManagers} selbst werden ausschließlich von oben angeführten Funktionen verwendet.
 
 \pagebreak 
