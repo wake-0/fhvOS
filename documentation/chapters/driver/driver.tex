@@ -1,23 +1,35 @@
 \section{Treiber}
 \label{chapDriver}
-Die Treiber stellen eine abstrakte Schnittstelle auf den Hardware Abstraction Layer dar. Dadurch muss nicht mehr direkt auf die einzelnen Hardwarekomponenten zugegriffen werden. Ein wesentlicher Aspekt bei der Architektur der Treiber war Abstraktion. Dadurch wird gewährleistet, dass jeder Treiber über die selbe Schnittstelle angesprochen werden kann. Zudem ist die Verwaltung durch den Driver Manager erleichtert.
+Die Treiber stellen eine abstrakte Schnittstelle auf den \ac{HAL} dar, respektive implementieren diese eine Schnittstelle für den Zugriff auf Peripheriegeräte. Ein wesentlicher Aspekt bei der Architektur der Treiber war Abstraktion. Dadurch wird gewährleistet, dass jeder Treiber über die selbe Schnittstelle angesprochen werden kann. Die Verwaltung und der konkrete Zugriff auf Treiber erfolgt schließlich mittels des implementierten \textit{DriverManager}
 
 \subsection{Allgemeiner Aufbau eines Treibers}
-In Listening \ref{generalDriverInterface} ist die allgemeine Schnittstelle für jeden Treiber ersichtlich. 
+In Listing \ref{generalDriverInterface} ist die allgemeine Schnittstelle eines Treibers ersichtlich. Es ist hier anzumerken, dass sämtliche Treiber dieselbe Schnittstelle implementieren.\\
 
 \lstinputlisting[language=C, caption=Allgemeine Schnittstelle für einen Treiber, captionpos=b, label=generalDriverInterface]{chapters/driver/codefiles/generalDriverInterface.c}
 
-\subsection{Beispiel Implementierung eines Treibers}
-Jeder implementierte Treiber muss diese vorweisen können, ein Beispiel (LED Treiber) dazu ist in Listening \ref{ledDriver} zu sehen.
+In oben angeführtem Listing ist ersichtlich, dass sämtliche Treiberfunktionen einen Parameter \texttt{payload} aufweisen. Dieser Parameter erlaubt der Treiberimplementierung die Unterscheidung verschiedener Geräte, welche durch denselben Treiber implementiert werden. Die Propagierung dieses Parameters erfolgt durch den \textit{DeviceManager} und \textit{DriverManager}.
+
+\subsection{Beispiel-Implementierung eines Treibers}
+Listing \ref{ledDriver} zeigt beispielhaft einen Auszug der konkreten Treiberimplementierung für die \textit{Board LEDs}, respektive die Funktion \texttt{LEDWrite(...)}. Hier ist sehr gut ersichtlich, wie die Treiberimplementierung unterschiedliche Geräte auf Basis des \texttt{payload}-Parameters ansteuert.\\
 
 \lstinputlisting[language=C, caption=Implementierung der allgemeinen Treiberschnittstelle (LED Beispiel), captionpos=b, label=ledDriver]{chapters/driver/codefiles/ledDriver.c}
 
 \subsection{DriverManager}
 \label{secDriverManager}
-Der DriverManager hat die Aufgabe die Treiber zu initialisieren sowie diese dann nach außen hin anzubieten. In Listening \ref{driverManagerInterface} ist die Schnittstelle des DriverManagers dargestellt. Eine Implementierung dieser Schnittstelle für das LED Beispiel ist in Listening \ref{driverManagerImplementation} aufgezeigt. Für das Hinzufügen eines weiteren Treibers beim DriverManager, muss nur die \textit{DriverManagerInit} Funktion angepasst werden. D.h. es muss ein zusätzlicher Treiber mit den seinen zugehörigen Funktionspointern in das \textit{drivers} Array eingefügt werden.\footnote{Die Verwendung von \textit{malloc} ist hier nicht nötig und könnte durch eine nicht dynamische Allokierung ersetzt werden.}
+Der \textit{DriverManager} ist verantwortlich für die Initialisierung und Verwaltung der Treiber. In Listing \ref{driverManagerInterface} ist die Schnittstelle des \textit{DriverManager} ersichtlich.\\
 
 \lstinputlisting[language=C, caption=Allgemeine Schnittstelle des DriverManagers, captionpos=b, label=driverManagerInterface]{chapters/driver/codefiles/driverManager-interface.c}
 
+Eine Implementierung dieser Schnittstelle für den Treiber der \textit{Board LEDs} ist in Listing \ref{driverManagerImplementation} aufgezeigt. Für das Hinzufügen eines weiteren Treibers zum \textit{DriverManager} muss so nur die \texttt{DriverManagerInit}-Funktion angepasst werden, respektive muss ein zusätzlicher Treiber mit seinen zugehörigen Funktionspointern in das \texttt{drivers}-Array eingefügt werden. Es ist zum angeführten Listing anzumerken, dass die Verwendung von \texttt{malloc} hier nicht zwingend notwendig wäre und diese auch durch eine statische Allokierung implementiert werden kann.\\
+
 \lstinputlisting[language=C, caption=Implementierung der DriverManager Schnittstelle für den LED Treiber, captionpos=b, label=driverManagerImplementation]{chapters/driver/codefiles/driverManager-implementation.c}
+
+\subsection{DeviceManager}
+\label{secDeviceManager}
+Der \textit{DeviceManager} ist verantwortlich für die Initialisierung und Verwaltung der einzelnen Geräte, welche ebenfalls die Zuordnung des Treibers für das Gerät beinhaltet. In Listing \ref{deviceManagerInterface} ist die Schnittstelle des \textit{DeviceManagers} ersichtlich.
+
+\lstinputlisting[language=C, caption=Allgemeine Schnittstelle des DeviceManagers, captionpos=b, label=deviceManagerInterface]{chapters/driver/codefiles/deviceManager-interface.c}
+
+Wie aus obigem Listing ersichtlich ist, sind die konkreten Treiberzugriffe durch den \textit{DeviceManager} entkoppelt. In den einzelnen Funktionsaufrufen des \textit{DeviceManagers} wird jeweils der Funktionsaufruf an den Treiber, durch das Interpretieren des übergebenen \texttt{device\_t}, an den richtigen Treiber (\texttt{driverId}) mit dem konkreten \texttt{payload}-Parameter, ausgeführt.\\
 
 \pagebreak 

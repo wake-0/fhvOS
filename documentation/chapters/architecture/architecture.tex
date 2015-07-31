@@ -47,7 +47,7 @@ Die oben angeführten Komponenten und deren Verantwortlichkeiten sind im Folgend
 	Der \textit{DriverManager} dient zur Verwaltung der Treiber, welche vom Betriebssystem zur Verfügung gestellt werden. Sollte ein Treiber benötigt werden, kann über die Schnittstelle des \textit{DriverManagers} der Zugriff auf den Treiber erfolgen. Der detaillierte Aufbau des \textit{DriverManager} ist in Kapitel \ref{secDriverManager} erläutert.
 	
 	\item[\textit{DeviceManager}] \hfill \\
-	Der \textit{DeviceManager} ist eine weitere Abstraktion zur Verwaltung von Treibern, respektive einzelnen Geräten. So sind beispielsweise auf Treiberebene alle vier Board-LEDs als identisch anzusehen, allerdings stellen sie auf Geräteebene jeweils vier unterschiedliche Geräte dar, welche aber vom selben Treiber angesprochen werden können.
+	Der \textit{DeviceManager} ist eine weitere Abstraktion zur Verwaltung von Treibern, respektive einzelnen Geräten. So sind beispielsweise auf Treiberebene alle vier Board-LEDs als identisch anzusehen, allerdings stellen sie auf Geräteebene jeweils vier unterschiedliche Geräte dar, welche aber vom selben Treiber angesprochen werden können. In Kapitel \ref{secDeviceManager} wird die Verantwortlichkeit des \textit{DeviceManagers} genauer diskutiert.
 	
 	\item[Kernel] \hfill \\
 	Der Kernel weist die Verantwortlichkeit für das Starten der einzelnen Komponenten auf und stellt grundlegende Funktionsschnittstellen für die einzelnen Komponenten zur Verfügung. Beispielsweise werden sämtliche Fehler oder Ausgaben von Kernelkomponenten an den Kernel selbst propagiert.
