@@ -2,7 +2,7 @@ typedef union device_t {
 	int device;
 	struct {
 		short driverId;
-		short driverMsg;
+		short payload;
 	};
 } device_t;
 

@@ -1,66 +1,47 @@
 \section{Prozessverwaltung}
 \label{chapProcess}
-Als Prozessverwaltung wird hauptsächlich das Verwalten von Prozessen durch das Betriebssystem verstanden (Vgl. http://www.lowlevel.eu/wiki/Prozessverwaltung). Jeder Prozess besitzt eine eindeutige Identifikation (PID), durch welche dieser vom System angesprochen werden kann. 
+Das Betriebssystem weist die Eigenschaften eines präemptiven Multi-Tasking-Systems, mit \textit{Round-Robin}-Verfahren und fixer Zeitscheibe, auf. Für die Verwaltung der einzelnen Prozesse und den Wechsel des aktiven Prozesses, wurde eine Prozessverwaltung implementiert. Im Folgenden sind die beteiligten Komponenten und wichtigen Eigenschaften der Prozessverwaltung dokumentiert.
 
 \subsection{Prozesszustände}
-Jeder Prozess besitzt zu einem bestimmten Zeitpunkt einen fix definierten Zustand, d.h. es können keine Inkonsistenzen auftreten. Abbildung \ref{fig:Process-states} zeigt die verschiedenen Zustände eines Prozesses sowie die jeweilig erlaubten Übergänge zu einem anderen Zustand auf.
+Jeder Prozess besitzt zu jedem beliebigen Zeitpunkt einen fix definierten Zustand, welche ebenfalls fix definierte Zustandsübergänge aufweisen, d.h. es können keine Inkonsistenzen diesbezüglich auftreten. Abbildung \ref{fig:Process-states} zeigt die verschiedenen Zustände eines Prozesses sowie die jeweilig erlaubten Übergänge zu einem anderen Zustand auf.
 
 \begin{figure}[H]
-	\includegraphics[scale=0.60]{chapters/processmanagement/figures/todo}
-	\caption{Erlaubte Prozesszustände und Prozessübergänge}
+	\includegraphics[scale=0.60]{chapters/processmanagement/figures/StateTransition}
+	\caption{Prozesszustände und Zustandsübergänge}
 	\label{fig:Process-states}
 \end{figure}
 
 Im folgenden wird eine detaillierte Erklärung zu den einzelnen Zuständen aus Abbildung \ref{fig:Process-states} gegeben.
 
 \begin{description}
-	\item[Ready] \hfill \\
-	Der Zustand ready tritt ein, wenn ein Prozess bereit wäre um ausgeführt zu werden. 
+	\item[\textit{Ready}] \hfill \\
+	Der Zustand \textit{Ready} tritt ein, wenn ein Prozess zur Ausführung bereit ist. Neu erstellte Prozesse befinden sich in jedem Fall im Zustand \textit{Ready}.
 	
-	\item[Running] \hfill \\
-	Ein Prozess weist diesen Zustand auf, wenn er gerade ausgeführt wird. Es gibt immer nur einen running Prozess zu einem bestimmten Zeitpunkt.
+	\item[\textit{Running}] \hfill \\
+	Ein Prozess weist diesen Zustand auf, wenn er sich in Ausführung befindet, respektive der Prozessselbst die aktuelle Zeitscheibe in Anspruch nimmt.
 	
-	\item[Blocked] \hfill \\
-	XXX
+	\item[\textit{Blocked}] \hfill \\
+	Ein Prozess weist den Zustand \textit{Blocked} auf, wenn dieser von der Ausführung durch ein bestimmtes Ereignis abgehalten wird, beispielsweise wartet der blockierte Prozess auf das Beenden eines anderen Prozesses.
 	
-	\item[Sleeping] \hfill \\
-	XXX	
-	
-	\item[Free] \hfill \\
-	XXX
+	\item[\textit{Sleeping}] \hfill \\
+	Falls ein Prozess für eine gewisse Zeit keine Prozessorzeit benötigt, kann er sich selbst über die System-API in den Zustand \textit{Sleeping} versetzen.
+
 \end{description}
 
-Es gibt unterschiedliche Zustandsübergänge, welche im Betriebssystem erlaubt sind. Tabelle \ref{table:State-transition} stellt die verschiedenen Übergänge mit einem dazu passenden Beispiel dar.
-
-\begin{table}[H]
-\begin{tabular}{p{3cm} | p{3cm} | p{6cm}}
-  \textbf{Ausgangszustand} & \textbf{Nächster Zustand} & \textbf{Beispiel} 
-  \\ \hline
-  Ready & Running & XXX \\
-  Running & Blocked & XXX \\
-  Running & XXX & XXX \\
-  XXX & XXX & XXX \\
-  
- \end{tabular}
- \caption{Erlaubte Zustandsübergänge mit Beispiel}
- \label{table:State-transition}
-\end{table}
-
-
-\begin{figure}[H]
-	\includegraphics[scale=0.60]{chapters/processmanagement/figures/StateTransition}
-	\caption{Prozesszustände und deren Transitionen}
-	\label{fig:StateTransition}
-\end{figure}
-
-\subsection{Scheduler Eigenschaften}
+\subsection{Scheduler}
 \label{secScheduler}
-Der Scheduler weißt eine Zeitscheibe von $10ms$ auf, d.h. jeder Prozess hat $10ms$ bevor er gewechselt wird. Sollte ein anderer Prozess zur Verfügung stehen wird dieser genommen ansonsten bekommt der gleicher Prozesse erneut eine Zeitscheibe von $10ms$. Diese Zeitscheibendauer wurde aufgrund mehrerer Aspekte gewählt: eine zu große Zeitscheibe $>$ $100ms$ würde merkbaren Verzögerungen im Betriebssystem führen, bei einer zu kleinen Zeitscheibe $<$ $1ms$ würde die benötigte Zeit für einen Wechsel im Vergleich zu lange dauern. Durchgeführte Performanztests sind im Kapitel XXX aufgeführt. \\ \\
-Das verwendete Schedulingverfahren ist Round Robin. Bei der Verwendung eines Verfahrens mit Prioritäten hätte der Fall mit einem hoch priorisierten Prozesse beachtet werden müssen. Ein Beispiel dazu: Es gibt drei Prioritäten (hoch, mittel und niedrig). Die Konsole wird als hoch eingestuft alle anderen Prozesse sind niedriger priorisiert. Wie bekommt nun ein mittel/niedrig priorisierter Prozess eine Zeitscheibe?
+Der \textit{Scheduler} ist eine Kernelkomponente welcher die Prozesse aus einer abstrakten Sicht, respektive lediglich die Prozesszustände und deren Kontext, verwaltet. Die Schnittstelle des \textit{Scheduler} ist in Listing \ref{lstScheduler} angeführt.
 
-\subsection{Vorgehen bei der Prozessverwaltung}
+\lstinputlisting[language=C, caption=Implementierung der DriverManager Schnittstelle für den LED Treiber, captionpos=b, label=lstScheduler]{chapters/processmanagement/codefiles/scheduler.c}
 
-Das Vorgehen bei der Prozessverwaltung wird im Sequenzdiagramm von Figure \ref{Sequencediagram} dargestellt. Ein Client übergibt dem ProcessManager die Aufgabe einen Prozess zu erzeugen. Dieser delegiert das Erzeugen des Prozesses an den Scheduler weiter. Hierbei ist zu beachten, dass die Metadaten vom Prozess nicht weitergegeben werden. Der Scheduler speichert sich diesen neuen Prozess in seiner Prozesstabelle ab. Das MemoryManagement dient zum Allokieren von benötigtem Speicherplatz für den neuen Prozess. Der erzeugte Prozess wird an den ProcessManager zurückgegeben, wobei dieser noch MetaInformationen beifügt (z.B. den Namen des Prozesses). Dem Client wird am Ende mitgeteilt, ob das Erzeugen erfolgreich war. Ein alternativer Rückgabeparameter wäre die PID, wobei hier darauf zu achten ist, dass im Fehlerfall eine ungültige PID zurückgeliefert wird.
+Die \textit{Scheduler}-Funktion \texttt{SchedulerRunNextProcess(..)} kann zu jedem beliebigen Zeitpunkt aufgerufen werden, an dem der aktuelle \texttt{context\_t} vorhanden ist, vorwiegend wird diese Funktion aber vom Timer-\textit{Interrupt} aufgerufen, welcher die Zeitscheibe von $10ms$ realisiert.\\
+Die Zeitscheibe von $10ms$ wurde auf Basis verschiedener Experimente gewählt und hat sich, aufgrund dessen dass keine Priorisierung der Prozesse erfolgt, als annehmbar herausgestellt. Die durchgeführten Experimente in Kapitel \ref{Performanz} haben aber gezeigt, dass möglicherweise eine längere Zeitscheibe zu einer besseren Gesamtperformanz geführt hätten.
+
+\subsection{ProcessManager}
+
+Der \textit{ProcessManager} ist eine dem \textit{Scheduler} übergeordnete Komponente, welche eine weitere Verwaltung der Prozesse realisiert. Der \textit{ProcessManager} fügt den abstrakten Eigenschaften der Prozesse des \textit{Schedulers} zusätzlich noch Meta-Informationen, wie Prozessname, Startzeit usw. hinzu. Der \textit{ProcessManager} stellt dabei die Schnittstelle für andere Kernelkomponenten zur Verfügung um Prozesse zu starten und zu beenden.\\
+
+Das Vorgehen bei der Prozessverwaltung wird im Sequenzdiagramm von Figure \ref{Sequencediagram} dargestellt. Ein Client übergibt dem \textit{ProcessManager} die Aufgabe einen Prozess zu erzeugen. Dieser delegiert das Erzeugen des Prozesses an den Scheduler weiter. Hierbei ist zu beachten, dass die Meta-Informationen vom \textit{ProcessManager} nicht weitergegeben werden. Der Scheduler speichert sich diesen neuen Prozess in seiner Prozesstabelle ab. Der \textit{MemoryManager} allokiert nun den vom Prozess benötigtem Speicherplatz. Der erzeugte Prozess wird an den \textit{ProcessManager} zurückgegeben. Dem Client wird nun der Erfolg der Prozesserstellung mitgeteilt, respektive wird diesem die erzeute Prozess-ID zurück geliefert.
 
 \begin{figure}[H]
 	\includegraphics[scale=0.70]{chapters/processmanagement/figures/processmanagement-sequence-diagram}
